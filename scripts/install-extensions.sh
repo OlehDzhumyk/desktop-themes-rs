@@ -4,7 +4,7 @@
 #   * 12 extensions from extensions.gnome.org, pinned by version tag (tested with GNOME Shell 51)
 #   * spotlight@nin gets the unified diffs from patches/spotlight@nin applied (see patches/README.md)
 #   * Liquid Glass from its upstream repository at a pinned commit (it is not on extensions.gnome.org)
-#   * this repository's own extensions (themes-quick, lockscreen-layout)
+#   * this repository's own extensions: desk-bridge (built from bridge/ with npm), lockscreen-layout
 # Newly installed extensions appear in GNOME Shell only after you log out and in again.
 #
 # Usage: scripts/install-extensions.sh [--dry-run] [--latest]
@@ -87,7 +87,13 @@ else
 fi
 compile_schemas "$EXT_DIR/$LIQUID_GLASS_UUID"
 
-for d in "$REPO"/extensions/*/; do
+BRIDGE_DIR="$REPO/bridge/build/desk-bridge@desktop-themes-rs"
+if [ ! -f "$BRIDGE_DIR/extension.js" ]; then
+  say "build desk-bridge (TypeScript)"
+  tb sh -c "cd '$REPO/bridge' && npm ci --no-audit --no-fund && npm run build"
+fi
+for d in "$REPO"/extensions/*/ "$BRIDGE_DIR/"; do
+  [ "$DRY_RUN" = 1 ] || [ -d "$d" ] || continue
   uuid=$(basename "$d")
   say "$uuid (this repository)"
   run rm -rf "${EXT_DIR:?}/$uuid"

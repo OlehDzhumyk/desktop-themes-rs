@@ -4,7 +4,7 @@
 #
 #   1. Flathub user remote (+ Extension Manager and Refine, used by the app's menu)
 #   2. build toolbox (compilers, sassc, GTK/libadwaita headers, Python generators)
-#   3. build the Rust app (cargo build --release) -- or use --prebuilt PATH
+#   3. build the Rust workspace (themes, deskd) and the TypeScript shell bridge -- or use --prebuilt PATH
 #   4. themes -> theme root;  upstream assets (WhiteSur, Fluent, icons, cursors, fonts, wallpapers)
 #   5. generate the original sounds and wallpapers (CC0)
 #   6. GNOME Shell extensions from extensions.gnome.org (+ patches) and this repo's own
@@ -83,6 +83,7 @@ if step build; then
         fi
       fi
       cd "$1" && cargo build --release --locked
+      cd "$1/bridge" && npm ci --no-audit --no-fund && npm run build
     ' _ "$REPO" "$RUSTUP"
   fi
 fi
