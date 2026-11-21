@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Themes
+Name[uk]=Теми
+GenericName=Desktop theme switcher
+GenericName[uk]=Перемикач тем робочого столу
+Comment=Switch the look of GNOME: Fedora, macOS, Windows 11 and your own themes; mix modules
+Comment[uk]=Перемикання вигляду: Fedora, macOS, Windows 11 та власні теми; змішування модулів
+Exec=@BIN@/themes gui
+Icon=preferences-desktop-appearance
+Terminal=false
+Categories=GNOME;GTK;Settings;DesktopSettings;
+Keywords=theme;appearance;macos;windows;sounds;behavior;тема;вигляд;звуки;поведінка;
+StartupNotify=true
+DBusActivatable=false

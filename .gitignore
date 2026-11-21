@@ -1,0 +1,16 @@
+/target
+# generated or third-party material is never committed (see scripts/)
+/themes/*/gtk4/
+/themes/*/gtk3/
+*.oga
+*.orig
+*.rej
+*.bak*
+.DS_Store
+._*
+# private user data that the app creates under the theme root
+state.json
+apply.log
+baseline*/
+backups/
+trash/

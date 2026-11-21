@@ -1,0 +1,16 @@
+[Unit]
+Description=Check GNOME themes and extensions (themes doctor --fix)
+Documentation=https://github.com/OlehDzhumyk/desktop-themes-rs
+# GNOME 51: the shell is org.gnome.Shell@user.service; older releases use @wayland
+After=gnome-session.target org.gnome.Shell@user.service org.gnome.Shell@wayland.service
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/themes doctor --fix --wait-shell 90
+# exit code 3 = problems that could not be fixed automatically; this is not a service failure
+SuccessExitStatus=3
+TimeoutStartSec=180
+
+[Install]
+WantedBy=gnome-session.target
