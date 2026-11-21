@@ -1,10 +1,2 @@
-user-theme@gnome-shell-extensions.gcampax.github.com
-appindicatorsupport@rgcjonas.gmail.com
-blur-my-shell@aunetx
-dash-to-dock@micxgx.gmail.com
-logomenu@aryan_k
-compiz-alike-magic-lamp-effect@hermes83.github.com
-spotlight@nin
-clipboard-indicator@tudmotu.com
-lockscreen-layout@desktop-themes-rs
-liquid-glass@thinkingcoding1231.gmail.com
+# macOS Liquid Glass = macos + the Liquid Glass extension (everything else is inherited, see theme.conf INHERITS)
++liquid-glass@thinkingcoding1231.gmail.com
