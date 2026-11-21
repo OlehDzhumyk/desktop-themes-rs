@@ -120,7 +120,7 @@ journalctl --user -u themes-doctor.service
   зачіпає лише його ключі. Якщо ключ задають кілька модулів, перемагає пізніший у порядку
   вигляд → поведінка → звуки → програми.
 * **Розширення:** (розширення з baseline + увімкнені вручну) − розширення всіх тем + `extensions.txt`
-  теми «вигляду» + постійне `themes-quick@desktop-themes-rs` − розширення, вимкнені як зламані.
+  теми «вигляду» + постійне `desk-bridge@desktop-themes-rs` − розширення, вимкнені як зламані.
 * Спершу застосовуються налаштування, і лише через ~1 с змінюється список розширень. Якщо зміна
   ключів `org.gnome.desktop.interface` збіжиться з вимкненням розширення, GNOME Shell 51.1 може
   впасти (це помічено в тестах).
@@ -191,10 +191,22 @@ gdbus call --session -d io.github.OlehDzhumyk.Themes -o /io/github/OlehDzhumyk/T
   файлі). `~/.local/bin/theme` і `~/.local/bin/themes-gui` — посилання на неї.
 * Сирці: репозиторій `desktop-themes-rs`. Збирання відбувається в toolbox `desktop-themes-build`:
   `cargo build --release`. Усе разом ставить `scripts/bootstrap.sh`.
-* `~/.local/share/gnome-shell/extensions/themes-quick@desktop-themes-rs`: перемикач у швидких
-  налаштуваннях (GJS).
+* `~/.local/bin/deskd`: служба функцій робочого столу (історія буфера обміну), запускається шиною
+  D-Bus; історія — у `~/.local/share/deskd/clipboard/`.
+* `~/.local/share/gnome-shell/extensions/desk-bridge@desktop-themes-rs`: міст оболонки (TypeScript):
+  «Тема» у швидких налаштуваннях і панелі буфера обміну (Win+V у темі Windows 11, Shift+Super+V у
+  темі macOS). Налаштування — у вікні «Теми», сторінка «Функції» → «Буфер обміну».
 * `~/.config/systemd/user/themes-doctor.service`: перевірка після входу.
 * `~/.local/share/desktop-themes/baseline` → `baseline-<дата>/`: знімок вашого вигляду до першої теми.
 * `themes/` — теми, `backups/` — ваші витіснені файли, `trash/` — видалені теми.
-* `tools/headless/` у репозиторії: скрипти для тестів у headless GNOME Shell (окрема шина D-Bus,
-  не заважає справжній сесії).
+* `tools/headless/` у репозиторії: скрипти для тестів у headless GNOME Shell, повністю ізольованому
+  від справжньої сесії (власні шина D-Bus, дисплей, `XDG_RUNTIME_DIR`, база dconf).
+
+## Якщо GNOME вимкнув розширення
+
+Коли GNOME Shell падає невдовзі після запуску, GNOME сам вимикає всі розширення
+(`disable-user-extensions`). «Теми» показують це банером, а `themes doctor` — помилкою з часом
+збою, темою, яка тоді була застосована, і ймовірним винуватцем. Розширення повертаються лише з
+вашої згоди: кнопка «Увімкнути…» у вікні (можна спершу перейти на «Fedora») або
+`themes doctor --enable-extensions`. Тема «macOS Liquid Glass» експериментальна: на GNOME 51.1
+вона спричиняла такі збої.

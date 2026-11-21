@@ -6,7 +6,8 @@ manager does not know (README, tools/, ...) are ignored.
 
 | File | Module | Purpose |
 |---|---|---|
-| `theme.conf` | - | `NAME="..."`, `DESCRIPTION="..."`, `PREVIEW="path"`, optional `PREVIEW_DARK="path"` |
+| `theme.conf` | - | `NAME="..."`, `DESCRIPTION="..."`, `PREVIEW="path"`, optional `PREVIEW_DARK="path"`, optional `INHERITS=<theme id>` |
+| `desk.dconf` | look | skin of the shell bridge and the clipboard shortcut (see "Skin" below) |
 | `settings.dconf`, `extensions.dconf`, any other `*.dconf` not listed below | look | keys in `dconf dump` format |
 | `extensions.txt` | look | UUIDs of extensions the theme enables, one per line (`#` comments) |
 | `gtk4/`, `gtk3/` | look | files linked into `~/.config/gtk-4.0/` and `~/.config/gtk-3.0/` (`gtk3/bookmarks` is never touched) |
@@ -62,12 +63,50 @@ module still applies.
 switches away. Environment: `THEME_ID`, `THEME_DIR`, `PREV_THEME_ID` (for `revert` also
 `NEXT_THEME_ID`). Hooks must be executable.
 
-## Aliases between themes
+## Skin (shell bridge UI variant)
 
-`macos-glass` reuses most of `macos` through relative symlinks (`apps.dconf -> ../macos/apps.dconf`,
-...) and owns only `theme.conf`, `glass.dconf`, `extensions.txt`. `themes/macos-glass/sync-glass.sh`
-re-creates the links and rebuilds `extensions.txt` after `macos` changes. Its `gtk4` entry points at
-`../macos/gtk4`, which `scripts/install-assets.sh` generates.
+The bridge extension `desk-bridge@desktop-themes-rs` draws the shell-side UI of desktop features
+(clipboard history, later more) in one of three variants. A theme picks one with a dconf key of the
+bridge's GSettings schema `io.github.OlehDzhumyk.Desk`, in its look module (`desk.dconf` by
+convention):
+
+```ini
+[io/github/OlehDzhumyk/Desk]
+skin='windows11'                       # 'default' | 'macos' | 'windows11'
+
+[io/github/OlehDzhumyk/Desk/clipboard]
+toggle-shortcut=['<Super>v']           # shortcut that opens the clipboard panel
+```
+
+| Skin | Clipboard UI |
+|---|---|
+| `default` | compact list popup at the pointer + «Буфер обміну» toggle in quick settings |
+| `macos` | Spotlight-like centred panel: search field, list, preview, keyboard hints |
+| `windows11` | Win+V flyout next to the text cursor: tabs, cards with pin and «…», «Очистити все» |
+
+A key rather than a separate file was chosen because it rides on the existing machinery: it is a
+managed key of the look module (switching to a theme without `desk.dconf` returns it to `default`),
+it is inherited, mixing modules works, and the bridge reacts to the change live (`changed::skin`).
+The stylesheet classes are `.desk-skin-<skin>` (bridge/static/stylesheet.css).
+
+## Inheritance (`INHERITS`)
+
+`INHERITS=<id>` in `theme.conf` makes a theme a child of another installed theme. Every file the
+child does not have comes from the parent (recursively, up to 8 levels; cycles and missing parents
+are reported by `themes doctor` and the child then stands alone):
+
+* `*.dconf`: by file name: a child's `settings.dconf` replaces the parent's `settings.dconf` as a
+  whole; files only the parent has are used as they are. This works per module (look, behavior,
+  sounds, apps).
+* `extensions.txt`: lines `+uuid` add to the parent's list, `-uuid` remove from it. If the child's
+  file has any plain `uuid` line, the parent's list is not used (the child lists everything itself);
+  `+`/`-` lines still apply on top. Without the file the parent's list is used.
+* `gtk4/`, `gtk3/`, `flatpak.conf`, `apps/hooks/*`: the first theme in the chain that has them
+  (directories are not merged). An inherited hook runs in its own theme's directory.
+* `theme.conf`: `PREVIEW`/`PREVIEW_DARK` and unknown keys are inherited; `NAME`, `DESCRIPTION` and
+  `INHERITS` are not.
+
+`macos-glass` is `INHERITS=macos` plus `glass.dconf` and `+liquid-glass@...`.
 
 ## Generated, not committed
 

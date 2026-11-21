@@ -27,6 +27,10 @@ So switching from a theme that sets a key to one that does not leaves no stale v
 whose selected theme has no files for it is shown as "(default)" and returns its keys to the
 baseline.
 
+Look-module keys may also live in the bridge's schema: `desk.dconf` sets the skin
+(`/io/github/OlehDzhumyk/Desk/skin`) and the clipboard shortcut, so switching the look switches the
+clipboard panel too; mixing a theme's look with another theme's behavior keeps the look's skin.
+
 ## Overlapping keys
 
 If two modules set the same key, the later module wins, in the order look, behavior, sounds, apps.
@@ -37,7 +41,7 @@ the macOS behavior module, otherwise both Spotlight and the overview would react
 
 The enabled set is: (baseline extensions + extensions you enabled manually) minus extensions of all
 themes, plus `extensions.txt` of the theme providing **look**, plus the permanent
-`themes-quick@desktop-themes-rs`, minus extensions disabled as broken. Extensions are switched
+`desk-bridge@desktop-themes-rs`, minus extensions disabled as broken. Extensions are switched
 about one second after the settings; see docs/architecture.md.
 
 ## Safety nets

@@ -13,7 +13,8 @@ dark colour scheme key in `settings.dconf`).
 
 WhiteSur GTK/shell theme, WhiteSur icons and cursors, WhiteSur wallpapers, Inter UI font,
 JetBrains Mono, a bottom dock (Dash to Dock), blurred panel (Blur my Shell), Spotlight-style
-launcher, clipboard history, and a lock-screen layout.
+launcher, clipboard history (desk-bridge, skin `macos`: a Spotlight-like panel on Shift+Super+V), and
+a lock-screen layout.
 
 * Names used: GTK `WhiteSur-Light`, shell `WhiteSur-Dark`, icons `WhiteSur`, cursor `WhiteSur-cursors`,
   fonts `Inter`, `JetBrains Mono`.
@@ -36,12 +37,18 @@ Compatibility notes: the WhiteSur installer knows GNOME up to 48; on Shell 51 / 
 small cosmetic differences. Upstream WhiteSur issue 1440 reports stutter on GNOME 51 Wayland with any
 user shell theme; if the shell lags after applying, clear `user-theme` `name`.
 
-## macos-glass
+## macos-glass (experimental)
+
+> **Experimental.** On GNOME Shell 51.1 on real hardware the shell crashed (SIGSEGV in
+> `st_theme_node_reduce_border_radius` ← `st_theme_node_paint_borders`) about 20 s after applying
+> this theme, and again at the next start; GNOME then sets `org.gnome.shell disable-user-extensions`
+> and no extension runs. `themes doctor` and the window detect this state and name the likely
+> culprit (here `liquid-glass@...`); see docs/architecture.md, "Crash protection".
 
 The macOS theme plus the **Liquid Glass** extension (refraction, highlights and glass edges on the
-panel, dock, menus, quick settings, notifications, OSD). Everything except `theme.conf`,
-`glass.dconf`, `extensions.txt` is a relative symlink to `../macos/*`; run
-`themes/macos-glass/sync-glass.sh` after changing `themes/macos`.
+panel, dock, menus, quick settings, notifications, OSD). It inherits everything from `macos`
+(`INHERITS=macos` in `theme.conf`) and owns only `theme.conf`, `glass.dconf` and an
+`extensions.txt` with one line, `+liquid-glass@thinkingcoding1231.gmail.com`.
 
 The refraction shader redraws the background under each glass element and costs noticeably more GPU
 time than plain blur; prefer `macos` on battery. Liquid Glass is not on extensions.gnome.org and is
@@ -51,7 +58,7 @@ installed from its repository at a pinned commit.
 
 Fluent GTK/shell theme (`round` tweak), Fluent icons and cursors, Noto Sans, a centred taskbar
 (Dash to Panel) with ArcMenu as the start menu, Tiling Shell for snap layouts, Desktop Icons NG, and
-Win+V clipboard history.
+Win+V clipboard history (desk-bridge, skin `windows11`: a flyout next to the text cursor).
 
 * Names used: GTK `Fluent-round`, shell `Fluent-round-Dark`, icons `Fluent`, cursor `Fluent-cursors`,
   font `Noto Sans 10`.
@@ -79,8 +86,10 @@ are fixed system files and cannot be themed. Choosing an alert sound in Settings
 
 ## Own extensions
 
-* `extensions/themes-quick@desktop-themes-rs`: the "Theme" toggle in quick settings, talks to the
-  D-Bus service. It is enabled in every theme (it cannot be switched off by a theme).
+* `desk-bridge@desktop-themes-rs` (TypeScript sources in `bridge/`): the one shell-side bridge to
+  deskd and the theme service: the "Theme" toggle in quick settings (formerly `themes-quick`) and the
+  clipboard history panels. Enabled in every theme (a theme cannot switch it off). See
+  docs/features.md.
 * `extensions/lockscreen-layout@desktop-themes-rs`: patches the GNOME Shell 51 unlock dialog (clock
   position, size and font, blur, tint, dedicated background). No network, no subprocesses; everything
   is restored in `disable()`. Settings schema `org.gnome.shell.extensions.lockscreen-layout`, driven
