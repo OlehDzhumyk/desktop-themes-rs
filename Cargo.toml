@@ -1,28 +1,25 @@
-[package]
-name = "themes"
-version = "2.0.0"
+[workspace]
+resolver = "3"
+members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd"]
+default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd"]
+
+[workspace.package]
+version = "2.1.0"
 edition = "2024"
 rust-version = "1.88"
-description = "GNOME desktop theme manager: switch and mix look, behavior, sounds and app settings (CLI + GUI + D-Bus)"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/OlehDzhumyk/desktop-themes-rs"
-readme = "README.md"
 
-[lib]
-name = "themes"
-path = "src/lib.rs"
-
-[[bin]]
-name = "themes"
-path = "src/main.rs"
-
-[dependencies]
+[workspace.dependencies]
 adw = { version = "0.9.2", package = "libadwaita", features = ["v1_10", "gtk_v4_24"] }
 clap = { version = "4.6.9", features = ["derive"] }
+gio = "0.22.11"
 gtk = { version = "0.11.5", package = "gtk4", features = ["v4_24"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 zbus = "6.5.0"
+themes-core = { path = "crates/themes-core" }
+desk-proto = { path = "crates/desk-proto" }
 
 [profile.release]
 opt-level = 3

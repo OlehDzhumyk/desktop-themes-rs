@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! themes — менеджер тем робочого столу GNOME (рівень користувача).
+//! themes-core — бібліотека менеджера тем робочого столу GNOME (рівень користувача).
 //!
 //! Бібліотека містить усю логіку; CLI, GUI і D-Bus-служба лише викликають її.
 
 pub mod apply;
+pub mod crash;
 pub mod dconf;
 pub mod doctor;
 pub mod error;
@@ -24,8 +25,11 @@ pub use error::{Error, Result};
 pub use modules::Module;
 pub use paths::Ctx;
 
-/// Розширення, яке має бути увімкнене в БУДЬ-ЯКІЙ темі (швидкі налаштування «Тема»).
-pub const PERMANENT_EXTENSIONS: &[&str] = &["themes-quick@desktop-themes-rs"];
+/// Розширення, яке має бути увімкнене в БУДЬ-ЯКІЙ темі: міст до оболонки (швидкі налаштування
+/// «Тема», буфер обміну та інші функції deskd).
+pub const PERMANENT_EXTENSIONS: &[&str] = &["desk-bridge@desktop-themes-rs"];
+/// Розширення, які замінив міст (прибираються з `enabled-extensions` під час міграції/застосування).
+pub const RETIRED_EXTENSIONS: &[&str] = &["themes-quick@desktop-themes-rs"];
 pub const APP_ID: &str = "io.github.OlehDzhumyk.Themes";
 pub const DBUS_NAME: &str = "io.github.OlehDzhumyk.Themes";
 pub const DBUS_PATH: &str = "/io/github/OlehDzhumyk/Themes";

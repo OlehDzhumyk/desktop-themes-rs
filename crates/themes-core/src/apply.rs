@@ -47,6 +47,8 @@ pub struct ApplyResult {
     pub shell_running: bool,
     /// Зміни оболонки застосовано наживо (без перевходу).
     pub live: bool,
+    /// GNOME вимкнув користувацькі розширення (захист після збою): розширення теми не працюють.
+    pub extensions_disabled_by_gnome: bool,
     pub relogin: bool,
     pub relogin_reasons: Vec<String>,
     pub warnings: Vec<String>,
@@ -176,6 +178,8 @@ pub fn apply_opts(
     for t in &themes {
         theme_exts.extend(t.extensions());
     }
+    // розширення, які замінив міст desk-bridge, прибираються з будь-якого набору
+    theme_exts.extend(crate::RETIRED_EXTENSIONS.iter().map(|s| s.to_string()));
     let broken: BTreeSet<String> = st
         .broken_extensions
         .iter()
@@ -433,12 +437,14 @@ fn live_check(
     warnings: &mut Vec<String>,
 ) {
     let mut reasons = Vec::new();
-    if shell.user_extensions_enabled() == Some(false) {
-        if !added.is_empty() {
-            warnings.push(
-                "користувацькі розширення вимкнено в оболонці (disable-user-extensions)".into(),
-            );
-        }
+    if shell.user_extensions_enabled() == Some(false) || crate::crash::user_extensions_disabled() {
+        res.extensions_disabled_by_gnome = true;
+        warnings.push(
+            "GNOME вимкнув розширення після збою оболонки (disable-user-extensions=true): розширення \
+             теми не працюватимуть, доки ви їх не ввімкнете (themes doctor --enable-extensions або \
+             кнопка у вікні «Теми»)"
+                .into(),
+        );
     } else {
         let locked = shell.screen_locked();
         if locked && !added.is_empty() {
@@ -493,7 +499,7 @@ fn live_check(
             }
         }
     }
-    res.live = reasons.is_empty();
+    res.live = reasons.is_empty() && !res.extensions_disabled_by_gnome;
     res.relogin = !reasons.is_empty();
     res.relogin_reasons = reasons;
 }
@@ -613,9 +619,9 @@ pub fn delete(ctx: &Ctx, id: &str) -> Result<(String, String)> {
 }
 
 /// Шлях dconf (каталог+ключ) → (схема, ключ) для всіх нерелокованих схем системи.
-fn schema_index() -> BTreeMap<String, (gtk::gio::SettingsSchema, String)> {
+fn schema_index() -> BTreeMap<String, (gio::SettingsSchema, String)> {
     let mut m = BTreeMap::new();
-    let Some(src) = gtk::gio::SettingsSchemaSource::default() else {
+    let Some(src) = gio::SettingsSchemaSource::default() else {
         return m;
     };
     let (fixed, _) = src.list_schemas(true);
@@ -701,7 +707,7 @@ fn cleanup(
         };
         let sk = sch.key(key);
         let def = sk.default_value();
-        let Ok(val) = gtk::glib::Variant::parse(Some(&sk.value_type()), v) else {
+        let Ok(val) = gio::glib::Variant::parse(Some(&sk.value_type()), v) else {
             continue;
         };
         if val == def {

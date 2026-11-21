@@ -7,10 +7,10 @@ use std::time::Duration;
 
 use adw::prelude::*;
 use gtk::{gio, glib};
-use themes::Ctx;
-use themes::modules::Module;
-use themes::state::State;
-use themes::theme::all_themes;
+use themes_core::Ctx;
+use themes_core::modules::Module;
+use themes_core::state::State;
+use themes_core::theme::all_themes;
 
 use super::GuiOptions;
 use super::card::{ThemeCard, ThemeInfo};
@@ -24,6 +24,7 @@ pub struct ThemesWindow {
     status: adw::StatusPage,
     toasts: adw::ToastOverlay,
     view: adw::ViewStack,
+    banner: adw::Banner,
     mix_group: adw::PreferencesGroup,
     mix_rows: RefCell<Vec<(Module, adw::ComboRow)>>,
     mix_guard: Cell<bool>,
@@ -188,6 +189,15 @@ impl ThemesWindow {
                 .build(),
         );
         toolbar.add_top_bar(&header);
+        // GNOME вимкнув розширення після збою оболонки (disable-user-extensions)
+        let banner = adw::Banner::builder()
+            .title("GNOME вимкнув розширення після збою оболонки")
+            .button_label("Увімкнути…")
+            .action_name("win.enable-extensions")
+            .revealed(themes_core::crash::user_extensions_disabled())
+            .build();
+        toolbar.add_top_bar(&banner);
+        let toasts = adw::ToastOverlay::new();
 
         // сторінка «Теми»
         let flow = gtk::FlowBox::builder()
@@ -244,11 +254,19 @@ impl ThemesWindow {
         mix_tools.add(&reset_row);
         mix_page.add(&mix_tools);
         view.add_titled_with_icon(&mix_page, Some("mix"), "Змішати", "view-dual-symbolic");
-        if opts.page.as_deref() == Some("mix") {
-            view.set_visible_child_name("mix");
+        // сторінка «Функції» (буфер обміну, подяки)
+        let feature_page = match opts.page.as_deref() {
+            Some(p @ ("clipboard" | "credits")) => Some(p),
+            _ => None,
+        };
+        let features = super::features::build(&toasts, feature_page);
+        view.add_titled_with_icon(&features, Some("features"), "Функції", "starred-symbolic");
+        match opts.page.as_deref() {
+            Some("mix") => view.set_visible_child_name("mix"),
+            Some("features" | "clipboard" | "credits") => view.set_visible_child_name("features"),
+            _ => {}
         }
 
-        let toasts = adw::ToastOverlay::new();
         toasts.set_child(Some(&view));
         toolbar.set_content(Some(&toasts));
         win.set_content(Some(&toolbar));
@@ -262,6 +280,7 @@ impl ThemesWindow {
             status,
             toasts,
             view,
+            banner,
             mix_group,
             mix_rows: RefCell::new(vec![]),
             mix_guard: Cell::new(false),
@@ -347,9 +366,14 @@ impl ThemesWindow {
         add(
             "reset",
             None,
-            Box::new(|t, _| t.apply(themes::BUILTIN_THEME.into(), vec![])),
+            Box::new(|t, _| t.apply(themes_core::BUILTIN_THEME.into(), vec![])),
         );
         add("doctor", None, Box::new(|t, _| t.run_doctor(false)));
+        add(
+            "enable-extensions",
+            None,
+            Box::new(|t, _| t.ask_enable_extensions()),
+        );
         add(
             "delete-theme",
             Some(glib::VariantTy::STRING),
@@ -435,6 +459,8 @@ impl ThemesWindow {
     }
 
     pub async fn reload(self: &Rc<Self>) {
+        self.banner
+            .set_revealed(themes_core::crash::user_extensions_disabled());
         let infos = load_infos(&self.ctx);
         while let Some(c) = self.flow.first_child() {
             self.flow.remove(&c);
@@ -549,7 +575,7 @@ impl ThemesWindow {
             let id2 = id.clone();
             let mods = modules.clone();
             let res =
-                gio::spawn_blocking(move || themes::apply::apply(&ctx, &id2, &mods, false)).await;
+                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, false)).await;
             t.set_busy(None);
             let res = match res {
                 Ok(Ok(r)) => r,
@@ -590,7 +616,7 @@ impl ThemesWindow {
             if res.shell_running && res.extensions_changed {
                 let ctx = t.ctx.clone();
                 let bad = gio::spawn_blocking(move || {
-                    themes::apply::verify_live(&ctx, Duration::from_secs(5))
+                    themes_core::apply::verify_live(&ctx, Duration::from_secs(5))
                 })
                 .await;
                 if let Ok(Ok(bad)) = bad {
@@ -637,10 +663,10 @@ impl ThemesWindow {
             }
             let name = e2.text().trim().to_string();
             let ids: Vec<String> = t.themes.borrow().iter().map(|x| x.id.clone()).collect();
-            let base = themes::util::slugify(&name);
+            let base = themes_core::util::slugify(&name);
             let mut id = base.clone();
             let mut n = 2;
-            while ids.contains(&id) || id == themes::BUILTIN_THEME {
+            while ids.contains(&id) || id == themes_core::BUILTIN_THEME {
                 id = format!("{base}-{n}");
                 n += 1;
             }
@@ -648,7 +674,7 @@ impl ThemesWindow {
             glib::spawn_future_local(async move {
                 let ctx = t.ctx.clone();
                 let r = gio::spawn_blocking(move || {
-                    themes::snapshot::snapshot(&ctx, &id, Some(&name), false)
+                    themes_core::snapshot::snapshot(&ctx, &id, Some(&name), false)
                 })
                 .await;
                 match r {
@@ -684,7 +710,7 @@ impl ThemesWindow {
             if r != "delete" {
                 return;
             }
-            match themes::apply::delete(&t.ctx, &id) {
+            match themes_core::apply::delete(&t.ctx, &id) {
                 Ok((name, _)) => t.toast(&format!("Тему «{name}» видалено"), 5),
                 Err(e) => t.toast(&format!("Помилка: {e}"), 10),
             };
@@ -707,9 +733,9 @@ impl ThemesWindow {
         glib::spawn_future_local(async move {
             let ctx = t.ctx.clone();
             let r = gio::spawn_blocking(move || {
-                themes::doctor::doctor(
+                themes_core::doctor::doctor(
                     &ctx,
-                    &themes::doctor::DoctorOptions {
+                    &themes_core::doctor::DoctorOptions {
                         fix,
                         wait_shell: Duration::ZERO,
                         notify: false,
@@ -779,6 +805,59 @@ impl ThemesWindow {
             if fix {
                 t.reload().await;
             }
+        });
+    }
+
+    /// GNOME вимкнув розширення після збою: показати ймовірну причину й увімкнути лише за згодою,
+    /// за бажання спершу перейшовши на безпечну тему.
+    fn ask_enable_extensions(self: &Rc<Self>) {
+        let t = self.clone();
+        glib::spawn_future_local(async move {
+            let ctx = t.ctx.clone();
+            let crashes = gio::spawn_blocking(move || themes_core::crash::recent_shell_crashes(&ctx, 48))
+                .await
+                .unwrap_or_default();
+            let mut body = String::from(
+                "Після збою GNOME Shell система вимкнула всі розширення (disable-user-extensions), \
+                 тому теми зараз працюють без них.",
+            );
+            let culprit = crashes.first().and_then(|c| c.theme.clone());
+            if let Some(c) = crashes.first() {
+                body.push_str(&format!("\n\n{}.", themes_core::crash::describe(c)));
+            }
+            body.push_str(
+                "\n\nЯкщо збій повториться, GNOME знову вимкне розширення. Безпечніше спершу перейти \
+                 на стандартну тему.",
+            );
+            let dlg = adw::AlertDialog::new(Some("Увімкнути розширення?"), Some(&body));
+            dlg.add_response("cancel", "Скасувати");
+            if culprit.as_deref().is_some_and(|c| c != themes_core::BUILTIN_THEME) {
+                dlg.add_response("safe", "Перейти на «Fedora» й увімкнути");
+                dlg.set_response_appearance("safe", adw::ResponseAppearance::Suggested);
+            }
+            dlg.add_response("enable", "Увімкнути");
+            dlg.set_default_response(Some("cancel"));
+            let t2 = t.clone();
+            dlg.connect_response(None, move |_, r| {
+                let enable = |t: &Rc<ThemesWindow>| match themes_core::crash::enable_user_extensions() {
+                    Ok(()) => {
+                        t.toast("Розширення знову ввімкнено", 5);
+                        t.banner.set_revealed(false);
+                    }
+                    Err(e) => {
+                        t.toast(&format!("Не вдалося: {e}"), 10);
+                    }
+                };
+                match r {
+                    "safe" => {
+                        t2.apply(themes_core::BUILTIN_THEME.into(), vec![]);
+                        enable(&t2);
+                    }
+                    "enable" => enable(&t2),
+                    _ => {}
+                }
+            });
+            dlg.present(Some(&t.win));
         });
     }
 

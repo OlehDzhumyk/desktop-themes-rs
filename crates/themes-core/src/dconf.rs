@@ -4,7 +4,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use gtk::glib;
+use gio::glib;
 
 use crate::error::{Context, Result};
 use crate::util::{run, run_check};
@@ -118,7 +118,7 @@ pub fn read(key: &str) -> Option<String> {
 
 /// Значення схеми за замовчуванням (без звернення до dconf).
 pub fn schema_default(schema: &str, key: &str) -> Option<String> {
-    let src = gtk::gio::SettingsSchemaSource::default()?;
+    let src = gio::SettingsSchemaSource::default()?;
     let sch = src.lookup(schema, true)?;
     if !sch.has_key(key) {
         return None;
@@ -128,13 +128,13 @@ pub fn schema_default(schema: &str, key: &str) -> Option<String> {
 
 /// Чинне значення ключа (dconf, а якщо не задано — типове схеми).
 pub fn effective(schema: &str, key: &str) -> Option<glib::Variant> {
-    let src = gtk::gio::SettingsSchemaSource::default()?;
+    let src = gio::SettingsSchemaSource::default()?;
     let sch = src.lookup(schema, true)?;
     if !sch.has_key(key) {
         return None;
     }
-    use gtk::gio::prelude::SettingsExt;
-    let s = gtk::gio::Settings::new_full(&sch, None::<&gtk::gio::SettingsBackend>, None);
+    use gio::prelude::SettingsExt;
+    let s = gio::Settings::new_full(&sch, None::<&gio::SettingsBackend>, None);
     Some(s.value(key))
 }
 

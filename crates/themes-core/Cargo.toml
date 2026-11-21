@@ -1,0 +1,17 @@
+[package]
+name = "themes-core"
+description = "Theme manager library: theme contract, modules, plan/apply, dconf, doctor"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "themes_core"
+
+[dependencies]
+gio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+zbus.workspace = true

@@ -5,12 +5,12 @@ use std::time::Duration;
 
 use clap::{Parser, Subcommand};
 use serde_json::json;
-use themes::apply::{ApplyResult, apply_opts, delete, verify_live};
-use themes::doctor::{DoctorOptions, doctor};
-use themes::modules::Module;
-use themes::state::State;
-use themes::theme::all_themes;
-use themes::{Ctx, Error};
+use themes_core::apply::{ApplyResult, apply_opts, delete, verify_live};
+use themes_core::doctor::{DoctorOptions, doctor};
+use themes_core::modules::Module;
+use themes_core::state::State;
+use themes_core::theme::all_themes;
+use themes_core::{Ctx, Error};
 
 #[derive(Parser)]
 #[command(
@@ -82,6 +82,10 @@ enum Cmd {
         /// Не надсилати сповіщення
         #[arg(long)]
         no_notify: bool,
+        /// Знову ввімкнути розширення, які GNOME вимкнув після збою оболонки
+        /// (disable-user-extensions). Робіть це, лише прибравши причину збою.
+        #[arg(long)]
+        enable_extensions: bool,
     },
     /// Відкрити програму «Теми»
     Gui {
@@ -93,7 +97,7 @@ enum Cmd {
         /// Розмір вікна, напр. 1180x780
         #[arg(long)]
         size: Option<String>,
-        /// Сторінка: themes | mix
+        /// Сторінка: themes | mix | features | clipboard | credits
         #[arg(long)]
         page: Option<String>,
     },
@@ -122,7 +126,7 @@ pub fn run(args: Vec<String>) -> i32 {
             return if e.use_stderr() { 2 } else { 0 };
         }
     };
-    themes::util::ensure_bus();
+    themes_core::util::ensure_bus();
     let ctx = Ctx::from_env();
     match exec(&ctx, cli.cmd, cli.json) {
         Ok(code) => code,
@@ -243,7 +247,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             let mods = modules_arg(only.as_deref(), &[])?;
             do_apply(
                 ctx,
-                themes::BUILTIN_THEME,
+                themes_core::BUILTIN_THEME,
                 &mods,
                 dry_run,
                 no_verify,
@@ -252,7 +256,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             )
         }
         Cmd::Snapshot { id, name, force } => {
-            let r = themes::snapshot::snapshot(ctx, &id, name.as_deref(), force)?;
+            let r = themes_core::snapshot::snapshot(ctx, &id, name.as_deref(), force)?;
             if json {
                 out_json(&r);
             } else {
@@ -289,7 +293,16 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             fix,
             wait_shell,
             no_notify,
+            enable_extensions,
         } => {
+            if enable_extensions {
+                if themes_core::crash::user_extensions_disabled() {
+                    themes_core::crash::enable_user_extensions()?;
+                    println!("Розширення знову ввімкнено (disable-user-extensions=false).");
+                } else {
+                    println!("Розширення й так увімкнені.");
+                }
+            }
             let r = doctor(
                 ctx,
                 &DoctorOptions {
@@ -437,11 +450,11 @@ fn print_apply(r: &ApplyResult) {
     );
     println!(
         "  попередньо:            {}",
-        themes::apply::fmt_sel(&r.previous_modules)
+        themes_core::apply::fmt_sel(&r.previous_modules)
     );
     println!(
         "  тепер:                 {}",
-        themes::apply::fmt_sel(&r.modules)
+        themes_core::apply::fmt_sel(&r.modules)
     );
     println!(
         "  змінено ключів dconf:  {} (з них скинуто до типових: {})",
@@ -477,6 +490,11 @@ fn print_apply(r: &ApplyResult) {
     if !r.shell_running {
         println!(
             "GNOME Shell зараз не запущено — зміни оболонки набудуть чинності при наступному вході."
+        );
+    } else if r.extensions_disabled_by_gnome {
+        println!(
+            "Налаштування застосовано, але GNOME вимкнув розширення після збою оболонки — розширення \
+             теми не працюють. Перевірте «themes doctor» і ввімкніть їх: themes doctor --enable-extensions"
         );
     } else if r.relogin {
         println!("ПОТРІБНО вийти з сесії та увійти знову:");

@@ -427,7 +427,7 @@ mod tests {
             cur_dis: &cur_dis,
             theme_exts: &theme_exts,
             target: &target,
-            permanent: &["themes-quick@desktop-themes-rs"],
+            permanent: &["desk-bridge@desktop-themes-rs"],
             broken: &broken,
         });
         assert_eq!(
@@ -437,7 +437,7 @@ mod tests {
                 "my-own@me",
                 "dash-to-panel@x",
                 "arcmenu@x",
-                "themes-quick@desktop-themes-rs"
+                "desk-bridge@desktop-themes-rs"
             ])
         );
         assert_eq!(dis, v(&["something@else"]));

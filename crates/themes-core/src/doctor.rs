@@ -34,6 +34,10 @@ pub struct Issue {
 #[derive(Debug, Serialize, Default)]
 pub struct DoctorReport {
     pub ok: bool,
+    /// GNOME вимкнув користувацькі розширення (`disable-user-extensions=true`).
+    pub extensions_disabled_by_gnome: bool,
+    /// Останні падіння справжньої оболонки (найновіші спершу).
+    pub shell_crashes: Vec<crate::crash::ShellCrash>,
     pub shell_running: bool,
     pub gnome_version: Option<String>,
     pub previous_gnome_version: Option<String>,
@@ -125,7 +129,38 @@ const BUILTIN_GTK: &[&str] = &[
 ];
 
 /// Відсутні теми/значки/курсори/звуки/шпалери, на які посилаються активні теми та dconf.
+/// Захист GNOME після збою (`disable-user-extensions`) і останні падіння оболонки. Нічого не
+/// виправляє автоматично: розширення повертаються лише за згодою користувача
+/// (`themes doctor --enable-extensions` або кнопка у вікні).
+fn check_crashes(ctx: &Ctx, rep: &mut DoctorReport) {
+    rep.shell_crashes = crate::crash::recent_shell_crashes(ctx, 48);
+    if crate::crash::user_extensions_disabled() {
+        rep.extensions_disabled_by_gnome = true;
+        let mut msg = "GNOME вимкнув розширення після збою оболонки (disable-user-extensions=true): \
+                       жодне розширення зараз не працює"
+            .to_string();
+        if let Some(c) = rep.shell_crashes.first() {
+            msg.push_str(&format!(". {}", crate::crash::describe(c)));
+            if let Some(t) = &c.theme {
+                msg.push_str(&format!(
+                    ". Радимо спершу перейти на безпечну тему (themes apply {}), якщо винна «{t}»",
+                    crate::BUILTIN_THEME
+                ));
+            }
+        }
+        msg.push_str(". Увімкнути знову: themes doctor --enable-extensions");
+        rep.push("error", "extensions-disabled", msg, None, false);
+    } else if let Some(c) = rep.shell_crashes.first() {
+        rep.push("warning", "shell-crash", crate::crash::describe(c), None, false);
+    }
+}
+
 fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
+    for t in crate::theme::all_themes(ctx) {
+        if let Some(e) = &t.inherit_error {
+            rep.push("warning", "inherits", format!("тема «{}»: {e}", t.id), None, false);
+        }
+    }
     // (що, ключ dconf, схема, ключ схеми)
     let checks: &[(&str, &str, &str, &str)] = &[
         (
@@ -404,7 +439,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             rep.push(
                 "warning",
                 "permanent",
-                format!("розширення {p} (швидкі налаштування «Тема») не встановлене"),
+                format!("розширення {p} (міст робочого столу: «Тема» у швидких налаштуваннях, буфер обміну) не встановлене"),
                 None,
                 false,
             );
@@ -419,6 +454,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         }
     }
     check_journal(&enabled, &mut rep);
+    check_crashes(ctx, &mut rep);
     check_assets(ctx, &st, &mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
@@ -529,15 +565,31 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             s2.gnome_version = version.clone();
         }
         s2.last_doctor = Some(now("%Y-%m-%d %H:%M:%S"));
+        // запис про останнє падіння оболонки (тема й підозрювані розширення на той момент)
+        if let Some(c) = rep.shell_crashes.first() {
+            s2.extra.insert(
+                "last_shell_crash".into(),
+                serde_json::to_value(c).unwrap_or_default(),
+            );
+        }
         s2.save(ctx)?;
     }
     rep.ok = rep.issues.iter().all(|i| i.severity == "info")
         || (opt.fix && rep.issues.iter().all(|i| i.severity == "info" || i.fixable));
     if opt.fix
         && opt.notify
-        && (!rep.fixed.is_empty() || !rep.restored.is_empty() || rep.version_changed)
+        && (!rep.fixed.is_empty()
+            || !rep.restored.is_empty()
+            || rep.version_changed
+            || rep.extensions_disabled_by_gnome)
     {
         let mut body = Vec::new();
+        if rep.extensions_disabled_by_gnome {
+            body.push(
+                "GNOME вимкнув розширення після збою оболонки. Відкрийте «Теми», щоб увімкнути їх знову."
+                    .to_string(),
+            );
+        }
         if rep.version_changed {
             body.push(format!(
                 "GNOME оновлено: {} → {}",

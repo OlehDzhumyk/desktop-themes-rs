@@ -3,7 +3,7 @@
 
 use adw::prelude::*;
 use gtk::{gdk, gio};
-use themes::modules::Module;
+use themes_core::modules::Module;
 
 #[derive(Clone, Debug)]
 pub struct ThemeInfo {

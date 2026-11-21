@@ -6,10 +6,10 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use themes::modules::Module;
-use themes::state::State;
-use themes::theme::all_themes;
-use themes::{Ctx, DBUS_NAME, DBUS_PATH};
+use themes_core::modules::Module;
+use themes_core::state::State;
+use themes_core::theme::all_themes;
+use themes_core::{Ctx, DBUS_NAME, DBUS_PATH};
 use zbus::object_server::SignalEmitter;
 
 const IDLE_EXIT: u64 = 90;
@@ -88,7 +88,7 @@ impl Service {
             .map_err(|e| zbus::fdo::Error::InvalidArgs(e.0))?;
         let ctx = self.ctx.clone();
         self.act.busy.store(true, Ordering::SeqCst);
-        let res = off_thread(move || themes::apply::apply(&ctx, &theme, &mods, false));
+        let res = off_thread(move || themes_core::apply::apply(&ctx, &theme, &mods, false));
         self.act.busy.store(false, Ordering::SeqCst);
         self.act.touch();
         let res = res.map_err(|e| zbus::fdo::Error::Failed(e.0))?;
@@ -100,14 +100,14 @@ impl Service {
             act.busy.store(true, Ordering::SeqCst);
             let conn = emitter.connection().clone();
             std::thread::spawn(move || {
-                if let Ok(bad) = themes::apply::verify_live(&ctx, Duration::from_secs(5)) {
+                if let Ok(bad) = themes_core::apply::verify_live(&ctx, Duration::from_secs(5)) {
                     if !bad.is_empty() {
                         let list = bad
                             .iter()
                             .map(|b| b.0.as_str())
                             .collect::<Vec<_>>()
                             .join(", ");
-                        let _ = themes::shell::notify(
+                        let _ = themes_core::shell::notify(
                             "Теми: розширення вимкнено",
                             &format!(
                                 "Після застосування теми розширення перейшли в стан помилки й були вимкнені: {list}"
@@ -138,9 +138,9 @@ impl Service {
         let ctx = self.ctx.clone();
         self.act.busy.store(true, Ordering::SeqCst);
         let rep = off_thread(move || {
-            themes::doctor::doctor(
+            themes_core::doctor::doctor(
                 &ctx,
-                &themes::doctor::DoctorOptions {
+                &themes_core::doctor::DoctorOptions {
                     fix,
                     wait_shell: Duration::ZERO,
                     notify: fix,
@@ -194,7 +194,7 @@ fn state_mtime(ctx: &Ctx) -> Option<SystemTime> {
 }
 
 pub fn run() -> i32 {
-    themes::util::ensure_bus();
+    themes_core::util::ensure_bus();
     let ctx = Ctx::from_env();
     let act = Activity {
         last: Arc::new(AtomicU64::new(now_s())),

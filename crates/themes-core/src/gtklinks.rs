@@ -72,9 +72,9 @@ pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String
     let mut made = Vec::new();
     for kind in GTK_KINDS {
         let entries = theme.gtk_entries(kind);
-        if entries.is_empty() {
+        let Some(src_dir) = theme.gtk_dir(kind).filter(|_| !entries.is_empty()) else {
             continue;
-        }
+        };
         let tdir = target_dir(ctx, kind);
         if !tdir.is_dir() {
             std::fs::create_dir_all(&tdir)?;
@@ -84,7 +84,7 @@ pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String
             }
         }
         for e in entries {
-            let src = theme.dir.join(kind).join(&e);
+            let src = src_dir.join(&e);
             let dest = tdir.join(&e);
             if lexists(&dest) {
                 let bdir = ctx.backups.join(tdir.file_name().unwrap_or_default());

@@ -84,7 +84,7 @@ pub fn conf_quote(s: &str) -> String {
 }
 
 pub fn now(fmt: &str) -> String {
-    gtk::glib::DateTime::now_local()
+    gio::glib::DateTime::now_local()
         .ok()
         .and_then(|d| d.format(fmt).ok())
         .map(|s| s.to_string())

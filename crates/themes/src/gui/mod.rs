@@ -2,12 +2,14 @@
 //! Програма «Теми» (GTK 4 + libadwaita).
 
 mod card;
+mod credits;
+mod features;
 mod preview;
 mod window;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use themes::APP_ID;
+use themes_core::APP_ID;
 
 #[derive(Clone, Debug)]
 pub struct GuiOptions {
@@ -36,6 +38,7 @@ const CSS: &str = r#"
 .badge { background: var(--accent-bg-color); color: var(--accent-fg-color);
          border-radius: 999px; padding: 2px 10px; font-weight: bold; font-size: 0.85em; }
 .badge.partial { background: alpha(black, 0.55); color: white; }
+.badge.origin { background: alpha(currentColor, 0.12); color: inherit; font-weight: normal; }
 .badges { margin: 10px; }
 .busy-veil { background: alpha(black, 0.35); border-radius: 14px 14px 0 0; }
 .module-chip { font-size: 0.85em; }
@@ -61,7 +64,7 @@ impl WindowIface {
 }
 
 fn claim_single_instance() -> Result<Option<zbus::Connection>, ()> {
-    themes::util::ensure_bus();
+    themes_core::util::ensure_bus();
     let conn = match zbus::block_on(zbus::Connection::session()) {
         Ok(c) => c,
         Err(_) => return Ok(None), // без шини — просто працюємо

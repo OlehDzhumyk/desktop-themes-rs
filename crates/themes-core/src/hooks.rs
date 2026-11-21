@@ -15,10 +15,16 @@ pub fn run_hook(
     next: Option<&str>,
 ) -> Option<Result<(), String>> {
     let path = theme.hook(name)?;
+    // успадкований хук працює у теці своєї (батьківської) теми
+    let dir = path
+        .ancestors()
+        .nth(3)
+        .map(|p| p.to_path_buf())
+        .unwrap_or_else(|| theme.dir.clone());
     let mut c = Command::new(&path);
-    c.current_dir(&theme.dir)
+    c.current_dir(&dir)
         .env("THEME_ID", &theme.id)
-        .env("THEME_DIR", &theme.dir)
+        .env("THEME_DIR", &dir)
         .env("THEME_HOOK", name)
         .env("DESKTOP_THEMES_ROOT", &ctx.root)
         .env("PREV_THEME_ID", prev.unwrap_or(""))
