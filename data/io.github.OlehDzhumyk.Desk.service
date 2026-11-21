@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=io.github.OlehDzhumyk.Desk
+Exec=@BIN@/deskd
+SystemdService=deskd.service

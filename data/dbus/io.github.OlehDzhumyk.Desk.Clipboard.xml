@@ -1,0 +1,54 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Clipboard history engine of deskd. The shell bridge (desk-bridge@desktop-themes-rs) feeds
+     clipboard contents in with Push() and renders the items it gets from List(). -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Clipboard">
+    <!-- A new clipboard owner appeared. mime: the type `data` is in (text/plain;charset=utf-8,
+         image/png, ...); offered: every mime type the source offers (used for password-manager
+         hints); source_app: WM class of the focused window. Returns the item id, 0 if skipped. -->
+    <method name="Push">
+      <arg name="mime" type="s" direction="in"/>
+      <arg name="data" type="ay" direction="in"/>
+      <arg name="offered" type="as" direction="in"/>
+      <arg name="source_app" type="s" direction="in"/>
+      <arg name="id" type="t" direction="out"/>
+    </method>
+    <!-- Items, most recent first. query: case-insensitive substring ("" = all), limit 0 = all.
+         Item: (id, kind "text"|"image", text or image description, mime, image file path or "",
+         pinned, unix time, size in bytes). -->
+    <method name="List">
+      <arg name="query" type="s" direction="in"/>
+      <arg name="limit" type="u" direction="in"/>
+      <arg name="items" type="a(tssssbxt)" direction="out"/>
+    </method>
+    <!-- Full content of an item. -->
+    <method name="Get">
+      <arg name="id" type="t" direction="in"/>
+      <arg name="mime" type="s" direction="out"/>
+      <arg name="data" type="ay" direction="out"/>
+    </method>
+    <!-- Like Get, and the item becomes the most recent one (the bridge then pastes it). -->
+    <method name="Activate">
+      <arg name="id" type="t" direction="in"/>
+      <arg name="mime" type="s" direction="out"/>
+      <arg name="data" type="ay" direction="out"/>
+    </method>
+    <method name="Pin">
+      <arg name="id" type="t" direction="in"/>
+      <arg name="pinned" type="b" direction="in"/>
+    </method>
+    <method name="Delete">
+      <arg name="id" type="t" direction="in"/>
+    </method>
+    <method name="Clear">
+      <arg name="keep_pinned" type="b" direction="in"/>
+    </method>
+    <!-- Private mode: nothing is recorded (mirrors the GSettings key private-mode). -->
+    <property name="Private" type="b" access="readwrite"/>
+    <!-- The engine is enabled (GSettings key enabled). -->
+    <property name="Enabled" type="b" access="read"/>
+    <property name="Count" type="u" access="read"/>
+    <!-- The item list changed. -->
+    <signal name="Changed"/>
+  </interface>
+</node>
