@@ -21,7 +21,7 @@ basediff() {
   echo "  повний diff: $(dconf dump / | diff "$R/baseline/full.dconf" - | grep -c '^[<>]') рядків; без некерованих ключів: $(printf %s "$d" | grep -c .)"
   if [ -z "$d" ]; then ok "dconf == baseline (крім некерованих ключів)"; else bad "відмінності від baseline:"; echo "$d" | sed 's/^/        /'; fi
   local en; en=$(dconf read /org/gnome/shell/enabled-extensions)
-  [ "$en" = "['background-logo@fedorahosted.org', 'themes-quick@desktop-themes-rs']" ] && ok "enabled-extensions = baseline + themes-quick" || bad "enabled-extensions = $en"
+  [ "$en" = "['background-logo@fedorahosted.org', 'desk-bridge@desktop-themes-rs']" ] && ok "enabled-extensions = baseline + desk-bridge" || bad "enabled-extensions = $en"
 }
 
 echo "== підготовка zz-test"
