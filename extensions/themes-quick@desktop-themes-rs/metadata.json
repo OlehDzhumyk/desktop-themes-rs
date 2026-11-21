@@ -1,0 +1,8 @@
+{
+  "uuid": "themes-quick@desktop-themes-rs",
+  "name": "Тема (швидкі налаштування)",
+  "description": "Перемикач тем робочого столу у швидких налаштуваннях. Працює через D-Bus-службу io.github.OlehDzhumyk.Themes (themes).",
+  "shell-version": ["51"],
+  "version": 1,
+  "url": "https://github.com/OlehDzhumyk/desktop-themes-rs"
+}

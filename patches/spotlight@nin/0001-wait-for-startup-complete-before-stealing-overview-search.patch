@@ -1,0 +1,42 @@
+Patch against spotlight@nin (extensions.gnome.org v15, GPL-3.0-or-later, https://github.com/itsnin/spotlight).
+See patches/README.md. Apply from the extension directory with: git apply -p1 <this file>
+
+--- a/extension.js
++++ b/extension.js
+@@ -1,5 +1,6 @@
+ // Spotlight: a compact launcher for GNOME Shell
+ // SPDX-License-Identifier: GPL-3.0-or-later
++import * as Main from "resource:///org/gnome/shell/ui/main.js";
+ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+ import {SpotlightPopup} from './lib/popup/widget/spotlightPopup.js';
+ import {KeybindingManager} from './lib/core/keybinding.js';
+@@ -11,7 +12,17 @@
+         this._popup = new SpotlightPopup(this._settings);
+         // Steal the overview search widgets permanently. The overview search stays gone
+         // for as long as Spotlight is loaded, which is the whole point of the extension.
+-        this._popup.stealOverviewSearch();
++        // Local patch: stealing the overview widgets while the shell is still starting up
++        // (startup animation) crashes GNOME Shell 51, so wait for startup-complete.
++        if (Main.layoutManager._startingUp) {
++            this._startupId = Main.layoutManager.connect("startup-complete", () => {
++                Main.layoutManager.disconnect(this._startupId);
++                this._startupId = 0;
++                this._popup?.stealOverviewSearch();
++            });
++        } else {
++            this._popup.stealOverviewSearch();
++        }
+         this._keybindingManager = new KeybindingManager();
+         this._keybindingManager.enable();
+         const shortcuts = this._settings.get_strv('toggle-shortcut');
+@@ -36,6 +47,10 @@
+     }
+     disable() {
+         this._settings.disconnectObject(this);
++        if (this._startupId) {
++            Main.layoutManager.disconnect(this._startupId);
++            this._startupId = 0;
++        }
+         this._keybindingManager.disable();
+         this._keybindingManager = null;
+         // Return the stolen widgets to the overview before destroying things so nothing leaks.

@@ -1,0 +1,14 @@
+Patch against spotlight@nin (extensions.gnome.org v15, GPL-3.0-or-later, https://github.com/itsnin/spotlight).
+See patches/README.md. Apply from the extension directory with: git apply -p1 <this file>
+
+--- a/lib/popup/widget/spotlightPopup.js
++++ b/lib/popup/widget/spotlightPopup.js
+@@ -38,7 +38,7 @@
+ 
+         this._content = new St.BoxLayout({
+             style_class: 'spotlight-container',
+-            vertical: true,
++            orientation: Clutter.Orientation.VERTICAL,
+             width: 520,
+         });
+         this.add_child(this._content);

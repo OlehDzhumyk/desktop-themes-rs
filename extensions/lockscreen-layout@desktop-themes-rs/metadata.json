@@ -1,0 +1,9 @@
+{
+  "uuid": "lockscreen-layout@desktop-themes-rs",
+  "name": "Lock Screen Layout",
+  "description": "Clock position/size/font, blur, tint and background image of the lock screen (per-theme via dconf).",
+  "shell-version": ["51"],
+  "settings-schema": "org.gnome.shell.extensions.lockscreen-layout",
+  "session-modes": ["user", "unlock-dialog"],
+  "version": 1
+}

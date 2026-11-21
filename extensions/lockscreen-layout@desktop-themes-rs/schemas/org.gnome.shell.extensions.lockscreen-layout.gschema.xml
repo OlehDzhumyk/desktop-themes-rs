@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <enum id="org.gnome.shell.extensions.lockscreen-layout.position">
+    <value value="0" nick="default"/>
+    <value value="1" nick="center-top"/>
+    <value value="2" nick="bottom-left"/>
+  </enum>
+  <schema id="org.gnome.shell.extensions.lockscreen-layout" path="/org/gnome/shell/extensions/lockscreen-layout/">
+    <key name="clock-position" enum="org.gnome.shell.extensions.lockscreen-layout.position">
+      <default>"default"</default>
+      <summary>Clock position: default (stock, centred), center-top, bottom-left</summary>
+    </key>
+    <key name="margin-x" type="i"><range min="0" max="2000"/><default>64</default>
+      <summary>bottom-left: distance from the left edge, px</summary></key>
+    <key name="margin-y" type="i"><range min="0" max="2000"/><default>96</default>
+      <summary>center-top: distance from the top; bottom-left: from the bottom, px</summary></key>
+    <key name="clock-font-size" type="i"><range min="0" max="400"/><default>0</default>
+      <summary>Time font size in px (0 = stock)</summary></key>
+    <key name="date-font-size" type="i"><range min="0" max="200"/><default>0</default>
+      <summary>Date font size in px (0 = stock)</summary></key>
+    <key name="clock-font-family" type="s"><default>""</default>
+      <summary>Font family for time and date (empty = stock)</summary></key>
+    <key name="clock-font-weight" type="s"><default>""</default>
+      <summary>CSS font-weight for the time, e.g. 200 or bold (empty = stock)</summary></key>
+    <key name="clock-glow" type="s"><default>""</default>
+      <summary>CSS colour of a soft glow (text-shadow) around the time (empty = none)</summary></key>
+    <key name="clock-color" type="s"><default>""</default>
+      <summary>CSS colour of the time (empty = stock)</summary></key>
+    <key name="date-color" type="s"><default>""</default>
+      <summary>CSS colour of the date (empty = stock)</summary></key>
+    <key name="hide-hint" type="b"><default>false</default>
+      <summary>Hide the "Click or press a key" hint</summary></key>
+    <key name="prompt-offset" type="i"><range min="-500" max="500"/><default>0</default>
+      <summary>Shift the password prompt down (px, may be negative)</summary></key>
+    <key name="blur" type="b"><default>true</default>
+      <summary>Blur the background (false = sharp wallpaper)</summary></key>
+    <key name="blur-radius" type="i"><range min="0" max="200"/><default>90</default>
+      <summary>Blur radius</summary></key>
+    <key name="brightness" type="d"><range min="0.0" max="1.0"/><default>0.65</default>
+      <summary>Background brightness when blurred</summary></key>
+    <key name="tint" type="s"><default>""</default>
+      <summary>CSS colour laid over the background, e.g. rgba(90,40,160,0.35) (empty = none)</summary></key>
+    <key name="background-uri" type="s"><default>""</default>
+      <summary>file:// image for the lock screen (empty = desktop wallpaper, as stock GNOME 51; the word screensaver = org.gnome.desktop.screensaver picture-uri)</summary></key>
+  </schema>
+</schemalist>
