@@ -1,0 +1,8 @@
+# Модуль apps (macOS): Ptyxis. Brave слідує GTK-темі сам (see docs/themes.md), хуків немає.
+# @DEFAULT_PTYXIS_PROFILE@ is replaced by the default Ptyxis profile UUID (dconf default-profile-uuid).
+[org/gnome/Ptyxis]
+use-system-font=false
+font-name='JetBrains Mono 12'
+
+[org/gnome/Ptyxis/Profiles/@DEFAULT_PTYXIS_PROFILE@]
+palette='Pro'

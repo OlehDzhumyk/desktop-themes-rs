@@ -1,0 +1,10 @@
+# Spotlight launcher (spotlight@nin) for the macOS theme. Part of the look module (extra *.dconf).
+[org/gnome/shell/extensions/spotlight]
+toggle-shortcut=['<Super>space']
+theme-preference='default'
+
+# Super+Space must not stay on the Overview. NOTE: behavior.dconf (module "behavior") still sets
+# toggle-overview=['<Super>space'] and behavior wins over look when both set a key, so the
+# one-line fix in macos/behavior.dconf is: toggle-overview=@as []
+[org/gnome/shell/keybindings]
+toggle-overview=@as []

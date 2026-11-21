@@ -1,0 +1,9 @@
+user-theme@gnome-shell-extensions.gcampax.github.com
+appindicatorsupport@rgcjonas.gmail.com
+blur-my-shell@aunetx
+dash-to-dock@micxgx.gmail.com
+logomenu@aryan_k
+compiz-alike-magic-lamp-effect@hermes83.github.com
+spotlight@nin
+clipboard-indicator@tudmotu.com
+lockscreen-layout@desktop-themes-rs

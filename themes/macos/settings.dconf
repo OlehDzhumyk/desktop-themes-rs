@@ -1,0 +1,22 @@
+[org/gnome/desktop/interface]
+gtk-theme='WhiteSur-Light'
+icon-theme='WhiteSur'
+cursor-theme='WhiteSur-cursors'
+font-name='Inter 11'
+document-font-name='Inter 11'
+monospace-font-name='JetBrains Mono 11'
+
+[org/gnome/desktop/wm/preferences]
+button-layout='close,minimize,maximize:'
+titlebar-font='Inter Bold 11'
+
+[org/gnome/desktop/background]
+picture-uri='file://${HOME}/.local/share/backgrounds/macos/WhiteSur-light.jpg'
+picture-uri-dark='file://${HOME}/.local/share/backgrounds/macos/WhiteSur-dark.jpg'
+picture-options='zoom'
+
+[org/gnome/desktop/screensaver]
+picture-uri='file://${HOME}/.local/share/backgrounds/macos/WhiteSur-dark.jpg'
+
+[org/gnome/shell/extensions/user-theme]
+name='WhiteSur-Dark'

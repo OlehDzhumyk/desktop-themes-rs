@@ -1,0 +1,6 @@
+# windows11 sounds module (staged; theme dir ~/.local/share/sounds/windows11-like)
+
+[org/gnome/desktop/sound]
+theme-name='windows11-like'
+event-sounds=true
+input-feedback-sounds=false

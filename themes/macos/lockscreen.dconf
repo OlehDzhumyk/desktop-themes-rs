@@ -1,0 +1,22 @@
+# Екран блокування у стилі macOS: тонкий великий годинник угорі по центру, розмиті шпалери,
+# поле пароля нижче центру. Розширення lockscreen-layout@desktop-themes-rs.
+[org/gnome/shell/extensions/lockscreen-layout]
+clock-position='center-top'
+margin-y=110
+clock-font-size=128
+date-font-size=26
+clock-font-family='Inter'
+clock-font-weight='200'
+clock-color='rgba(255,255,255,0.92)'
+date-color='rgba(255,255,255,0.85)'
+hide-hint=false
+prompt-offset=120
+blur=true
+blur-radius=60
+brightness=0.78
+tint=''
+background-uri='screensaver'
+
+# Екран блокування малює lockscreen-layout, тож власне розмиття Blur my Shell для нього вимкнено
+[org/gnome/shell/extensions/blur-my-shell/lockscreen]
+blur=false

@@ -1,0 +1,4 @@
+# Generated from a stock Fedora baseline (ключі вигляду, явно задані в baseline)
+[org/gnome/desktop/interface]
+color-scheme='prefer-dark'
+

@@ -1,0 +1,56 @@
+# macos behavior module (staged; applied by theme manager via dconf load /)
+
+[org/gnome/desktop/wm/keybindings]
+switch-applications=['<Super>Tab', '<Alt>Tab']
+switch-applications-backward=['<Shift><Super>Tab', '<Shift><Alt>Tab']
+switch-group=['<Super>Above_Tab', '<Alt>Above_Tab']
+switch-group-backward=['<Shift><Super>Above_Tab', '<Shift><Alt>Above_Tab']
+switch-windows=@as []
+switch-windows-backward=@as []
+switch-input-source=['<Super><Alt>space', 'XF86Keyboard']
+switch-input-source-backward=['<Shift><Super><Alt>space', '<Shift>XF86Keyboard']
+close=['<Super>q', '<Alt>F4']
+minimize=['<Super>h']
+show-desktop=@as []
+
+[org/gnome/shell/keybindings]
+toggle-overview=@as []
+toggle-application-view=['<Super>a']
+toggle-quick-settings=['<Super>s']
+toggle-message-tray=['<Super>v', '<Super>m']
+focus-active-notification=['<Super>n']
+show-screenshot-ui=['Print']
+
+[org/gnome/settings-daemon/plugins/media-keys]
+home=['']
+custom-keybindings=@as []
+
+[org/gnome/shell/extensions/dash-to-dock]
+shortcut=@as []
+
+[org/gnome/desktop/peripherals/touchpad]
+natural-scroll=true
+tap-to-click=true
+click-method='fingers'
+disable-while-typing=true
+
+[org/gnome/desktop/peripherals/mouse]
+natural-scroll=false
+
+[org/gnome/desktop/interface]
+enable-hot-corners=true
+font-antialiasing='grayscale'
+font-hinting='slight'
+enable-animations=true
+locate-pointer=false
+show-battery-percentage=true
+clock-show-weekday=true
+
+[org/gnome/mutter]
+edge-tiling=false
+attach-modal-dialogs=true
+center-new-windows=true
+
+[org/gnome/desktop/wm/preferences]
+action-double-click-titlebar='minimize'
+action-middle-click-titlebar='none'

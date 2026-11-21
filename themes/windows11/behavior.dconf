@@ -1,0 +1,58 @@
+# windows11 behavior module (staged; applied by theme manager via dconf load /)
+
+[org/gnome/desktop/wm/keybindings]
+switch-applications=@as []
+switch-applications-backward=@as []
+switch-group=@as []
+switch-group-backward=@as []
+switch-windows=['<Alt>Tab']
+switch-windows-backward=['<Shift><Alt>Tab']
+switch-input-source=['<Super>space', 'XF86Keyboard']
+switch-input-source-backward=['<Shift><Super>space', '<Shift>XF86Keyboard']
+close=['<Alt>F4']
+minimize=['<Super>h']
+show-desktop=['<Super>d']
+
+[org/gnome/shell/keybindings]
+toggle-overview=['<Super>Tab']
+toggle-application-view=['<Super>s']
+toggle-quick-settings=['<Super>a']
+toggle-message-tray=['<Super>n', '<Super>m']
+focus-active-notification=@as []
+show-screenshot-ui=['Print', '<Shift><Super>s']
+
+[org/gnome/settings-daemon/plugins/media-keys]
+home=['<Super>e']
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/win11-system-monitor/']
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/win11-system-monitor]
+name='System Monitor (Ctrl+Shift+Esc)'
+command='gnome-system-monitor'
+binding='<Primary><Shift>Escape'
+
+[org/gnome/desktop/peripherals/touchpad]
+natural-scroll=false
+tap-to-click=true
+click-method='areas'
+disable-while-typing=true
+
+[org/gnome/desktop/peripherals/mouse]
+natural-scroll=false
+
+[org/gnome/desktop/interface]
+enable-hot-corners=false
+font-antialiasing='rgba'
+font-hinting='full'
+enable-animations=true
+locate-pointer=false
+show-battery-percentage=false
+clock-show-weekday=false
+
+[org/gnome/mutter]
+edge-tiling=true
+attach-modal-dialogs=false
+center-new-windows=true
+
+[org/gnome/desktop/wm/preferences]
+action-double-click-titlebar='toggle-maximize'
+action-middle-click-titlebar='none'

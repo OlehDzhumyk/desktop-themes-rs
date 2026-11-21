@@ -1,0 +1,23 @@
+# Екран блокування у стилі Windows 11: великий час і дата внизу ліворуч, різкі (нерозмиті) шпалери.
+# Поле пароля з’являється після натискання клавіші (двоетапний екран GNOME). lockscreen-layout@desktop-themes-rs.
+[org/gnome/shell/extensions/lockscreen-layout]
+clock-position='bottom-left'
+margin-x=80
+margin-y=90
+clock-font-size=120
+date-font-size=30
+clock-font-family='Inter'
+clock-font-weight='300'
+clock-color='rgba(255,255,255,1.0)'
+date-color='rgba(255,255,255,0.95)'
+hide-hint=true
+prompt-offset=0
+blur=false
+blur-radius=0
+brightness=1.0
+tint='rgba(0,0,0,0.22)'
+background-uri='screensaver'
+
+# Екран блокування малює lockscreen-layout, тож власне розмиття Blur my Shell для нього вимкнено
+[org/gnome/shell/extensions/blur-my-shell/lockscreen]
+blur=false

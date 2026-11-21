@@ -1,0 +1,6 @@
+# macos sounds module (staged; theme dir ~/.local/share/sounds/macos-like)
+
+[org/gnome/desktop/sound]
+theme-name='macos-like'
+event-sounds=true
+input-feedback-sounds=false
