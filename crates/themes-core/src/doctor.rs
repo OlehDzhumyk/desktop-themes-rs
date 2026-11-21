@@ -358,17 +358,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     rep.extensions_checked = enabled.len();
     let ver = version.clone().unwrap_or_default();
     let mut to_disable: Vec<(String, String)> = Vec::new();
-    if let Some(sh) = &shell
-        && sh.user_extensions_enabled() == Some(false)
-    {
-        rep.push(
-                "warning",
-                "extensions-disabled",
-                "оболонка вимкнула всі користувацькі розширення (disable-user-extensions = true; можливо, після збою)".into(),
-                None,
-                false,
-            );
-    }
+    // disable-user-extensions (захист GNOME після збою) перевіряє check_crashes()
     for u in &enabled {
         let installed = ctx.extension_path(u).is_some();
         let info = shell.as_ref().and_then(|s| s.ext_info(u));
