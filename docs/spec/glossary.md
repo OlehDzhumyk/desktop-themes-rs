@@ -54,11 +54,11 @@ the selected theme's value, else the baseline value, else the schema default
 **Mixing.** Taking modules from different themes at the same time (macOS look with Windows 11
 behaviour).
 
-**Module.** One of four independently switchable parts of a theme: `look` (GTK and shell themes, icons,
+<a id="module"></a>**Module.** One of four independently switchable parts of a theme: `look` (GTK and shell themes, icons,
 cursors, fonts, wallpapers, extensions, skin), `behavior` (shortcuts, Alt+Tab, touchpad, hot corners,
 window placement), `sounds` (sound theme), `apps` (per-app settings and hooks).
 
-**Origin badge.** The one-line statement of where a feature comes from ("In Windows 11 and macOS",
+<a id="origin-badge"></a>**Origin badge.** The one-line statement of where a feature comes from ("In Windows 11 and macOS",
 "From Windows, adapted for macOS style", "Based on <project> (<licence>)", "Original"), shown on the
 feature's page in the hub and listed in the [feature map](README.md#feature-map).
 
