@@ -77,6 +77,12 @@
    defaults (theme writes a `*-default` key or the registry reads the theme's desk.dconf). Today
    `toggle-shortcut` is written by themes and shown read-only.
 
+## Cross-agent
+* The tokens crate (theme-tokens, other branch) has English CLI/validation messages: once merged,
+  wrap them in `desk_settings::tr!` and they are extracted by `cargo xtask pot` (it scans crates/**).
+* Verified: this worktree has no theme-tokens files or Cargo.toml entry (shared-mirror mix-up);
+  my mirror now lives in a uniquely named scratch dir.
+
 ## Next commands
 ```sh
 cd ~/Developer/dtr-settings
