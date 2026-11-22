@@ -92,6 +92,7 @@ user's machine, not committed.
 * [docs/module-system.md](docs/module-system.md): modules, managed keys, mixing rules
 * [docs/themes.md](docs/themes.md): notes on the bundled themes and their extensions
 * [docs/features.md](docs/features.md): desktop features (clipboard history), skins, privacy
+* [docs/spec/](docs/spec/README.md): functional specifications of every feature (behaviour, acceptance criteria, status)
 * [docs/README.uk.md](docs/README.uk.md): full user guide in Ukrainian
 
 ## Development
