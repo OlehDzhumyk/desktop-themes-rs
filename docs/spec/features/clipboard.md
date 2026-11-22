@@ -121,7 +121,8 @@ to deskd as the source application.
   Це не можна скасувати.»).
 * Ids are unique, never reused within a store.
 * Storage: text history in `~/.local/share/deskd/clipboard/history.json` (dir 0700, file 0600,
-  written atomically via temp file + rename after each change) when `persist` is on; images in
+  written atomically via temp file + rename, debounced: 2 s after the last change, at most 10 s after
+  the first, and flushed on SIGTERM/SIGINT/SIGHUP so a logout loses nothing) when `persist` is on; images in
   `$XDG_RUNTIME_DIR/deskd/clipboard/images` (gone at session end) unless `persist` and `persist-images`
   are both on, then in `~/.local/share/deskd/clipboard/images`. Changing those settings moves files
   accordingly; turning `persist` off deletes `history.json`. A corrupt store is ignored with a log

@@ -16,6 +16,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- `themes apply` exits 4 when the automatic rollback turned an extension off (was 0).
+- `themes doctor` checks deskd (service file, running, same version).
+- Snapshots include the skin and the clipboard shortcut of the look module.
+- deskd writes the clipboard history debounced (2 s quiet, 10 s at most) and flushes it on
+  SIGTERM/SIGINT/SIGHUP, so nothing is lost on logout and bursts of copies cost one write.
 - Clipboard history and thumbnail cache use a stable hash (FNV-1a) instead of `DefaultHasher`;
   an existing `history.json` is migrated at load (store version 2). The `no-default-hasher`
   ast-grep rule is an error now.

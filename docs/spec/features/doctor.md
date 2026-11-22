@@ -10,7 +10,7 @@ and brings extensions back **only with the user's consent**.
 
 ## Status
 
-**Implemented** (stage 0). Origin badge: *Original*. Gaps below (no check of deskd; doctor writes
+**Implemented** (stage 0). Origin badge: *Original*. Gaps below (no schema check; doctor writes
 state; a stale crash keeps the exit code at 3 for 48 h).
 
 ## Reference behaviour
@@ -110,11 +110,11 @@ The login run is off the critical path (after `gnome-session.target`).
 
 ## Gaps found
 
-* **G-DOCTOR-1** Doctor does not check the deskd service or the GSettings schema
-  (`io.github.OlehDzhumyk.Desk*`): a missing schema makes the bridge fail on enable with
-  "GSettings schema not found" (`bridge/src/extension.ts`). Intended: error `deskd` (service not
-  reachable or not activatable) and `schema` (not found), both fixable by `data/install.sh`-style
-  recompile.
+* **G-DOCTOR-1** *(deskd part resolved)* Doctor checks deskd: warning when its D-Bus service file is
+  missing, warning when it owns its name but does not answer or runs another version than `themes`,
+  info (not a problem) when it is merely not running yet (D-Bus activation starts it on first use).
+  Still open: the GSettings schema check (`io.github.OlehDzhumyk.Desk*`): a missing schema makes the bridge
+  fail on enable with "GSettings schema not found" (`bridge/src/extension.ts`). Intended: error `schema`.
 * **G-DOCTOR-2** A shell crash stays a `warning` for 48 h, so `themes doctor` exits 3 even though nothing
   can be fixed and the tool already told the user. Intended: report once per crash (remember
   "acknowledged" in `state.json`) and drop to `info`.
