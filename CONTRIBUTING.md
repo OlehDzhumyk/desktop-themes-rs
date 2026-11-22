@@ -62,6 +62,21 @@ anyway.)
 working copy of the tool. While you develop, run `target/debug/themes` and `target/debug/deskd`
 directly, and read [docs/architecture.md](docs/architecture.md) first.
 
+## End-to-end tests (`just e2e`)
+
+`tests/e2e/` runs GNOME Shell 51 headless in a throw-away podman container and tests the freshly
+built bridge, deskd and `themes` in it ([docs/testing.md](docs/testing.md),
+[ADR 0007](docs/adr/0007-e2e-in-containers.md)). Only podman is needed on the host; the build runs
+in the toolbox (`E2E_TOOLBOX`, default `themes-rs-build`):
+
+```sh
+just e2e                    # build, then the whole suite (about a minute after the first image pull)
+just e2e -k clipboard       # pytest arguments pass through
+tools/e2e.sh --no-build -m smoke
+```
+
+Screenshots, shell logs of failed tests and the container journal land in `target/e2e/`.
+
 ## Headless testing (the safe way)
 
 `tools/headless/` starts a complete GNOME Shell with `--headless` on a **private** D-Bus bus,
