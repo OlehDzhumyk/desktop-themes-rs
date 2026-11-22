@@ -6,6 +6,7 @@
 //! служби вказує на юніт systemd --user `deskd.service`).
 
 mod clipboard;
+mod persist;
 mod service;
 mod settings;
 
@@ -15,6 +16,8 @@ use desk_proto::{BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH};
 use desk_settings::tr;
 use gio::glib;
 use gio::prelude::*;
+use signal_hook::consts::{SIGHUP, SIGINT, SIGTERM};
+use signal_hook::iterator::Signals;
 
 use clipboard::{Config, Engine};
 use service::{ClipboardIface, Desk, Shared};
@@ -83,8 +86,10 @@ fn main() {
     eng.load();
     let eng: Shared = Arc::new(Mutex::new(eng));
 
+    let saver = persist::Saver::spawn(eng.clone(), persist::QUIET, persist::MAX_WAIT);
     let clip = ClipboardIface {
         eng: eng.clone(),
+        saver: saver.clone(),
         set_private: settings::set_private_async,
     };
     let desk = Desk {
@@ -161,9 +166,19 @@ fn main() {
         });
     }
 
-    // SIGTERM від systemd просто завершує процес: історія зберігається після кожної зміни.
+    // logout / `systemctl --user stop`: leave the main loop so that the pending history is written
+    match Signals::new([SIGHUP, SIGINT, SIGTERM]) {
+        Ok(mut signals) => {
+            let ml = main_loop.clone();
+            std::thread::spawn(move || {
+                if signals.forever().next().is_some() {
+                    ml.quit();
+                }
+            });
+        }
+        Err(e) => eprintln!("deskd: cannot watch SIGTERM, the history is saved on changes only: {e}"),
+    }
     main_loop.run();
-    let e = eng.lock().unwrap_or_else(|p| p.into_inner());
-    let _ = e.save();
+    saver.flush();
     drop(gsettings);
 }

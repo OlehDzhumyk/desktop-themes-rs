@@ -8,6 +8,7 @@ use desk_proto::ClipItem;
 use zbus::object_server::SignalEmitter;
 
 use crate::clipboard::{Engine, Pushed};
+use crate::persist::Saver;
 
 pub type Shared = Arc<Mutex<Engine>>;
 
@@ -18,14 +19,8 @@ pub fn now() -> i64 {
         .unwrap_or(0)
 }
 
-fn lock(e: &Shared) -> MutexGuard<'_, Engine> {
+pub(crate) fn lock(e: &Shared) -> MutexGuard<'_, Engine> {
     e.lock().unwrap_or_else(|p| p.into_inner())
-}
-
-fn save(eng: &Engine) {
-    if let Err(e) = eng.save() {
-        eprintln!("deskd: cannot save the clipboard history: {e}");
-    }
 }
 
 fn not_found(id: u64) -> zbus::fdo::Error {
@@ -51,6 +46,8 @@ impl Desk {
 
 pub struct ClipboardIface {
     pub eng: Shared,
+    /// Writes the history after a quiet period (and on shutdown).
+    pub saver: Saver,
     /// Записати приватний режим у GSettings (у тестах — нічого).
     pub set_private: fn(bool),
 }
@@ -69,7 +66,7 @@ impl ClipboardIface {
             let mut eng = lock(&self.eng);
             let r = eng.push(&mime, &data, &offered, &source_app, now());
             if !matches!(r, Pushed::Skipped(_)) {
-                save(&eng);
+                self.saver.touch();
             }
             r
         };
@@ -101,7 +98,7 @@ impl ClipboardIface {
         let r = {
             let mut eng = lock(&self.eng);
             let r = eng.activate(id, now());
-            save(&eng);
+            self.saver.touch();
             r
         };
         let r = r.ok_or_else(|| not_found(id))?;
@@ -119,7 +116,7 @@ impl ClipboardIface {
             let mut eng = lock(&self.eng);
             let found = eng.find(id).is_some();
             if eng.pin(id, pinned) {
-                save(&eng);
+                self.saver.touch();
             }
             found
         };
@@ -135,7 +132,7 @@ impl ClipboardIface {
             let mut eng = lock(&self.eng);
             let c = eng.delete(id);
             if c {
-                save(&eng);
+                self.saver.touch();
             }
             c
         };
@@ -149,7 +146,7 @@ impl ClipboardIface {
         {
             let mut eng = lock(&self.eng);
             eng.clear(keep_pinned);
-            save(&eng);
+            self.saver.touch();
         }
         let _ = Self::changed(&em).await;
         let _ = self.count_changed(&em).await;
@@ -198,6 +195,7 @@ mod tests {
         );
         let iface = ClipboardIface {
             eng: Arc::new(Mutex::new(eng)),
+            saver: Saver::inert(),
             set_private: |_| {},
         };
         iface.introspect_to_writer(&mut xml, 0);
