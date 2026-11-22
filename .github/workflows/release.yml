@@ -1,0 +1,134 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Release: pushing a tag vX.Y.Z builds the artifacts in a Fedora 45 container and drafts a GitHub
+# release (never published automatically: a maintainer reviews and publishes it).
+#
+#   scripts/release.sh X.Y.Z && git commit -am "Release X.Y.Z" && git tag -s vX.Y.Z -m X.Y.Z && git push origin main vX.Y.Z
+#
+# Artifacts (x86_64, Fedora 45 / GNOME Shell 51):
+#   desktop-themes-rs-VERSION-x86_64.tar.gz     binaries (themes, deskd), the built bridge, themes, scripts;
+#                                               ./install.sh installs it for the current user
+#   desk-bridge@desktop-themes-rs.shell-extension.zip   the shell extension alone (gnome-extensions install)
+#   SHA256SUMS                                   checksums of both
+# plus a build provenance attestation for each (gh attestation verify ...).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_HOME: ${{ github.workspace }}/.cargo-home
+
+jobs:
+  build:
+    name: build (Fedora 45)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo \
+            nodejs npm zip tar gzip findutils
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Tag must match the version in the tree
+        id: ver
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          tag=${GITHUB_REF_NAME#v}
+          cargo_v=$(sed -n '/^\[workspace.package\]/,/^\[/{s/^version = "\(.*\)"/\1/p}' Cargo.toml | head -n 1)
+          meta_v=$(sed -n 's/.*"version-name": *"\([^"]*\)".*/\1/p' bridge/static/metadata.json)
+          [ "$tag" = "$cargo_v" ] || { echo "::error::tag v$tag does not match Cargo.toml version $cargo_v (run scripts/release.sh)"; exit 1; }
+          [ "$tag" = "$meta_v" ] || { echo "::error::tag v$tag does not match bridge metadata version-name '$meta_v'"; exit 1; }
+          grep -q "^## \[$tag\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no section for $tag"; exit 1; }
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+      - name: Tests
+        run: cargo test --workspace --locked
+      - name: Build release binaries
+        run: cargo build --release --locked -p themes -p deskd
+      - name: Build the bridge
+        run: cd bridge && npm ci --no-audit --no-fund && npm run build
+      - name: Package
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -eu
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export SOURCE_DATE_EPOCH
+          uuid=desk-bridge@desktop-themes-rs
+          name=desktop-themes-rs-$VERSION-x86_64
+          mkdir -p dist "stage/$name/target/release" "stage/$name/bridge/build"
+          cp target/release/themes target/release/deskd "stage/$name/target/release/"
+          cp -a "bridge/build/$uuid" "stage/$name/bridge/build/"
+          cp -a data extensions patches scripts themes tools docs "stage/$name/"
+          cp LICENSE README.md CREDITS.md CHANGELOG.md "stage/$name/"
+          cp scripts/dist-install.sh "stage/$name/install.sh"
+          # the source tree has no use for the dev-only parts of tools/
+          rm -rf "stage/$name/tools/perf" "stage/$name/tools/headless" "stage/$name/tools/integration-test.sh"
+          find stage -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
+          tar --sort=name --owner=0 --group=0 --numeric-owner -C stage -cf - "$name" | gzip -n -9 > "dist/$name.tar.gz"
+          # the extension alone, files at the archive root like `gnome-extensions pack`
+          (cd "bridge/build/$uuid" && find . -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} + \
+            && find . -mindepth 1 | LC_ALL=C sort | zip -X -q "$GITHUB_WORKSPACE/dist/$uuid.shell-extension.zip" -@)
+          (cd dist && sha256sum -- * > SHA256SUMS)
+          cat dist/SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: attest and draft the release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # create the draft release
+      id-token: write        # OIDC for the attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+      - name: Verify checksums
+        run: cd dist && sha256sum --check SHA256SUMS
+      - name: Build provenance attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS
+      - name: Release notes from CHANGELOG.md
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" {on=1; next}
+            on && /^## \[/ {exit}
+            on {print}
+          ' CHANGELOG.md > notes.md
+          [ -s notes.md ] || { echo "::error::empty release notes"; exit 1; }
+          {
+            echo
+            echo "Verify: \`sha256sum --check SHA256SUMS\` and \`gh attestation verify <file> --repo $GITHUB_REPOSITORY\`."
+          } >> notes.md
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          pre=()
+          case "$VERSION" in *-*) pre=(--prerelease) ;; esac
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag "${pre[@]}" \
+            --title "desktop-themes-rs $VERSION" --notes-file notes.md \
+            dist/*.tar.gz dist/*.zip dist/SHA256SUMS

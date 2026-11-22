@@ -1,0 +1,7 @@
+{
+  "uuid": "perf-probe@desktop-themes-rs",
+  "name": "desktop-themes-rs perf probe",
+  "description": "Test-only: lets tools/perf time the clipboard panel inside the headless shell. Never installed for users.",
+  "shell-version": ["51"],
+  "version": 1
+}
