@@ -26,8 +26,7 @@ with `CARGO_TARGET_DIR=$PWD/target`.
   debug binary end-to-end ~1.5 ms. Budget 50 ms.
 
 ## In progress / remaining
-* docs/design-tokens.md (NOT written yet) + theme-contract.md row for tokens.toml + themes.md
-  (lavender section, macos palette Pro -> original "Graphite", windows11 builtin campbell).
+* (done) docs/design-tokens.md, theme-contract.md, themes.md.
 * README.uk.md: optional short note.
 
 ## Known issues
