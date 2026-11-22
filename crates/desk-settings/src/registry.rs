@@ -105,7 +105,10 @@ pub static DESK: Schema = Schema {
     path: "/io/github/OlehDzhumyk/Desk/",
     rust_name: "DeskSettings",
     keys: &[&SKIN, &LANGUAGE],
-    children: &[("clipboard", CLIPBOARD_SCHEMA), ("shortcuts", SHORTCUTS_SCHEMA)],
+    children: &[
+        ("clipboard", CLIPBOARD_SCHEMA),
+        ("shortcuts", SHORTCUTS_SCHEMA),
+    ],
 };
 
 // ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk.Clipboard
@@ -458,4 +461,9 @@ pub static PAGE_CREDITS: Page = Page {
 };
 
 /// The pages, in the order they are listed.
-pub static PAGES: &[&Page] = &[&PAGE_CLIPBOARD, &PAGE_SHORTCUTS, &PAGE_GENERAL, &PAGE_CREDITS];
+pub static PAGES: &[&Page] = &[
+    &PAGE_CLIPBOARD,
+    &PAGE_SHORTCUTS,
+    &PAGE_GENERAL,
+    &PAGE_CREDITS,
+];

@@ -350,7 +350,10 @@ fn capture_shortcut(parent: &impl IsA<gtk::Widget>, title: &str, done: impl Fn(S
 }
 
 /// A shortcut of a feature: the keys in force, where they come from, change and reset.
-fn shortcut_row(sc: &'static desk_settings::Shortcut, toasts: &adw::ToastOverlay) -> adw::ActionRow {
+fn shortcut_row(
+    sc: &'static desk_settings::Shortcut,
+    toasts: &adw::ToastOverlay,
+) -> adw::ActionRow {
     use desk_settings::shortcuts::Source;
     let ctx = themes_core::Ctx::from_env();
     let row = adw::ActionRow::builder().title(t(sc.label)).build();
@@ -366,8 +369,14 @@ fn shortcut_row(sc: &'static desk_settings::Shortcut, toasts: &adw::ToastOverlay
         .valign(gtk::Align::Center)
         .build();
     reset.add_css_class("flat");
-    a11y::label(&reset, &tr!("Reset {name} to the theme default", name = t(sc.label)));
-    a11y::label(&change, &tr!("Change the shortcut: {name}", name = t(sc.label)));
+    a11y::label(
+        &reset,
+        &tr!("Reset {name} to the theme default", name = t(sc.label)),
+    );
+    a11y::label(
+        &change,
+        &tr!("Change the shortcut: {name}", name = t(sc.label)),
+    );
     row.add_suffix(&val);
     row.add_suffix(&change);
     row.add_suffix(&reset);

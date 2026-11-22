@@ -118,7 +118,9 @@ mod tests {
             assert!(matches!(&sc.override_key.kind, Kind::Accel { default } if default.is_empty()));
             assert!(FEATURES.iter().any(|f| f.id == sc.feature), "{}", sc.id);
             assert!(
-                PAGES.iter().any(|p| p.shortcuts().any(|x| std::ptr::eq(x, *sc))),
+                PAGES
+                    .iter()
+                    .any(|p| p.shortcuts().any(|x| std::ptr::eq(x, *sc))),
                 "{} is on no page",
                 sc.id
             );

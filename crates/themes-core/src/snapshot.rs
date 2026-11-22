@@ -369,8 +369,12 @@ mod tests {
     fn snapshot_takes_the_skin_and_shortcut_but_not_user_choices() {
         let taken = |k: &str| SNAPSHOT_PREFIXES.iter().any(|p| k.starts_with(p));
         assert!(taken("/io/github/OlehDzhumyk/Desk/skin"));
-        assert!(taken("/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut"));
-        assert!(!taken("/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle"));
+        assert!(taken(
+            "/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut"
+        ));
+        assert!(!taken(
+            "/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle"
+        ));
         assert!(!taken("/io/github/OlehDzhumyk/Desk/clipboard/history-size"));
         assert!(!taken("/io/github/OlehDzhumyk/Desk/language"));
     }

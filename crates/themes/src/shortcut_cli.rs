@@ -85,7 +85,10 @@ pub fn exec(ctx: &Ctx, cmd: ShortcutCmd, json: bool) -> Result<i32, Error> {
                 } else if accels.iter().all(|a| a == DISABLED) {
                     println!("{}", tr!("Shortcut {id} turned off", id = id));
                 } else {
-                    println!("{}", tr!("Shortcut {id}: {accels}", id = id, accels = show(&accels)));
+                    println!(
+                        "{}",
+                        tr!("Shortcut {id}: {accels}", id = id, accels = show(&accels))
+                    );
                 }
                 return Ok(0);
             }
@@ -105,7 +108,10 @@ pub fn exec(ctx: &Ctx, cmd: ShortcutCmd, json: bool) -> Result<i32, Error> {
             if json {
                 println!("{}", json!({"ok": true, "id": id}));
             } else {
-                println!("{}", tr!("Shortcut {id}: back to the theme default", id = id));
+                println!(
+                    "{}",
+                    tr!("Shortcut {id}: back to the theme default", id = id)
+                );
                 for c in &conflicts {
                     println!("  {}", tr!("warning: {text}", text = describe(c)));
                 }

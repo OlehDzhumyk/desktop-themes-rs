@@ -70,10 +70,7 @@ pub fn apply_overrides(targets: &mut BTreeMap<Module, Settings>, current: &Setti
             }
         }
         if !found {
-            targets
-                .entry(Module::Look)
-                .or_default()
-                .insert(path, value);
+            targets.entry(Module::Look).or_default().insert(path, value);
         }
     }
 }
@@ -221,9 +218,8 @@ pub fn status(ctx: &Ctx, current: &Settings) -> Vec<Row> {
             let user = accels(current, sc.override_key).unwrap_or_default();
             let theme = theme_default(&targets, sc);
             let resolved = rules::resolve(&user, theme.as_deref(), &default_of(sc.key));
-            let theme_default = theme.unwrap_or_else(|| {
-                default_of(sc.key).into_iter().map(String::from).collect()
-            });
+            let theme_default =
+                theme.unwrap_or_else(|| default_of(sc.key).into_iter().map(String::from).collect());
             Row {
                 id: sc.id,
                 label: sc.label,
@@ -241,7 +237,11 @@ fn find(id: &str) -> Result<&'static Shortcut> {
         crate::Error(tr!(
             "unknown shortcut “{id}” (known: {known})",
             id = id,
-            known = SHORTCUTS.iter().map(|s| s.id).collect::<Vec<_>>().join(", ")
+            known = SHORTCUTS
+                .iter()
+                .map(|s| s.id)
+                .collect::<Vec<_>>()
+                .join(", ")
         ))
     })
 }
@@ -416,7 +416,10 @@ mod tests {
 
     #[test]
     fn two_features_are_reported_not_resolved() {
-        let mut fin = s(&[(&key_path(), "['<Super>space']"), (SPOT, "['<Super>space']")]);
+        let mut fin = s(&[
+            (&key_path(), "['<Super>space']"),
+            (SPOT, "['<Super>space']"),
+        ]);
         let before = fin.clone();
         let r = resolve_conflicts(&mut fin);
         assert_eq!(r.conflicts.len(), 1);
@@ -456,6 +459,9 @@ mod tests {
                 }
             }
         }
-        assert!(resolved_any, "the known Super+Space mix should have been resolved");
+        assert!(
+            resolved_any,
+            "the known Super+Space mix should have been resolved"
+        );
     }
 }

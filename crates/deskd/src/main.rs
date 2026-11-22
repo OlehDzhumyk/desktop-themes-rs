@@ -176,7 +176,9 @@ fn main() {
                 }
             });
         }
-        Err(e) => eprintln!("deskd: cannot watch SIGTERM, the history is saved on changes only: {e}"),
+        Err(e) => {
+            eprintln!("deskd: cannot watch SIGTERM, the history is saved on changes only: {e}")
+        }
     }
     main_loop.run();
     saver.flush();

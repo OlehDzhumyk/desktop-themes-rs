@@ -340,11 +340,15 @@ fn deskd_verdict(
         // D-Bus activation starts it on first use, so "not running" is normal after login
         (false, true, _) => Some((
             "info",
-            tr!("deskd is not running (it starts when a feature such as the clipboard is first used)"),
+            tr!(
+                "deskd is not running (it starts when a feature such as the clipboard is first used)"
+            ),
         )),
         (true, _, None) => Some((
             "warning",
-            tr!("deskd owns its D-Bus name but does not answer; restart it: systemctl --user restart deskd"),
+            tr!(
+                "deskd owns its D-Bus name but does not answer; restart it: systemctl --user restart deskd"
+            ),
         )),
         (true, _, Some(v)) if v != ours => Some((
             "warning",
