@@ -476,10 +476,10 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                 page,
                 ..Default::default()
             };
-            if let Some(s) = size {
-                if let Some((w, h)) = s.split_once('x') {
-                    o.size = (w.parse().unwrap_or(1180), h.parse().unwrap_or(780));
-                }
+            if let Some(s) = size
+                && let Some((w, h)) = s.split_once('x')
+            {
+                o.size = (w.parse().unwrap_or(1180), h.parse().unwrap_or(780));
             }
             Ok(crate::gui::run(o))
         }
@@ -532,17 +532,20 @@ fn do_apply(
     json: bool,
 ) -> Result<i32, Error> {
     let mut r = apply_opts(ctx, id, mods, dry_run, purge)?;
-    if !dry_run && !no_verify && r.shell_running && r.extensions_changed {
-        if let Ok(bad) = verify_live(ctx, Duration::from_secs(5)) {
-            for (u, why) in &bad {
-                r.warnings.push(tr!(
-                    "automatic rollback: extension {uuid} turned off ({reason})",
-                    uuid = u,
-                    reason = why
-                ));
-            }
-            r.rolled_back = bad.into_iter().map(|b| b.0).collect();
+    if !dry_run
+        && !no_verify
+        && r.shell_running
+        && r.extensions_changed
+        && let Ok(bad) = verify_live(ctx, Duration::from_secs(5))
+    {
+        for (u, why) in &bad {
+            r.warnings.push(tr!(
+                "automatic rollback: extension {uuid} turned off ({reason})",
+                uuid = u,
+                reason = why
+            ));
         }
+        r.rolled_back = bad.into_iter().map(|b| b.0).collect();
     }
     if json {
         out_json(&r);

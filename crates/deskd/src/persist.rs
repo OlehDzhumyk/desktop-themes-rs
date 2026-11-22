@@ -121,6 +121,7 @@ impl Saver {
     }
 
     /// A saver that writes nothing (tests of the D-Bus interface).
+    #[cfg(test)]
     pub fn inert() -> Saver {
         let (tx, _rx) = mpsc::channel();
         Saver { tx }

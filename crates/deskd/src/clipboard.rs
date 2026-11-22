@@ -500,10 +500,11 @@ impl Engine {
                 for e in &self.items {
                     if let Some(p) = self.image_path(e) {
                         let dest = to.join(&e.image);
-                        if p != dest && std::fs::rename(&p, &dest).is_err() {
-                            if std::fs::copy(&p, &dest).is_ok() {
-                                let _ = std::fs::remove_file(&p);
-                            }
+                        if p != dest
+                            && std::fs::rename(&p, &dest).is_err()
+                            && std::fs::copy(&p, &dest).is_ok()
+                        {
+                            let _ = std::fs::remove_file(&p);
                         }
                     }
                 }

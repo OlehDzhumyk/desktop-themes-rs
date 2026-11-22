@@ -454,9 +454,13 @@ mod tests {
                 fin.extend(beh.settings(Module::Behavior));
                 let r = resolve_conflicts(&mut fin);
                 resolved_any |= !r.stripped.is_empty();
-                for c in find_conflicts(&collect_bindings(&fin)) {
-                    panic!("look {} + behavior {}: {c:?}", look.id, beh.id);
-                }
+                let left = find_conflicts(&collect_bindings(&fin));
+                assert!(
+                    left.is_empty(),
+                    "look {} + behavior {}: {left:?}",
+                    look.id,
+                    beh.id
+                );
             }
         }
         assert!(

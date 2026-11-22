@@ -16,6 +16,9 @@ use themes_core::theme::all_themes;
 use super::GuiOptions;
 use super::card::{ThemeCard, ThemeInfo};
 
+/// What a window action does: the window and the action's parameter.
+type ActionHandler = Box<dyn Fn(&Rc<ThemesWindow>, Option<&glib::Variant>)>;
+
 pub struct ThemesWindow {
     ctx: Ctx,
     pub win: adw::ApplicationWindow,
@@ -126,18 +129,15 @@ fn spawn_flatpak(app: &adw::Application, id: &str, label: &str) {
         desk_settings::i18n::restore_child_env(&mut std::process::Command::new("flatpak"))
             .args(["run", id])
             .spawn()
+        && let Some(w) = app.active_window()
+        && let Ok(w) = w.downcast::<adw::ApplicationWindow>()
+        && let Some(t) = find_toasts(&w)
     {
-        if let Some(w) = app.active_window() {
-            if let Ok(w) = w.downcast::<adw::ApplicationWindow>() {
-                if let Some(t) = find_toasts(&w) {
-                    t.add_toast(adw::Toast::new(&tr!(
-                        "Could not start {app}: {error}",
-                        app = label,
-                        error = e
-                    )));
-                }
-            }
-        }
+        t.add_toast(adw::Toast::new(&tr!(
+            "Could not start {app}: {error}",
+            app = label,
+            error = e
+        )));
     }
 }
 
@@ -355,7 +355,8 @@ impl ThemesWindow {
             adw::StyleManager::default().connect_dark_notify(move |sm| {
                 if let Some(t) = w.upgrade() {
                     let dark = sm.is_dark();
-                    for c in t.cards.borrow().iter().cloned() {
+                    for c in t.cards.borrow().iter() {
+                        let c = c.clone();
                         glib::spawn_future_local(async move { c.load_preview(dark).await });
                     }
                 }
@@ -373,7 +374,9 @@ impl ThemesWindow {
                         exit.set(1);
                     }
                 }
-                t2.win.application().map(|a| a.quit());
+                if let Some(a) = t2.win.application() {
+                    a.quit()
+                }
             }
         });
         win.present();
@@ -381,9 +384,7 @@ impl ThemesWindow {
     }
 
     fn add_actions(self: &Rc<Self>, app: &adw::Application) {
-        let add = |name: &str,
-                   ty: Option<&glib::VariantTy>,
-                   f: Box<dyn Fn(&Rc<ThemesWindow>, Option<&glib::Variant>)>| {
+        let add = |name: &str, ty: Option<&glib::VariantTy>, f: ActionHandler| {
             let a = gio::SimpleAction::new(name, ty);
             let w = Rc::downgrade(self);
             a.connect_activate(move |_, p| {
@@ -426,10 +427,10 @@ impl ThemesWindow {
             "apply-module",
             Some(glib::VariantTy::new("(ss)").unwrap()),
             Box::new(|t, p| {
-                if let Some((id, m)) = p.and_then(|v| v.get::<(String, String)>()) {
-                    if let Ok(m) = Module::parse(&m) {
-                        t.apply(id, vec![m]);
-                    }
+                if let Some((id, m)) = p.and_then(|v| v.get::<(String, String)>())
+                    && let Ok(m) = Module::parse(&m)
+                {
+                    t.apply(id, vec![m]);
                 }
             }),
         );
@@ -704,18 +705,18 @@ impl ThemesWindow {
                     themes_core::apply::verify_live(&ctx, Duration::from_secs(5))
                 })
                 .await;
-                if let Ok(Ok(bad)) = bad {
-                    if !bad.is_empty() {
-                        let list: Vec<&str> = bad.iter().map(|b| b.0.as_str()).collect();
-                        t.toast(
-                            &tr!(
-                                "Extensions with errors turned off: {list}",
-                                list = list.join(", ")
-                            ),
-                            0,
-                        );
-                        t.reload().await;
-                    }
+                if let Ok(Ok(bad)) = bad
+                    && !bad.is_empty()
+                {
+                    let list: Vec<&str> = bad.iter().map(|b| b.0.as_str()).collect();
+                    t.toast(
+                        &tr!(
+                            "Extensions with errors turned off: {list}",
+                            list = list.join(", ")
+                        ),
+                        0,
+                    );
+                    t.reload().await;
                 }
             }
         });

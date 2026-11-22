@@ -134,14 +134,14 @@ fn main() {
         std::thread::spawn(move || {
             zbus::block_on(async {
                 use futures_util::StreamExt;
-                if let Ok(proxy) = zbus::fdo::DBusProxy::new(&conn).await {
-                    if let Ok(mut lost) = proxy.receive_name_lost().await {
-                        while let Some(sig) = lost.next().await {
-                            if sig.args().map(|a| a.name == BUS_NAME).unwrap_or(false) {
-                                eprintln!("deskd: another process took {BUS_NAME}, exiting");
-                                ml.quit();
-                                break;
-                            }
+                if let Ok(proxy) = zbus::fdo::DBusProxy::new(&conn).await
+                    && let Ok(mut lost) = proxy.receive_name_lost().await
+                {
+                    while let Some(sig) = lost.next().await {
+                        if sig.args().map(|a| a.name == BUS_NAME).unwrap_or(false) {
+                            eprintln!("deskd: another process took {BUS_NAME}, exiting");
+                            ml.quit();
+                            break;
                         }
                     }
                 }
