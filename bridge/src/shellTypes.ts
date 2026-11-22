@@ -5,6 +5,7 @@ import type Meta from 'gi://Meta';
 import type Shell from 'gi://Shell';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import type {OutputStreamSlider} from 'resource:///org/gnome/shell/ui/status/volume.js';
 
 /** The part of Main.inputMethod the bridge uses (the typings declare it `any`). */
 export interface InputMethodInfo {
@@ -32,4 +33,9 @@ export function focusWindow(): Meta.Window | null {
 /** Text of anything that was thrown. */
 export function errorText(e: unknown): string {
     return e instanceof Error ? e.message : String(e);
+}
+
+/** GNOME's output volume slider in quick settings (null until the shell has set it up). */
+export function outputSlider(): OutputStreamSlider | null {
+    return Main.panel.statusArea.quickSettings?._volumeOutput?._output ?? null;
 }
