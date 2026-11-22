@@ -1,0 +1,20 @@
+# Strings that the privacy check must accept. Each line is an extended regex that has to match the
+# WHOLE flagged string. Only public, third-party or placeholder strings belong here, never personal
+# ones. Do not add a generic domain (gmail.com, ...): list the exact public identifier.
+#
+# GNOME Shell extension UUIDs and D-Bus unit names look like e-mail addresses.
+appindicatorsupport@rgcjonas\.gmail\.com
+arcmenu@arcmenu\.com
+background-logo@fedorahosted\.org
+clipboard-indicator@tudmotu\.com
+compiz-alike-magic-lamp-effect@hermes83\.github\.com
+dash-to-dock@micxgx\.gmail\.com
+dash-to-panel@jderose9\.github\.com
+desk-bridge@desktop-themes-rs\.shell-extension\.zip
+gtk4-ding@smedius\.gitlab\.com
+liquid-glass@thinkingcoding1231\.gmail\.com
+org\.gnome\.Shell@(user|wayland)\.service
+tilingshell@ferrarodomenico\.com
+user-theme@gnome-shell-extensions\.gcampax\.github\.com
+# placeholder addresses
+[A-Za-z0-9._-]+@example\.(com|org|net)
