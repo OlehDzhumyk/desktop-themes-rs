@@ -4,7 +4,7 @@
 
 use desk_settings::tr;
 use std::collections::BTreeSet;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use serde::Serialize;
@@ -401,6 +401,194 @@ fn check_deskd(rep: &mut DoctorReport) {
     }
 }
 
+// ------------------------------------------------------------------ GSettings schemas
+
+const SCHEMAS_COMPILED: &str = "gschemas.compiled";
+
+/// What is wrong with a schema directory that holds `*.gschema.xml` files.
+#[derive(Debug, PartialEq, Eq)]
+enum SchemaProblem {
+    /// no `gschemas.compiled` (the case of a real install: the extension cannot load its settings)
+    Missing,
+    /// a `.gschema.xml` is newer than the compiled file
+    Older,
+    /// the compiled file does not know this schema id
+    Lacks(String),
+}
+
+fn schema_xmls(dir: &Path) -> impl Iterator<Item = std::fs::DirEntry> {
+    std::fs::read_dir(dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| e.file_name().to_string_lossy().ends_with(".gschema.xml"))
+}
+
+/// `None` when the directory has no schema sources or its compiled file is complete and current.
+fn schema_problem(dir: &Path, ids: &[&str]) -> Option<SchemaProblem> {
+    let newest_xml = schema_xmls(dir)
+        .map(|e| e.metadata().ok().and_then(|m| m.modified().ok()))
+        .max()?; // no .gschema.xml at all: nothing to compile
+    let compiled = dir.join(SCHEMAS_COMPILED);
+    let Ok(meta) = std::fs::metadata(&compiled) else {
+        return Some(SchemaProblem::Missing);
+    };
+    if let (Some(x), Ok(c)) = (newest_xml, meta.modified())
+        && x > c
+    {
+        return Some(SchemaProblem::Older);
+    }
+    // gvdb keeps schema ids as plain strings, so a byte search tells whether a schema is in there
+    let bytes = std::fs::read(&compiled).unwrap_or_default();
+    ids.iter()
+        .find(|id| !bytes.windows(id.len()).any(|w| w == id.as_bytes()))
+        .map(|id| SchemaProblem::Lacks((*id).to_string()))
+}
+
+fn compile_schemas(dir: &Path) -> bool {
+    run("glib-compile-schemas", &[&dir.to_string_lossy()], None).is_ok_and(|o| o.ok)
+}
+
+/// Report a schema directory problem, or compile it with `--fix` (only the compiled file is
+/// written, never a setting).
+fn report_schema_problem(
+    dir: &Path,
+    problem: &SchemaProblem,
+    (what, severity, uuid): (String, &'static str, Option<String>),
+    fix: bool,
+    compile: &dyn Fn(&Path) -> bool,
+    rep: &mut DoctorReport,
+) {
+    if fix && compile(dir) {
+        rep.fixed
+            .push(tr!("compiled the GSettings schemas of {what}", what = what));
+        return;
+    }
+    let why = match problem {
+        SchemaProblem::Missing => tr!("gschemas.compiled is missing"),
+        SchemaProblem::Older => tr!("gschemas.compiled is older than the schema files"),
+        SchemaProblem::Lacks(id) => tr!("gschemas.compiled does not contain {schema}", schema = id),
+    };
+    rep.push(
+        severity,
+        "schemas",
+        tr!(
+            "{what}: {why} (themes doctor --fix runs glib-compile-schemas)",
+            what = what,
+            why = why
+        ),
+        uuid,
+        true,
+    );
+}
+
+/// Our GSettings schemas (`io.github.OlehDzhumyk.Desk*`) are installed and compiled, and every
+/// installed extension that ships `schemas/*.gschema.xml` has `schemas/gschemas.compiled` next to
+/// them (without it the extension fails to enable). `data_dirs` are the system data directories.
+fn check_schemas_in(
+    user_data: &Path,
+    data_dirs: &[PathBuf],
+    extensions: &Path,
+    enabled: &[String],
+    fix: bool,
+    compile: &dyn Fn(&Path) -> bool,
+    rep: &mut DoctorReport,
+) {
+    // the schemas of deskd, the bridge and the window
+    let file = format!("{}.gschema.xml", desk_settings::DESK_SCHEMA);
+    let dir = user_data.join("glib-2.0/schemas");
+    if dir.join(&file).is_file() {
+        let ids: Vec<&str> = desk_settings::SCHEMAS.iter().map(|s| s.id).collect();
+        if let Some(p) = schema_problem(&dir, &ids) {
+            let what = "desktop-themes-rs".to_string();
+            report_schema_problem(&dir, &p, (what, "warning", None), fix, compile, rep);
+        }
+    } else if !data_dirs
+        .iter()
+        .any(|d| d.join("glib-2.0/schemas").join(&file).is_file())
+    {
+        rep.push(
+            "warning",
+            "schemas",
+            tr!(
+                "the GSettings schema {schema} is not installed (run data/install.sh)",
+                schema = desk_settings::DESK_SCHEMA
+            ),
+            None,
+            false,
+        );
+    }
+
+    // extensions with a schema of their own
+    let mut exts: Vec<PathBuf> = std::fs::read_dir(extensions)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .map(|e| e.path())
+        .collect();
+    exts.sort();
+    for ext in exts {
+        let sdir = ext.join("schemas");
+        let Some(problem) = schema_problem(&sdir, &[]) else {
+            continue;
+        };
+        let uuid = ext
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        let severity = if enabled.contains(&uuid) {
+            "error"
+        } else {
+            "warning"
+        };
+        let what = tr!("the extension {uuid}", uuid = uuid);
+        report_schema_problem(
+            &sdir,
+            &problem,
+            (what, severity, Some(uuid.clone())),
+            fix,
+            compile,
+            rep,
+        );
+    }
+}
+
+/// Values in dconf that the registry does not accept (a hand-edited key, an older free-form value):
+/// the extension or the application ignores them and falls back to the standard value.
+fn check_values(cur: &dconf::Settings, rep: &mut DoctorReport) {
+    for (path, why) in crate::values::invalid_values(cur) {
+        rep.push(
+            "warning",
+            "setting-value",
+            tr!(
+                "{key} holds a value that is not allowed ({why}); it is ignored (gsettings reset or change it in the window)",
+                key = path,
+                why = why
+            ),
+            None,
+            false,
+        );
+    }
+}
+
+fn check_schemas(ctx: &Ctx, enabled: &[String], fix: bool, rep: &mut DoctorReport) {
+    let data_dirs: Vec<PathBuf> = std::env::var("XDG_DATA_DIRS")
+        .unwrap_or_else(|_| "/usr/local/share:/usr/share".into())
+        .split(':')
+        .filter(|d| !d.is_empty())
+        .map(PathBuf::from)
+        .collect();
+    check_schemas_in(
+        &ctx.home.join(".local/share"),
+        &data_dirs,
+        &ctx.user_extensions_dir(),
+        enabled,
+        fix,
+        &compile_schemas,
+        rep,
+    );
+}
+
 fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
     let mut seen = BTreeSet::new();
     for m in [Module::Look, Module::Apps] {
@@ -646,6 +834,8 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_crashes(ctx, &mut rep);
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
+    check_schemas(ctx, &enabled, opt.fix, &mut rep);
+    check_values(&cur, &mut rep);
     check_deskd(&mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
@@ -835,5 +1025,153 @@ mod tests {
         assert_eq!(sev(true, true, Some("1.2.2")), Some("warning")); // older than this program
         assert_eq!(sev(true, false, Some("1.2.3")), None);
         assert_eq!(sev(true, true, Some("1.2.3")), None);
+    }
+
+    fn tmp(tag: &str) -> PathBuf {
+        crate::theme::tests::tmp_root(&format!("doctor-schemas-{tag}"))
+    }
+
+    fn touch(p: &Path, s: &str) {
+        crate::theme::tests::write(p, s);
+    }
+
+    /// Stand-in for glib-compile-schemas: writes a compiled file that names the schemas it saw.
+    fn fake_compile(dir: &Path) -> bool {
+        let mut names = String::new();
+        for e in schema_xmls(dir) {
+            names.push_str(&std::fs::read_to_string(e.path()).unwrap());
+        }
+        std::fs::write(dir.join(SCHEMAS_COMPILED), names).unwrap();
+        true
+    }
+
+    fn run_check(root: &Path, enabled: &[&str], fix: bool) -> DoctorReport {
+        let mut rep = DoctorReport::default();
+        let enabled: Vec<String> = enabled.iter().map(|s| s.to_string()).collect();
+        check_schemas_in(
+            &root.join("data"),
+            &[root.join("sys")],
+            &root.join("data/gnome-shell/extensions"),
+            &enabled,
+            fix,
+            &fake_compile,
+            &mut rep,
+        );
+        rep
+    }
+
+    fn desk_xml() -> String {
+        desk_settings::SCHEMAS
+            .iter()
+            .map(|s| format!("<schema id=\"{}\"/>", s.id))
+            .collect()
+    }
+
+    #[test]
+    fn schema_problem_cases() {
+        let d = tmp("problem");
+        assert_eq!(schema_problem(&d, &[]), None, "no xml, nothing to compile");
+        touch(&d.join("a.gschema.xml"), "<schema id=\"x.A\"/>");
+        assert_eq!(schema_problem(&d, &[]), Some(SchemaProblem::Missing));
+        touch(&d.join(SCHEMAS_COMPILED), "x.A");
+        std::fs::File::options()
+            .write(true)
+            .open(d.join(SCHEMAS_COMPILED))
+            .unwrap()
+            .set_modified(std::time::SystemTime::now() + Duration::from_secs(60))
+            .unwrap();
+        assert_eq!(schema_problem(&d, &["x.A"]), None);
+        assert_eq!(
+            schema_problem(&d, &["x.A", "x.B"]),
+            Some(SchemaProblem::Lacks("x.B".into()))
+        );
+        std::fs::File::options()
+            .write(true)
+            .open(d.join(SCHEMAS_COMPILED))
+            .unwrap()
+            .set_modified(std::time::SystemTime::UNIX_EPOCH)
+            .unwrap();
+        assert_eq!(schema_problem(&d, &["x.A"]), Some(SchemaProblem::Older));
+    }
+
+    #[test]
+    fn schemas_ok_and_not_installed() {
+        let r = tmp("ok");
+        // nothing installed anywhere: one non-fixable warning
+        let rep = run_check(&r, &[], false);
+        assert_eq!(rep.issues.len(), 1);
+        assert!(!rep.issues[0].fixable && rep.issues[0].kind == "schemas");
+        // installed by the distribution (system dir): fine
+        touch(
+            &r.join("sys/glib-2.0/schemas/io.github.OlehDzhumyk.Desk.gschema.xml"),
+            "",
+        );
+        assert!(run_check(&r, &[], false).issues.is_empty());
+    }
+
+    /// The failure of a real install: an extension with schemas/*.gschema.xml but no
+    /// schemas/gschemas.compiled. An enabled extension is an error, `--fix` compiles it.
+    #[test]
+    fn extension_without_compiled_schemas() {
+        let r = tmp("ext");
+        let ext = r.join("data/gnome-shell/extensions/e@x/schemas");
+        touch(&ext.join("e.gschema.xml"), "<schema id=\"e\"/>");
+        touch(
+            &r.join("data/gnome-shell/extensions/plain@x/metadata.json"),
+            "{}",
+        );
+        let dskd = r.join("data/glib-2.0/schemas");
+        touch(
+            &dskd.join("io.github.OlehDzhumyk.Desk.gschema.xml"),
+            &desk_xml(),
+        );
+        fake_compile(&dskd);
+
+        let rep = run_check(&r, &["e@x"], false);
+        assert_eq!(rep.issues.len(), 1, "{:?}", rep.issues);
+        let i = &rep.issues[0];
+        assert_eq!((i.severity, i.kind, i.fixable), ("error", "schemas", true));
+        assert_eq!(i.uuid.as_deref(), Some("e@x"));
+        assert_eq!(run_check(&r, &[], false).issues[0].severity, "warning");
+
+        let rep = run_check(&r, &["e@x"], true);
+        assert!(rep.issues.is_empty() && rep.fixed.len() == 1, "{rep:?}");
+        assert!(ext.join(SCHEMAS_COMPILED).is_file());
+        assert!(run_check(&r, &["e@x"], false).issues.is_empty());
+    }
+
+    #[test]
+    fn own_schema_compiled_stale_is_fixed() {
+        let r = tmp("own");
+        let dir = r.join("data/glib-2.0/schemas");
+        touch(
+            &dir.join("io.github.OlehDzhumyk.Desk.gschema.xml"),
+            &desk_xml(),
+        );
+        // compiled before a schema was added: lacks the newest id
+        touch(&dir.join(SCHEMAS_COMPILED), "io.github.OlehDzhumyk.Desk");
+        let rep = run_check(&r, &[], false);
+        assert_eq!(rep.issues.len(), 1, "{:?}", rep.issues);
+        assert!(rep.issues[0].fixable);
+        let rep = run_check(&r, &[], true);
+        assert!(rep.issues.is_empty() && !rep.fixed.is_empty());
+        assert!(run_check(&r, &[], false).issues.is_empty());
+    }
+
+    #[test]
+    fn stored_values_outside_the_registry_are_reported() {
+        let mut cur = dconf::Settings::new();
+        let p = "/org/gnome/shell/extensions/lockscreen-layout/";
+        cur.insert(format!("{p}tint"), "'red; margin: 0'".into());
+        cur.insert(format!("{p}clock-color"), "'#ffffff'".into());
+        cur.insert(
+            "/org/gnome/desktop/interface/gtk-theme".into(),
+            "'x'".into(),
+        );
+        let mut rep = DoctorReport::default();
+        check_values(&cur, &mut rep);
+        assert_eq!(rep.issues.len(), 1, "{:?}", rep.issues);
+        assert_eq!(rep.issues[0].kind, "setting-value");
+        assert!(rep.issues[0].message.contains("lockscreen-layout/tint"));
     }
 }

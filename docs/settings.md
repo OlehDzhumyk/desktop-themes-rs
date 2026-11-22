@@ -13,11 +13,14 @@ Labels are English gettext ids; the Ukrainian texts are in `po/uk.po` (see
 [i18n.md](i18n.md)). Change values with the window, or e.g.
 `gsettings set io.github.OlehDzhumyk.Desk.Clipboard history-size 100`.
 
+Colour keys hold a CSS colour or are empty; the window, `themes apply` and the extension that reads them accept only `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, `rgb()` and `rgba()` (anything else would end up in a style string).
+
 ## Features
 
 | Feature | Origin |
 |---|---|
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
+| Lock screen (`lockscreen`) | Available in Windows 11 and macOS |
 | Application (`app`) | — |
 
 ## `io.github.OlehDzhumyk.Desk`
@@ -54,6 +57,32 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 |---|---|---|---|---|---|---|---|
 | `clipboard-toggle` | shortcut list | `[]` |  | Open the clipboard panel | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | clipboard | shortcut row on `--page shortcuts` |
 
+## `org.gnome.shell.extensions.lockscreen-layout`
+
+Path `/org/gnome/shell/extensions/lockscreen-layout/`.
+
+Schema of the extension `lockscreen-layout@desktop-themes-rs` (file `extensions/lockscreen-layout@desktop-themes-rs/schemas/org.gnome.shell.extensions.lockscreen-layout.gschema.xml`, compiled next to the extension).
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `clock-position` | choice | `'default'` | `default`, `center-top`, `bottom-left` | Clock position | Where the time and date are on the lock screen | lockscreen | drop-down on `--page lockscreen` |
+| `margin-x` | integer | `64` | 0…2000 (step 8) | Distance from the left edge | Bottom left layout, in pixels | lockscreen | spin button on `--page lockscreen` |
+| `margin-y` | integer | `96` | 0…2000 (step 8) | Distance from the top or bottom | Top centre: from the top; bottom left: from the bottom, in pixels | lockscreen | spin button on `--page lockscreen` |
+| `clock-font-size` | integer | `0` | 0…400 (step 2) | Time size | In pixels; 0 keeps the standard size | lockscreen | spin button on `--page lockscreen` |
+| `date-font-size` | integer | `0` | 0…200 (step 2) | Date size | In pixels; 0 keeps the standard size | lockscreen | spin button on `--page lockscreen` |
+| `clock-font-family` | string | `''` |  | Font | A family name; quotes and backslashes are stripped by the extension. | lockscreen | entry on `--page lockscreen` |
+| `clock-font-weight` | choice | `''` | ``, `100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900`, `normal`, `bold` | Time weight | CSS font-weight for the time (empty = stock) | lockscreen | drop-down on `--page lockscreen` |
+| `clock-glow` | colour | `''` | CSS colour (`#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`, `rgba()`) or empty | Glow around the time | A colour such as #rrggbb or rgba(r, g, b, a); empty = none | lockscreen | entry (colour, checked) on `--page lockscreen` |
+| `clock-color` | colour | `''` | CSS colour (`#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`, `rgba()`) or empty | Time colour | A colour such as #rrggbb or rgba(r, g, b, a); empty = standard | lockscreen | entry (colour, checked) on `--page lockscreen` |
+| `date-color` | colour | `''` | CSS colour (`#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`, `rgba()`) or empty | Date colour | A colour such as #rrggbb or rgba(r, g, b, a); empty = standard | lockscreen | entry (colour, checked) on `--page lockscreen` |
+| `hide-hint` | boolean | `false` |  | Hide the hint | Hide “Click or press a key” | lockscreen | switch on `--page lockscreen` |
+| `prompt-offset` | integer | `0` | -500…500 (step 10) | Move the password field down | In pixels; negative moves it up | lockscreen | spin button on `--page lockscreen` |
+| `blur` | boolean | `true` |  | Blur the background | Off shows the wallpaper sharp | lockscreen | switch on `--page lockscreen` |
+| `blur-radius` | integer | `90` | 0…200 (step 5) | Blur radius | Blur radius | lockscreen | spin button on `--page lockscreen` |
+| `brightness` | number | `0.65` | 0…1 (step 0.05) | Background brightness | When the background is blurred | lockscreen | spin button on `--page lockscreen` |
+| `tint` | colour | `''` | CSS colour (`#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`, `rgba()`) or empty | Background tint | A colour such as #rrggbb or rgba(r, g, b, a) laid over the background; empty = none | lockscreen | entry (colour, checked) on `--page lockscreen` |
+| `background-uri` | string | `''` |  | Background image | A file:// address; empty = the desktop wallpaper; “screensaver” = the screen saver picture of the theme | lockscreen | entry on `--page lockscreen` |
+
 ## Shortcuts
 
 The theme default is written into the key in force (what the bridge binds); the override wins, survives theme switches and is re-applied by every `themes apply`. Empty override = follow the theme; `['disabled']` = no shortcut.
@@ -67,6 +96,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | Page | Title | Groups |
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
+| `lockscreen` | Lock screen | Layout, Time and date, Background |
 | `shortcuts` | Keyboard shortcuts | Features |
 | `general` | General | Language |
 | `credits` | Credits | generated from CREDITS.md |

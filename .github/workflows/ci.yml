@@ -35,6 +35,8 @@ jobs:
             git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel \
             rust cargo rustfmt clippy
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -78,6 +80,8 @@ jobs:
             git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo tar gzip
           command -v curl >/dev/null || dnf install -y --setopt=install_weak_deps=False curl
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -104,6 +108,8 @@ jobs:
       - name: Install packages
         run: dnf install -y --setopt=install_weak_deps=False git cargo cargo-deny
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: cargo deny check
         run: cargo deny check
 
@@ -121,6 +127,8 @@ jobs:
         working-directory: .
         run: dnf install -y --setopt=install_weak_deps=False git nodejs npm glib2-devel
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: npm ci
         run: npm ci --no-audit --no-fund
       - name: tsc --noEmit
@@ -141,6 +149,8 @@ jobs:
           dnf install -y --setopt=install_weak_deps=False \
             git ShellCheck glib2-devel desktop-file-utils libxml2 python3 gettext appstream jq
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: shellcheck
         run: |
           # The container runs as root on a checkout owned by another uid: let git read it.
@@ -177,6 +187,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: tools/privacy-check.sh
         run: tools/privacy-check.sh --all
 
@@ -185,6 +197,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install ast-grep (pinned, checksum-verified)
         run: tools/install-dev-tools.sh "$HOME/.local/bin" ast-grep
       - name: Rule tests
@@ -201,6 +215,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: actionlint
         run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
 
@@ -209,6 +225,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Check relative links and anchors
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:

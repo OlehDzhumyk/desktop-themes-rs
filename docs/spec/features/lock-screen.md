@@ -89,9 +89,18 @@ accessibility.)
 
 ## Settings
 
-The keys above, written per theme by `lockscreen.dconf` (look module). No hub page yet; the hub should offer
-a "Lock screen" preview page (planned, [settings-hub](settings-hub.md)): layout (stock / top centre /
-bottom left), blur on/off, wallpaper. The schema is compiled with the extension.
+The keys above are declared in the settings registry (`crates/desk-settings/src/lockscreen.rs`); the schema
+file in the extension directory is generated from it (`cargo xtask gen`, see [settings.md](../../settings.md)).
+They are written per theme by `lockscreen.dconf` (look module) and edited on the «Lock screen» page of the
+window (`themes gui --page lockscreen`). The page needs the extension installed: its schema is compiled next
+to the extension (`data/install.sh`, `themes doctor --fix`).
+
+Accepted values (the registry checks them in the window, in `themes apply` for theme files, in `themes
+doctor` for dconf, and the extension repeats the check before it builds a style string): `clock-position`
+one of `default`, `center-top`, `bottom-left`; `clock-font-weight` empty, `100`..`900`, `normal` or `bold`;
+the colours (`clock-color`, `date-color`, `clock-glow`, `tint`) empty or `#rgb`, `#rgba`, `#rrggbb`,
+`#rrggbbaa`, `rgb()`, `rgba()` with numbers (no colour names); integers and the brightness within their ranges.
+A refused value is ignored and the standard look is used.
 
 ## Privacy & security
 
@@ -129,10 +138,10 @@ no work is done while unlocked other than holding the injections.
   understands (it then reads `org.gnome.desktop.screensaver picture-uri`, a key GNOME 51 itself ignores,
   per the comment in `extension.js`). With the extension off, that key has no effect; the dependency is
   implicit and undocumented for theme authors (add it to the theme contract).
-* **G-LOCK-2** `clock-color`, `date-color`, `clock-glow`, `clock-font-weight` and `tint` are interpolated
-  into St style strings without validation (only the font family is sanitised); a hostile third-party theme
-  can inject extra CSS declarations into the lock dialog (no code execution, but visual spoofing of the
-  prompt area is conceivable). Validate against a colour grammar.
+* **G-LOCK-2** (fixed) `clock-color`, `date-color`, `clock-glow`, `clock-font-weight` and `tint` were
+  interpolated into St style strings without validation. They are now checked against the registry grammar (a
+  colour, a weight from a list) by the extension, `themes apply` and `themes doctor`; only the font family is
+  still sanitised by stripping quotes and backslashes.
 * **G-LOCK-3** No contrast guard: a light wallpaper with the `windows11` values can make the clock illegible.
 * **G-LOCK-4** Sizes are px, not scaled with `text-scaling-factor`.
 * **G-LOCK-5** The extension has no unit/headless test; the headless tools cover only the clipboard.
@@ -149,8 +158,8 @@ no work is done while unlocked other than holding the injections.
 * AC-LOCK-05: Given `lockscreen-layout blur` is toggled while locked, Then the background changes without
   re-locking.
 * AC-LOCK-06: Given `background-uri` points to a missing file, Then the desktop wallpaper is shown.
-* AC-LOCK-07: Given `clock-color='red; margin:0'` (hostile), Then the extra declaration is ignored (target,
-  G-LOCK-2).
+* AC-LOCK-07: Given `clock-color='red; margin:0'` (hostile), Then the value is refused and the standard colour
+  is used (`desk_settings::validate` tests; `extension.js` repeats the check).
 * AC-LOCK-08: Given a white wallpaper and either layout, When the clock/background contrast is measured,
   Then it is >= 4.5:1 (target, G-LOCK-3).
 * AC-LOCK-09: Given the password is typed on the lock screen, Then it is never present in any log of the shell
