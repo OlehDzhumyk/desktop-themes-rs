@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Agent context (AGENTS.md, CLAUDE.md, .claude/**/*.md) is read by every agent session, so its size
+# is a budget. Fails when the measured size exceeds the budget recorded on the base branch in
+# .github/agent-context-budget.json, unless the PR has the label `agent-context-increase`. A PR that
+# accepts growth also updates the file (run `just context-budget`). Idea adapted from T3 Code (MIT).
+name: Agent context budget
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+# No concurrency group: label events come in bursts and a cancelled run shows as a failed check.
+jobs:
+  budget:
+    name: Agent context budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BUDGET: .github/agent-context-budget.json
+      ALLOW_INCREASE: ${{ contains(github.event.pull_request.labels.*.name, 'agent-context-increase') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+      - name: Compare with the base branch budget
+        run: |
+          # HEAD is the PR merged onto its base; HEAD^1 is that base.
+          measured=$(tools/agent-context-bytes.sh)
+          if git cat-file -e "HEAD^1:$BUDGET" 2>/dev/null; then
+            budget=$(git show "HEAD^1:$BUDGET" | jq -r .bytes)
+          else
+            echo "Base has no budget file yet; measured $measured bytes."
+            exit 0
+          fi
+          echo "agent context: $measured bytes, base budget: $budget bytes"
+          if [ "$measured" -le "$budget" ]; then
+            exit 0
+          fi
+          if [ "$ALLOW_INCREASE" = "true" ]; then
+            echo "Growth of $((measured - budget)) bytes accepted by the agent-context-increase label."
+            exit 0
+          fi
+          echo "::error file=$BUDGET::Agent context grew by $((measured - budget)) bytes over the budget. Cut text, or ask a maintainer for the agent-context-increase label (and update $BUDGET to $measured)."
+          exit 1
