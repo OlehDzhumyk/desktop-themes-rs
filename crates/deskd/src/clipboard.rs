@@ -6,8 +6,6 @@
 //! Захоплення буфера в GNOME Wayland робить оболонка (desk-bridge), рушій лише отримує вміст.
 
 use desk_settings::tr;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -21,7 +19,8 @@ pub const SECRET_HINTS: [&str; 2] = [
     "x-kde-passwordManagerHint",
     "application/x-nspasteboard-concealed-type",
 ];
-const STORE_VERSION: u32 = 1;
+/// 2: `hash` is FNV-1a (1: `DefaultHasher`, recomputed on load).
+const STORE_VERSION: u32 = 2;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Config {
@@ -108,11 +107,10 @@ pub fn is_text_mime(m: &str) -> bool {
     m.starts_with("text/plain") || m == "UTF8_STRING" || m == "STRING" || m == "TEXT"
 }
 
+/// Content hash for de-duplication; stored in history.json, so it must be stable
+/// (FNV-1a 64 over the kind and the bytes; version 1 of the store used `DefaultHasher`).
 fn hash_of(mime_kind: &str, data: &[u8]) -> u64 {
-    let mut h = DefaultHasher::new();
-    mime_kind.hash(&mut h);
-    data.hash(&mut h);
-    h.finish()
+    desk_settings::stable_hash::fnv1a64(&[mime_kind.as_bytes(), data])
 }
 
 fn image_ext(mime: &str) -> &'static str {
@@ -238,6 +236,26 @@ impl Engine {
             .into_iter()
             .map(|p| self.images_dir(p).join(&e.image))
             .find(|p| p.is_file())
+    }
+
+    /// Migration from store version 1: recompute every `hash` with the stable function, so that
+    /// copying the same content again still finds the old entry. Image files keep their names.
+    fn rehash(&mut self) {
+        let hashes: Vec<u64> = self
+            .items
+            .iter()
+            .map(|e| {
+                let data = if e.kind == kind::TEXT {
+                    Some(e.text.clone().into_bytes())
+                } else {
+                    self.image_path(e).and_then(|p| std::fs::read(p).ok())
+                };
+                data.map_or(e.hash, |d| hash_of(&e.kind, &d))
+            })
+            .collect();
+        for (e, h) in self.items.iter_mut().zip(hashes) {
+            e.hash = h;
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -547,6 +565,9 @@ impl Engine {
             .into_iter()
             .filter(|e| e.kind == kind::TEXT || self.image_path(e).is_some())
             .collect();
+        if store.version < 2 {
+            self.rehash();
+        }
         if let Some(m) = self.items.iter().map(|e| e.id).max() {
             self.next_id = self.next_id.max(m + 1);
         }
@@ -728,6 +749,26 @@ mod tests {
             e2.push("image/png", &img, &[], "", 3),
             Pushed::Skipped(Skip::ImagesOff)
         );
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    /// A history written before the stable hash (store version 1, hashes from `DefaultHasher`)
+    /// still de-duplicates after loading: the hashes are recomputed.
+    #[test]
+    fn version_1_store_is_migrated() {
+        let (e, d) = engine("migrate", Config::default());
+        let data = d.join("data");
+        std::fs::create_dir_all(&data).unwrap();
+        let old = r#"{"version":1,"next_id":2,"items":[{"id":1,"kind":"text","mime":"text/plain;charset=utf-8","text":"old entry","pinned":false,"time":1,"size":9,"hash":12345}]}"#;
+        std::fs::write(data.join("history.json"), old).unwrap();
+        let mut e2 = Engine::new(e.cfg.clone(), data, d.join("run"));
+        e2.load();
+        assert_eq!(e2.len(), 1);
+        assert_eq!(e2.push(T, b"old entry", &[], "", 5), Pushed::Bumped(1));
+        assert_eq!(e2.len(), 1);
+        e2.save().unwrap();
+        let saved = std::fs::read_to_string(d.join("data/history.json")).unwrap();
+        assert!(saved.contains(&format!("\"version\":{STORE_VERSION}")));
         let _ = std::fs::remove_dir_all(d);
     }
 

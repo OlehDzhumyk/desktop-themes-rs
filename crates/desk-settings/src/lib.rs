@@ -9,6 +9,7 @@ pub mod i18n;
 pub mod model;
 pub mod registry;
 pub mod shortcuts;
+pub mod stable_hash;
 
 #[cfg(feature = "gio")]
 #[rustfmt::skip]

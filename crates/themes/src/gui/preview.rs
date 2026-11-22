@@ -1,13 +1,34 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Мініатюри прев'ю (кеш у ~/.cache/desktop-themes/thumbs, обрізка до 16:9).
 
-use std::hash::{Hash, Hasher};
+use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
+use std::sync::Once;
 
 use gtk::{gdk, gdk_pixbuf::Pixbuf, glib};
 
 fn thumb_dir() -> PathBuf {
     glib::user_cache_dir().join("desktop-themes/thumbs")
+}
+
+/// File names of the stable-hash scheme start with this; older thumbnails (named by
+/// `DefaultHasher`, which is not guaranteed stable) are orphaned and removed once per run.
+const THUMB_PREFIX: &str = "v5-";
+
+fn purge_old_thumbs() {
+    static ONCE: Once = Once::new();
+    ONCE.call_once(|| {
+        let Ok(rd) = std::fs::read_dir(thumb_dir()) else {
+            return;
+        };
+        for f in rd.flatten() {
+            let name = f.file_name();
+            let name = name.to_string_lossy();
+            if name.ends_with(".png") && !name.starts_with(THUMB_PREFIX) {
+                let _ = std::fs::remove_file(f.path());
+            }
+        }
+    });
 }
 
 /// Готує мініатюру у фоні; повертає шлях до PNG.
@@ -19,9 +40,13 @@ fn make_thumb(path: &Path, width: i32) -> Option<PathBuf> {
         .duration_since(std::time::UNIX_EPOCH)
         .ok()?
         .as_secs();
-    let mut h = std::collections::hash_map::DefaultHasher::new();
-    ("v4", path, mtime, width).hash(&mut h);
-    let thumb = thumb_dir().join(format!("{:016x}.png", h.finish()));
+    purge_old_thumbs();
+    let key = desk_settings::stable_hash::fnv1a64(&[
+        path.as_os_str().as_bytes(),
+        mtime.to_string().as_bytes(),
+        width.to_string().as_bytes(),
+    ]);
+    let thumb = thumb_dir().join(format!("{THUMB_PREFIX}{key:016x}.png"));
     if thumb.is_file() {
         return Some(thumb);
     }

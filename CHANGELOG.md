@@ -14,6 +14,12 @@ All notable changes to this project are documented in this file. The format is b
   `strictTypeChecked` + `stylisticTypeChecked`, no `any`; typed D-Bus proxies. eslint 10. Replaces
   the Dependabot bump of the bridge group.
 
+### Fixed
+
+- Clipboard history and thumbnail cache use a stable hash (FNV-1a) instead of `DefaultHasher`;
+  an existing `history.json` is migrated at load (store version 2). The `no-default-hasher`
+  ast-grep rule is an error now.
+
 ### Added
 
 - Keyboard shortcuts in the settings registry: one «Keyboard shortcuts» page (`themes gui --page
