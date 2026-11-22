@@ -325,6 +325,78 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
 
 /// Generated files of the active themes went missing (e.g. ~/.cache was cleaned): `--fix`
 /// regenerates them (the links point at stable paths, so they work again).
+/// What the doctor says about deskd, from the facts: `(severity, message)`; `None` = all well.
+fn deskd_verdict(
+    owned: bool,
+    activatable: bool,
+    running_version: Option<&str>,
+    ours: &str,
+) -> Option<(&'static str, String)> {
+    match (owned, activatable, running_version) {
+        (false, false, _) => Some((
+            "warning",
+            tr!("deskd is not installed: its D-Bus service file is missing (run data/install.sh)"),
+        )),
+        // D-Bus activation starts it on first use, so "not running" is normal after login
+        (false, true, _) => Some((
+            "info",
+            tr!("deskd is not running (it starts when a feature such as the clipboard is first used)"),
+        )),
+        (true, _, None) => Some((
+            "warning",
+            tr!("deskd owns its D-Bus name but does not answer; restart it: systemctl --user restart deskd"),
+        )),
+        (true, _, Some(v)) if v != ours => Some((
+            "warning",
+            tr!(
+                "deskd {running} is running but this program is {ours}; restart it: systemctl --user restart deskd",
+                running = v,
+                ours = ours
+            ),
+        )),
+        (true, _, Some(_)) => None,
+    }
+}
+
+/// deskd: installed (activatable), running (D-Bus name owned) and the same version as this program.
+/// Without a session bus there is nothing to check.
+fn check_deskd(rep: &mut DoctorReport) {
+    use desk_proto::{BUS_NAME, DeskProxy};
+    let Some(conn) = crate::shell::session() else {
+        return;
+    };
+    let facts = zbus::block_on(async {
+        let dbus = zbus::fdo::DBusProxy::new(&conn).await.ok()?;
+        let owned = dbus.name_has_owner(BUS_NAME.try_into().ok()?).await.ok()?;
+        let activatable = dbus
+            .list_activatable_names()
+            .await
+            .ok()?
+            .iter()
+            .any(|n| n.as_str() == BUS_NAME);
+        let version = if owned {
+            match DeskProxy::new(&conn).await {
+                Ok(p) => p.version().await.ok(),
+                Err(_) => None,
+            }
+        } else {
+            None
+        };
+        Some((owned, activatable, version))
+    });
+    let Some((owned, activatable, version)) = facts else {
+        return;
+    };
+    if let Some((severity, message)) = deskd_verdict(
+        owned,
+        activatable,
+        version.as_deref(),
+        env!("CARGO_PKG_VERSION"),
+    ) {
+        rep.push(severity, "deskd", message, None, false);
+    }
+}
+
 fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
     let mut seen = BTreeSet::new();
     for m in [Module::Look, Module::Apps] {
@@ -570,6 +642,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_crashes(ctx, &mut rep);
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
+    check_deskd(&mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
         rep.push(
@@ -743,4 +816,20 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         ),
     );
     Ok(rep)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deskd_verdicts() {
+        let sev = |o, a, v: Option<&str>| deskd_verdict(o, a, v, "1.2.3").map(|x| x.0);
+        assert_eq!(sev(false, false, None), Some("warning")); // not installed
+        assert_eq!(sev(false, true, None), Some("info")); // starts on demand: not a problem
+        assert_eq!(sev(true, true, None), Some("warning")); // owns the name, silent
+        assert_eq!(sev(true, true, Some("1.2.2")), Some("warning")); // older than this program
+        assert_eq!(sev(true, false, Some("1.2.3")), None);
+        assert_eq!(sev(true, true, Some("1.2.3")), None);
+    }
 }

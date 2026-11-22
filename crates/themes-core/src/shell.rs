@@ -275,7 +275,7 @@ impl Shell {
     }
 }
 
-fn session() -> Option<Connection> {
+pub(crate) fn session() -> Option<Connection> {
     crate::util::ensure_bus();
     zbus::block_on(Connection::session()).ok()
 }

@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-22 19:19+0000\n"
+"POT-Creation-Date: 2026-11-22 19:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -242,17 +242,17 @@ msgid ""
 "LICENSE file in their repositories)."
 msgstr ""
 
-#: crates/deskd/src/clipboard.rs:151
+#: crates/deskd/src/clipboard.rs:149
 #, rust-format
 msgid "{format} image {width}×{height}"
 msgstr ""
 
-#: crates/deskd/src/clipboard.rs:156
+#: crates/deskd/src/clipboard.rs:154
 #, rust-format
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/main.rs:26
+#: crates/deskd/src/main.rs:29
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -262,14 +262,14 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:74
+#: crates/deskd/src/main.rs:77
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:116 crates/themes/src/service.rs:234
+#: crates/deskd/src/main.rs:121 crates/themes/src/service.rs:234
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -438,101 +438,126 @@ msgstr ""
 msgid "the wallpaper file does not exist: {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:344
+#: crates/themes-core/src/doctor.rs:338
+msgid ""
+"deskd is not installed: its D-Bus service file is missing (run data/"
+"install.sh)"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:343
+msgid ""
+"deskd is not running (it starts when a feature such as the clipboard is "
+"first used)"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:347
+msgid ""
+"deskd owns its D-Bus name but does not answer; restart it: systemctl --user "
+"restart deskd"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:352
+#, rust-format
+msgid ""
+"deskd {running} is running but this program is {ours}; restart it: systemctl "
+"--user restart deskd"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:416
 #, rust-format
 msgid "generated the token files of the theme “{theme}”"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:352
+#: crates/themes-core/src/doctor.rs:424
 #, rust-format
 msgid ""
 "the files generated from tokens.toml of the theme “{theme}” are missing or "
 "out of date (themes doctor --fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:370
+#: crates/themes-core/src/doctor.rs:442
 #, rust-format
 msgid "updated {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:415
+#: crates/themes-core/src/doctor.rs:487
 #, rust-format
 msgid "journal: {line}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:465
+#: crates/themes-core/src/doctor.rs:537
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:494
+#: crates/themes-core/src/doctor.rs:566
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:496
+#: crates/themes-core/src/doctor.rs:568
 msgid "error (ERROR)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:518
+#: crates/themes-core/src/doctor.rs:590
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:526
+#: crates/themes-core/src/doctor.rs:598
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:538
+#: crates/themes-core/src/doctor.rs:610
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:555
+#: crates/themes-core/src/doctor.rs:627
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
 "is not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:563
+#: crates/themes-core/src/doctor.rs:635
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:579
+#: crates/themes-core/src/doctor.rs:652
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:620
+#: crates/themes-core/src/doctor.rs:693
 #, rust-format
 msgid "turned off {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:677
+#: crates/themes-core/src/doctor.rs:750
 #, rust-format
 msgid "turned on {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:711
+#: crates/themes-core/src/doctor.rs:784
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:716
+#: crates/themes-core/src/doctor.rs:789
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:725 crates/themes/src/cli.rs:462
+#: crates/themes-core/src/doctor.rs:798 crates/themes/src/cli.rs:462
 #: crates/themes/src/gui/window.rs:875
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:728
+#: crates/themes-core/src/doctor.rs:801
 msgid "Themes: system check"
 msgstr ""
 
@@ -658,34 +683,34 @@ msgstr ""
 msgid "standard default"
 msgstr ""
 
-#: crates/themes-core/src/snapshot.rs:98
+#: crates/themes-core/src/snapshot.rs:102
 msgid "invalid id: allowed are a-z 0-9 . _ - (up to 64 characters)"
 msgstr ""
 
-#: crates/themes-core/src/snapshot.rs:102
+#: crates/themes-core/src/snapshot.rs:106
 msgid "the id “fedora” is reserved"
 msgstr ""
 
-#: crates/themes-core/src/snapshot.rs:110
+#: crates/themes-core/src/snapshot.rs:114
 #, rust-format
 msgid "the theme “{theme}” already exists (add --force to overwrite it)"
 msgstr ""
 
-#: crates/themes-core/src/snapshot.rs:145
+#: crates/themes-core/src/snapshot.rs:149
 #, rust-format
 msgid ""
 "the key {key} is reset compared to the baseline; the snapshot does not show "
 "it"
 msgstr ""
 
-#: crates/themes-core/src/snapshot.rs:216
+#: crates/themes-core/src/snapshot.rs:220
 #, rust-format
 msgid ""
 "the extension {uuid} from the baseline is disabled now; the snapshot will "
 "not keep that"
 msgstr ""
 
-#: crates/themes-core/src/snapshot.rs:281
+#: crates/themes-core/src/snapshot.rs:285
 #, rust-format
 msgid "Snapshot of the look from {date}"
 msgstr ""
@@ -911,7 +936,7 @@ msgid ""
 "extensions {extensions}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:377 crates/themes/src/cli.rs:665
+#: crates/themes/src/cli.rs:377 crates/themes/src/cli.rs:679
 #: crates/themes/src/shortcut_cli.rs:110 crates/themes/src/tokens_cli.rs:138
 #, rust-format
 msgid "warning: {text}"
@@ -987,115 +1012,115 @@ msgstr ""
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:561
+#: crates/themes/src/cli.rs:575
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 
-#: crates/themes/src/cli.rs:567
+#: crates/themes/src/cli.rs:581
 #, rust-format
 msgid "Write ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:573
+#: crates/themes/src/cli.rs:587
 #, rust-format
 msgid "Reset ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:582
+#: crates/themes/src/cli.rs:596
 #, rust-format
 msgid "Extensions: {list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:606
+#: crates/themes/src/cli.rs:620
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr ""
 
-#: crates/themes/src/cli.rs:615
+#: crates/themes/src/cli.rs:629
 msgid "before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:618
+#: crates/themes/src/cli.rs:632
 msgid "now:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:620
+#: crates/themes/src/cli.rs:634
 msgid "dconf keys changed:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:622
+#: crates/themes/src/cli.rs:636
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:627
+#: crates/themes/src/cli.rs:641
 msgid "extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:633
+#: crates/themes/src/cli.rs:647
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:640
+#: crates/themes/src/cli.rs:654
 msgid "GTK links:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:647
+#: crates/themes/src/cli.rs:661
 msgid "cleaned up after extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:652
+#: crates/themes/src/cli.rs:666
 msgid "hooks:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:670
+#: crates/themes/src/cli.rs:684
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
 msgstr ""
 
-#: crates/themes/src/cli.rs:676
+#: crates/themes/src/cli.rs:690
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
 "them on: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes/src/cli.rs:682
+#: crates/themes/src/cli.rs:696
 msgid "You MUST log out and log in again:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:690
+#: crates/themes/src/cli.rs:704
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:705
+#: crates/themes/src/cli.rs:719
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:713
+#: crates/themes/src/cli.rs:727
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:721
+#: crates/themes/src/cli.rs:735
 msgid "cache up to date"
 msgstr ""
 
-#: crates/themes/src/cli.rs:722
+#: crates/themes/src/cli.rs:736
 msgid "generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:723
+#: crates/themes/src/cli.rs:737
 msgid "will be generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:728
+#: crates/themes/src/cli.rs:742
 #, rust-format
 msgid "link: {path}"
 msgstr ""
@@ -1766,7 +1791,7 @@ msgstr ""
 msgid "Clipboard settings"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:126
+#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:131
 #: bridge/src/clipboard/winFlyout.ts:61
 msgid "Clipboard history"
 msgstr ""
@@ -1787,43 +1812,43 @@ msgstr ""
 msgid "pin"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:136
+#: bridge/src/clipboard/listPanel.ts:137
 msgid "Nothing found for “{query}”"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:137
+#: bridge/src/clipboard/listPanel.ts:138
 msgid "Private mode: nothing is recorded"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:138
+#: bridge/src/clipboard/listPanel.ts:139
 msgid "The history is empty. Copy something (Ctrl+C) and it shows up here."
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:175 bridge/src/clipboard/listPanel.ts:209
+#: bridge/src/clipboard/listPanel.ts:176 bridge/src/clipboard/listPanel.ts:210
 msgid "pinned"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:208
+#: bridge/src/clipboard/listPanel.ts:209
 msgid "{count} chars · {when}"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:34
+#: bridge/src/clipboard/panel.ts:37
 msgid "just now"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:36
+#: bridge/src/clipboard/panel.ts:39
 msgid "{n} min ago"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:38
+#: bridge/src/clipboard/panel.ts:41
 msgid "{n} h ago"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:39
+#: bridge/src/clipboard/panel.ts:42
 msgid "{n} d ago"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:45
+#: bridge/src/clipboard/panel.ts:48
 msgid "{text}, pinned"
 msgstr ""
 
@@ -1869,57 +1894,57 @@ msgstr ""
 msgid "More"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:38
+#: bridge/src/quickSettings.ts:44
 msgid "Desktop"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:49 bridge/src/quickSettings.ts:50
-#: bridge/src/quickSettings.ts:87 bridge/src/quickSettings.ts:123
-#: bridge/src/quickSettings.ts:125 bridge/src/quickSettings.ts:127
+#: bridge/src/quickSettings.ts:55 bridge/src/quickSettings.ts:56
+#: bridge/src/quickSettings.ts:93 bridge/src/quickSettings.ts:129
+#: bridge/src/quickSettings.ts:131 bridge/src/quickSettings.ts:133
 msgid "Theme"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:54
+#: bridge/src/quickSettings.ts:60
 msgid "Open “Desktop”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:74
+#: bridge/src/quickSettings.ts:80
 msgid "service unavailable"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:86
+#: bridge/src/quickSettings.ts:92
 msgid "{name} (mixed)"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:96
+#: bridge/src/quickSettings.ts:102
 msgid "{count} of {total} modules active"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:98
+#: bridge/src/quickSettings.ts:104
 msgid "{name}: modules {modules}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:119
+#: bridge/src/quickSettings.ts:125
 msgid "applying “{name}”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:127
+#: bridge/src/quickSettings.ts:133
 msgid "Could not apply “{name}”: {error}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:172
 msgid "Clipboard settings…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:184
+#: bridge/src/quickSettings.ts:199
 msgid "private mode"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:195
+#: bridge/src/quickSettings.ts:213
 msgid "deskd is unavailable"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:199
+#: bridge/src/quickSettings.ts:217
 msgid "The history is empty"
 msgstr ""
 
