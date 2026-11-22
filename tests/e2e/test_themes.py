@@ -17,16 +17,18 @@ THEME_SKIN = {'macos': 'macos', 'windows11': 'windows11', 'fedora': 'default'}
 def test_apply_live_and_doctor(make_shell, theme):
     shell = make_shell(skin='default')
     rc, res, err = themes(shell, 'apply', theme)
+    # exit code 4: applied, but the automatic rollback had to turn an extension off
+    assert res.get('rolled_back', []) == [], res.get('warnings')
     assert rc == 0, (res, err)
     assert res['ok'] and res['live'] and not res['relogin'], res
-    assert UUID not in res.get('rolled_back', []), res
     st = shell.hook('bridgeState')
     assert st['state'] == 1 and st['skin'] == THEME_SKIN[theme], st
     shell.screenshot('applied')
     rc, rep, err = themes(shell, 'doctor', '--no-notify')
-    errors = [i for i in rep['items'] if i['level'] == 'error']
+    assert rep['shell_running'] and not rep['extensions_disabled_by_gnome'], rep
+    errors = [i for i in rep['issues'] if i['severity'] == 'error']
     assert errors == [], rep
-    assert not [i for i in rep['items'] if i.get('extension') == UUID], rep
+    assert not [i for i in rep['issues'] if i.get('uuid') == UUID], rep
     rc, cur, _ = themes(shell, 'current')
     assert all(v == theme for v in cur['modules'].values()), cur
 

@@ -33,7 +33,15 @@ CLIP_IFACE = 'io.github.OlehDzhumyk.Desk.Clipboard'
 
 
 def skin_dconf(skin):
-    return (SRC / 'themes' / SKINS[skin][0] / 'desk.dconf').read_text()
+    """The theme's desk.dconf (skin + panel shortcut). For windows11 also the line of its behavior
+    module that moves the shell's notification list off Super+V, which the flyout takes."""
+    theme = SKINS[skin][0]
+    text = (SRC / 'themes' / theme / 'desk.dconf').read_text()
+    if theme == 'windows11':
+        behavior = (SRC / 'themes/windows11/behavior.dconf').read_text().splitlines()
+        tray = next(line for line in behavior if line.startswith('toggle-message-tray='))
+        text += f'\n[org/gnome/shell/keybindings]\n{tray}\n'
+    return text
 
 
 @pytest.hookimpl(wrapper=True, tryfirst=True)

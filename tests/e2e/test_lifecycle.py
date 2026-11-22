@@ -22,9 +22,10 @@ def exercise(shell, shortcut):
     shell.hook('waitPanel', False)
     for skin in ('macos', 'windows11', 'default'):
         shell.dconf_write(SKIN_KEY, f"'{skin}'")
-        assert shell.hook('bridgeState')['skin'] == skin
-    shell.dconf_write(LANG_KEY, "'uk'")
-    shell.dconf_write(LANG_KEY, "'system'")
+        shell.hook('waitBridge', 'skin', skin)
+    for lang in ('uk', 'system'):
+        shell.dconf_write(LANG_KEY, f"'{lang}'")
+        shell.hook('waitBridge', 'language', lang)
     shell.keys(SKINS['default'][1])
     shell.hook('waitPanel', True)
     shell.keys('Escape')

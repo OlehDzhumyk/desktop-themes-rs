@@ -95,7 +95,9 @@ class Session:
         shutil.copytree(built, ext_dir / UUID)
         lockscreen = SRC / 'extensions/lockscreen-layout@desktop-themes-rs'
         if lockscreen.is_dir():
+            # as data/install.sh does: copy, then compile the extension's own schemas
             shutil.copytree(lockscreen, ext_dir / lockscreen.name)
+            subprocess.run(['glib-compile-schemas', str(ext_dir / lockscreen.name / 'schemas')], check=True)
         schemas = self.data / 'glib-2.0/schemas'
         schemas.mkdir(parents=True)
         shutil.copy(SRC / 'data/io.github.OlehDzhumyk.Desk.gschema.xml', schemas)
@@ -157,9 +159,10 @@ class Session:
         self.env['DBUS_SESSION_BUS_ADDRESS'] = address
         self.bus = Gio.DBusConnection.new_for_address_sync(
             address, Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT | Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION)
-        exts = ', '.join(f"'{e}'" for e in self.extensions)
+        exts = ', '.join(f"'{e}'" for e in self.extensions) or '@as '
+        exts = exts if exts != '@as ' else None
         self.dconf_load(f"""[org/gnome/shell]
-enabled-extensions=[{exts}]
+enabled-extensions={f'[{exts}]' if exts else '@as []'}
 disable-user-extensions=false
 welcome-dialog-last-shown-version='999'
 
@@ -210,6 +213,9 @@ enable-animations=false
         self.eval_js("""new Promise(r => { if (!Main.overview.visible) { r(true); return; }
             const id = Main.overview.connect('hidden', () => { Main.overview.disconnect(id); r(true); });
             Main.overview.hide(); })""")
+        # the hidden overview can keep the stage key focus, and then shortcut presses get lost:
+        # give the focus back to the (empty) desktop like after a click on it
+        self.eval_js('global.stage.set_key_focus(null)')
 
     # ---- talking to the shell
     def call(self, name, path, iface, method, args=None, rtype=None, timeout_ms=30000):
@@ -268,7 +274,9 @@ enable-animations=false
         def action():
             self.call('org.gnome.Shell', '/org/gnome/Shell', 'org.gnome.Shell.Extensions', method,
                       GLib.Variant('(s)', (uuid,)), '(b)')
-        return self.wait_ext_state({1} if enabled else {2}, uuid, action)
+        state = self.wait_ext_state({1} if enabled else {2}, uuid, action)
+        self.hook('settle')
+        return state
 
     def screenshot(self, name):
         path = self.artifacts / f'{self.name}-{name}.png'

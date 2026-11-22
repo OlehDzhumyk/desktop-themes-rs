@@ -24,4 +24,5 @@ def test_skin_switch_live(make_shell):
     shell = make_shell(skin='default')
     for skin in ('macos', 'windows11', 'default'):
         shell.dconf_write('/io/github/OlehDzhumyk/Desk/skin', f"'{skin}'")
+        shell.hook('waitBridge', 'skin', skin)
         assert shell.hook('bridgeState')['panelClass'] == PANEL_CLASS[skin]

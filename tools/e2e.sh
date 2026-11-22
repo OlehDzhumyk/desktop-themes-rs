@@ -33,8 +33,8 @@ if ! podman image exists "$IMAGE"; then
   podman build -t "$IMAGE" -f "$REPO/tests/e2e/Containerfile" "$REPO/tests/e2e"
 fi
 mkdir -p "$OUT"
-find "$OUT" -mindepth 1 -maxdepth 1 \( -name '*.png' -o -name '*.log' -o -name 'journal.txt' \) -delete
-CID=$(podman run -d --rm --systemd=always --security-opt label=disable \
+find "$OUT" -mindepth 1 -maxdepth 1 \( -name '*.png' -o -name '*.log' -o -name 'journal.txt' -o -name 'processes.txt' \) -delete
+CID=$(podman run -d --rm --systemd=always --security-opt label=disable --pids-limit=-1 \
   -v "$REPO:/src:ro" -v "$OUT:/out" "$IMAGE" /sbin/init)
 # only the container this script created is removed
 trap 'podman rm -f -t 5 "$CID" >/dev/null 2>&1 || true' EXIT
@@ -42,5 +42,6 @@ podman exec "$CID" systemctl is-system-running --wait >/dev/null || true
 rc=0
 podman exec -w /src/tests/e2e -e PYTHONDONTWRITEBYTECODE=1 -e E2E_OUT=/out \
   -e E2E_KEEP_LOGS="${E2E_KEEP_LOGS:-}" -e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}" "$CID" python3 -m pytest "$@" || rc=$?
+podman exec "$CID" ps -eo pid,ppid,nlwp,args > "$OUT/processes.txt" 2>&1 || true
 podman exec "$CID" journalctl -b --no-pager -o short-monotonic > "$OUT/journal.txt" 2>&1 || true
 exit $rc
