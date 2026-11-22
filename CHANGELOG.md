@@ -32,8 +32,20 @@ All notable changes to this project are documented in this file. The format is b
 - CI: typos, cargo-machete and zizmor jobs (`hygiene.yml`) and a smoke test of `data/install.sh` in a
   throw-away HOME (`tools/install-smoke.sh`).
 
+- End-to-end tests of the bridge, deskd and `themes` in GNOME Shell 51 running headless in a podman
+  container (`tests/e2e`, `just e2e`, CI job `e2e.yml`; ADR 0007): enable on every skin, clipboard
+  copy → history → shortcut → paste, shortcut overrides and conflicts, live `themes apply` +
+  `themes doctor`, the experimental-theme confirmation, and nothing left behind after disable or
+  logout. Harness approach and two modules from ddterm (see CREDITS.md).
+
 ### Fixed
 
+- Bridge: disabling it left the menus of its quick settings toggles (theme, clipboard), their items
+  and a GSettings handler on the stage (GNOME Shell 51 does not destroy an item's menu with the
+  item); switching the skin or language added another set each time.
+- Bridge: a D-Bus reply or signal arriving after disable or during logout touched already destroyed
+  actors ("has been already disposed" critical messages in the journal); the deskd proxy set-up is now
+  cancelled on disable.
 - `data/install.sh` compiles the GSettings schemas of repository extensions after copying them
   (`lockscreen-layout` failed to load with a missing `gschemas.compiled` after a reinstall).
 

@@ -26,6 +26,7 @@ export class ClipboardFeature implements PanelHost {
     private _bound = false;
     private _settingsIds: number[] = [];
     private _listeners = new Set<() => void>();
+    private _destroyed = false;
 
     constructor(extDir: string, settings: Gio.Settings, skin: string, private _openPrefs: () => void) {
         this.settings = settings;
@@ -45,6 +46,8 @@ export class ClipboardFeature implements PanelHost {
     }
 
     private _changed(): void {
+        if (this._destroyed)
+            return;
         if (this._panel?.isOpen)
             void this._panel.refresh();
         for (const f of this._listeners)
@@ -91,6 +94,7 @@ export class ClipboardFeature implements PanelHost {
     }
 
     destroy(): void {
+        this._destroyed = true;
         if (this._bound)
             Main.wm.removeKeybinding(SHORTCUT_KEY);
         this._bound = false;

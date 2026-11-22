@@ -84,6 +84,11 @@ headless theme="windows11" keys="Super+v" out="target/headless-shots":
     cd bridge && npm ci && npm run build
     tools/headless/clipboard-test.sh {{theme}} {{keys}} {{out}}
 
+# GNOME Shell end-to-end tests in a podman container (tests/e2e, ADR 0007): just e2e -k clipboard
+[positional-arguments]
+e2e *args:
+    tools/e2e.sh "$@"
+
 # enable the repository's git hooks
 install-hooks:
     git config core.hooksPath .githooks

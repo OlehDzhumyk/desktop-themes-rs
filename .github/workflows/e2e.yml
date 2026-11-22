@@ -1,0 +1,88 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# End-to-end tests (tests/e2e, ADR 0007): GNOME Shell 51 headless in a podman container with
+# systemd, the freshly built bridge, deskd and `themes` inside it. The suite takes about a minute
+# after the build, so it runs on every pull request.
+#
+# Two jobs: the binaries are built in a Fedora 45 container (the image the tests run in is Fedora 45
+# too, so they link against the same libraries), then the runner's own rootless podman runs
+# tools/e2e.sh --no-build. Container-in-container is avoided on purpose: systemd as PID 1 needs a
+# real cgroup tree. Layout after ddterm's ci.yml (CC0-1.0, see CREDITS.md).
+name: E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_HOME: ${{ github.workspace }}/.cargo-home
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  build:
+    name: build bridge, deskd, themes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel rust cargo \
+            nodejs npm gettext tar
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .cargo-home/registry
+            .cargo-home/git
+            target
+          key: cargo-fedora45-e2e-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-fedora45-e2e-
+      - name: Build
+        run: |
+          cargo build --locked -p deskd -p themes
+          (cd bridge && npm ci --no-audit --no-fund && npm run build)
+      # a tarball keeps the executable bits (upload-artifact does not)
+      - name: Pack
+        run: tar -cf e2e-build.tar target/debug/deskd target/debug/themes bridge/build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-build
+          path: e2e-build.tar
+          retention-days: 1
+
+  test:
+    name: GNOME Shell end-to-end
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: e2e-build
+      - name: Unpack
+        run: tar -xf e2e-build.tar && rm e2e-build.tar
+      - name: Run the tests
+        run: tools/e2e.sh --no-build --out "$RUNNER_TEMP/e2e"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: e2e-results
+          path: ${{ runner.temp }}/e2e
+          retention-days: 14

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Image of the end-to-end harness (tests/e2e, `just e2e`): GNOME Shell 51 on Fedora 45 with systemd
+# as PID 1, from ddterm's gnome-shell-image (MIT, https://github.com/ddterm/gnome-shell-image; see
+# CREDITS.md), plus what the tests need. Our binaries and the bridge are NOT baked in: the runner
+# mounts the repository read-only and the tests install the freshly built files at start.
+# Bump the base by tag and digest together (`podman pull` prints the digest).
+FROM ghcr.io/ddterm/gnome-shell-image/fedora-45:2026.11.12.0@sha256:aa3d052f75bc2fc2aee44350ade19c104dff1e79f00f7a9b17fc5d9c9549a694
+
+RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
+        python3-pytest python3-gobject gtk4 libadwaita dconf glib2 wl-clipboard \
+        adwaita-icon-theme procps-ng \
+    && dnf clean all -y

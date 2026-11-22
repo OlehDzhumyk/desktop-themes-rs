@@ -45,11 +45,24 @@ export function launchGui(page?: string): void {
     }
 }
 
+/**
+ * GNOME Shell 51 puts a quick settings item's menu into the quick settings overlay
+ * (QuickSettingsMenu._completeAddItem) and does not destroy it with the item, so a removed toggle
+ * would leave its menu, items and their signal handlers on the stage. Call from the toggle's
+ * 'destroy' handler.
+ */
+function destroyMenu(toggle: QuickMenuToggle): void {
+    toggle.menu.destroy();
+}
+
 const ThemesToggle = GObject.registerClass(
 class ThemesToggle extends QuickMenuToggle {
     declare private _section: PopupMenu.PopupMenuSection;
     declare private _client: ThemesClient;
     declare private _busy: boolean;
+    /** Destroyed, by disable() or by the shell tearing the stage down at logout (from C, so no
+     * JS destroy() override runs then); async work that finishes later must not touch it. */
+    declare private _destroyed: boolean;
 
     constructor() {
         super({title: _('Theme'), iconName: THEME_ICON, toggleMode: false});
@@ -63,7 +76,13 @@ class ThemesToggle extends QuickMenuToggle {
         });
         this.connect('clicked', () => { this.menu.open(); });
         this._busy = false;
+        this._destroyed = false;
         this._client = new ThemesClient(() => void this._refresh());
+        this.connect('destroy', () => {
+            this._destroyed = true;
+            this._client.destroy();
+            destroyMenu(this);
+        });
         this.menu.connect('open-state-changed', (_m: unknown, open: boolean) => {
             if (open)
                 void this._refresh();
@@ -72,11 +91,19 @@ class ThemesToggle extends QuickMenuToggle {
         void this._refresh();
     }
 
+    /** Read through a method: TypeScript cannot see the change across an await. */
+    _gone(): boolean {
+        return this._destroyed;
+    }
+
     async _refresh(): Promise<void> {
         try {
             const [themes, current] = await this._client.listAndCurrent();
-            this._render(themes, current);
+            if (!this._gone())
+                this._render(themes, current);
         } catch (e) {
+            if (this._gone())
+                return;
             this.subtitle = _('service unavailable');
             this._section.removeAll();
             this._section.addMenuItem(new PopupMenu.PopupMenuItem(
@@ -113,11 +140,13 @@ class ThemesToggle extends QuickMenuToggle {
             return;
         this._busy = true;
         const warning = (await this._client.experimental())[id];
+        if (this._gone())
+            return;
         if (warning !== undefined) {
             Main.panel.closeQuickSettings();
             const ok = await confirm(fmt(_('Apply the experimental theme “{name}”?'), {name}), warning,
                 _('Apply anyway'));
-            if (!ok) {
+            if (!ok || this._gone()) {
                 this._busy = false;
                 return;
             }
@@ -133,13 +162,9 @@ class ThemesToggle extends QuickMenuToggle {
             Main.notifyError(_('Theme'), fmt(_('Could not apply “{name}”: {error}'), {name, error: errorText(e)}));
         } finally {
             this._busy = false;
-            void this._refresh();
+            if (!this._gone())
+                void this._refresh();
         }
-    }
-
-    override destroy(): void {
-        this._client.destroy();
-        super.destroy();
     }
 });
 
@@ -151,11 +176,21 @@ class ClipboardToggle extends QuickMenuToggle {
     declare private _section: PopupMenu.PopupMenuSection;
     declare private _privateItem: PopupMenu.PopupSwitchMenuItem;
     declare private _unlisten: (() => void) | null;
+    declare private _destroyed: boolean;
 
     constructor() {
         super({title: _('Clipboard'), iconName: CLIP_ICON, toggleMode: false});
         this._feature = null;
         this._unlisten = null;
+        this._destroyed = false;
+        // a signal, not a destroy() override: the shell may destroy the toggle from C at logout
+        this.connect('destroy', () => {
+            this._destroyed = true;
+            this._unlisten?.();
+            this._unlisten = null;
+            this._feature = null;
+            destroyMenu(this);
+        });
         this.menu.setHeader(CLIP_ICON, _('Clipboard'), '');
         this._section = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._section);
@@ -200,6 +235,11 @@ class ClipboardToggle extends QuickMenuToggle {
         this._privateItem.setToggleState(priv);
     }
 
+    /** Read through a method: TypeScript cannot see the change across an await. */
+    _gone(): boolean {
+        return this._destroyed;
+    }
+
     async _refresh(): Promise<void> {
         this._sync();
         this._section.removeAll();
@@ -210,9 +250,13 @@ class ClipboardToggle extends QuickMenuToggle {
         try {
             items = await feature.client.list('', 8);
         } catch {
+            if (this._gone())
+                return;
             this._section.addMenuItem(new PopupMenu.PopupMenuItem(_('deskd is unavailable'), {reactive: false}));
             return;
         }
+        if (this._gone())
+            return;
         if (!items.length)
             this._section.addMenuItem(new PopupMenu.PopupMenuItem(_('The history is empty'), {reactive: false}));
         for (const it of items) {
@@ -226,11 +270,6 @@ class ClipboardToggle extends QuickMenuToggle {
             });
             this._section.addMenuItem(mi);
         }
-    }
-
-    override destroy(): void {
-        this._unlisten?.();
-        super.destroy();
     }
 });
 
