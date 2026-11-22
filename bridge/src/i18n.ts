@@ -10,6 +10,8 @@
 //   'en'     → the English source strings.
 import type {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import {errorText} from './shellTypes.js';
+
 let _ext: Extension | null = null;
 let _lang = 'system';
 let _catalog: Record<string, string> | null = null;
@@ -19,7 +21,7 @@ export function initI18n(ext: Extension, language: string): void {
     try {
         ext.initTranslations();
     } catch (e) {
-        console.warn(`desk-bridge: translations unavailable: ${e}`);
+        console.warn(`desk-bridge: translations unavailable: ${errorText(e)}`);
     }
     setLanguage(language);
 }
@@ -34,7 +36,7 @@ export function setLanguage(language: string): void {
         const [, bytes] = file.load_contents(null);
         _catalog = JSON.parse(new TextDecoder().decode(bytes)) as Record<string, string>;
     } catch (e) {
-        console.warn(`desk-bridge: no catalogue for ${_lang}: ${e}`);
+        console.warn(`desk-bridge: no catalogue for ${_lang}: ${errorText(e)}`);
     }
 }
 
@@ -43,7 +45,7 @@ export function _(msgid: string): string {
     if (_lang === 'en')
         return msgid;
     if (_catalog)
-        return _catalog[msgid] || msgid;
+        return _catalog[msgid] ?? msgid;
     return _ext ? _ext.gettext(msgid) : msgid;
 }
 

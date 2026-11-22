@@ -29,11 +29,11 @@ export class ClipboardFeature implements PanelHost {
 
     constructor(extDir: string, settings: Gio.Settings, skin: string, private _openPrefs: () => void) {
         this.settings = settings;
-        this.client = new ClipboardClient(extDir, () => this._changed());
+        this.client = new ClipboardClient(extDir, () => { this._changed(); });
         this._watcher = new ClipboardWatcher(this.client, settings);
         this._paster = new Paster();
-        this._settingsIds.push(settings.connect(`changed::${SHORTCUT_KEY}`, () => this._bind()));
-        this._settingsIds.push(settings.connect('changed::enabled', () => this._bind()));
+        this._settingsIds.push(settings.connect(`changed::${SHORTCUT_KEY}`, () => { this._bind(); }));
+        this._settingsIds.push(settings.connect('changed::enabled', () => { this._bind(); }));
         this.setSkin(skin);
         this._bind();
     }
@@ -75,14 +75,14 @@ export class ClipboardFeature implements PanelHost {
         if (!this.settings.get_boolean('enabled'))
             return;
         Main.wm.addKeybinding(SHORTCUT_KEY, this.settings, Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
-            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, () => this.toggle());
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW, () => { this.toggle(); });
         this._bound = true;
     }
 
     activate(item: ClipItem): void {
         const paste = this.settings.get_boolean('paste-on-select');
         this.client.activate(item.id)
-            .then(([mime, data]) => this._paster.paste(mime, data, paste))
+            .then(([mime, data]) => { this._paster.paste(mime, data, paste); })
             .catch(logError);
     }
 

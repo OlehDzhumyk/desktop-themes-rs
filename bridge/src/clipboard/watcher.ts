@@ -13,6 +13,7 @@ import type Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import type {ClipboardClient} from '../dbus.js';
+import {errorText, focusWindow} from '../shellTypes.js';
 
 const CLIPBOARD = St.ClipboardType.CLIPBOARD;
 const TEXT_TYPES = ['text/plain;charset=utf-8', 'UTF8_STRING', 'text/plain', 'STRING'];
@@ -59,22 +60,27 @@ export class ClipboardWatcher {
             do {
                 this._again = false;
                 await this._capture();
-            } while (this._again && !this._destroyed);
+            } while (this._repeat());
         } catch (e) {
-            console.warn(`desk-bridge: clipboard capture failed: ${e}`);
+            console.warn(`desk-bridge: clipboard capture failed: ${errorText(e)}`);
         } finally {
             this._busy = false;
         }
+    }
+
+    /** Another read is wanted (read through a method: TypeScript cannot see the change across the await). */
+    private _repeat(): boolean {
+        return this._again && !this._destroyed;
     }
 
     private async _capture(): Promise<void> {
         if (this._destroyed || !this._settings.get_boolean('enabled') ||
             this._settings.get_boolean('private-mode') || this._client.private)
             return;
-        const offered: string[] = this._selection.get_mimetypes(Meta.SelectionType.SELECTION_CLIPBOARD) ?? [];
+        const offered: string[] = this._selection.get_mimetypes(Meta.SelectionType.SELECTION_CLIPBOARD);
         if (offered.some(m => SECRET_HINTS.includes(m)))
             return;
-        const app = global.display.focus_window?.get_wm_class() ?? '';
+        const app = focusWindow()?.get_wm_class() ?? '';
         const types = [...TEXT_TYPES];
         if (this._settings.get_boolean('images'))
             types.push(...IMAGE_TYPES);

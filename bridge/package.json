@@ -5,17 +5,19 @@
   "description": "GNOME Shell bridge extension of desktop-themes-rs (desk-bridge@desktop-themes-rs)",
   "license": "GPL-3.0-or-later",
   "type": "module",
+  "//": "Two compilers on purpose. The build and the type check use TypeScript 7 (the native compiler, installed under the alias typescript-native and run by path because its bin name collides with the old one). typescript-eslint still needs the TypeScript 6 JavaScript compiler API (`require('typescript')`), which TypeScript 7 no longer ships, so `typescript` stays at 6.x and is used by eslint only. Drop the 6.x pin when typescript-eslint supports TypeScript 7.",
   "scripts": {
-    "build": "tsc -p tsconfig.json && node assemble.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "node node_modules/typescript-native/bin/tsc -p tsconfig.json && node assemble.mjs",
+    "typecheck": "node node_modules/typescript-native/bin/tsc -p tsconfig.json --noEmit",
     "lint": "eslint src"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@girs/gjs": "5.6.0",
     "@girs/gnome-shell": "51.0.1",
-    "eslint": "^9.39.5",
+    "eslint": "^10.15.0",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.73.0"
+    "typescript-eslint": "^8.73.0",
+    "typescript-native": "npm:typescript@7.0.2"
   }
 }

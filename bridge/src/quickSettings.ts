@@ -13,6 +13,7 @@ import {QuickMenuToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/q
 import {confirm} from './confirmDialog.js';
 import {ThemesClient, type ThemeRow} from './dbus.js';
 import {_, fmt} from './i18n.js';
+import {errorText} from './shellTypes.js';
 import type {ClipboardFeature} from './clipboard/feature.js';
 import {itemAccessibleName, oneLine} from './clipboard/panel.js';
 
@@ -20,11 +21,16 @@ const THEME_ICON = 'preferences-desktop-appearance-symbolic';
 const CLIP_ICON = 'edit-paste-symbolic';
 const MODULES = ['look', 'behavior', 'sounds', 'apps'];
 
+/** The typings say `new()` always finds the file; at run time it returns null when it does not. */
+function desktopApp(id: string): GioUnix.DesktopAppInfo | null {
+    return GioUnix.DesktopAppInfo.new(id);
+}
+
 /** Launch the window (themes gui; “Робочий стіл” in the bridge), optionally on a page. */
 export function launchGui(page?: string): void {
     try {
         if (!page) {
-            const app = GioUnix.DesktopAppInfo.new('io.github.OlehDzhumyk.Themes.desktop');
+            const app = desktopApp('io.github.OlehDzhumyk.Themes.desktop');
             if (app) {
                 app.launch([], global.create_app_launch_context(0, -1));
                 return;
@@ -55,7 +61,7 @@ class ThemesToggle extends QuickMenuToggle {
             launchGui();
             Main.panel.closeQuickSettings();
         });
-        this.connect('clicked', () => this.menu.open());
+        this.connect('clicked', () => { this.menu.open(); });
         this._busy = false;
         this._client = new ThemesClient(() => void this._refresh());
         this.menu.connect('open-state-changed', (_m: unknown, open: boolean) => {
@@ -74,17 +80,17 @@ class ThemesToggle extends QuickMenuToggle {
             this.subtitle = _('service unavailable');
             this._section.removeAll();
             this._section.addMenuItem(new PopupMenu.PopupMenuItem(
-                fmt(_('Error: {error}'), {error: (e as Error).message}), {reactive: false}));
+                fmt(_('Error: {error}'), {error: errorText(e)}), {reactive: false}));
         }
     }
 
     _render(themes: ThemeRow[], current: Record<string, string>): void {
-        const look = current.look ?? '';
+        const look = current['look'] ?? '';
         const uniform = MODULES.every(m => (current[m] ?? '') === look);
         const nameOf = (id: string) => themes.find(t => t[0] === id)?.[1] ?? id;
         this.checked = look !== '' && look !== 'fedora';
         this.subtitle = look ? (uniform ? nameOf(look) : fmt(_('{name} (mixed)'), {name: nameOf(look)})) : '';
-        this.menu.setHeader(THEME_ICON, _('Theme'), this.subtitle ?? '');
+        this.menu.setHeader(THEME_ICON, _('Theme'), this.subtitle);
         this._section.removeAll();
         for (const [id, name, , modules] of themes) {
             const item = new PopupMenu.PopupMenuItem(name);
@@ -92,7 +98,7 @@ class ThemesToggle extends QuickMenuToggle {
             const full = active.length === MODULES.length;
             item.setOrnament(full ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NO_DOT);
             if (active.length && !full)
-                item.label.text = `${name} · ${active.length}/${MODULES.length}`;
+                item.label.text = `${name} · ${String(active.length)}/${String(MODULES.length)}`;
             const state = full ? _('active') : active.length ? fmt(_('{count} of {total} modules active'),
                 {count: active.length, total: MODULES.length}) : '';
             item.accessible_name = fmt(_('{name}: modules {modules}'), {name, modules: modules.join(', ')}) +
@@ -124,7 +130,7 @@ class ThemesToggle extends QuickMenuToggle {
             else if (warnings.length)
                 Main.notify(_('Theme'), `${message}\n${warnings.join('\n')}`);
         } catch (e) {
-            Main.notifyError(_('Theme'), fmt(_('Could not apply “{name}”: {error}'), {name, error: (e as Error).message}));
+            Main.notifyError(_('Theme'), fmt(_('Could not apply “{name}”: {error}'), {name, error: errorText(e)}));
         } finally {
             this._busy = false;
             void this._refresh();
@@ -137,38 +143,47 @@ class ThemesToggle extends QuickMenuToggle {
     }
 });
 
+// GObject typings describe the constructor of a registered class through _init(), not through a
+// custom constructor, so the feature is handed over by attach() right after construction.
 const ClipboardToggle = GObject.registerClass(
 class ClipboardToggle extends QuickMenuToggle {
-    declare private _feature: ClipboardFeature;
+    declare private _feature: ClipboardFeature | null;
     declare private _section: PopupMenu.PopupMenuSection;
     declare private _privateItem: PopupMenu.PopupSwitchMenuItem;
-    declare private _unlisten: () => void;
+    declare private _unlisten: (() => void) | null;
 
-    constructor(feature: ClipboardFeature) {
+    constructor() {
         super({title: _('Clipboard'), iconName: CLIP_ICON, toggleMode: false});
-        this._feature = feature;
+        this._feature = null;
+        this._unlisten = null;
         this.menu.setHeader(CLIP_ICON, _('Clipboard'), '');
         this._section = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._section);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this._privateItem = new PopupMenu.PopupSwitchMenuItem(_('Private mode'), false);
         this._privateItem.connect('toggled', (_i: unknown, state: boolean) => {
-            this._feature.client.private = state;
+            if (this._feature)
+                this._feature.client.private = state;
         });
         this.menu.addMenuItem(this._privateItem);
         this.menu.addAction(_('Clear history'), () => {
-            void this._feature.client.clear(true).catch(e => console.warn(e));
+            void this._feature?.client.clear(true).catch((e: unknown) => { console.warn(e); });
         });
         this.menu.addAction(_('Clipboard settings…'), () => {
             launchGui('clipboard');
             Main.panel.closeQuickSettings();
         });
-        this.connect('clicked', () => this.menu.open());
+        this.connect('clicked', () => { this.menu.open(); });
         this.menu.connect('open-state-changed', (_m: unknown, open: boolean) => {
             if (open)
                 void this._refresh();
             return undefined;
         });
+    }
+
+    /** Connect the toggle to the clipboard feature it shows. */
+    attach(feature: ClipboardFeature): void {
+        this._feature = feature;
         this._unlisten = feature.onChanged(() => {
             if (this.menu.isOpen)
                 void this._refresh();
@@ -179,7 +194,7 @@ class ClipboardToggle extends QuickMenuToggle {
     }
 
     _sync(): void {
-        const priv = this._feature.client.private;
+        const priv = this._feature?.client.private ?? false;
         this.checked = !priv;
         this.subtitle = priv ? _('private mode') : '';
         this._privateItem.setToggleState(priv);
@@ -188,9 +203,12 @@ class ClipboardToggle extends QuickMenuToggle {
     async _refresh(): Promise<void> {
         this._sync();
         this._section.removeAll();
+        const feature = this._feature;
+        if (!feature)
+            return;
         let items;
         try {
-            items = await this._feature.client.list('', 8);
+            items = await feature.client.list('', 8);
         } catch {
             this._section.addMenuItem(new PopupMenu.PopupMenuItem(_('deskd is unavailable'), {reactive: false}));
             return;
@@ -204,14 +222,14 @@ class ClipboardToggle extends QuickMenuToggle {
             mi.accessible_name = itemAccessibleName(it);
             mi.connect('activate', () => {
                 Main.panel.closeQuickSettings();
-                this._feature.activate(it);
+                feature.activate(it);
             });
             this._section.addMenuItem(mi);
         }
     }
 
     override destroy(): void {
-        this._unlisten();
+        this._unlisten?.();
         super.destroy();
     }
 });
@@ -234,18 +252,16 @@ class DeskIndicator extends SystemIndicator {
             this._clipToggle = null;
         }
         if (feature) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            this._clipToggle = new (ClipboardToggle as any)(feature) as InstanceType<typeof ClipboardToggle>;
+            this._clipToggle = new ClipboardToggle();
+            this._clipToggle.attach(feature);
             this.quickSettingsItems.push(this._clipToggle);
             // items added after addExternalIndicator() must be placed by hand
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const qs = Main.panel.statusArea.quickSettings as any;
-            qs.menu?.addItem?.(this._clipToggle);
+            Main.panel.statusArea.quickSettings?.menu.addItem(this._clipToggle);
         }
     }
 
     override destroy(): void {
-        this.quickSettingsItems.forEach(i => i.destroy());
+        this.quickSettingsItems.forEach(i => { i.destroy(); });
         super.destroy();
     }
 });
