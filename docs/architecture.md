@@ -180,7 +180,7 @@ re-enables them without the user's confirmation (`themes doctor --enable-extensi
 Silverblue has no compilers on the host. `scripts/lib.sh` runs build steps inside a toolbox
 (`desktop-themes-build`, override with `DT_TOOLBOX`) that `scripts/bootstrap.sh` creates with these
 packages: `git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel
-libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm gettext`
+libadwaita-devel pipewire-devel clang-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm gettext`
 (npm builds the TypeScript bridge; its dev dependencies are pinned in `bridge/package-lock.json`).
 The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.89 or newer is required
 (edition 2024, let chains); `bootstrap.sh --rustup` installs a toolchain with rustup if the

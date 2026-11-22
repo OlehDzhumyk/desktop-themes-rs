@@ -32,7 +32,7 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel \
             rust cargo rustfmt clippy
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -77,7 +77,8 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo tar gzip
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel rust cargo tar gzip \
+            pipewire wireplumber pipewire-utils dbus-daemon
           command -v curl >/dev/null || dnf install -y --setopt=install_weak_deps=False curl
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

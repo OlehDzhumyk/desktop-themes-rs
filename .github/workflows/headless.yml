@@ -65,7 +65,7 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel rust cargo \
             nodejs npm gnome-shell mutter gjs dbus-daemon dconf glib2 gtk4 wl-clipboard \
             python3-gobject mesa-dri-drivers mesa-libEGL adwaita-icon-theme procps-ng
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -103,7 +103,7 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel rust cargo \
             nodejs npm gnome-shell mutter gjs dbus-daemon dconf glib2 gtk4 wl-clipboard \
             python3-gobject mesa-dri-drivers mesa-libEGL adwaita-icon-theme procps-ng
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
