@@ -15,3 +15,7 @@ gio = ["dep:gio"]
 [dependencies]
 gettext-rs = { version = "0.8.0", features = ["gettext-system"] }
 gio = { workspace = true, optional = true }
+
+[package.metadata.cargo-machete]
+# the crate gettext-rs is used as `gettextrs`
+ignored = ["gettext-rs"]
