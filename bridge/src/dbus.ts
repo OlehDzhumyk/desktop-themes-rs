@@ -5,6 +5,8 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
+import {errorText} from './shellTypes.js';
+
 export const DESK_BUS = 'io.github.OlehDzhumyk.Desk';
 export const CLIPBOARD_PATH = '/io/github/OlehDzhumyk/Desk/Clipboard';
 export const THEMES_BUS = 'io.github.OlehDzhumyk.Themes';
@@ -36,37 +38,75 @@ function readXml(dir: string, name: string): string {
     return new TextDecoder().decode(bytes);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyProxy = any;
+/** What GJS generates for a D-Bus interface: the typings only know the generic proxy. */
+interface Proxy {
+    readonly g_name_owner: string | null;
+    connectSignal(name: string, callback: () => void): number;
+    disconnectSignal(id: number): void;
+    connect(signal: string, callback: () => void): number;
+    disconnect(id: number): void;
+}
+
+type ProxyConstructor<T> = new (
+    bus: Gio.DBusConnection, name: string, path: string,
+    onReady: ((proxy: T | null, error: unknown) => void) | null,
+    cancellable: Gio.Cancellable | null, flags: Gio.DBusProxyFlags,
+) => T;
+
+/**
+ * Proxy class for an interface XML. The one cast of this file: GJS builds a constructor function
+ * at run time (`new Wrapper(...)`), the typings describe it as a plain call.
+ */
+function proxyClass<T>(xml: string): ProxyConstructor<T> {
+    return Gio.DBusProxy.makeProxyWrapper<T>(xml) as unknown as ProxyConstructor<T>;
+}
+
+/** Methods and properties of io.github.OlehDzhumyk.Desk.Clipboard (data/dbus/). */
+interface ClipboardProxy extends Proxy {
+    Private: boolean;
+    readonly Enabled: boolean | null;
+    PushAsync(mime: string, data: Uint8Array, offered: string[], sourceApp: string): Promise<[number]>;
+    ListAsync(query: string, limit: number): Promise<[Tuple[]]>;
+    ActivateAsync(id: number): Promise<[string, Uint8Array | number[]]>;
+    PinAsync(id: number, pinned: boolean): Promise<unknown>;
+    DeleteAsync(id: number): Promise<unknown>;
+    ClearAsync(keepPinned: boolean): Promise<unknown>;
+}
 
 /** deskd's clipboard engine. Calls auto-start deskd through D-Bus activation. */
 export class ClipboardClient {
-    private _proxy: AnyProxy = null;
+    private _proxy: ClipboardProxy | null = null;
     private _signalId = 0;
     private _propsId = 0;
     private _onChanged: () => void;
 
     constructor(extDir: string, onChanged: () => void) {
         this._onChanged = onChanged;
-        const Wrapper: AnyProxy = Gio.DBusProxy.makeProxyWrapper(readXml(extDir, 'io.github.OlehDzhumyk.Desk.Clipboard'));
+        const Wrapper = proxyClass<ClipboardProxy>(readXml(extDir, 'io.github.OlehDzhumyk.Desk.Clipboard'));
         // asynchronous construction: never block the shell while deskd is being activated
-        this._proxy = new Wrapper(Gio.DBus.session, DESK_BUS, CLIPBOARD_PATH, (p: AnyProxy, error: unknown) => {
+        const proxy = new Wrapper(Gio.DBus.session, DESK_BUS, CLIPBOARD_PATH, (_p, error) => {
             if (error)
-                console.warn(`desk-bridge: deskd proxy: ${error}`);
+                console.warn(`desk-bridge: deskd proxy: ${errorText(error)}`);
             else
                 this._onChanged();
-            void p;
         }, null, Gio.DBusProxyFlags.NONE);
-        this._signalId = this._proxy.connectSignal('Changed', () => this._onChanged());
-        this._propsId = this._proxy.connect('g-properties-changed', () => this._onChanged());
+        this._proxy = proxy;
+        this._signalId = proxy.connectSignal('Changed', () => { this._onChanged(); });
+        this._propsId = proxy.connect('g-properties-changed', () => { this._onChanged(); });
+    }
+
+    private get _p(): ClipboardProxy {
+        if (!this._proxy)
+            throw new Error('the deskd client is destroyed');
+        return this._proxy;
     }
 
     get available(): boolean {
-        return this._proxy?.g_name_owner !== null && this._proxy?.g_name_owner !== undefined;
+        return this._proxy?.g_name_owner != null;
     }
 
     get private(): boolean {
-        return Boolean(this._proxy?.Private);
+        return this._proxy?.Private ?? false;
     }
 
     set private(v: boolean) {
@@ -75,35 +115,34 @@ export class ClipboardClient {
     }
 
     get enabled(): boolean {
-        const v = this._proxy?.Enabled;
-        return v === undefined || v === null ? true : Boolean(v);
+        return this._proxy?.Enabled ?? true;
     }
 
     async push(mime: string, data: Uint8Array, offered: string[], sourceApp: string): Promise<number> {
-        const [id] = await this._proxy.PushAsync(mime, data, offered, sourceApp);
-        return Number(id);
+        const [id] = await this._p.PushAsync(mime, data, offered, sourceApp);
+        return id;
     }
 
     async list(query = '', limit = 0): Promise<ClipItem[]> {
-        const [items] = await this._proxy.ListAsync(query, limit);
-        return (items as Tuple[]).map(toItem);
+        const [items] = await this._p.ListAsync(query, limit);
+        return items.map(toItem);
     }
 
     async activate(id: number): Promise<[string, Uint8Array]> {
-        const [mime, data] = await this._proxy.ActivateAsync(id);
+        const [mime, data] = await this._p.ActivateAsync(id);
         return [mime, data instanceof Uint8Array ? data : new Uint8Array(data)];
     }
 
     async pin(id: number, pinned: boolean): Promise<void> {
-        await this._proxy.PinAsync(id, pinned);
+        await this._p.PinAsync(id, pinned);
     }
 
     async remove(id: number): Promise<void> {
-        await this._proxy.DeleteAsync(id);
+        await this._p.DeleteAsync(id);
     }
 
     async clear(keepPinned: boolean): Promise<void> {
-        await this._proxy.ClearAsync(keepPinned);
+        await this._p.ClearAsync(keepPinned);
     }
 
     destroy(): void {
@@ -128,28 +167,36 @@ const THEMES_XML = `<node><interface name="io.github.OlehDzhumyk.Themes">
 
 export type ThemeRow = [string, string, string, string[]];
 
+/** Methods of io.github.OlehDzhumyk.Themes (THEMES_XML above). */
+interface ThemesProxy extends Proxy {
+    ListAsync(): Promise<[ThemeRow[]]>;
+    CurrentAsync(): Promise<[Record<string, string>]>;
+    ExperimentalAsync(): Promise<[Record<string, string>]>;
+    ApplyAsync(id: string, modules: string[]): Promise<[boolean, string, string[]]>;
+}
+
 /** The theme manager service (themes --dbus-service, activated on demand, exits when idle). */
 export class ThemesClient {
-    private _proxy: AnyProxy;
+    private _proxy: ThemesProxy;
     private _signalId: number;
 
     constructor(onChanged: () => void) {
-        const Wrapper: AnyProxy = Gio.DBusProxy.makeProxyWrapper(THEMES_XML);
+        const Wrapper = proxyClass<ThemesProxy>(THEMES_XML);
         this._proxy = new Wrapper(Gio.DBus.session, THEMES_BUS, THEMES_PATH, null, null,
             Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION);
-        this._signalId = this._proxy.connectSignal('Changed', () => onChanged());
+        this._signalId = this._proxy.connectSignal('Changed', () => { onChanged(); });
     }
 
     async listAndCurrent(): Promise<[ThemeRow[], Record<string, string>]> {
         const [[themes], [current]] = await Promise.all([this._proxy.ListAsync(), this._proxy.CurrentAsync()]);
-        return [themes as ThemeRow[], current as Record<string, string>];
+        return [themes, current];
     }
 
     /** Experimental themes: id → warning text (needs confirmation before Apply). */
     async experimental(): Promise<Record<string, string>> {
         try {
             const [map] = await this._proxy.ExperimentalAsync();
-            return map as Record<string, string>;
+            return map;
         } catch {
             return {}; // an older service without the method
         }

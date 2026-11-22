@@ -27,7 +27,7 @@ The repository is a Cargo workspace:
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
 | `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (now: clipboard history) |
-| `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` to ES modules (types from `@girs/gnome-shell` 51 / ts-for-gir) |
+| `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
 `theme` and `themes-gui` are symlinks to the same binary.
@@ -182,7 +182,7 @@ Silverblue has no compilers on the host. `scripts/lib.sh` runs build steps insid
 packages: `git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel
 libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm gettext`
 (npm builds the TypeScript bridge; its dev dependencies are pinned in `bridge/package-lock.json`).
-The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.88 or newer is required
+The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.89 or newer is required
 (edition 2024, let chains); `bootstrap.sh --rustup` installs a toolchain with rustup if the
 distribution's is older.
 
@@ -192,7 +192,7 @@ distribution's is older.
 * `tools/integration-test.sh`: applies a temporary theme with all modules, mixes macos/windows11
   and checks dconf against the baseline after reset. **It writes the real dconf**; use a VM or a
   spare session.
-* `bridge/`: `npm run typecheck` (tsc --noEmit against the GNOME Shell 51 types), `npm run lint`.
+* `bridge/`: `npm run typecheck` (tsc --noEmit against the GNOME Shell 51 types), `npm run lint`. Two compilers on purpose: TypeScript 7 builds and type-checks, TypeScript 6 (package `typescript`) is only the compiler API typescript-eslint still needs; see the note in `bridge/package.json`.
 * `tools/headless/`: a fully isolated headless GNOME Shell (see `env.sh`): own `dbus-daemon`, own
   Wayland socket, own `XDG_RUNTIME_DIR` subdirectory (so the shell's crash-protection file never
   lands in the real one), own `XDG_CONFIG_HOME`/dconf database, own `XDG_DATA_HOME` overlay (symlinks

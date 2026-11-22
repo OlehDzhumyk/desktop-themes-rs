@@ -46,7 +46,8 @@ const H24: &str = n_("Save a screenshot of the window as PNG and exit");
 const H25: &str = n_("Window size, e.g. 1180x780");
 const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
 const H28: &str = n_("Design tokens (tokens.toml): check, generate, a theme from a wallpaper");
-const H26: &str = n_("Page: themes | mix | features | clipboard | general | credits");
+const H26: &str = n_("Page: themes | mix | features | clipboard | shortcuts | general | credits");
+const H29: &str = n_("Keyboard shortcuts of the features (the theme gives the default)");
 
 #[derive(Parser)]
 #[command(
@@ -127,6 +128,11 @@ enum Cmd {
             help = H22
         )]
         enable_extensions: bool,
+    },
+    #[command(about = H29)]
+    Shortcut {
+        #[command(subcommand)]
+        cmd: crate::shortcut_cli::ShortcutCmd,
     },
     #[command(about = H28)]
     Tokens {
@@ -232,6 +238,7 @@ fn modules_arg(only: Option<&str>, module: &[String]) -> Result<Vec<Module>, Err
 fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     match cmd {
         Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
+        Cmd::Shortcut { cmd } => crate::shortcut_cli::exec(ctx, cmd, json),
         Cmd::List => {
             let st = State::load(ctx);
             let look = st.source(Module::Look).map(String::from);
@@ -469,10 +476,10 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                 page,
                 ..Default::default()
             };
-            if let Some(s) = size {
-                if let Some((w, h)) = s.split_once('x') {
-                    o.size = (w.parse().unwrap_or(1180), h.parse().unwrap_or(780));
-                }
+            if let Some(s) = size
+                && let Some((w, h)) = s.split_once('x')
+            {
+                o.size = (w.parse().unwrap_or(1180), h.parse().unwrap_or(780));
             }
             Ok(crate::gui::run(o))
         }
@@ -525,25 +532,42 @@ fn do_apply(
     json: bool,
 ) -> Result<i32, Error> {
     let mut r = apply_opts(ctx, id, mods, dry_run, purge)?;
-    if !dry_run && !no_verify && r.shell_running && r.extensions_changed {
-        if let Ok(bad) = verify_live(ctx, Duration::from_secs(5)) {
-            for (u, why) in &bad {
-                r.warnings.push(tr!(
-                    "automatic rollback: extension {uuid} turned off ({reason})",
-                    uuid = u,
-                    reason = why
-                ));
-            }
-            r.rolled_back = bad.into_iter().map(|b| b.0).collect();
+    if !dry_run
+        && !no_verify
+        && r.shell_running
+        && r.extensions_changed
+        && let Ok(bad) = verify_live(ctx, Duration::from_secs(5))
+    {
+        for (u, why) in &bad {
+            r.warnings.push(tr!(
+                "automatic rollback: extension {uuid} turned off ({reason})",
+                uuid = u,
+                reason = why
+            ));
         }
+        r.rolled_back = bad.into_iter().map(|b| b.0).collect();
     }
     if json {
         out_json(&r);
     } else {
         print_apply(&r);
     }
-    Ok(0)
+    Ok(apply_exit_code(&r))
 }
+
+/// 0, or 4 when the theme was applied and the automatic rollback then turned an extension off:
+/// scripts must not take that for a clean apply.
+fn apply_exit_code(r: &ApplyResult) -> i32 {
+    if r.rolled_back.is_empty() {
+        0
+    } else {
+        EXIT_ROLLED_BACK
+    }
+}
+
+/// Exit code of `themes apply` when the automatic rollback had to turn an extension off
+/// (3 is `themes doctor` with problems).
+const EXIT_ROLLED_BACK: i32 = 4;
 
 fn print_apply(r: &ApplyResult) {
     let mods: Vec<&str> = r.applied_modules.iter().map(|m| m.id()).collect();
@@ -727,5 +751,18 @@ fn or_dash(v: &[String]) -> String {
         "-".into()
     } else {
         v.join(", ")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn apply_fails_after_a_rollback() {
+        let mut r = ApplyResult::default();
+        assert_eq!(apply_exit_code(&r), 0);
+        r.rolled_back = vec!["broken@example".into()];
+        assert_eq!(apply_exit_code(&r), EXIT_ROLLED_BACK);
     }
 }

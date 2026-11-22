@@ -21,8 +21,8 @@ export function confirm(title: string, description: string, okLabel: string): Pr
             resolve(yes);
         };
         dialog.setButtons([
-            {label: _('Cancel'), action: () => answer(false), key: Clutter.KEY_Escape, default: true},
-            {label: okLabel, action: () => answer(true)},
+            {label: _('Cancel'), action: () => { answer(false); }, key: Clutter.KEY_Escape, default: true},
+            {label: okLabel, action: () => { answer(true); }},
         ]);
         if (!dialog.open())
             answer(false);

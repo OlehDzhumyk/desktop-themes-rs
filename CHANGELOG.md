@@ -6,8 +6,37 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-22
+
+### Changed
+
+- desk-bridge: strict TypeScript (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`,
+  `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`), target
+  ES2025 (gjs 1.90 / SpiderMonkey 140), TypeScript 7 for the build and type check, typescript-eslint
+  `strictTypeChecked` + `stylisticTypeChecked`, no `any`; typed D-Bus proxies. eslint 10. Replaces
+  the Dependabot bump of the bridge group.
+
+### Fixed
+
+- rustfmt and clippy are clean and blocking in CI now; the minimum Rust version is 1.89
+  (`File::try_lock` was already used).
+- `themes apply` exits 4 when the automatic rollback turned an extension off (was 0).
+- `themes doctor` checks deskd (service file, running, same version).
+- Snapshots include the skin and the clipboard shortcut of the look module.
+- deskd writes the clipboard history debounced (2 s quiet, 10 s at most) and flushes it on
+  SIGTERM/SIGINT/SIGHUP, so nothing is lost on logout and bursts of copies cost one write.
+- Clipboard history and thumbnail cache use a stable hash (FNV-1a) instead of `DefaultHasher`;
+  an existing `history.json` is migrated at load (store version 2). The `no-default-hasher`
+  ast-grep rule is an error now.
+
 ### Added
 
+- Keyboard shortcuts in the settings registry: one «Keyboard shortcuts» page (`themes gui --page
+  shortcuts`) and `themes shortcut list|set|reset`; a theme only supplies the default, the user's
+  choice wins and survives theme switches, "reset to theme default" per shortcut, a taken
+  accelerator is refused. New schema `io.github.OlehDzhumyk.Desk.Shortcuts`; existing keys unchanged.
+- `themes apply` detects one accelerator owned twice (mixing look and behavior, e.g. `Super+Space`
+  or `Super+V`) and gives it to the feature, with a warning.
 - Continuous integration (`.github/workflows/ci.yml`): rustfmt and clippy (report only), tests,
   `cargo deny`, the desk-bridge build (`tsc`, eslint), shellcheck, GSettings schema, desktop file and
   D-Bus XML validation, actionlint and an offline documentation link check.
@@ -81,6 +110,7 @@ Initial version: the theme manager.
 - `scripts/bootstrap.sh` and the individual installers, all with `--dry-run`.
 - README, CREDITS and documentation (English, with a Ukrainian user guide).
 
-[Unreleased]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OlehDzhumyk/desktop-themes-rs/releases/tag/v0.1.0

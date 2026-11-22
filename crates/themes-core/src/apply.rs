@@ -156,6 +156,11 @@ pub fn apply_opts(
         };
         targets.insert(m, s);
     }
+    // a full reset forgets the user's shortcut overrides; every other apply keeps them on top
+    let full_reset = id == crate::BUILTIN_THEME && affected.len() == Module::ALL.len();
+    if !full_reset {
+        crate::shortcuts::apply_overrides(&mut targets, &cur);
+    }
     let mut theme_keys: BTreeMap<Module, BTreeSet<String>> = BTreeMap::new();
     for t in &themes {
         for m in Module::ALL {
@@ -165,7 +170,7 @@ pub fn apply_opts(
                 .extend(t.settings(m).into_keys());
         }
     }
-    let dplan = plan::compute_dconf(&DconfInput {
+    let mut dplan = plan::compute_dconf(&DconfInput {
         baseline: &baseline,
         current: &cur,
         prev_keys: &st.module_keys,
@@ -173,6 +178,36 @@ pub fn apply_opts(
         targets: &targets,
         affected: &affected,
     });
+    // one accelerator, two owners (mixing look and behavior): the feature keeps it
+    {
+        let mut fin = cur.clone();
+        fin.extend(dplan.writes.clone());
+        for k in &dplan.resets {
+            fin.remove(k);
+        }
+        let res = crate::shortcuts::resolve_conflicts(&mut fin);
+        for c in &res.conflicts {
+            let kept = res.stripped.keys().any(|k| c.owners.contains(k));
+            warnings.push(if kept {
+                tr!(
+                    "shortcut conflict: {conflict}; the feature keeps it, the system shortcut loses it",
+                    conflict = crate::shortcuts::describe(c)
+                )
+            } else {
+                tr!(
+                    "shortcut conflict: {conflict}; change one of them (themes shortcut set)",
+                    conflict = crate::shortcuts::describe(c)
+                )
+            });
+        }
+        for (k, v) in res.stripped {
+            dplan.resets.retain(|r| r != &k);
+            if cur.get(&k) != Some(&v) {
+                dplan.writes.insert(k.clone(), v.clone());
+            }
+            dplan.desired.insert(k, Some(v));
+        }
+    }
 
     // розширення (лише «вигляд» задає extensions.txt; постійні й «зламані» враховуються завжди)
     let look_theme = sel.get(&Module::Look).and_then(|s| theme_of(s));
@@ -424,7 +459,9 @@ pub fn apply_opts(
         }
     }
     // 8. прибирання після того, як розширення відпрацювали (вони інколи пишуть ключі при вимкненні)
-    let full_reset = id == crate::BUILTIN_THEME && affected.len() == Module::ALL.len();
+    if full_reset {
+        crate::shortcuts::clear_all();
+    }
     if res.shell_running && ext_changed {
         std::thread::sleep(Duration::from_millis(1500));
     }

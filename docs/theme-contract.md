@@ -76,7 +76,7 @@ convention):
 skin='windows11'                       # 'default' | 'macos' | 'windows11'
 
 [io/github/OlehDzhumyk/Desk/clipboard]
-toggle-shortcut=['<Super>v']           # shortcut that opens the clipboard panel
+toggle-shortcut=['<Super>v']           # DEFAULT shortcut that opens the clipboard panel (the user may override it)
 ```
 
 | Skin | Clipboard UI |

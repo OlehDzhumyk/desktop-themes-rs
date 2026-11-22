@@ -107,7 +107,7 @@ resident cost zero when closed (the window is a short-lived process; only the D-
 ## Gaps found
 
 * **G-HUB-1** The window is still named «Теми» and has no sidebar of feature pages; «Функції» lists only the clipboard and credits.
-* **G-HUB-2** Shortcut rows are read-only («Задається темою») and `excluded-apps` is not exposed ([clipboard](clipboard.md) G-CLIP-9, [behavior](behavior.md) G-BEHAV-5).
+* **G-HUB-2** `excluded-apps` is not exposed ([clipboard](clipboard.md) G-CLIP-9). Shortcuts are editable on the «Keyboard shortcuts» page ([behavior](behavior.md), Settings).
 * **G-HUB-3** No settings search, no per-page reset.
 * **G-HUB-4** The language setting needs a window restart (documented in the page text) instead of applying live.
 * **G-HUB-5** No `--page` for the pages of planned features (they do not exist yet), and no test that every registry page opens (a headless test should open each).

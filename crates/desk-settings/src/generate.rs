@@ -248,6 +248,12 @@ fn md_cell(s: &str) -> String {
 fn widget_doc(k: &Key) -> String {
     let page = PAGES.iter().find(|p| p.keys().any(|x| std::ptr::eq(x, k)));
     let row = match (k.widget, &k.kind) {
+        _ if SHORTCUTS
+            .iter()
+            .any(|s| std::ptr::eq(s.key, k) || std::ptr::eq(s.override_key, k)) =>
+        {
+            return "shortcut row on `--page shortcuts`".into();
+        }
         (Widget::Hidden, _) => return "— (gsettings only)".into(),
         (Widget::Display, _) => "read-only row",
         (_, Kind::Bool { .. }) => "switch",
@@ -327,6 +333,23 @@ pub fn settings_md() -> String {
                 widget_doc(k)
             );
         }
+    }
+    o.push_str(
+        "\n## Shortcuts\n\nThe theme default is written into the key in force (what the bridge binds); the override \
+         wins, survives theme switches and is re-applied by every `themes apply`. Empty override = \
+         follow the theme; `['disabled']` = no shortcut.\n\n\
+         | Id | Label | Feature | Key in force | Override |\n|---|---|---|---|---|\n",
+    );
+    for s in SHORTCUTS {
+        let _ = writeln!(
+            o,
+            "| `{}` | {} | {} | `{}` | `{}` |",
+            s.id,
+            md_cell(s.label),
+            s.feature,
+            md_cell(&crate::dconf_path(s.key)),
+            md_cell(&crate::dconf_path(s.override_key)),
+        );
     }
     o.push_str("\n## Pages of the window\n\n| Page | Title | Groups |\n|---|---|---|\n");
     for p in PAGES {

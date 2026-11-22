@@ -2,6 +2,7 @@
 mod cli;
 mod gui;
 mod service;
+mod shortcut_cli;
 mod tokens_cli;
 
 fn main() {

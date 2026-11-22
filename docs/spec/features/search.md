@@ -143,10 +143,10 @@ polling; deskd stays <= 20 MB with all providers loaded.
 * **G-SRCH-1** The current macOS launcher is an unmodified third-party extension plus two patches; its
   behaviour on a new Shell release is unpredictable (it already crashed Shell 51 at start-up, hence patch
   1).
-* **G-SRCH-2** `themes/macos/spotlight.dconf` contains a stale comment about `behavior.dconf`.
+* **G-SRCH-2** *(resolved)* the stale comment in `themes/macos/spotlight.dconf` is corrected.
 * **G-SRCH-3** `spotlight.dconf` binds the launcher to `Super+Space` in the look module while the
   `windows11` behaviour binds `switch-input-source` to the same key: a macOS look + Windows 11 behaviour mix
-  yields two owners ([behavior](behavior.md) G-BEHAV-2).
+  yields two owners; `themes apply` resolves it in favour of the launcher ([behavior](behavior.md) G-BEHAV-2).
 * **G-SRCH-4** The Windows 11 theme has no search field of its own (ArcMenu's start menu has one); `Super+S`
   opens the application grid, not search, which differs from Windows.
 

@@ -19,3 +19,4 @@ serde_json.workspace = true
 zbus.workspace = true
 desk-proto.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
+signal-hook = { version = "0.4.6", default-features = false, features = ["iterator"] }

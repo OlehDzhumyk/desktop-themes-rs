@@ -13,6 +13,9 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type {ClipItem, ClipboardClient} from '../dbus.js';
 import {_, fmt} from '../i18n.js';
+import {errorText, inputMethod, pushModal} from '../shellTypes.js';
+
+type Monitor = NonNullable<typeof Main.layoutManager.currentMonitor>;
 
 export const VERTICAL = {orientation: Clutter.Orientation.VERTICAL};
 export const HORIZONTAL = {orientation: Clutter.Orientation.HORIZONTAL};
@@ -87,7 +90,9 @@ export function pinIcon(pinned: boolean): Gio.Icon {
     if (pinned)
         return new Gio.ThemedIcon({name: 'view-pin-symbolic'});
     const [file] = GLib.filename_from_uri(import.meta.url);
-    const root = Gio.File.new_for_path(file).get_parent()!.get_parent()!;
+    const root = Gio.File.new_for_path(file).get_parent()?.get_parent();
+    if (!root)
+        return new Gio.ThemedIcon({name: 'view-pin-symbolic'});
     return new Gio.FileIcon({file: root.get_child('icons').get_child('desk-pin-outline-symbolic.svg')});
 }
 
@@ -101,7 +106,7 @@ export function iconButton(icon: string | Gio.Icon, accessible: string, styleCla
             ? new St.Icon({icon_name: icon, style_class: 'desk-clip-button-icon'})
             : new St.Icon({gicon: icon, style_class: 'desk-clip-button-icon'}),
     });
-    b.connect('clicked', () => onClick());
+    b.connect('clicked', () => { onClick(); });
     return b;
 }
 
@@ -178,9 +183,9 @@ export abstract class ClipboardPanel {
             return;
         this.actor.set_position(mon.x, mon.y);
         this.actor.set_size(mon.width, mon.height);
-        const anchor = this._anchorPoint();
+        const anchor = this._anchorPoint(mon);
         this.actor.show();
-        this._grab = Main.pushModal(this.actor, {actionMode: Shell.ActionMode.POPUP});
+        this._grab = pushModal(this.actor, Shell.ActionMode.POPUP);
         if (!this._grab) {
             this.actor.hide();
             return;
@@ -188,7 +193,7 @@ export abstract class ClipboardPanel {
         this.selected = 0;
         this._syncSystemClasses();
         this.onOpen();
-        void this.refresh().then(() => this._place(anchor));
+        void this.refresh().then(() => { this._place(anchor); });
         this._place(anchor);
         this.focusInitial();
         // a short fade only when the user has not turned animations off
@@ -216,12 +221,21 @@ export abstract class ClipboardPanel {
         };
         set('desk-hc', st.high_contrast);
         set('desk-light', st.color_scheme !== St.SystemColorScheme.PREFER_DARK);
-        const accents = ['blue', 'teal', 'green', 'yellow', 'orange', 'red', 'pink', 'purple', 'slate'];
-        accents.forEach((a, i) => set(`desk-accent-${a}`, st.accent_color === i));
+        const accents: [St.SystemAccentColor, string][] = [
+            [St.SystemAccentColor.BLUE, 'blue'], [St.SystemAccentColor.TEAL, 'teal'],
+            [St.SystemAccentColor.GREEN, 'green'], [St.SystemAccentColor.YELLOW, 'yellow'],
+            [St.SystemAccentColor.ORANGE, 'orange'], [St.SystemAccentColor.RED, 'red'],
+            [St.SystemAccentColor.PINK, 'pink'], [St.SystemAccentColor.PURPLE, 'purple'],
+            [St.SystemAccentColor.SLATE, 'slate'],
+        ];
+        for (const [color, name] of accents)
+            set(`desk-accent-${name}`, st.accent_color === color);
     }
 
     /** Called before the first refresh (reset search etc.). */
-    protected onOpen(): void {}
+    protected onOpen(): void {
+        // nothing to reset in the base panel
+    }
 
     close(): void {
         if (!this.isOpen || this._closing)
@@ -245,7 +259,7 @@ export abstract class ClipboardPanel {
             if (serial !== this._refreshSerial)
                 return;
             this.items = [];
-            console.warn(`desk-bridge: deskd List failed: ${e}`);
+            console.warn(`desk-bridge: deskd List failed: ${errorText(e)}`);
         }
         if (this.selected >= this.items.length)
             this.selected = Math.max(0, this.items.length - 1);
@@ -268,13 +282,15 @@ export abstract class ClipboardPanel {
             this.scrollTo(row);
             // keyboard focus on a row (Tab reached the list): it follows the selection
             const focus = global.stage.get_key_focus();
-            if (focus && focus !== row && this.rows.includes(focus as St.Widget) && row.can_focus)
+            if (focus && focus !== row && this.rows.some(r => r === focus) && row.can_focus)
                 row.grab_key_focus();
         }
     }
 
     /** Scroll a row into view (skins with a St.ScrollView override). */
-    protected scrollTo(_row: St.Widget): void {}
+    protected scrollTo(_row: St.Widget): void {
+        // skins without a scroll view have nothing to scroll
+    }
 
     protected move(delta: number): void {
         if (!this.items.length)
@@ -352,15 +368,13 @@ export abstract class ClipboardPanel {
     }
 
     /** Point the panel is placed at: text caret (input method), pointer, or monitor geometry. */
-    private _anchorPoint(): [number, number] {
-        const mon = Main.layoutManager.currentMonitor!;
+    private _anchorPoint(mon: Monitor): [number, number] {
         if (this.anchor === 'caret') {
             // GNOME's input method keeps the caret rectangle the focused client reported
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const r = (Main.inputMethod as any)?._cursorRect;
+            const r = inputMethod()._cursorRect;
             if (r && r.x >= mon.x && r.y >= mon.y && r.x < mon.x + mon.width && r.y < mon.y + mon.height &&
-                (r.x || r.y))
-                return [r.x, r.y + (r.height || 16) + 6];
+                (r.x !== 0 || r.y !== 0))
+                return [r.x, r.y + (r.height > 0 ? r.height : 16) + 6];
         }
         if (this.anchor === 'caret' || this.anchor === 'pointer') {
             const [x, y] = global.get_pointer();
@@ -407,7 +421,7 @@ export abstract class ClipboardPanel {
 }
 
 export function logError(e: unknown): void {
-    console.warn(`desk-bridge: ${e}`);
+    console.warn(`desk-bridge: ${errorText(e)}`);
 }
 
 /** Run `f` once the main loop is idle (after the current event is done). */

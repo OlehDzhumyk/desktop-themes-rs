@@ -5,6 +5,7 @@
   "shell-version": ["51"],
   "settings-schema": "io.github.OlehDzhumyk.Desk",
   "gettext-domain": "desktop-themes-rs",
-  "version": 1,
+  "version": 2,
+  "version-name": "0.3.0",
   "url": "https://github.com/OlehDzhumyk/desktop-themes-rs"
 }

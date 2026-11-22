@@ -57,6 +57,19 @@ pub struct ClipItem {
     pub size: u64,
 }
 
+/// Клієнтський проксі самої служби (версія, список функцій).
+#[zbus::proxy(
+    interface = "io.github.OlehDzhumyk.Desk",
+    default_service = "io.github.OlehDzhumyk.Desk",
+    default_path = "/io/github/OlehDzhumyk/Desk"
+)]
+pub trait Desk {
+    #[zbus(property)]
+    fn version(&self) -> zbus::Result<String>;
+    #[zbus(property)]
+    fn features(&self) -> zbus::Result<Vec<String>>;
+}
+
 /// Клієнтський проксі рушія буфера обміну.
 #[zbus::proxy(
     interface = "io.github.OlehDzhumyk.Desk.Clipboard",

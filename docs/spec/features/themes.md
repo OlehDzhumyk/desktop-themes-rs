@@ -160,18 +160,15 @@ modules. Switching never relies on colour alone ("активна" badge text).
 
 ## Gaps found
 
-* **G-THEMES-1** Saving a snapshot does not include the skin and the clipboard shortcut:
-  `SNAPSHOT_PREFIXES` in `crates/themes-core/src/snapshot.rs` has no `/io/github/OlehDzhumyk/Desk/`,
-  so a snapshot theme falls back to the default skin. Intended: include the `Desk` keys in the look
-  module's `desk.dconf`.
+* **G-THEMES-1** *(resolved)* `SNAPSHOT_PREFIXES` now has the skin and the clipboard shortcut
+  (`/io/github/OlehDzhumyk/Desk/skin`, `.../clipboard/toggle-shortcut`); the user's shortcut overrides
+  (`Desk/shortcuts/`) and other preferences are deliberately not theme data.
 * **G-THEMES-2** There is no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
   description, and the CLI, the window and quick settings apply it with one click. Intended: mandatory
   confirmation, see [liquid-glass](liquid-glass.md).
-* **G-THEMES-3** `themes/macos/spotlight.dconf` contains a stale comment ("behavior.dconf still sets
-  toggle-overview=['<Super>space']"); `behavior.dconf` already clears it.
-* **G-THEMES-4** `themes apply` exits 0 even when the auto-rollback disabled an extension; only the
-  warning and the JSON field `rolled_back` tell. Scripts must read `rolled_back`; consider a distinct
-  exit code.
+* **G-THEMES-3** *(resolved)* `themes/macos/spotlight.dconf` had a stale comment about `behavior.dconf`.
+* **G-THEMES-4** *(resolved)* `themes apply` exits 4 when the auto-rollback disabled an extension
+  (the theme was applied; the JSON field `rolled_back` lists the extensions).
 * **G-THEMES-5** `themes doctor` (no `--fix`) writes `state.json` (`gnome_version`, `last_doctor`,
   `last_shell_crash`); a "check" that mutates state surprises users who diff it.
 
@@ -209,6 +206,6 @@ modules. Switching never relies on colour alone ("активна" badge text).
 ## Open questions
 
 1. *(Decided)* Experimental themes (`EXPERIMENTAL=true`, `WARNING="..."` in `theme.conf`) stay bundled but need explicit confirmation before apply: CLI `y/N` (`--yes` skips), GUI dialog, quick-settings dialog ([liquid-glass](liquid-glass.md)).
-2. Distinct exit code when rollback happened (G-THEMES-4)?
+2. *(Decided)* exit code 4 when the rollback happened (G-THEMES-4).
 3. Should third-party themes with hooks need an explicit "trust" step stored in `state.json`?
 4. Should `reset` offer to keep the user's wallpaper (a frequent ask)?

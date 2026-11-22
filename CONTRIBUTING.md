@@ -35,7 +35,7 @@ git clone https://github.com/OlehDzhumyk/desktop-themes-rs && cd desktop-themes-
 toolbox create themes-dev
 toolbox run -c themes-dev sudo dnf install -y git gcc pkgconf-pkg-config glib2-devel gtk4-devel \
     libadwaita-devel rust cargo rustfmt clippy cargo-deny ShellCheck nodejs npm desktop-file-utils
-# Rust >= 1.88 is required (edition 2024). If the distribution's is older: scripts/bootstrap.sh --rustup
+# Rust >= 1.89 is required (edition 2024). If the distribution's is older: scripts/bootstrap.sh --rustup
 ```
 
 Build and check (inside the toolbox, or prefix with `toolbox run -c themes-dev`):

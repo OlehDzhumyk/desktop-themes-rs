@@ -28,14 +28,17 @@ whose selected theme has no files for it is shown as "(default)" and returns its
 baseline.
 
 Look-module keys may also live in the bridge's schema: `desk.dconf` sets the skin
-(`/io/github/OlehDzhumyk/Desk/skin`) and the clipboard shortcut, so switching the look switches the
-clipboard panel too; mixing a theme's look with another theme's behavior keeps the look's skin.
+(`/io/github/OlehDzhumyk/Desk/skin`) and the default of the clipboard shortcut, so switching the look
+switches the clipboard panel too (a shortcut the user chose wins over the theme default and stays,
+see [behavior](spec/features/behavior.md)); mixing a theme's look with another theme's behavior keeps the look's skin.
 
 ## Overlapping keys
 
 If two modules set the same key, the later module wins, in the order look, behavior, sounds, apps.
 (Example: `toggle-overview` is cleared by the macOS look through the Spotlight fragment and also by
 the macOS behavior module, otherwise both Spotlight and the overview would react to Super+Space.)
+When a feature shortcut and a system keybinding still end up on one accelerator (mixing modules),
+`themes apply` removes it from the system key and warns: the feature keeps it.
 
 ## Extensions
 

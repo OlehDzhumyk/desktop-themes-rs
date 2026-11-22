@@ -18,7 +18,6 @@ const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
 
 export default class DeskBridge extends Extension {
     private _settings: Gio.Settings | null = null;
-    private _clipSettings: Gio.Settings | null = null;
     private _indicator: InstanceType<typeof DeskIndicator> | null = null;
     private _clipboard: ClipboardFeature | null = null;
     private _skinId = 0;
@@ -28,8 +27,9 @@ export default class DeskBridge extends Extension {
     private _schema(id: string): Gio.Settings {
         const dir = this.dir.get_child('schemas');
         let source = Gio.SettingsSchemaSource.get_default();
-        if (dir.query_exists(null))
-            source = Gio.SettingsSchemaSource.new_from_directory(dir.get_path()!, source, false);
+        const path = dir.get_path();
+        if (path && dir.query_exists(null))
+            source = Gio.SettingsSchemaSource.new_from_directory(path, source, false);
         const schema = source?.lookup(id, true);
         if (!schema)
             throw new Error(`GSettings schema ${id} not found`);
@@ -37,24 +37,28 @@ export default class DeskBridge extends Extension {
     }
 
     override enable(): void {
-        this._settings = this._schema('io.github.OlehDzhumyk.Desk');
-        this._clipSettings = this._schema(CLIPBOARD_SCHEMA);
-        initI18n(this, this._settings.get_string('language'));
-        this._build();
-        this._skinId = this._settings.connect('changed::skin', () => this._applySkin());
+        const settings = this._schema('io.github.OlehDzhumyk.Desk');
+        const clipSettings = this._schema(CLIPBOARD_SCHEMA);
+        this._settings = settings;
+        initI18n(this, settings.get_string('language'));
+        this._build(clipSettings);
+        this._skinId = settings.connect('changed::skin', () => { this._applySkin(); });
         // the language setting rebuilds the UI with the new texts
-        this._langId = this._settings.connect('changed::language', () => {
-            setLanguage(this._settings!.get_string('language'));
+        this._langId = settings.connect('changed::language', () => {
+            setLanguage(settings.get_string('language'));
             this._teardown();
-            this._build();
+            this._build(clipSettings);
         });
     }
 
-    private _build(): void {
+    private _build(clipSettings: Gio.Settings): void {
+        const quickSettings = Main.panel.statusArea.quickSettings;
+        if (!quickSettings)
+            throw new Error('desk-bridge: the quick settings panel is not available');
         this._indicator = new DeskIndicator();
-        Main.panel.statusArea.quickSettings!.addExternalIndicator(this._indicator);
-        this._clipboard = new ClipboardFeature(this.path, this._clipSettings!, this._skin(),
-            () => launchGui('clipboard'));
+        quickSettings.addExternalIndicator(this._indicator);
+        this._clipboard = new ClipboardFeature(this.path, clipSettings, this._skin(),
+            () => { launchGui('clipboard'); });
         this._applySkin();
     }
 
@@ -86,6 +90,5 @@ export default class DeskBridge extends Extension {
         this._langId = 0;
         this._teardown();
         this._settings = null;
-        this._clipSettings = null;
     }
 }

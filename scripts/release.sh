@@ -6,7 +6,7 @@
 #   scripts/release.sh [--dry-run] [--allow-empty] [--date YYYY-MM-DD] VERSION     e.g. 0.3.0 or 1.0.0-rc.1
 #
 # Updates:
-#   Cargo.toml                [workspace.package] version, and the four workspace crates in Cargo.lock
+#   Cargo.toml                [workspace.package] version, and the workspace crates (crates/*, xtask) in Cargo.lock
 #   bridge/package.json       version (and the root entries of package-lock.json)
 #   bridge/static/metadata.json  "version-name" = VERSION, "version" (the integer GNOME wants) + 1
 #   CHANGELOG.md              "## [Unreleased]" becomes "## [VERSION] - DATE", a new empty Unreleased
@@ -74,8 +74,7 @@ write("Cargo.toml", s[:m.start(2)] + version + s[m.end(2):], s)
 
 # Cargo.lock: workspace members only (path crates have no source line)
 members = set()
-for crate in os.listdir("crates"):
-    toml = os.path.join("crates", crate, "Cargo.toml")
+for toml in [os.path.join("crates", c, "Cargo.toml") for c in os.listdir("crates")] + ["xtask/Cargo.toml"]:
     if os.path.exists(toml):
         mm = re.search(r'^name = "([^"]+)"', read(toml), re.M)
         if mm and "version.workspace = true" in read(toml):

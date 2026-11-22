@@ -114,23 +114,23 @@ impl Service {
             act.busy.store(true, Ordering::SeqCst);
             let conn = emitter.connection().clone();
             std::thread::spawn(move || {
-                if let Ok(bad) = themes_core::apply::verify_live(&ctx, Duration::from_secs(5)) {
-                    if !bad.is_empty() {
-                        let list = bad
-                            .iter()
-                            .map(|b| b.0.as_str())
-                            .collect::<Vec<_>>()
-                            .join(", ");
-                        let _ = themes_core::shell::notify(
-                            &tr!("Themes: extensions turned off"),
-                            &tr!(
-                                "After the theme was applied these extensions went into an error state and were turned off: {list}",
-                                list = list
-                            ),
-                            "dialog-warning-symbolic",
-                        );
-                        emit_changed(&conn, &ctx);
-                    }
+                if let Ok(bad) = themes_core::apply::verify_live(&ctx, Duration::from_secs(5))
+                    && !bad.is_empty()
+                {
+                    let list = bad
+                        .iter()
+                        .map(|b| b.0.as_str())
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    let _ = themes_core::shell::notify(
+                        &tr!("Themes: extensions turned off"),
+                        &tr!(
+                            "After the theme was applied these extensions went into an error state and were turned off: {list}",
+                            list = list
+                        ),
+                        "dialog-warning-symbolic",
+                    );
+                    emit_changed(&conn, &ctx);
                 }
                 act.busy.store(false, Ordering::SeqCst);
                 act.touch();

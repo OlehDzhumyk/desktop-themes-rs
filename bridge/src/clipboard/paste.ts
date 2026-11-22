@@ -10,7 +10,7 @@ import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import {inputMethod} from '../shellTypes.js';
 
 export class Paster {
     private _device: Clutter.VirtualInputDevice;
@@ -21,8 +21,9 @@ export class Paster {
         const seat = global.stage.context.get_backend().get_default_seat();
         this._device = seat.create_virtual_device(Clutter.InputDeviceType.KEYBOARD_DEVICE);
         // terminals paste with Ctrl+Shift+Insert, everything else with Shift+Insert
-        Main.inputMethod.connectObject('notify::content-purpose', () => {
-            this._purpose = Main.inputMethod.content_purpose;
+        const im = inputMethod();
+        im.connectObject('notify::content-purpose', () => {
+            this._purpose = im.content_purpose;
         }, this);
     }
 
@@ -68,7 +69,7 @@ export class Paster {
         for (const id of this._timeouts)
             GLib.source_remove(id);
         this._timeouts.clear();
-        Main.inputMethod.disconnectObject(this);
+        inputMethod().disconnectObject(this);
         this._device.run_dispose();
     }
 }

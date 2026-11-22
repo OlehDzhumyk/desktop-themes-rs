@@ -51,7 +51,7 @@ export class WinFlyout extends ClipboardPanel {
             y_align: Clutter.ActorAlign.CENTER}));
         this._clearBtn = new St.Button({style_class: 'desk-clip-clear', label: _('Clear all'), can_focus: true});
         this._clearBtn.connect('clicked', () => {
-            void this.host.client.clear(true).then(() => this.refresh()).catch(e => console.warn(e));
+            void this.host.client.clear(true).then(() => this.refresh()).catch((e: unknown) => { console.warn(e); });
         });
         head.add_child(this._clearBtn);
         this.box.add_child(head);
@@ -151,7 +151,7 @@ export class WinFlyout extends ClipboardPanel {
         }
         inner.add_child(side);
         card.set_child(inner);
-        card.connect('clicked', () => this.activate(it));
+        card.connect('clicked', () => { this.activate(it); });
         // Tab / focus moves the selection too, so Enter, Delete and Ctrl+P act on the focused card
         card.connect('key-focus-in', () => {
             if (this.selected !== index) {

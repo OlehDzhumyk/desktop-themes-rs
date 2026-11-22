@@ -43,13 +43,30 @@ Path `/io/github/OlehDzhumyk/Desk/clipboard/`.
 | `persist-images` | boolean | `false` |  | Keep images between sessions | Off by default: images live only in $XDG_RUNTIME_DIR while the session runs. | clipboard | switch on `--page clipboard` |
 | `private-mode` | boolean | `false` |  | Private mode | Temporarily record nothing | clipboard | switch on `--page clipboard` |
 | `paste-on-select` | boolean | `true` |  | Paste the chosen item | After you choose an item it is pasted into the window you were working in | clipboard | switch on `--page clipboard` |
-| `toggle-shortcut` | shortcut list | `['<Shift><Super>v']` |  | Keyboard shortcut | Themes set it in desk.dconf: Super+V for Windows 11, Shift+Super+V for macOS. | clipboard | read-only row on `--page clipboard` |
+| `toggle-shortcut` | shortcut list | `['<Shift><Super>v']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Super+V for Windows 11, Shift+Super+V for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts clipboard-toggle replaces it and is re-applied after every theme apply. Change it in the window (Keyboard shortcuts) or with `themes shortcut`. | clipboard | shortcut row on `--page shortcuts` |
 | `excluded-apps` | string list | `['org.keepassxc.KeePassXC', 'KeePassXC', 'keepassxc', 'Bitwarden', 'bitwarden', 'com.bitwarden.desktop', '1Password', '1password', 'org.gnome.World.Secrets', 'secrets', 'org.gnome.seahorse.Application', 'Seahorse', 'proton-pass', 'Proton Pass', 'me.proton.Pass']` |  | Excluded applications | Applications whose copies are never recorded (WM class or app id) | clipboard | — (gsettings only) |
+
+## `io.github.OlehDzhumyk.Desk.Shortcuts`
+
+Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `clipboard-toggle` | shortcut list | `[]` |  | Open the clipboard panel | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | clipboard | shortcut row on `--page shortcuts` |
+
+## Shortcuts
+
+The theme default is written into the key in force (what the bridge binds); the override wins, survives theme switches and is re-applied by every `themes apply`. Empty override = follow the theme; `['disabled']` = no shortcut.
+
+| Id | Label | Feature | Key in force | Override |
+|---|---|---|---|---|
+| `clipboard-toggle` | Open the clipboard panel | clipboard | `/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle` |
 
 ## Pages of the window
 
 | Page | Title | Groups |
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
+| `shortcuts` | Keyboard shortcuts | Features |
 | `general` | General | Language |
 | `credits` | Credits | generated from CREDITS.md |

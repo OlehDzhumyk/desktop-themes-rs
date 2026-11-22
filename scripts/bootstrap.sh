@@ -79,7 +79,7 @@ if step build; then
           curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
           export PATH="$HOME/.cargo/bin:$PATH"
         else
-          echo "error: Rust >= 1.88 is required (found: $(rustc --version 2>&1)). Re-run with --rustup." >&2; exit 1
+          echo "error: Rust >= 1.89 is required (found: $(rustc --version 2>&1)). Re-run with --rustup." >&2; exit 1
         fi
       fi
       cd "$1" && cargo build --release --locked

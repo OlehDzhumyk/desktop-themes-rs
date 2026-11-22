@@ -199,7 +199,7 @@ checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
 name = "desk-proto"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
  "serde",
  "zbus",
@@ -207,7 +207,7 @@ dependencies = [
 
 [[package]]
 name = "desk-settings"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
  "gettext-rs",
  "gio",
@@ -215,7 +215,7 @@ dependencies = [
 
 [[package]]
 name = "deskd"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
  "desk-proto",
  "desk-settings",
@@ -223,6 +223,7 @@ dependencies = [
  "gio",
  "serde",
  "serde_json",
+ "signal-hook",
  "zbus",
 ]
 
@@ -1018,6 +1019,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
+name = "signal-hook"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49f7447afd772ca79ad17ae0a3972a6b0df0cb4b80990fd82707593e9e012a74"
+dependencies = [
+ "libc",
+ "signal-hook-registry",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1136,7 +1147,7 @@ dependencies = [
 
 [[package]]
 name = "theme-tokens"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
  "insta",
  "serde",
@@ -1145,7 +1156,7 @@ dependencies = [
 
 [[package]]
 name = "themes"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "desk-proto",
@@ -1160,8 +1171,9 @@ dependencies = [
 
 [[package]]
 name = "themes-core"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
+ "desk-proto",
  "desk-settings",
  "gio",
  "serde",
@@ -1406,7 +1418,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "2.1.0"
+version = "0.3.0"
 dependencies = [
  "desk-settings",
 ]

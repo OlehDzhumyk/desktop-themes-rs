@@ -17,3 +17,4 @@ serde_json.workspace = true
 theme-tokens.workspace = true
 zbus.workspace = true
 desk-settings.workspace = true
+desk-proto.workspace = true

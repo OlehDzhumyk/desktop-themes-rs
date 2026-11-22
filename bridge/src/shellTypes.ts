@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Typed views of the few shell objects whose typings are `any` or incomplete.
+import type Clutter from 'gi://Clutter';
+import type Meta from 'gi://Meta';
+import type Shell from 'gi://Shell';
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
+/** The part of Main.inputMethod the bridge uses (the typings declare it `any`). */
+export interface InputMethodInfo {
+    readonly content_purpose: Clutter.InputContentPurpose;
+    connectObject(signal: string, callback: () => void, owner: object): void;
+    disconnectObject(owner: object): void;
+    /** Where the focused client says its text cursor is (private to the shell). */
+    readonly _cursorRect?: {readonly x: number; readonly y: number; readonly height: number} | null;
+}
+
+export function inputMethod(): InputMethodInfo {
+    return Main.inputMethod as InputMethodInfo;
+}
+
+/** Main.pushModal with its real types (the typings declare an `any` overload); null: grab refused. */
+export function pushModal(actor: Clutter.Actor, actionMode: Shell.ActionMode): Clutter.Grab | null {
+    return Main.pushModal(actor, {actionMode}) as Clutter.Grab | null;
+}
+
+/** The window that has the focus; the typings say there always is one. */
+export function focusWindow(): Meta.Window | null {
+    return global.display.focus_window;
+}
+
+/** Text of anything that was thrown. */
+export function errorText(e: unknown): string {
+    return e instanceof Error ? e.message : String(e);
+}

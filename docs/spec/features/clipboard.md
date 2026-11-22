@@ -121,7 +121,8 @@ to deskd as the source application.
   Це не можна скасувати.»).
 * Ids are unique, never reused within a store.
 * Storage: text history in `~/.local/share/deskd/clipboard/history.json` (dir 0700, file 0600,
-  written atomically via temp file + rename after each change) when `persist` is on; images in
+  written atomically via temp file + rename, debounced: 2 s after the last change, at most 10 s after
+  the first, and flushed on SIGTERM/SIGINT/SIGHUP so a logout loses nothing) when `persist` is on; images in
   `$XDG_RUNTIME_DIR/deskd/clipboard/images` (gone at session end) unless `persist` and `persist-images`
   are both on, then in `~/.local/share/deskd/clipboard/images`. Changing those settings moves files
   accordingly; turning `persist` off deletes `history.json`. A corrupt store is ignored with a log
@@ -239,10 +240,9 @@ fine); deskd <= 20 MB resident after 200 pushes; capture adds no polling (event-
 * **G-CLIP-4** The caret position reads the private `Main.inputMethod._cursorRect`
   (`panel.ts` `_anchorPoint`), which can disappear in a Shell update; the pointer fallback hides the
   failure.
-* **G-CLIP-5** `Entry.hash` is std `DefaultHasher` (`crates/deskd/src/clipboard.rs` `hash_of`), whose
-  algorithm Rust does not promise to keep; the hash is persisted in `history.json` and not recomputed at
-  load, so after a toolchain change a re-copied old text may become a duplicate row. Use a stable hash or
-  recompute at load.
+* **G-CLIP-5** *(resolved)* `Entry.hash` was std `DefaultHasher`, whose algorithm Rust does not promise to
+  keep. It is now FNV-1a 64 (`desk_settings::stable_hash`); store version 2, and a version 1 history has its
+  hashes recomputed at load. The thumbnail cache of the window uses the same hash (old thumbnails are purged).
 * **G-CLIP-6** Windows flyout: the pin button uses the same icon for pinned and unpinned
   (`it.pinned ? 'view-pin-symbolic' : 'view-pin-symbolic'`), the state is only a style class; `_expanded`
   keeps its index after a delete, so the next card appears expanded.

@@ -16,6 +16,7 @@ pub mod modules;
 pub mod paths;
 pub mod plan;
 pub mod shell;
+pub mod shortcuts;
 pub mod snapshot;
 pub mod state;
 pub mod theme;

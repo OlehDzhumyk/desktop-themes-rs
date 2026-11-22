@@ -38,9 +38,9 @@ export class ListPanel extends ClipboardPanel {
         });
         this._entry.clutter_text.accessible_name = _('Search the clipboard');
         this._entry.set_primary_icon(new St.Icon({icon_name: 'edit-find-symbolic', style_class: 'desk-clip-search-icon'}));
-        this._entry.clutter_text.connect('text-changed', () => this._queueSearch());
+        this._entry.clutter_text.connect('text-changed', () => { this._queueSearch(); });
         // Enter in the search field (the input method may consume the key event itself)
-        this._entry.clutter_text.connect('activate', () => this.activateSelected());
+        this._entry.clutter_text.connect('activate', () => { this.activateSelected(); });
         this._entry.clutter_text.connect('key-press-event', (_a: Clutter.Actor, ev: Clutter.Event) => {
             // arrows, Enter and shortcuts go to the list even while typing
             return this.onKey(ev);
@@ -79,7 +79,8 @@ export class ListPanel extends ClipboardPanel {
 
         if (this._full) {
             const hints = new St.BoxLayout({...HORIZONTAL, style_class: 'desk-clip-hints'});
-            for (const [k, t] of [['↵', _('paste')], ['Ctrl+P', _('pin')], ['Ctrl+⌫', _('delete')], ['Esc', _('close')]]) {
+            const keys: [string, string][] = [['↵', _('paste')], ['Ctrl+P', _('pin')], ['Ctrl+⌫', _('delete')], ['Esc', _('close')]];
+            for (const [k, t] of keys) {
                 hints.add_child(new St.Label({text: k, style_class: 'desk-clip-key'}));
                 hints.add_child(new St.Label({text: t, style_class: 'desk-clip-hint'}));
             }
@@ -176,7 +177,7 @@ export class ListPanel extends ClipboardPanel {
         if (this._full)
             inner.add_child(new St.Label({text: ago(it.time), style_class: 'desk-clip-time', y_align: Clutter.ActorAlign.CENTER}));
         row.set_child(inner);
-        row.connect('clicked', () => this.activate(it));
+        row.connect('clicked', () => { this.activate(it); });
         row.connect('notify::hover', () => {
             if (row.hover && this.selected !== index) {
                 this.selected = index;
