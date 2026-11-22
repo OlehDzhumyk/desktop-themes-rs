@@ -18,6 +18,7 @@ Labels are English gettext ids; the Ukrainian texts are in `po/uk.po` (see
 | Feature | Origin |
 |---|---|
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
+| Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | Application (`app`) | — |
 
 ## `io.github.OlehDzhumyk.Desk`
@@ -53,6 +54,21 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | Key | Type | Default | Range / choices | Label | Description | Feature | Window |
 |---|---|---|---|---|---|---|---|
 | `clipboard-toggle` | shortcut list | `[]` |  | Open the clipboard panel | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | clipboard | shortcut row on `--page shortcuts` |
+| `mixer-open` | shortcut list | `[]` |  | Open the volume mixer | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | mixer | shortcut row on `--page shortcuts` |
+
+## `io.github.OlehDzhumyk.Desk.Mixer`
+
+Path `/io/github/OlehDzhumyk/Desk/mixer/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Volume mixer | Volume of each application and the choice of output and input devices | mixer | switch on `--page mixer` |
+| `entry-point` | choice | `'menu-and-icon'` | `menu`, `menu-and-icon` | Where to open it | 'menu': inside the volume menu of quick settings only; 'menu-and-icon': a secondary click on the system area of the top bar opens it directly as well. | mixer | drop-down on `--page mixer` |
+| `show-silent-apps` | boolean | `false` |  | Show silent applications | Also list applications that keep a sound stream open without playing | mixer | switch on `--page mixer` |
+| `remember-app-volume` | boolean | `false` |  | Remember application volume | Stored in ~/.local/share/deskd/mixer/apps.json (mode 0600): application ids with a volume and a mute flag. Turning it off forgets them and deletes the file. | mixer | switch on `--page mixer` |
+| `volume-step` | unsigned | `5` | 1…20 (step 1) | Volume step, % | How much an arrow key changes a slider (Shift: 1 %) | mixer | spin button on `--page mixer` |
+| `hide-apps` | string list | `[]` |  | Hidden applications | Application keys (app id or program name) never listed in the mixer | mixer | — (gsettings only) |
+| `mixer-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | mixer | shortcut row on `--page shortcuts` |
 
 ## Shortcuts
 
@@ -61,12 +77,14 @@ The theme default is written into the key in force (what the bridge binds); the 
 | Id | Label | Feature | Key in force | Override |
 |---|---|---|---|---|
 | `clipboard-toggle` | Open the clipboard panel | clipboard | `/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle` |
+| `mixer-open` | Open the volume mixer | mixer | `/io/github/OlehDzhumyk/Desk/mixer/mixer-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/mixer-open` |
 
 ## Pages of the window
 
 | Page | Title | Groups |
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
+| `mixer` | Volume mixer | Mixer, How to open |
 | `shortcuts` | Keyboard shortcuts | Features |
 | `general` | General | Language |
 | `credits` | Credits | generated from CREDITS.md |
