@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Програма «Теми» (GTK 4 + libadwaita).
 
+mod a11y;
 mod card;
 mod credits;
 mod features;
 mod preview;
 mod window;
+
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
@@ -38,12 +41,22 @@ const CSS: &str = r#"
 .badge { background: var(--accent-bg-color); color: var(--accent-fg-color);
          border-radius: 999px; padding: 2px 10px; font-weight: bold; font-size: 0.85em; }
 .badge.partial { background: alpha(black, 0.55); color: white; }
+.badge.experimental { background: var(--warning-bg-color); color: var(--warning-fg-color); }
 .badge.origin { background: alpha(currentColor, 0.12); color: inherit; font-weight: normal; }
 .badges { margin: 10px; }
+@media (prefers-contrast: more) {
+  .theme-card.active { box-shadow: 0 0 0 4px currentColor; }
+  .badge, .badge.partial, .badge.experimental { background: var(--warning-bg-color); color: var(--warning-fg-color); }
+.badge.origin { background: none; color: inherit; border: 2px solid currentColor; }
+  .busy-veil { background: alpha(black, 0.6); }
+}
 .busy-veil { background: alpha(black, 0.35); border-radius: 14px 14px 0 0; }
 .module-chip { font-size: 0.85em; }
 flowboxchild { border-radius: 14px; padding: 0; }
 "#;
+
+/// Перезапустити вікно після виходу з циклу (дія `app.restart`, напр. після зміни мови).
+pub static RESTART: AtomicBool = AtomicBool::new(false);
 
 // ---------------------------------------------------------------- один екземпляр
 // GApplication не може зайняти io.github.OlehDzhumyk.Themes (цю назву має D-Bus-служба),
@@ -114,7 +127,7 @@ pub fn run(opts: GuiOptions) -> i32 {
             let provider = gtk::CssProvider::new();
             provider.load_from_string(CSS);
             gtk::style_context_add_provider_for_display(
-                &gdk::Display::default().expect("дисплей"),
+                &gdk::Display::default().expect("display"),
                 &provider,
                 gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
             );
@@ -139,9 +152,27 @@ pub fn run(opts: GuiOptions) -> i32 {
     }
     let argv0 = std::env::args().next().unwrap_or_else(|| "themes".into());
     let code = app.run_with_args(&[argv0]);
+    if RESTART.load(Ordering::SeqCst) {
+        restart(_guard.as_ref());
+    }
     if exit.get() != 0 {
         exit.get()
     } else {
         i32::from(code)
     }
+}
+
+/// Замінити процес новим вікном (мова та інші налаштування читаються заново).
+fn restart(conn: Option<&zbus::Connection>) {
+    use std::os::unix::process::CommandExt;
+    if let Some(c) = conn {
+        let _ = zbus::block_on(c.release_name(WINDOW_NAME));
+    }
+    let Ok(exe) = std::env::current_exe() else {
+        return;
+    };
+    let mut cmd = std::process::Command::new(exe);
+    desk_settings::i18n::restore_child_env(&mut cmd);
+    let err = cmd.arg("gui").exec();
+    eprintln!("themes: restart failed: {err}");
 }

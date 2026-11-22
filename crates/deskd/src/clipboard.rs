@@ -5,6 +5,7 @@
 //! Чиста логіка без D-Bus і GSettings (їх під'єднує `service.rs`), тож усе покрито тестами.
 //! Захоплення буфера в GNOME Wayland робить оболонка (desk-bridge), рушій лише отримує вміст.
 
+use desk_settings::tr;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
@@ -145,8 +146,14 @@ pub fn image_size(data: &[u8]) -> Option<(u32, u32)> {
 fn image_label(mime: &str, data: &[u8]) -> String {
     let fmt = image_ext(mime).to_uppercase();
     match image_size(data) {
-        Some((w, h)) => format!("Зображення {fmt} {w}×{h}"),
-        None => format!("Зображення {fmt}"),
+        // TRANSLATORS: description of a copied image in the clipboard history, e.g. "PNG image 640×480"
+        Some((w, h)) => tr!(
+            "{format} image {width}×{height}",
+            format = fmt,
+            width = w,
+            height = h
+        ),
+        None => tr!("{format} image", format = fmt),
     }
 }
 
@@ -304,7 +311,11 @@ impl Engine {
         let is_text = is_text_mime(mime);
         let k = if is_text { kind::TEXT } else { kind::IMAGE };
         let hash = hash_of(k, data);
-        if let Some(pos) = self.items.iter().position(|e| e.hash == hash && e.kind == k) {
+        if let Some(pos) = self
+            .items
+            .iter()
+            .position(|e| e.hash == hash && e.kind == k)
+        {
             let mut e = self.items.remove(pos);
             e.time = now;
             let id = e.id;
@@ -524,7 +535,10 @@ impl Engine {
             return;
         };
         let Ok(store) = serde_json::from_slice::<Store>(&bytes) else {
-            eprintln!("deskd: пошкоджений {}, ігнорую", self.store_path().display());
+            eprintln!(
+                "deskd: {} is damaged, ignoring it",
+                self.store_path().display()
+            );
             return;
         };
         self.next_id = store.next_id.max(1);
@@ -582,11 +596,20 @@ mod tests {
         assert_eq!(e.push(T, b"two", &[], "", 2), Pushed::Added(2));
         assert_eq!(e.push("UTF8_STRING", b"one", &[], "", 3), Pushed::Bumped(1));
         let l = e.list("", 0);
-        assert_eq!(l.iter().map(|i| i.text.as_str()).collect::<Vec<_>>(), ["one", "two"]);
+        assert_eq!(
+            l.iter().map(|i| i.text.as_str()).collect::<Vec<_>>(),
+            ["one", "two"]
+        );
         assert_eq!(l[0].time, 3);
         assert_eq!(l[0].mime, T);
-        assert_eq!(e.push(T, b"   \n", &[], "", 4), Pushed::Skipped(Skip::Empty));
-        assert_eq!(e.push("text/html", b"<b>", &[], "", 4), Pushed::Skipped(Skip::Unsupported));
+        assert_eq!(
+            e.push(T, b"   \n", &[], "", 4),
+            Pushed::Skipped(Skip::Empty)
+        );
+        assert_eq!(
+            e.push("text/html", b"<b>", &[], "", 4),
+            Pushed::Skipped(Skip::Unsupported)
+        );
         let _ = std::fs::remove_dir_all(d);
     }
 
@@ -598,7 +621,10 @@ mod tests {
         };
         let (mut e, d) = engine("sens", cfg);
         let hint = vec![T.to_string(), "x-kde-passwordManagerHint".to_string()];
-        assert_eq!(e.push(T, b"secret", &hint, "", 1), Pushed::Skipped(Skip::Sensitive));
+        assert_eq!(
+            e.push(T, b"secret", &hint, "", 1),
+            Pushed::Skipped(Skip::Sensitive)
+        );
         assert_eq!(
             e.push(T, b"secret", &[], "org.keepassxc.keepassxc", 1),
             Pushed::Skipped(Skip::ExcludedApp)
@@ -630,7 +656,11 @@ mod tests {
             e.push(T, format!("t{i}").as_bytes(), &[], "", i);
         }
         let texts: Vec<String> = e.list("", 0).into_iter().map(|i| i.text).collect();
-        assert_eq!(texts, ["t5", "t4", "t3", "t0"], "pinned t0 survives trimming");
+        assert_eq!(
+            texts,
+            ["t5", "t4", "t3", "t0"],
+            "pinned t0 survives trimming"
+        );
         assert!(e.clear(true));
         assert_eq!(e.len(), 1);
         assert!(e.pin(1, false));
@@ -670,7 +700,7 @@ mod tests {
         };
         let it = e.list("", 0).remove(0);
         assert_eq!(it.kind, "image");
-        assert_eq!(it.text, "Зображення PNG 640×480");
+        assert_eq!(it.text, "PNG image 640×480");
         assert!(it.image.starts_with(d.join("run").to_str().unwrap()));
         assert_eq!(e.get(id).unwrap().1, img);
         assert_eq!(
@@ -682,7 +712,11 @@ mod tests {
         c.persist_images = true;
         e.set_config(c);
         let it = e.list("", 0).remove(0);
-        assert!(it.image.starts_with(d.join("data").to_str().unwrap()), "{}", it.image);
+        assert!(
+            it.image.starts_with(d.join("data").to_str().unwrap()),
+            "{}",
+            it.image
+        );
         e.save().unwrap();
         let mut e2 = Engine::new(e.cfg.clone(), d.join("data"), d.join("run"));
         e2.load();
@@ -690,7 +724,10 @@ mod tests {
         assert!(e2.delete(id));
         assert!(!Path::new(&it.image).exists());
         e2.cfg.images = false;
-        assert_eq!(e2.push("image/png", &img, &[], "", 3), Pushed::Skipped(Skip::ImagesOff));
+        assert_eq!(
+            e2.push("image/png", &img, &[], "", 3),
+            Pushed::Skipped(Skip::ImagesOff)
+        );
         let _ = std::fs::remove_dir_all(d);
     }
 
@@ -706,7 +743,11 @@ mod tests {
             use std::os::unix::fs::PermissionsExt;
             let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
             assert_eq!(mode, 0o600);
-            let dmode = std::fs::metadata(d.join("data")).unwrap().permissions().mode() & 0o777;
+            let dmode = std::fs::metadata(d.join("data"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777;
             assert_eq!(dmode, 0o700);
         }
         let mut e2 = Engine::new(Config::default(), d.join("data"), d.join("run"));

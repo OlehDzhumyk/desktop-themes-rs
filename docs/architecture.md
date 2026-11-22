@@ -25,6 +25,7 @@ The repository is a Cargo workspace:
 | `crates/themes-core` | library | the theme manager: theme contract (incl. inheritance), modules, plan/apply, dconf, doctor, crash detection |
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
+| `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
 | `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (now: clipboard history) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` to ES modules (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
@@ -179,7 +180,7 @@ re-enables them without the user's confirmation (`themes doctor --enable-extensi
 Silverblue has no compilers on the host. `scripts/lib.sh` runs build steps inside a toolbox
 (`desktop-themes-build`, override with `DT_TOOLBOX`) that `scripts/bootstrap.sh` creates with these
 packages: `git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel
-libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm`
+libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm gettext`
 (npm builds the TypeScript bridge; its dev dependencies are pinned in `bridge/package-lock.json`).
 The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.88 or newer is required
 (edition 2024, let chains); `bootstrap.sh --rustup` installs a toolchain with rustup if the

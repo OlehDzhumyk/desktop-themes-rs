@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Модулі теми: вигляд, поведінка, звуки, програми.
 
+use desk_settings::tr;
 use serde::{Deserialize, Serialize};
 
 use crate::error::{Error, Result};
@@ -27,23 +28,24 @@ impl Module {
         }
     }
 
-    pub fn label(self) -> &'static str {
+    /// Назва модуля мовою інтерфейсу.
+    pub fn label(self) -> String {
         match self {
-            Module::Look => "Вигляд",
-            Module::Behavior => "Поведінка",
-            Module::Sounds => "Звуки",
-            Module::Apps => "Програми",
+            Module::Look => tr!("Look"),
+            Module::Behavior => tr!("Behaviour"),
+            Module::Sounds => tr!("Sounds"),
+            Module::Apps => tr!("Apps"),
         }
     }
 
-    pub fn description(self) -> &'static str {
+    pub fn description(self) -> String {
         match self {
-            Module::Look => "Теми GTK і оболонки, значки, шрифти, шпалери, розширення",
+            Module::Look => tr!("GTK and shell themes, icons, fonts, wallpapers, extensions"),
             Module::Behavior => {
-                "Клавіатурні скорочення, Alt+Tab, сенсорна панель, анімації, розташування вікон"
+                tr!("Keyboard shortcuts, Alt+Tab, touchpad, animations, window placement")
             }
-            Module::Sounds => "Звукова тема та системні звуки",
-            Module::Apps => "Налаштування програм (палітра терміналу Ptyxis тощо)",
+            Module::Sounds => tr!("Sound theme and system sounds"),
+            Module::Apps => tr!("Application settings (the Ptyxis terminal palette and others)"),
         }
     }
 
@@ -58,12 +60,13 @@ impl Module {
 
     pub fn parse(s: &str) -> Result<Module> {
         match s.trim().to_lowercase().as_str() {
-            "look" | "вигляд" => Ok(Module::Look),
-            "behavior" | "behaviour" | "поведінка" => Ok(Module::Behavior),
-            "sounds" | "sound" | "звуки" => Ok(Module::Sounds),
-            "apps" | "app" | "програми" => Ok(Module::Apps),
-            other => Err(Error(format!(
-                "невідомий модуль «{other}» (доступні: look, behavior, sounds, apps)"
+            "look" | "вигляд" => Ok(Module::Look), // i18n-ok: input alias
+            "behavior" | "behaviour" | "поведінка" => Ok(Module::Behavior), // i18n-ok: input alias
+            "sounds" | "sound" | "звуки" => Ok(Module::Sounds), // i18n-ok: input alias
+            "apps" | "app" | "програми" => Ok(Module::Apps), // i18n-ok: input alias
+            other => Err(Error(tr!(
+                "unknown module “{module}” (available: look, behavior, sounds, apps)",
+                module = other
             ))),
         }
     }

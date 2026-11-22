@@ -3,7 +3,9 @@
 
 use std::time::Duration;
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, FromArgMatches, Parser, Subcommand};
+use desk_settings::i18n::gettext;
+use desk_settings::{n_, tr};
 use serde_json::json;
 use themes_core::apply::{ApplyResult, apply_opts, delete, verify_live};
 use themes_core::doctor::{DoctorOptions, doctor};
@@ -12,16 +14,49 @@ use themes_core::state::State;
 use themes_core::theme::all_themes;
 use themes_core::{Ctx, Error};
 
+// Тексти довідки (ідентифікатори gettext): атрибути clap не бачить xgettext, тож вони тут.
+const H01: &str = n_("GNOME desktop theme switcher (modules: look, behavior, sounds, apps)");
+const H02: &str = n_(
+    "Without arguments it opens the Themes window. --json gives machine-readable output.\nRoot: ~/.local/share/desktop-themes (DESKTOP_THEMES_ROOT)",
+);
+const H03: &str = n_("Machine-readable output (JSON)");
+const H04: &str = n_("List the themes (* = active for the look)");
+const H05: &str = n_("Where every module comes from");
+const H06: &str = n_("Apply a theme (all modules or the chosen ones)");
+const H07: &str = n_("MODULES");
+const H08: &str = n_("Only these modules: look,behavior,sounds,apps");
+const H09: &str = n_("MODULE");
+const H10: &str = n_("One module (can be repeated)");
+const H11: &str = n_("Show what would change without changing anything");
+const H12: &str = n_("Do not wait 5 s to check the extensions after a live apply");
+const H13: &str = n_("Go back to the standard look (= apply fedora)");
+const H14: &str = n_("Keep the settings of the themes' own extensions on a full reset");
+const H15: &str = n_("Save the current look as a new theme");
+const H16: &str = n_("Delete a theme (into trash/); not fedora and not active ones");
+const H17: &str = n_("Check extensions, the journal, themes/icons/sounds, the GNOME version");
+const H18: &str = n_("Turn broken extensions off (and repaired ones back on), send a notification");
+const H19: &str = n_("SEC");
+const H20: &str = n_("Wait up to N seconds for GNOME Shell to start (for running at login)");
+const H21: &str = n_("Do not send notifications");
+const H22: &str = n_(
+    "Turn the extensions back on that GNOME turned off after a shell crash (disable-user-extensions). Do it only after removing the cause of the crash.",
+);
+const H23: &str = n_("Open the Themes window");
+const H24: &str = n_("Save a screenshot of the window as PNG and exit");
+const H25: &str = n_("Window size, e.g. 1180x780");
+const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
+const H28: &str = n_("Design tokens (tokens.toml): check, generate, a theme from a wallpaper");
+const H26: &str = n_("Page: themes | mix | features | clipboard | general | credits");
+
 #[derive(Parser)]
 #[command(
     name = "themes",
     version,
-    about = "Перемикач тем робочого столу GNOME (модулі: look, behavior, sounds, apps)",
-    after_help = "Без аргументів відкриває програму «Теми». Параметр --json — машинозчитуваний вивід.\nКорінь: ~/.local/share/desktop-themes (DESKTOP_THEMES_ROOT)"
+    about = H01,
+    after_help = H02
 )]
 struct Cli {
-    /// Машинозчитуваний вивід (JSON)
-    #[arg(long, global = true)]
+    #[arg(long, global = true, help = H03)]
     json: bool,
     #[command(subcommand)]
     cmd: Cmd,
@@ -29,39 +64,39 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Cmd {
-    /// Список тем (* — активна для «вигляду»)
+    #[command(about = H04)]
     List,
-    /// Звідки взято кожен модуль
+    #[command(about = H05)]
     Current,
-    /// Застосувати тему (усі модулі або вибрані)
+    #[command(about = H06)]
     Apply {
         id: String,
-        /// Лише ці модулі: look,behavior,sounds,apps
-        #[arg(long, value_name = "МОДУЛІ")]
+        #[arg(long, value_name = H07, help = H08)]
         only: Option<String>,
-        /// Один модуль (можна повторювати)
-        #[arg(long, value_name = "МОДУЛЬ")]
+        #[arg(long, value_name = H09, help = H10)]
         module: Vec<String>,
-        /// Показати, що зміниться, нічого не змінюючи
-        #[arg(long)]
+        #[arg(long, help = H11)]
         dry_run: bool,
-        /// Не чекати 5 с на перевірку розширень після живого застосування
-        #[arg(long)]
+        #[arg(long, help = H12)]
         no_verify: bool,
+        #[arg(long, short = 'y', help = H27)]
+        yes: bool,
     },
-    /// Повернути стандартний вигляд (= apply fedora)
+    #[command(about = H13)]
     Reset {
-        #[arg(long, value_name = "МОДУЛІ")]
+        #[arg(long, value_name = H07)]
         only: Option<String>,
         #[arg(long)]
         dry_run: bool,
         #[arg(long)]
         no_verify: bool,
-        /// Не прибирати власні налаштування розширень тем при повному скиданні
-        #[arg(long)]
+        #[arg(
+            long,
+            help = H14
+        )]
         keep_extension_settings: bool,
     },
-    /// Зберегти поточний вигляд як нову тему
+    #[command(about = H15)]
     Snapshot {
         id: String,
         #[arg(long)]
@@ -69,43 +104,79 @@ enum Cmd {
         #[arg(long)]
         force: bool,
     },
-    /// Видалити тему (у trash/); fedora й активні — ні
+    #[command(about = H16)]
     Delete { id: String },
-    /// Перевірити розширення, журнал, теми/значки/звуки, версію GNOME
+    #[command(about = H17)]
     Doctor {
-        /// Вимкнути зламані розширення (і повернути полагоджені), надіслати сповіщення
-        #[arg(long)]
+        #[arg(
+            long,
+            help = H18
+        )]
         fix: bool,
-        /// Чекати до N секунд на запуск GNOME Shell (для запуску під час входу)
-        #[arg(long, value_name = "СЕК", default_value_t = 0)]
+        #[arg(
+            long,
+            value_name = H19,
+            default_value_t = 0,
+            help = H20
+        )]
         wait_shell: u64,
-        /// Не надсилати сповіщення
-        #[arg(long)]
+        #[arg(long, help = H21)]
         no_notify: bool,
-        /// Знову ввімкнути розширення, які GNOME вимкнув після збою оболонки
-        /// (disable-user-extensions). Робіть це, лише прибравши причину збою.
-        #[arg(long)]
+        #[arg(
+            long,
+            help = H22
+        )]
         enable_extensions: bool,
     },
-    /// Дизайн-токени (tokens.toml): перевірка, генерація, тема з шпалер
+    #[command(about = H28)]
     Tokens {
         #[command(subcommand)]
         cmd: crate::tokens_cli::TokensCmd,
     },
-    /// Відкрити програму «Теми»
+    #[command(about = H23)]
     Gui {
-        /// Зберегти знімок вікна у PNG і вийти
-        #[arg(long)]
+        #[arg(long, help = H24)]
         screenshot: Option<String>,
         #[arg(long, value_name = "dark|light")]
         color_scheme: Option<String>,
-        /// Розмір вікна, напр. 1180x780
-        #[arg(long)]
+        #[arg(long, help = H25)]
         size: Option<String>,
-        /// Сторінка: themes | mix | features | clipboard | credits
-        #[arg(long)]
+        #[arg(
+            long,
+            help = H26
+        )]
         page: Option<String>,
     },
+}
+
+/// Перекласти тексти довідки clap (вони записані англійською як ідентифікатори gettext).
+fn translate_help(cmd: clap::Command) -> clap::Command {
+    let t = |s: &clap::builder::StyledStr| gettext(s.to_string());
+    let mut cmd = cmd.mut_args(|a| {
+        let mut a = a;
+        if let Some(h) = a.get_help() {
+            let h = t(h);
+            a = a.help(h);
+        }
+        if let Some(names) = a.get_value_names() {
+            // clap хоче &'static str; рядків кілька, витік один раз за запуск
+            let names: Vec<&'static str> = names
+                .iter()
+                .map(|n| &*Box::leak(gettext(n.as_str()).into_boxed_str()))
+                .collect();
+            a = a.value_names(names);
+        }
+        a
+    });
+    if let Some(s) = cmd.get_about() {
+        let s = t(s);
+        cmd = cmd.about(s);
+    }
+    if let Some(s) = cmd.get_after_help() {
+        let s = t(s);
+        cmd = cmd.after_help(s);
+    }
+    cmd.mut_subcommands(translate_help)
 }
 
 fn out_json(v: &impl serde::Serialize) {
@@ -115,7 +186,10 @@ fn out_json(v: &impl serde::Serialize) {
 pub fn run(args: Vec<String>) -> i32 {
     let json_flag = args.iter().any(|a| a == "--json");
     // сумісність зі старим `theme` без аргументів: довідка
-    let cli = match Cli::try_parse_from(&args) {
+    let parsed = translate_help(Cli::command())
+        .try_get_matches_from(&args)
+        .and_then(|m| Cli::from_arg_matches(&m));
+    let cli = match parsed {
         Ok(c) => c,
         Err(e) => {
             if json_flag
@@ -139,7 +213,7 @@ pub fn run(args: Vec<String>) -> i32 {
             if cli.json {
                 out_json(&json!({"ok": false, "error": e.0}));
             } else {
-                eprintln!("Помилка: {}", e.0);
+                eprintln!("{}", tr!("Error: {error}", error = e.0));
             }
             1
         }
@@ -177,6 +251,8 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                             "active_modules": active_modules,
                             "modules": t.modules(),
                             "builtin": t.builtin(), "extensions": t.extensions(),
+                            "experimental": t.experimental(),
+                            "warning": if t.experimental() { t.warning() } else { String::new() },
                             "path": t.dir,
                         })
                     })
@@ -203,7 +279,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                         if act.is_empty() {
                             String::new()
                         } else {
-                            format!(" активні: {}", act.join(","))
+                            format!(" {}", tr!("active: {modules}", modules = act.join(",")))
                         },
                         t.description()
                     );
@@ -218,7 +294,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                     &json!({"current": st.source(Module::Look), "modules": st.modules, "mixed": st.uniform().is_none() && !st.modules.is_empty()}),
                 );
             } else if st.modules.is_empty() {
-                println!("(невідомо — тему ще не застосовували)");
+                println!("{}", tr!("(unknown: no theme has been applied yet)"));
             } else {
                 for m in Module::ALL {
                     println!(
@@ -229,7 +305,10 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                     );
                 }
                 if let Some(u) = st.uniform() {
-                    println!("(усі модулі з теми «{u}»)");
+                    println!(
+                        "{}",
+                        tr!("(all modules from the theme “{theme}”)", theme = u)
+                    );
                 }
             }
             Ok(0)
@@ -240,8 +319,12 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             module,
             dry_run,
             no_verify,
+            yes,
         } => {
             let mods = modules_arg(only.as_deref(), &module)?;
+            if !dry_run && !yes {
+                confirm_experimental(ctx, &id, json)?;
+            }
             do_apply(ctx, &id, &mods, dry_run, no_verify, true, json)
         }
         Cmd::Reset {
@@ -272,16 +355,19 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                     .map(|(m, n)| format!("{m}: {n}"))
                     .collect();
                 println!(
-                    "Збережено тему «{}» ({}): ключів dconf {} ({}), розширень {}\n  {}",
-                    r.name,
-                    r.theme,
-                    r.keys,
-                    per.join(", "),
-                    r.extensions.len(),
+                    "{}\n  {}",
+                    tr!(
+                        "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), extensions {extensions}",
+                        name = r.name,
+                        id = r.theme,
+                        keys = r.keys,
+                        per_module = per.join(", "),
+                        extensions = r.extensions.len()
+                    ),
                     r.path
                 );
                 for w in &r.warnings {
-                    println!("  увага: {w}");
+                    println!("  {}", tr!("warning: {text}", text = w));
                 }
             }
             Ok(0)
@@ -291,7 +377,14 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             if json {
                 out_json(&json!({"ok": true, "theme": id, "name": name, "moved_to": moved}));
             } else {
-                println!("Тему «{name}» видалено (переміщено до {moved})");
+                println!(
+                    "{}",
+                    tr!(
+                        "Theme “{name}” deleted (moved to {path})",
+                        name = name,
+                        path = moved
+                    )
+                );
             }
             Ok(0)
         }
@@ -304,9 +397,12 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             if enable_extensions {
                 if themes_core::crash::user_extensions_disabled() {
                     themes_core::crash::enable_user_extensions()?;
-                    println!("Розширення знову ввімкнено (disable-user-extensions=false).");
+                    println!(
+                        "{}",
+                        tr!("Extensions turned on again (disable-user-extensions=false).")
+                    );
                 } else {
-                    println!("Розширення й так увімкнені.");
+                    println!("{}", tr!("Extensions are already on."));
                 }
             }
             let r = doctor(
@@ -324,14 +420,17 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                     "GNOME Shell: {} ({})",
                     r.gnome_version.clone().unwrap_or("?".into()),
                     if r.shell_running {
-                        "запущено"
+                        tr!("running")
                     } else {
-                        "не запущено"
+                        tr!("not running")
                     }
                 );
-                println!("Перевірено розширень: {}", r.extensions_checked);
+                println!(
+                    "{}",
+                    tr!("Extensions checked: {count}", count = r.extensions_checked)
+                );
                 if r.issues.is_empty() {
-                    println!("Проблем не знайдено.");
+                    println!("{}", tr!("No problems found."));
                 }
                 for i in &r.issues {
                     let mark = match i.severity {
@@ -343,17 +442,17 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                         "  {mark} {}{}",
                         i.message,
                         if i.fixable && !fix {
-                            "  [виправить: themes doctor --fix]"
+                            format!("  [{}]", tr!("fix with: themes doctor --fix"))
                         } else {
-                            ""
+                            String::new()
                         }
                     );
                 }
                 for f in &r.fixed {
-                    println!("  виправлено: {f}");
+                    println!("  {}", tr!("fixed: {what}", what = f));
                 }
                 for u in &r.restored {
-                    println!("  знову увімкнено: {u}");
+                    println!("  {}", tr!("turned on again: {uuid}", uuid = u));
                 }
             }
             Ok(if r.ok { 0 } else { 3 })
@@ -380,6 +479,42 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     }
 }
 
+/// Експериментальна тема: спитати y/N у терміналі; без терміналу (скрипти, --json) — відмова, якщо
+/// не передано --yes.
+fn confirm_experimental(ctx: &Ctx, id: &str, json: bool) -> Result<(), Error> {
+    use std::io::{BufRead, IsTerminal, Write};
+    let t = themes_core::theme::get_theme(ctx, id)?;
+    if !t.experimental() {
+        return Ok(());
+    }
+    let interactive = !json && std::io::stdin().is_terminal() && std::io::stderr().is_terminal();
+    if !interactive {
+        return Err(Error(tr!(
+            "“{name}” is an experimental theme: {warning}\nRun it again with --yes to apply it anyway.",
+            name = t.name(),
+            warning = t.warning()
+        )));
+    }
+    eprintln!(
+        "{}",
+        tr!("“{name}” is an experimental theme.", name = t.name())
+    );
+    eprintln!("{}", t.warning());
+    // TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
+    eprint!("{} ", tr!("Apply it anyway? [y/N]"));
+    let _ = std::io::stderr().flush();
+    let mut line = String::new();
+    std::io::stdin().lock().read_line(&mut line)?;
+    let a = line.trim().to_lowercase();
+    // TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
+    let yes_words = tr!("y|yes");
+    if a == "y" || a == "yes" || yes_words.split('|').any(|w| !w.is_empty() && a == w) {
+        Ok(())
+    } else {
+        Err(Error(tr!("Cancelled: the theme was not applied.")))
+    }
+}
+
 fn do_apply(
     ctx: &Ctx,
     id: &str,
@@ -393,8 +528,11 @@ fn do_apply(
     if !dry_run && !no_verify && r.shell_running && r.extensions_changed {
         if let Ok(bad) = verify_live(ctx, Duration::from_secs(5)) {
             for (u, why) in &bad {
-                r.warnings
-                    .push(format!("автовідкат: розширення {u} вимкнено ({why})"));
+                r.warnings.push(tr!(
+                    "automatic rollback: extension {uuid} turned off ({reason})",
+                    uuid = u,
+                    reason = why
+                ));
             }
             r.rolled_back = bad.into_iter().map(|b| b.0).collect();
         }
@@ -411,25 +549,31 @@ fn print_apply(r: &ApplyResult) {
     let mods: Vec<&str> = r.applied_modules.iter().map(|m| m.id()).collect();
     if r.dry_run {
         println!(
-            "Пробний запуск для «{}» ({}), модулі: {} — нічого не змінено",
-            r.name,
-            r.theme,
-            mods.join(",")
+            "{}",
+            tr!(
+                "Dry run for “{name}” ({id}), modules: {modules}; nothing changed",
+                name = r.name,
+                id = r.theme,
+                modules = mods.join(",")
+            )
         );
-        println!("Записати ({}):", r.writes.len());
+        println!("{}", tr!("Write ({count}):", count = r.writes.len()));
         for (k, v) in &r.writes {
             println!("  {k} = {v}");
         }
         println!(
-            "Скинути ({}): {}",
-            r.resets.len(),
+            "{} {}",
+            tr!("Reset ({count}):", count = r.resets.len()),
             if r.resets.is_empty() {
                 "-".into()
             } else {
                 r.resets.join(", ")
             }
         );
-        println!("Розширення: {}", r.enabled_extensions.join(", "));
+        println!(
+            "{}",
+            tr!("Extensions: {list}", list = r.enabled_extensions.join(", "))
+        );
         if r.extensions_changed {
             println!(
                 "  + {}   − {}",
@@ -450,68 +594,94 @@ fn print_apply(r: &ApplyResult) {
         return;
     }
     println!(
-        "Тему «{}» ({}) застосовано; модулі: {}.",
-        r.name,
-        r.theme,
-        mods.join(", ")
+        "{}",
+        tr!(
+            "Theme “{name}” ({id}) applied; modules: {modules}.",
+            name = r.name,
+            id = r.theme,
+            modules = mods.join(", ")
+        )
     );
-    println!(
-        "  попередньо:            {}",
-        themes_core::apply::fmt_sel(&r.previous_modules)
-    );
-    println!(
-        "  тепер:                 {}",
-        themes_core::apply::fmt_sel(&r.modules)
-    );
-    println!(
-        "  змінено ключів dconf:  {} (з них скинуто до типових: {})",
-        r.changed_keys.len(),
-        r.resets_effective
-    );
-    println!(
-        "  розширення:            {}",
-        r.enabled_extensions.join(", ")
-    );
+    // підписи вирівнюються за найдовшим (довжина залежить від мови)
+    let mut rows: Vec<(String, String)> = vec![
+        (
+            tr!("before:"),
+            themes_core::apply::fmt_sel(&r.previous_modules),
+        ),
+        (tr!("now:"), themes_core::apply::fmt_sel(&r.modules)),
+        (
+            tr!("dconf keys changed:"),
+            tr!(
+                "{count} (reset to defaults: {resets})",
+                count = r.changed_keys.len(),
+                resets = r.resets_effective
+            ),
+        ),
+        (tr!("extensions:"), r.enabled_extensions.join(", ")),
+    ];
     if r.extensions_changed {
-        println!(
-            "    увімкнено: {}   вимкнено: {}",
-            or_dash(&r.extensions_added),
-            or_dash(&r.extensions_removed)
-        );
+        rows.push((
+            String::new(),
+            tr!(
+                "turned on: {added}   turned off: {removed}",
+                added = or_dash(&r.extensions_added),
+                removed = or_dash(&r.extensions_removed)
+            ),
+        ));
     }
     if !r.gtk_links.is_empty() {
-        println!("  посилання GTK:         {}", r.gtk_links.join(", "));
+        rows.push((tr!("GTK links:"), r.gtk_links.join(", ")));
     }
     if r.flatpak_lines > 0 {
-        println!("  flatpak overrides:     {}", r.flatpak_lines);
+        rows.push(("flatpak overrides:".into(), r.flatpak_lines.to_string()));
     }
-    print_generated(r);
     if !r.cleanup.is_empty() {
-        println!("  прибрано після розширень: {}", r.cleanup.len());
+        rows.push((
+            tr!("cleaned up after extensions:"),
+            r.cleanup.len().to_string(),
+        ));
     }
     if !r.hooks.is_empty() {
-        println!("  хуки:                  {}", r.hooks.join(", "));
+        rows.push((tr!("hooks:"), r.hooks.join(", ")));
     }
+    let width = rows
+        .iter()
+        .map(|(l, _)| l.chars().count())
+        .max()
+        .unwrap_or(0);
+    for (l, v) in rows {
+        let pad = width.saturating_sub(l.chars().count());
+        println!("  {l}{}  {v}", " ".repeat(pad));
+    }
+    print_generated(r);
     for w in &r.warnings {
-        println!("  увага: {w}");
+        println!("  {}", tr!("warning: {text}", text = w));
     }
     if !r.shell_running {
         println!(
-            "GNOME Shell зараз не запущено — зміни оболонки набудуть чинності при наступному вході."
+            "{}",
+            tr!("GNOME Shell is not running now; the shell changes take effect at the next login.")
         );
     } else if r.extensions_disabled_by_gnome {
         println!(
-            "Налаштування застосовано, але GNOME вимкнув розширення після збою оболонки — розширення \
-             теми не працюють. Перевірте «themes doctor» і ввімкніть їх: themes doctor --enable-extensions"
+            "{}",
+            tr!(
+                "The settings are applied, but GNOME turned extensions off after a shell crash, so \
+                 the theme's extensions do not work. Check “themes doctor” and turn them on: themes \
+                 doctor --enable-extensions"
+            )
         );
     } else if r.relogin {
-        println!("ПОТРІБНО вийти з сесії та увійти знову:");
+        println!("{}", tr!("You MUST log out and log in again:"));
         for why in &r.relogin_reasons {
             println!("  • {why}");
         }
     } else {
         println!(
-            "Застосовано наживо, перевхід не потрібен (відкриті програми GTK4/libadwaita варто перезапустити)."
+            "{}",
+            tr!(
+                "Applied live, no new login needed (open GTK4/libadwaita apps should be restarted)."
+            )
         );
     }
 }
@@ -522,24 +692,33 @@ fn print_generated(r: &ApplyResult) {
         return;
     }
     if r.dry_run {
-        println!("Згенеровано з tokens.toml ({}):", r.generated.len());
+        println!(
+            "{}",
+            tr!(
+                "Generated from tokens.toml ({count}):",
+                count = r.generated.len()
+            )
+        );
     } else {
         println!(
-            "  з tokens.toml ({}, {:.1} мс):",
-            r.generated.len(),
-            r.tokens_ms
+            "  {}",
+            tr!(
+                "from tokens.toml ({count}, {ms} ms):",
+                count = r.generated.len(),
+                ms = format!("{:.1}", r.tokens_ms)
+            )
         );
     }
     for f in &r.generated {
         let st = match f.status {
-            "cached" => "кеш актуальний",
-            "written" => "згенеровано",
-            _ => "буде згенеровано",
+            "cached" => tr!("cache up to date"),
+            "written" => tr!("generated"),
+            _ => tr!("will be generated"),
         };
         println!("    {} ({st})", f.path);
     }
     for l in &r.token_links {
-        println!("    посилання: {l}");
+        println!("    {}", tr!("link: {path}", path = l));
     }
 }
 

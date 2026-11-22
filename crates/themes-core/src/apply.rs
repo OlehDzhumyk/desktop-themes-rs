@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Застосування теми (повністю або окремих модулів), живе оновлення оболонки, автовідкат.
 
+use desk_settings::tr;
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
 use serde::Serialize;
 
 use crate::dconf::{self, Settings};
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::lock::Lock;
 use crate::modules::Module;
 use crate::paths::Ctx;
@@ -144,8 +145,10 @@ pub fn apply_opts(
         let s = match src.as_deref().map(|s| (s, theme_of(s))) {
             Some((_, Some(t))) => t.settings(m),
             Some((sid, None)) => {
-                warnings.push(format!(
-                    "тему «{sid}» (модуль {m}) не знайдено — її ключі повертаються до стандартних"
+                warnings.push(tr!(
+                    "theme “{theme}” (module {module}) not found; its keys go back to the standard values",
+                    theme = sid,
+                    module = m
                 ));
                 Settings::new()
             }
@@ -344,11 +347,12 @@ pub fn apply_opts(
     }
     for u in &target_exts {
         if !installed(ctx, u) {
-            warnings.push(format!("розширення {u} не встановлене"));
+            warnings.push(tr!("extension {uuid} is not installed", uuid = u));
         }
         if broken.contains(u) {
-            warnings.push(format!(
-                "розширення {u} вимкнено як несправне (див. «themes doctor»)"
+            warnings.push(tr!(
+                "extension {uuid} is turned off as broken (see “themes doctor”)",
+                uuid = u
             ));
         }
     }
@@ -440,7 +444,8 @@ pub fn apply_opts(
     log(
         ctx,
         &format!(
-            "apply {id} modules={} (було: {}) keys_changed={} resets={} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}",
+            // формат apply.log, його розбирає crash.rs
+            "apply {id} modules={} (було: {}) keys_changed={} resets={} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}", // i18n-ok
             affected
                 .iter()
                 .map(|m| m.id())
@@ -501,17 +506,17 @@ fn live_check(
     let mut reasons = Vec::new();
     if shell.user_extensions_enabled() == Some(false) || crate::crash::user_extensions_disabled() {
         res.extensions_disabled_by_gnome = true;
-        warnings.push(
-            "GNOME вимкнув розширення після збою оболонки (disable-user-extensions=true): розширення \
-             теми не працюватимуть, доки ви їх не ввімкнете (themes doctor --enable-extensions або \
-             кнопка у вікні «Теми»)"
-                .into(),
-        );
+        warnings.push(tr!(
+            "GNOME turned extensions off after a shell crash (disable-user-extensions=true): the \
+             theme's extensions will not work until you turn them on (themes doctor \
+             --enable-extensions or the button in the Themes window)"
+        ));
     } else {
         let locked = shell.screen_locked();
         if locked && !added.is_empty() {
-            warnings
-                .push("сеанс заблоковано — нові розширення ввімкнуться після розблокування".into());
+            warnings.push(tr!(
+                "the session is locked; new extensions turn on after unlocking"
+            ));
         }
         let on: Vec<String> = if locked {
             vec![]
@@ -530,18 +535,25 @@ fn live_check(
         }
         for u in new_en.iter().filter(|u| installed(ctx, u)) {
             match infos.get(u).cloned().flatten() {
-                None => reasons.push(format!(
-                    "оболонка ще не знає про розширення {u} (встановлене після входу)"
+                None => reasons.push(tr!(
+                    "the shell does not know the extension {uuid} yet (installed after login)",
+                    uuid = u
                 )),
                 Some(i) if i.state == ExtState::Active => {}
                 Some(i) if i.state.broken() => {
-                    warnings.push(format!("розширення {u}: {} {}", i.state.name(), i.error));
+                    warnings.push(tr!(
+                        "extension {uuid}: {state} {error}",
+                        uuid = u,
+                        state = i.state.name(),
+                        error = i.error
+                    ));
                 }
                 Some(i)
                     if locked && matches!(i.state, ExtState::Inactive | ExtState::Initialized) => {}
-                Some(i) if added.contains(u) => reasons.push(format!(
-                    "розширення {u} не ввімкнулося наживо (стан {})",
-                    i.state.name()
+                Some(i) if added.contains(u) => reasons.push(tr!(
+                    "extension {uuid} did not turn on live (state {state})",
+                    uuid = u,
+                    state = i.state.name()
                 )),
                 Some(_) => {}
             }
@@ -550,14 +562,18 @@ fn live_check(
             if let Some(i) = infos.get(u).cloned().flatten()
                 && i.state == ExtState::Active
             {
-                reasons.push(format!("розширення {u} не вимкнулося наживо"));
+                reasons.push(tr!("extension {uuid} did not turn off live", uuid = u));
             }
         }
         for (a, b) in SWAP_NEEDS_RELOGIN {
             let swap = (added.iter().any(|u| u == a) && removed.iter().any(|u| u == b))
                 || (added.iter().any(|u| u == b) && removed.iter().any(|u| u == a));
             if swap {
-                reasons.push(format!("заміна {b} ↔ {a} наживо лишає артефакти панелі"));
+                reasons.push(tr!(
+                    "swapping {old} ↔ {new} live leaves panel artefacts",
+                    old = b,
+                    new = a
+                ));
             }
         }
     }
@@ -590,7 +606,7 @@ pub fn verify_live(ctx: &Ctx, wait: Duration) -> Result<Vec<(String, String)>> {
         }
     }
     if !bad.is_empty() {
-        disable_broken(ctx, &shell, &bad, "автовідкат після застосування")?;
+        disable_broken(ctx, &shell, &bad, &tr!("automatic rollback after applying"))?;
     }
     Ok(bad)
 }
@@ -657,7 +673,9 @@ pub fn ext_stamp(ctx: &Ctx, uuid: &str) -> String {
 /// Видалити тему (у trash/). fedora й активні теми видаляти не можна.
 pub fn delete(ctx: &Ctx, id: &str) -> Result<(String, String)> {
     if id == crate::BUILTIN_THEME {
-        crate::bail!("тему «fedora» видаляти не можна — це стандартний вигляд");
+        return Err(Error(tr!(
+            "the theme “fedora” cannot be deleted: it is the standard look"
+        )));
     }
     let t = get_theme(ctx, id)?;
     let _lock = Lock::acquire(ctx)?;
@@ -668,10 +686,11 @@ pub fn delete(ctx: &Ctx, id: &str) -> Result<(String, String)> {
         .map(|m| m.id())
         .collect();
     if !used.is_empty() {
-        crate::bail!(
-            "тема «{id}» зараз активна (модулі: {}) — спершу застосуйте іншу (themes reset)",
-            used.join(", ")
-        );
+        return Err(Error(tr!(
+            "the theme “{theme}” is active now (modules: {modules}); apply another one first (themes reset)",
+            theme = id,
+            modules = used.join(", ")
+        )));
     }
     std::fs::create_dir_all(&ctx.trash)?;
     let dst = ctx.trash.join(format!("{id}-{}", now("%Y%m%d-%H%M%S")));

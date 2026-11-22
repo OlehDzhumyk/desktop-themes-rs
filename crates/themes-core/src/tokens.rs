@@ -19,7 +19,9 @@ use serde::Serialize;
 use theme_tokens::generate::{self, Outputs, Target};
 use theme_tokens::{KeyModule, Keys, Loaded, TokenError};
 
-use crate::error::Result;
+use desk_settings::tr;
+
+use crate::error::{Error, Result};
 use crate::modules::Module;
 use crate::paths::Ctx;
 use crate::state::State;
@@ -139,7 +141,11 @@ pub fn check(theme: &Theme) -> Result<Option<Loaded>> {
     match load(theme) {
         None => Ok(None),
         Some(Ok(l)) => Ok(Some(l)),
-        Some(Err(e)) => crate::bail!("тема «{}»: {e}", theme.id),
+        Some(Err(e)) => Err(Error(tr!(
+            "theme “{theme}”: {error}",
+            theme = theme.id,
+            error = e
+        ))),
     }
 }
 
@@ -218,7 +224,10 @@ pub fn unlink_module(st: &mut State, module: Module, warnings: &mut Vec<String>)
             Ok(t) if t == Path::new(&src) => {
                 let _ = std::fs::remove_file(d);
             }
-            _ if lexists(d) => warnings.push(format!("{dest} змінено вручну — залишено як є")),
+            _ if lexists(d) => warnings.push(tr!(
+                "{path} was changed by hand; left as it is",
+                path = dest
+            )),
             _ => {}
         }
     }
@@ -238,9 +247,9 @@ pub fn link_module(
         if lexists(&dest) {
             let ours = std::fs::read_link(&dest).is_ok_and(|t| t == src);
             if !ours {
-                warnings.push(format!(
-                    "{} уже існує і не є посиланням менеджера — згенерований файл не підключено",
-                    dest.display()
+                warnings.push(tr!(
+                    "{path} already exists and is not a link of the manager; the generated file is not linked",
+                    path = dest.display()
                 ));
                 continue;
             }
@@ -391,7 +400,7 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
         std::fs::write(&css, "/* edited */").unwrap();
         crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
         assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* edited */");
-        assert!(w.iter().any(|m| m.contains("вручну")), "{w:?}");
+        assert!(w.iter().any(|m| m.contains("by hand")), "{w:?}");
 
         // a hand-made gtk4/ and user-theme name switch generation off
         write(&t.join("gtk4/gtk.css"), "/* hand */");

@@ -1,26 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Сторінка «Функції»: функції робочого столу, які надає deskd через міст оболонки
-//! (поки що «Буфер обміну»), і «Подяки», згенеровані з CREDITS.md.
+//! Сторінка «Функції», згенерована з реєстру налаштувань (`desk_settings::PAGES`): список сторінок
+//! за розділами (функції, програма, про проєкт) і самі сторінки, рядки яких вибираються за типом
+//! ключа (перемикач, лічильник, список вибору, поле, скорочення). «Подяки» беруться з CREDITS.md.
 //!
-//! Налаштування належать deskd (GSettings `io.github.OlehDzhumyk.Desk.Clipboard`): ця сторінка лише
-//! прив'язує до них віджети, тож немає окремого вікна налаштувань і дублювання.
+//! Налаштування належать deskd (GSettings `io.github.OlehDzhumyk.Desk*`): сторінки лише прив'язують
+//! до них віджети, тож немає окремого вікна налаштувань і дублювання.
+
+use std::collections::HashMap;
 
 use adw::prelude::*;
-use desk_proto::{CLIPBOARD_SCHEMA_ID, ClipboardProxy, SCHEMA_ID};
+use desk_proto::ClipboardProxy;
+use desk_settings::{Group, Item, Key, Kind, Origin, Page, PageKind, Section, Widget, tr};
 use gtk::{gio, glib};
 
-use super::credits::{self, Section};
+use super::a11y;
+use super::credits::{self, Section as CreditsSection};
 
-/// Звідки функція: є в яких ОС і на чому заснована (значки на сторінці функції).
-struct Origin {
-    has_in: &'static str,
-    based_on: Option<&'static str>,
+fn t(s: &str) -> String {
+    if s.is_empty() {
+        String::new()
+    } else {
+        desk_settings::i18n::gettext(s)
+    }
 }
-
-const CLIPBOARD_ORIGIN: Origin = Origin {
-    has_in: "Є в Windows 11 і macOS",
-    based_on: Some("Засновано на Clipboard Indicator (MIT)"),
-};
 
 /// Підсторінка з власним заголовком (кнопка «Назад» і назва).
 fn subpage(title: &str, tag: &str, child: &impl IsA<gtk::Widget>) -> adw::NavigationPage {
@@ -54,16 +56,29 @@ fn badge(text: &str, extra: &str) -> gtk::Label {
     l
 }
 
-fn origin_group(o: &Origin) -> adw::PreferencesGroup {
+pub fn origin_label(o: &Origin) -> String {
+    match o {
+        Origin::Has(s) => t(s),
+        Origin::BasedOn { project, licence } => {
+            tr!(
+                "Based on {project} ({licence})",
+                project = project,
+                licence = licence
+            )
+        }
+    }
+}
+
+fn origin_group(origins: &[Origin]) -> adw::PreferencesGroup {
     let g = adw::PreferencesGroup::new();
     let row = gtk::Box::builder()
         .orientation(gtk::Orientation::Horizontal)
         .spacing(8)
         .build();
-    row.append(&badge(o.has_in, ""));
-    if let Some(b) = o.based_on {
-        row.append(&badge(b, "origin"));
+    for (i, o) in origins.iter().enumerate() {
+        row.append(&badge(&origin_label(o), if i == 0 { "" } else { "origin" }));
     }
+    a11y::label(&row, &tr!("Origin of the feature"));
     g.add(&row);
     g
 }
@@ -78,18 +93,137 @@ pub fn shortcut_label(accels: &glib::StrV) -> String {
         })
         .collect();
     if parts.is_empty() {
-        "немає".into()
+        tr!("none")
     } else {
         parts.join(", ")
     }
 }
 
-fn skin_label(s: &str) -> &'static str {
-    match s {
-        "macos" => "панель у стилі macOS (по центру, з пошуком)",
-        "windows11" => "панель Win+V у стилі Windows 11 (біля курсора)",
-        _ => "просте меню (і перемикач у швидких налаштуваннях)",
+fn choice_label(k: &Key, value: &str) -> String {
+    match &k.kind {
+        Kind::Choice { choices, .. } => choices
+            .iter()
+            .find(|c| c.value == value)
+            .map(|c| t(c.label))
+            .unwrap_or_else(|| value.to_string()),
+        _ => value.to_string(),
     }
+}
+
+/// Поточне значення ключа текстом (для рядків лише для читання).
+fn value_text(k: &'static Key, s: &gio::Settings) -> String {
+    match &k.kind {
+        Kind::Accel { .. } => shortcut_label(&s.strv(k.name)),
+        Kind::Choice { .. } => choice_label(k, &s.string(k.name)),
+        Kind::StrList { .. } => s
+            .strv(k.name)
+            .iter()
+            .map(|x| x.as_str())
+            .collect::<Vec<_>>()
+            .join(", "),
+        Kind::Str { .. } => s.string(k.name).to_string(),
+        Kind::Bool { .. } => {
+            if s.boolean(k.name) {
+                tr!("on")
+            } else {
+                tr!("off")
+            }
+        }
+        Kind::UInt { .. } => s.uint(k.name).to_string(),
+    }
+}
+
+/// Рядок лише для читання: заголовок, опис і поточне значення (оновлюється разом із GSettings).
+fn display_row(k: &'static Key, s: &gio::Settings) -> adw::ActionRow {
+    let row = adw::ActionRow::builder().title(t(k.label)).build();
+    let desc = t(k.description);
+    match &k.kind {
+        // коротке значення праворуч, опис — підзаголовком
+        Kind::Accel { .. } | Kind::Bool { .. } | Kind::UInt { .. } => {
+            if !desc.is_empty() {
+                row.set_subtitle(&desc);
+            }
+            let val = gtk::Label::new(Some(&value_text(k, s)));
+            val.add_css_class("dim-label");
+            val.set_selectable(true);
+            row.add_suffix(&val);
+            let v2 = val.clone();
+            s.connect_changed(Some(k.name), move |s, _| v2.set_label(&value_text(k, s)));
+        }
+        // довше значення — підзаголовком
+        _ => {
+            row.set_subtitle(&value_text(k, s));
+            let r2 = row.clone();
+            s.connect_changed(Some(k.name), move |s, _| r2.set_subtitle(&value_text(k, s)));
+        }
+    }
+    row
+}
+
+fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
+    let desc = t(k.description);
+    match &k.kind {
+        Kind::Bool { .. } => {
+            let r = adw::SwitchRow::builder()
+                .title(t(k.label))
+                .subtitle(desc)
+                .build();
+            s.bind(k.name, &r, "active").build();
+            r.upcast()
+        }
+        Kind::UInt { min, max, step, .. } => {
+            let r = adw::SpinRow::with_range(*min as f64, *max as f64, *step as f64);
+            r.set_title(&t(k.label));
+            r.set_subtitle(&desc);
+            s.bind(k.name, &r, "value").build();
+            r.upcast()
+        }
+        Kind::Choice { choices, .. } => {
+            let labels: Vec<String> = choices.iter().map(|c| t(c.label)).collect();
+            let model =
+                gtk::StringList::new(&labels.iter().map(String::as_str).collect::<Vec<_>>());
+            let r = adw::ComboRow::builder()
+                .title(t(k.label))
+                .subtitle(desc)
+                .model(&model)
+                .build();
+            let values: Vec<&'static str> = choices.iter().map(|c| c.value).collect();
+            let v2 = values.clone();
+            s.bind(k.name, &r, "selected")
+                .mapping(move |v, _| {
+                    let cur: String = v.get()?;
+                    Some((values.iter().position(|x| *x == cur).unwrap_or(0) as u32).to_value())
+                })
+                .set_mapping(move |v, _| {
+                    let i: u32 = v.get().ok()?;
+                    v2.get(i as usize).map(|x| x.to_variant())
+                })
+                .build();
+            r.upcast()
+        }
+        Kind::Str { .. } => {
+            let r = adw::EntryRow::builder().title(t(k.label)).build();
+            s.bind(k.name, &r, "text").build();
+            if !desc.is_empty() {
+                a11y::description(&r, &desc);
+            }
+            r.upcast()
+        }
+        // списки рядків і скорочення поки не редагуються у вікні
+        Kind::StrList { .. } | Kind::Accel { .. } => display_row(k, s).upcast(),
+    }
+}
+
+fn key_row(k: &'static Key, s: &gio::Settings) -> Option<gtk::Widget> {
+    let row = match k.widget {
+        Widget::Hidden => return None,
+        Widget::Display => display_row(k, s).upcast(),
+        Widget::Edit => edit_row(k, s),
+    };
+    if let Some(dep) = k.sensitive_if {
+        s.bind(dep, &row, "sensitive").get_only().build();
+    }
+    Some(row)
 }
 
 fn clear_history(toasts: &adw::ToastOverlay) {
@@ -104,19 +238,58 @@ fn clear_history(toasts: &adw::ToastOverlay) {
         })
         .await;
         let msg = match r {
-            Ok(Ok(())) => "Історію буфера обміну очищено".to_string(),
-            Ok(Err(e)) => format!("Не вдалося очистити історію: {e}"),
-            Err(_) => "Не вдалося очистити історію".to_string(),
+            Ok(Ok(())) => tr!("Clipboard history cleared"),
+            Ok(Err(e)) => tr!("Could not clear the history: {error}", error = e),
+            Err(_) => tr!("Could not clear the history"),
         };
         toasts.add_toast(adw::Toast::new(&msg));
     });
 }
 
-fn count_row() -> adw::ActionRow {
+fn action_row(
+    id: &'static str,
+    label: &str,
+    destructive: bool,
+    toasts: &adw::ToastOverlay,
+) -> adw::ButtonRow {
+    let row = adw::ButtonRow::builder().title(t(label)).build();
+    if destructive {
+        row.add_css_class("destructive-action");
+    }
+    let toasts = toasts.clone();
+    row.connect_activated(move |row| match id {
+        "clear-history" => {
+            let dlg = adw::AlertDialog::new(
+                Some(&tr!("Clear the clipboard history?")),
+                Some(&tr!(
+                    "All items will be deleted, pinned ones too. This cannot be undone."
+                )),
+            );
+            dlg.add_responses(&[("cancel", &tr!("Cancel")), ("clear", &tr!("Clear"))]);
+            dlg.set_response_appearance("clear", adw::ResponseAppearance::Destructive);
+            dlg.set_default_response(Some("cancel"));
+            dlg.set_close_response("cancel");
+            let toasts = toasts.clone();
+            dlg.connect_response(None, move |_, r| {
+                if r == "clear" {
+                    clear_history(&toasts);
+                }
+            });
+            dlg.present(Some(row));
+        }
+        other => eprintln!("themes: unknown settings action {other}"),
+    });
+    row
+}
+
+fn status_row(id: &'static str, label: &str) -> adw::ActionRow {
     let row = adw::ActionRow::builder()
-        .title("Служба deskd")
-        .subtitle("перевірка…")
+        .title(t(label))
+        .subtitle(tr!("checking…"))
         .build();
+    if id != "deskd" {
+        return row;
+    }
     let r2 = row.clone();
     glib::spawn_future_local(async move {
         let res = gio::spawn_blocking(|| {
@@ -128,155 +301,53 @@ fn count_row() -> adw::ActionRow {
         })
         .await;
         r2.set_subtitle(&match res {
-            Ok(Ok(n)) => format!("працює; записів в історії: {n}"),
-            Ok(Err(e)) => format!("недоступна: {e}"),
-            Err(_) => "недоступна".into(),
+            Ok(Ok(n)) => tr!("running; items in the history: {count}", count = n),
+            Ok(Err(e)) => tr!("unavailable: {error}", error = e),
+            Err(_) => tr!("unavailable"),
         });
     });
     row
 }
 
-fn clipboard_page(toasts: &adw::ToastOverlay) -> adw::NavigationPage {
-    let page = adw::PreferencesPage::builder()
-        .description(
-            "Історія скопійованого: тексти й зображення, закріплення, пошук. Зберігається у службі \
-             deskd; панель малює міст оболонки у стилі поточної теми.",
-        )
-        .build();
-    page.add(&origin_group(&CLIPBOARD_ORIGIN));
-    let Some(s) = schema(CLIPBOARD_SCHEMA_ID) else {
-        let g = adw::PreferencesGroup::builder()
-            .title("Налаштування недоступні")
-            .description(format!(
-                "Схему GSettings {CLIPBOARD_SCHEMA_ID} не встановлено. Запустіть data/install.sh."
-            ))
-            .build();
-        page.add(&g);
-        return subpage("Буфер обміну", "clipboard", &page);
-    };
-
-    let hist = adw::PreferencesGroup::builder().title("Історія").build();
-    let switch = |title: &str, subtitle: &str, key: &str| {
-        let r = adw::SwitchRow::builder().title(title).subtitle(subtitle).build();
-        s.bind(key, &r, "active").build();
-        r
-    };
-    hist.add(&switch("Записувати історію", "Вимкніть, щоб функція не працювала зовсім", "enabled"));
-    let size = adw::SpinRow::with_range(5.0, 500.0, 5.0);
-    size.set_title("Розмір історії");
-    size.set_subtitle("Скільки незакріплених записів зберігати");
-    s.bind("history-size", &size, "value").build();
-    hist.add(&size);
-    hist.add(&switch("Зображення", "Записувати також скопійовані зображення", "images"));
-    hist.add(&switch(
-        "Вставляти вибране",
-        "Після вибору запис одразу вставляється у вікно, де ви працювали",
-        "paste-on-select",
-    ));
-    page.add(&hist);
-
-    let privacy = adw::PreferencesGroup::builder()
-        .title("Приватність")
-        .description(
-            "Паролі з менеджерів паролів (позначка x-kde-passwordManagerHint, KeePassXC, Bitwarden, \
-             1Password, «Секрети» тощо) ніколи не записуються.",
-        )
-        .build();
-    privacy.add(&switch(
-        "Приватний режим",
-        "Тимчасово нічого не записувати",
-        "private-mode",
-    ));
-    privacy.add(&switch(
-        "Зберігати між сеансами",
-        "Текст зберігається у ~/.local/share/deskd/clipboard (доступ лише для вас)",
-        "persist",
-    ));
-    let pimg = switch(
-        "Зберігати зображення між сеансами",
-        "Інакше зображення живуть лише до виходу з сеансу",
-        "persist-images",
-    );
-    s.bind("persist", &pimg, "sensitive").get_only().build();
-    privacy.add(&pimg);
-    page.add(&privacy);
-
-    let keys = adw::PreferencesGroup::builder().title("Як відкрити").build();
-    let shortcut = adw::ActionRow::builder()
-        .title("Клавіатурне скорочення")
-        .subtitle("Задається темою (файл desk.dconf у модулі «Вигляд»)")
-        .build();
-    let acc = gtk::Label::new(Some(&shortcut_label(&s.strv("toggle-shortcut"))));
-    acc.add_css_class("dim-label");
-    shortcut.add_suffix(&acc);
-    {
-        let acc = acc.clone();
-        s.connect_changed(Some("toggle-shortcut"), move |s, _| {
-            acc.set_label(&shortcut_label(&s.strv("toggle-shortcut")));
-        });
+fn settings_group(
+    g: &Group,
+    settings: &HashMap<&'static str, gio::Settings>,
+    toasts: &adw::ToastOverlay,
+) -> Option<adw::PreferencesGroup> {
+    let pg = adw::PreferencesGroup::new();
+    if !g.title.is_empty() {
+        pg.set_title(&t(g.title));
     }
-    keys.add(&shortcut);
-    if let Some(desk) = schema(SCHEMA_ID) {
-        let skin = adw::ActionRow::builder()
-            .title("Вигляд панелі")
-            .subtitle(skin_label(&desk.string("skin")))
-            .build();
-        let skin2 = skin.clone();
-        desk.connect_changed(Some("skin"), move |d, _| {
-            skin2.set_subtitle(skin_label(&d.string("skin")));
-        });
-        // тримати об'єкт налаштувань живим разом із рядком
-        skin.connect_destroy(move |_| {
-            let _ = &desk;
-        });
-        keys.add(&skin);
+    if !g.description.is_empty() {
+        pg.set_description(Some(&t(g.description)));
     }
-    keys.add(&count_row());
-    page.add(&keys);
-
-    let danger = adw::PreferencesGroup::new();
-    let clear = adw::ButtonRow::builder().title("Очистити історію").build();
-    clear.add_css_class("destructive-action");
-    {
-        let toasts = toasts.clone();
-        clear.connect_activated(move |row| {
-            let dlg = adw::AlertDialog::new(
-                Some("Очистити історію буфера обміну?"),
-                Some("Буде видалено всі записи, зокрема закріплені. Це не можна скасувати."),
-            );
-            dlg.add_responses(&[("cancel", "Скасувати"), ("clear", "Очистити")]);
-            dlg.set_response_appearance("clear", adw::ResponseAppearance::Destructive);
-            dlg.set_default_response(Some("cancel"));
-            let toasts = toasts.clone();
-            dlg.connect_response(None, move |_, r| {
-                if r == "clear" {
-                    clear_history(&toasts);
-                }
-            });
-            dlg.present(Some(row));
-        });
+    let mut any = false;
+    for item in g.items {
+        let w: Option<gtk::Widget> = match item {
+            Item::Key(k) => settings.get(k.schema).and_then(|s| key_row(k, s)),
+            Item::Action {
+                id,
+                label,
+                destructive,
+            } => Some(action_row(id, label, *destructive, toasts).upcast()),
+            Item::Status { id, label } => Some(status_row(id, label).upcast()),
+        };
+        if let Some(w) = w {
+            pg.add(&w);
+            any = true;
+        }
     }
-    danger.add(&clear);
-    page.add(&danger);
-    page.connect_destroy(move |_| {
-        let _ = &s;
-    });
-
-    subpage("Буфер обміну", "clipboard", &page)
+    any.then_some(pg)
 }
 
-fn credits_page() -> adw::NavigationPage {
-    let page = adw::PreferencesPage::builder()
-        .description(
-            "desktop-themes-rs стоїть на плечах інших проєктів. Список узято з CREDITS.md; ліцензії — \
-             ті, що вказали автори (перевіряйте файл LICENSE у їхніх сховищах).",
-        )
-        .build();
-    for Section { title, entries } in credits::parse(credits::CREDITS_MD) {
+fn credits_groups(page: &adw::PreferencesPage) {
+    for CreditsSection { title, entries } in credits::parse(credits::CREDITS_MD) {
         if entries.is_empty() {
             continue;
         }
-        let g = adw::PreferencesGroup::builder().title(title.as_str()).build();
+        let g = adw::PreferencesGroup::builder()
+            .title(title.as_str())
+            .build();
         for e in entries {
             let mut sub = Vec::new();
             if !e.used_for.is_empty() {
@@ -296,6 +367,7 @@ fn credits_page() -> adw::NavigationPage {
                     .tooltip_text(url.as_str())
                     .build();
                 b.add_css_class("flat");
+                a11y::label(&b, &tr!("Open the website of {name}", name = e.name));
                 b.connect_clicked(move |b| {
                     let l = gtk::UriLauncher::new(&url);
                     let win = b.root().and_downcast::<gtk::Window>();
@@ -307,58 +379,121 @@ fn credits_page() -> adw::NavigationPage {
         }
         page.add(&g);
     }
-    subpage("Подяки", "credits", &page)
 }
 
-/// Сторінка «Функції» (навігація: список функцій → сторінка функції; «Подяки»).
+/// Сторінка з реєстру.
+fn build_page(p: &'static Page, toasts: &adw::ToastOverlay) -> adw::NavigationPage {
+    let page = adw::PreferencesPage::builder()
+        .description(t(p.description))
+        .build();
+    if let Some(f) = p.feature
+        && !f.origins.is_empty()
+    {
+        page.add(&origin_group(f.origins));
+    }
+    match p.kind {
+        PageKind::Credits => credits_groups(&page),
+        PageKind::Settings => {
+            let mut settings: HashMap<&'static str, gio::Settings> = HashMap::new();
+            let mut missing = Vec::new();
+            for k in p.keys() {
+                if settings.contains_key(k.schema) || missing.contains(&k.schema) {
+                    continue;
+                }
+                match schema(k.schema) {
+                    Some(s) => {
+                        settings.insert(k.schema, s);
+                    }
+                    None => missing.push(k.schema),
+                }
+            }
+            if !missing.is_empty() {
+                page.add(
+                    &adw::PreferencesGroup::builder()
+                        .title(tr!("Settings unavailable"))
+                        .description(tr!(
+                            "The GSettings schema {schema} is not installed. Run data/install.sh.",
+                            schema = missing.join(", ")
+                        ))
+                        .build(),
+                );
+            } else {
+                for g in p.groups {
+                    if let Some(pg) = settings_group(g, &settings, toasts) {
+                        page.add(&pg);
+                    }
+                }
+                if p.keys().any(|k| std::ptr::eq(k, &desk_settings::LANGUAGE))
+                    && let Some(s) = settings.get(desk_settings::DESK_SCHEMA)
+                {
+                    let toasts = toasts.clone();
+                    s.connect_changed(Some(desk_settings::LANGUAGE.name), move |_, _| {
+                        let toast = adw::Toast::builder()
+                            .title(tr!("The language changes after a restart"))
+                            .button_label(tr!("Restart"))
+                            .action_name("app.restart")
+                            .timeout(0)
+                            .build();
+                        toasts.add_toast(toast);
+                    });
+                }
+                // тримати об'єкти налаштувань живими разом зі сторінкою
+                page.connect_destroy(move |_| {
+                    let _ = &settings;
+                });
+            }
+        }
+    }
+    subpage(&t(p.title), p.id, &page)
+}
+
+/// Сторінка «Функції» (навігація: список сторінок → сторінка). `open` — id сторінки з реєстру.
 pub fn build(toasts: &adw::ToastOverlay, open: Option<&str>) -> adw::NavigationView {
     let nav = adw::NavigationView::new();
     let root = adw::PreferencesPage::builder()
-        .description(
-            "Функції, які є в Windows 11 і macOS, для GNOME. Їх виконує служба deskd, а вигляд \
-             підлаштовується під поточну тему.",
-        )
+        .description(t(desk_settings::ROOT_DESCRIPTION))
         .build();
-    let g = adw::PreferencesGroup::builder().title("Функції").build();
-    let clip = adw::ActionRow::builder()
-        .title("Буфер обміну")
-        .subtitle("Історія скопійованого: Win+V у Windows 11, Shift+Super+V у macOS")
-        .activatable(true)
-        .build();
-    clip.add_prefix(&gtk::Image::from_icon_name("edit-paste-symbolic"));
-    clip.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
-    g.add(&clip);
-    root.add(&g);
-    let about = adw::PreferencesGroup::builder().title("Про проєкт").build();
-    let cr = adw::ActionRow::builder()
-        .title("Подяки")
-        .subtitle("Проєкти, на яких засновано теми й функції, та їхні ліцензії")
-        .activatable(true)
-        .build();
-    cr.add_prefix(&gtk::Image::from_icon_name("emblem-favorite-symbolic"));
-    cr.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
-    about.add(&cr);
-    root.add(&about);
+    for section in [Section::Features, Section::App, Section::About] {
+        let pages: Vec<&'static Page> = desk_settings::PAGES
+            .iter()
+            .copied()
+            .filter(|p| p.section == section)
+            .collect();
+        if pages.is_empty() {
+            continue;
+        }
+        let g = adw::PreferencesGroup::builder()
+            .title(t(section.title()))
+            .build();
+        for p in pages {
+            let row = adw::ActionRow::builder()
+                .title(t(p.title))
+                .subtitle(t(p.subtitle))
+                .activatable(true)
+                .build();
+            row.add_prefix(&gtk::Image::from_icon_name(p.icon));
+            row.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
+            let nav2 = nav.clone();
+            let toasts = toasts.clone();
+            row.connect_activated(move |_| nav2.push(&build_page(p, &toasts)));
+            g.add(&row);
+        }
+        root.add(&g);
+    }
     nav.add(
         &adw::NavigationPage::builder()
-            .title("Функції")
+            .title(tr!("Features"))
             .tag("features")
             .child(&root)
             .build(),
     );
-    {
-        let nav2 = nav.clone();
-        let toasts = toasts.clone();
-        clip.connect_activated(move |_| nav2.push(&clipboard_page(&toasts)));
-    }
-    {
-        let nav2 = nav.clone();
-        cr.connect_activated(move |_| nav2.push(&credits_page()));
-    }
-    match open {
-        Some("clipboard") => nav.push(&clipboard_page(toasts)),
-        Some("credits") => nav.push(&credits_page()),
-        _ => {}
+    if let Some(p) = open.and_then(desk_settings::page) {
+        nav.push(&build_page(p, toasts));
     }
     nav
+}
+
+/// Ідентифікатори сторінок для `themes gui --page`.
+pub fn page_ids() -> impl Iterator<Item = &'static str> {
+    desk_settings::PAGES.iter().map(|p| p.id)
 }

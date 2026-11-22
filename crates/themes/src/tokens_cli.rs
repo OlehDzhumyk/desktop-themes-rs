@@ -5,44 +5,57 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use clap::Subcommand;
+use desk_settings::{n_, tr};
 use serde_json::json;
 use themes_core::theme::{Theme, all_themes, get_theme, write_conf};
 use themes_core::tokens::theme_tokens;
 use themes_core::{Ctx, Error, tokens, util};
 
+// Тексти довідки (ідентифікатори gettext; cli.rs перекладає їх під час запуску).
+const T01: &str =
+    n_("Check tokens.toml (all themes or the given ones): syntax, ranges, WCAG AA contrast");
+const T02: &str = n_(
+    "Generate the files from the tokens into the cache (~/.cache/desktop-themes/<id>) and show the time",
+);
+const T03: &str = n_("Regenerate even if the cache is up to date");
+const T04: &str = n_("Measure N forced generations (min/median/max)");
+const T05: &str =
+    n_("dconf keys derived from the tokens (`dconf load /` format; without Ptyxis profile keys)");
+const T06: &str = n_(
+    "Create a theme from the palette of an image (wallpaper): themes/<id>/tokens.toml + theme.conf",
+);
+const T07: &str = n_("Id of the new theme");
+const T08: &str = n_("Name of the theme (NAME in theme.conf)");
+const T09: &str = n_("Overwrite an existing theme");
+const T10: &str = n_("Write into this folder instead of the themes root");
+const T11: &str = n_("Do not use the image as the theme's wallpaper (generate a gradient)");
+
 #[derive(Subcommand)]
 pub enum TokensCmd {
-    /// Перевірити tokens.toml (усі теми або вказані): синтаксис, діапазони, контраст WCAG AA
+    #[command(about = T01)]
     Check { ids: Vec<String> },
-    /// Згенерувати файли з токенів у кеш (~/.cache/desktop-themes/<id>) і показати час
+    #[command(about = T02)]
     Generate {
         id: String,
-        /// Перегенерувати, навіть якщо кеш актуальний
-        #[arg(long)]
+        #[arg(long, help = T03)]
         force: bool,
-        /// Виміряти N примусових генерацій (мін./медіана/макс.)
-        #[arg(long, value_name = "N")]
+        #[arg(long, value_name = "N", help = T04)]
         repeat: Option<u32>,
     },
-    /// Ключі dconf, похідні від токенів (формат `dconf load /`; без ключів профілю Ptyxis)
+    #[command(about = T05)]
     Keys { id: String },
-    /// Створити тему з палітри зображення (шпалер): themes/<id>/tokens.toml + theme.conf
+    #[command(about = T06)]
     FromImage {
         path: PathBuf,
-        /// Id нової теми
-        #[arg(long)]
+        #[arg(long, help = T07)]
         name: String,
-        /// Назва теми (NAME у theme.conf)
-        #[arg(long)]
+        #[arg(long, help = T08)]
         title: Option<String>,
-        /// Перезаписати наявну тему
-        #[arg(long)]
+        #[arg(long, help = T09)]
         force: bool,
-        /// Записати в цю теку замість кореня тем
-        #[arg(long, value_name = "DIR")]
+        #[arg(long, value_name = "DIR", help = T10)]
         out: Option<PathBuf>,
-        /// Не робити зображення шпалерами теми (згенерувати градієнт)
-        #[arg(long)]
+        #[arg(long, help = T11)]
         no_wallpaper: bool,
     },
 }
@@ -99,7 +112,7 @@ fn check(ctx: &Ctx, ids: &[String], json: bool) -> Result<i32, Error> {
     let mut out = Vec::new();
     for t in &themes {
         let (ok, errors, warnings) = match tokens::load(t) {
-            None => (true, vec![], vec!["немає tokens.toml".to_string()]),
+            None => (true, vec![], vec![tr!("no tokens.toml")]),
             Some(Ok(l)) => (
                 true,
                 vec![],
@@ -119,10 +132,10 @@ fn check(ctx: &Ctx, ids: &[String], json: bool) -> Result<i32, Error> {
         } else {
             println!("{} {}", if ok { "OK  " } else { "FAIL" }, t.id);
             for e in &errors {
-                println!("  помилка: {e}");
+                println!("  {}", tr!("error: {text}", text = e));
             }
             for w in &warnings {
-                println!("  увага:   {w}");
+                println!("  {}", tr!("warning: {text}", text = w));
             }
         }
     }
@@ -141,7 +154,10 @@ fn generate(
 ) -> Result<i32, Error> {
     let t = get_theme(ctx, id)?;
     if !tokens::has_tokens(&t) {
-        return Err(Error(format!("тема «{id}» не має tokens.toml")));
+        return Err(Error(tr!(
+            "the theme “{theme}” has no tokens.toml",
+            theme = id
+        )));
     }
     if let Some(n) = repeat {
         // end-to-end per run: read files, parse, merge, validate, render, write
@@ -166,7 +182,15 @@ fn generate(
             );
         } else {
             println!(
-                "{id}: {n} генерацій — мін. {min:.2} мс, медіана {med:.2} мс, макс. {max:.2} мс; з кешу {cached:.2} мс"
+                "{id}: {}",
+                tr!(
+                    "{runs} generations: min {min} ms, median {median} ms, max {max} ms; from the cache {cached} ms",
+                    runs = n,
+                    min = format!("{min:.2}"),
+                    median = format!("{med:.2}"),
+                    max = format!("{max:.2}"),
+                    cached = format!("{cached:.2}")
+                )
             );
         }
         return Ok(0);
@@ -180,7 +204,14 @@ fn generate(
         for f in &files {
             println!("  {} ({})", f.path, f.status);
         }
-        println!("{id}: {} файл(ів), {took:.2} мс", files.len());
+        println!(
+            "{id}: {}",
+            tr!(
+                "files: {count}, {ms} ms",
+                count = files.len(),
+                ms = format!("{took:.2}")
+            )
+        );
     }
     Ok(0)
 }
@@ -189,9 +220,10 @@ fn generate(
 /// (gdk-pixbuf: every format with an installed loader, including JPEG XL and WebP).
 fn read_rgb(path: &Path) -> Result<Vec<u8>, Error> {
     let pb = gtk::gdk_pixbuf::Pixbuf::from_file_at_scale(path, 256, 256, true).map_err(|e| {
-        Error(format!(
-            "не вдалося прочитати зображення {}: {e}",
-            path.display()
+        Error(tr!(
+            "could not read the image {path}: {error}",
+            path = path.display(),
+            error = e
         ))
     })?;
     let (w, h) = (pb.width() as usize, pb.height() as usize);
@@ -228,19 +260,19 @@ fn from_image(
     json: bool,
 ) -> Result<i32, Error> {
     if !util::valid_id(id) {
-        return Err(Error(format!("некоректний id теми: {id:?}")));
+        return Err(Error(tr!("invalid theme id: {id}", id = format!("{id:?}"))));
     }
     let dir = out.unwrap_or_else(|| ctx.themes.join(id));
     if dir.join("tokens.toml").exists() && !force {
-        return Err(Error(format!(
-            "{} уже існує (--force, щоб перезаписати)",
-            dir.display()
+        return Err(Error(tr!(
+            "{path} already exists (--force to overwrite it)",
+            path = dir.display()
         )));
     }
     let t0 = Instant::now();
     let rgb = read_rgb(path)?;
     if rgb.is_empty() {
-        return Err(Error("зображення не містить непрозорих пікселів".into()));
+        return Err(Error(tr!("the image has no opaque pixels")));
     }
     let (clusters, pal) = theme_tokens::palette::from_pixels(&rgb);
     let name = title.unwrap_or_else(|| id.to_string());
@@ -263,9 +295,10 @@ fn from_image(
             ("NAME", name.clone()),
             (
                 "DESCRIPTION",
-                format!(
-                    "Тема з палітри зображення {}",
-                    abs.file_name()
+                tr!(
+                    "Theme from the palette of the image {file}",
+                    file = abs
+                        .file_name()
                         .map(|f| f.to_string_lossy().into_owned())
                         .unwrap_or_default()
                 ),
@@ -282,14 +315,32 @@ fn from_image(
             })
         );
     } else {
-        println!("Тему «{name}» ({id}) створено: {}", dir.display());
-        println!("  опорний колір: {}", pal.seed.hex());
+        println!(
+            "{}",
+            tr!(
+                "Theme “{name}” ({id}) created: {path}",
+                name = name,
+                id = id,
+                path = dir.display()
+            )
+        );
+        println!(
+            "  {}",
+            tr!("seed colour: {colour}", colour = pal.seed.hex())
+        );
         let cs: Vec<String> = clusters
             .iter()
             .map(|c| format!("{} {:.0}%", c.color.hex(), c.share * 100.0))
             .collect();
-        println!("  кластери: {}", cs.join(", "));
-        println!("  {took:.1} мс. Застосувати: themes apply {id} --only look,apps");
+        println!("  {}", tr!("clusters: {list}", list = cs.join(", ")));
+        println!(
+            "  {}",
+            tr!(
+                "{ms} ms. To apply: themes apply {id} --only look,apps",
+                ms = format!("{took:.1}"),
+                id = id
+            )
+        );
     }
     Ok(0)
 }

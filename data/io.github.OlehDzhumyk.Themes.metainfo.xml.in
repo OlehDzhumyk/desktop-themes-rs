@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+<component type="desktop-application">
+  <id>io.github.OlehDzhumyk.Themes</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Themes</name>
+  <summary>Switch and mix the look of the GNOME desktop</summary>
+  <description>
+    <p>Switches the whole look of GNOME between Fedora, macOS, macOS Liquid Glass and Windows 11, and lets you mix modules: the macOS look with Windows 11 keyboard behaviour, for example.</p>
+    <p>Desktop features that Windows 11 and macOS both have, such as a clipboard history, come with it. Everything works at user level, without administrator rights.</p>
+  </description>
+  <launchable type="desktop-id">io.github.OlehDzhumyk.Themes.desktop</launchable>
+  <url type="homepage">https://github.com/OlehDzhumyk/desktop-themes-rs</url>
+  <url type="bugtracker">https://github.com/OlehDzhumyk/desktop-themes-rs/issues</url>
+  <developer id="io.github.olehdzhumyk">
+    <name translate="no">OlehDzhumyk</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <translation type="gettext">desktop-themes-rs</translation>
+</component>

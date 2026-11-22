@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens"]
-default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens"]
+members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "xtask"]
+default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings"]
 
 [workspace.package]
 version = "2.1.0"
@@ -21,6 +21,7 @@ zbus = "6.5.0"
 themes-core = { path = "crates/themes-core" }
 desk-proto = { path = "crates/desk-proto" }
 theme-tokens = { path = "crates/theme-tokens" }
+desk-settings = { path = "crates/desk-settings" }
 
 [profile.release]
 opt-level = 3

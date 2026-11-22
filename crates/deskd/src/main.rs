@@ -12,6 +12,7 @@ mod settings;
 use std::sync::{Arc, Mutex};
 
 use desk_proto::{BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH};
+use desk_settings::tr;
 use gio::glib;
 use gio::prelude::*;
 
@@ -20,9 +21,12 @@ use service::{ClipboardIface, Desk, Shared};
 
 fn usage() {
     println!(
-        "deskd {} — служба функцій робочого столу (D-Bus {BUS_NAME})\n\n\
-         Використання: deskd [--replace]\n  --replace   забрати назву на шині в запущеного deskd\n  --version",
-        env!("CARGO_PKG_VERSION")
+        "{}",
+        tr!(
+            "deskd {version} — desktop features service (D-Bus {name})\n\nUsage: deskd [--replace]\n  --replace   take the bus name over from a running deskd\n  --version",
+            version = env!("CARGO_PKG_VERSION"),
+            name = BUS_NAME
+        )
     );
 }
 
@@ -48,6 +52,7 @@ fn emit_changed(conn: &zbus::Connection) {
 }
 
 fn main() {
+    desk_settings::i18n::init(desk_settings::i18n::language_from_gsettings);
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.iter().any(|a| a == "--help" || a == "-h") {
         usage();
@@ -64,8 +69,11 @@ fn main() {
         Some(s) => settings::read_config(s),
         None => {
             eprintln!(
-                "deskd: схему {CLIPBOARD_SCHEMA_ID} не встановлено (data/install.sh), \
-                 працюю з типовими налаштуваннями"
+                "deskd: {}",
+                tr!(
+                    "the schema {schema} is not installed (data/install.sh), using the default settings",
+                    schema = CLIPBOARD_SCHEMA_ID
+                )
             );
             Config::default()
         }
@@ -103,11 +111,14 @@ fn main() {
     let conn = match conn {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("deskd: не вдалося зайняти {BUS_NAME}: {e}");
+            eprintln!(
+                "deskd: {}",
+                tr!("cannot own {name}: {error}", name = BUS_NAME, error = e)
+            );
             std::process::exit(1);
         }
     };
-    eprintln!("deskd {}: працює як {BUS_NAME}", env!("CARGO_PKG_VERSION"));
+    eprintln!("deskd {}: running as {BUS_NAME}", env!("CARGO_PKG_VERSION"));
 
     let main_loop = glib::MainLoop::new(None, false);
 
@@ -122,7 +133,7 @@ fn main() {
                     if let Ok(mut lost) = proxy.receive_name_lost().await {
                         while let Some(sig) = lost.next().await {
                             if sig.args().map(|a| a.name == BUS_NAME).unwrap_or(false) {
-                                eprintln!("deskd: назву {BUS_NAME} забрав інший процес, виходжу");
+                                eprintln!("deskd: another process took {BUS_NAME}, exiting");
                                 ml.quit();
                                 break;
                             }
@@ -136,8 +147,9 @@ fn main() {
     if let Some(s) = &gsettings {
         let eng = eng.clone();
         let conn = conn.clone();
-        s.connect_changed(None, move |s, key| {
-            let cfg = settings::read_config(s);
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, key| {
+            let cfg = settings::read_config(&typed);
             {
                 let mut e = eng.lock().unwrap_or_else(|p| p.into_inner());
                 e.set_config(cfg);

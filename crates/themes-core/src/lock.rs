@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+use desk_settings::tr;
 use std::fs::{File, OpenOptions, TryLockError};
 use std::io::Write;
 use std::time::{Duration, Instant};
@@ -25,9 +26,9 @@ impl Lock {
                     std::thread::sleep(Duration::from_millis(200))
                 }
                 Err(TryLockError::WouldBlock) => {
-                    return Err(Error(format!(
-                        "інший процес тримає блокування {}",
-                        ctx.lock.display()
+                    return Err(Error(tr!(
+                        "another process holds the lock {path}",
+                        path = ctx.lock.display()
                     )));
                 }
                 Err(TryLockError::Error(e)) => return Err(e.into()),

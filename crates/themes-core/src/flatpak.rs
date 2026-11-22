@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Користувацькі flatpak overrides з обліком того, що саме змінила тема.
 
+use desk_settings::tr;
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -86,11 +87,11 @@ pub fn remove(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
         let p = Path::new(&ch.file);
         let mut kf = kf_read(p);
         if kf_get(&kf, &ch.section, &ch.key) != Some(ch.new.as_str()) {
-            warnings.push(format!(
-                "flatpak override {} [{}] {} змінено вручну — не чіпаю",
-                p.file_name().unwrap_or_default().to_string_lossy(),
-                ch.section,
-                ch.key
+            warnings.push(tr!(
+                "flatpak override {file} [{section}] {key} was changed by hand; not touching it",
+                file = p.file_name().unwrap_or_default().to_string_lossy(),
+                section = ch.section,
+                key = ch.key
             ));
             continue;
         }
@@ -121,7 +122,7 @@ pub fn apply(
 ) -> Result<usize> {
     let lines = theme.flatpak_lines();
     if !lines.is_empty() && !which("flatpak") {
-        warnings.push("flatpak не знайдено — overrides пропущено".into());
+        warnings.push(tr!("flatpak not found; overrides skipped"));
         return Ok(0);
     }
     for args in &lines {

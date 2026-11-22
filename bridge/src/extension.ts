@@ -11,6 +11,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {ClipboardFeature} from './clipboard/feature.js';
+import {initI18n, setLanguage} from './i18n.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
 const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
@@ -21,6 +22,7 @@ export default class DeskBridge extends Extension {
     private _indicator: InstanceType<typeof DeskIndicator> | null = null;
     private _clipboard: ClipboardFeature | null = null;
     private _skinId = 0;
+    private _langId = 0;
 
     /** Settings from the extension's own schemas/ (falls back to the system/user schema dirs). */
     private _schema(id: string): Gio.Settings {
@@ -37,12 +39,31 @@ export default class DeskBridge extends Extension {
     override enable(): void {
         this._settings = this._schema('io.github.OlehDzhumyk.Desk');
         this._clipSettings = this._schema(CLIPBOARD_SCHEMA);
+        initI18n(this, this._settings.get_string('language'));
+        this._build();
+        this._skinId = this._settings.connect('changed::skin', () => this._applySkin());
+        // the language setting rebuilds the UI with the new texts
+        this._langId = this._settings.connect('changed::language', () => {
+            setLanguage(this._settings!.get_string('language'));
+            this._teardown();
+            this._build();
+        });
+    }
+
+    private _build(): void {
         this._indicator = new DeskIndicator();
         Main.panel.statusArea.quickSettings!.addExternalIndicator(this._indicator);
-        this._clipboard = new ClipboardFeature(this.path, this._clipSettings, this._skin(),
+        this._clipboard = new ClipboardFeature(this.path, this._clipSettings!, this._skin(),
             () => launchGui('clipboard'));
         this._applySkin();
-        this._skinId = this._settings.connect('changed::skin', () => this._applySkin());
+    }
+
+    private _teardown(): void {
+        this._indicator?.setClipboard(null);
+        this._clipboard?.destroy();
+        this._clipboard = null;
+        this._indicator?.destroy();
+        this._indicator = null;
     }
 
     private _skin(): string {
@@ -57,14 +78,13 @@ export default class DeskBridge extends Extension {
     }
 
     override disable(): void {
-        if (this._skinId)
-            this._settings?.disconnect(this._skinId);
+        for (const id of [this._skinId, this._langId]) {
+            if (id)
+                this._settings?.disconnect(id);
+        }
         this._skinId = 0;
-        this._indicator?.setClipboard(null);
-        this._clipboard?.destroy();
-        this._clipboard = null;
-        this._indicator?.destroy();
-        this._indicator = null;
+        this._langId = 0;
+        this._teardown();
         this._settings = null;
         this._clipSettings = null;
     }

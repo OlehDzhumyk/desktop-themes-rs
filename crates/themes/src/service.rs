@@ -6,6 +6,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use desk_settings::tr;
 use themes_core::modules::Module;
 use themes_core::state::State;
 use themes_core::theme::all_themes;
@@ -48,7 +49,9 @@ pub fn current_map(ctx: &Ctx) -> HashMap<String, String> {
 
 /// Виконати синхронну роботу бібліотеки в окремому потоці (не блокуючи виконавця zbus напряму).
 fn off_thread<T: Send + 'static>(f: impl FnOnce() -> T + Send + 'static) -> T {
-    std::thread::spawn(f).join().expect("потік служби впав")
+    std::thread::spawn(f)
+        .join()
+        .expect("service thread crashed")
 }
 
 #[zbus::interface(name = "io.github.OlehDzhumyk.Themes")]
@@ -66,6 +69,17 @@ impl Service {
                     t.modules().iter().map(|m| m.id().to_string()).collect(),
                 )
             })
+            .collect()
+    }
+
+    /// Експериментальні теми: id → попередження (мовою служби). Клієнти (міст) питають
+    /// підтвердження перед `Apply` такої теми.
+    fn experimental(&self) -> HashMap<String, String> {
+        self.act.touch();
+        all_themes(&self.ctx)
+            .iter()
+            .filter(|t| t.experimental())
+            .map(|t| (t.id.clone(), t.warning()))
             .collect()
     }
 
@@ -108,9 +122,10 @@ impl Service {
                             .collect::<Vec<_>>()
                             .join(", ");
                         let _ = themes_core::shell::notify(
-                            "Теми: розширення вимкнено",
-                            &format!(
-                                "Після застосування теми розширення перейшли в стан помилки й були вимкнені: {list}"
+                            &tr!("Themes: extensions turned off"),
+                            &tr!(
+                                "After the theme was applied these extensions went into an error state and were turned off: {list}",
+                                list = list
                             ),
                             "dialog-warning-symbolic",
                         );
@@ -121,11 +136,12 @@ impl Service {
                 act.touch();
             });
         }
-        let mut msg = format!("Тему «{}» застосовано", res.name);
+        let mut msg = tr!("Theme “{name}” applied", name = res.name);
         if res.relogin {
-            msg.push_str(&format!(
-                ". Потрібен перевхід: {}",
-                res.relogin_reasons.join("; ")
+            msg.push_str(". ");
+            msg.push_str(&tr!(
+                "You need to log in again: {reasons}",
+                reasons = res.relogin_reasons.join("; ")
             ));
         }
         Ok((res.relogin, msg, res.warnings))
@@ -213,7 +229,10 @@ pub fn run() -> i32 {
     }) {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("themes --dbus-service: не вдалося зайняти {DBUS_NAME}: {e}");
+            eprintln!(
+                "themes --dbus-service: {}",
+                tr!("cannot own {name}: {error}", name = DBUS_NAME, error = e)
+            );
             return 1;
         }
     };

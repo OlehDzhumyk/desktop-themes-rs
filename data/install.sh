@@ -2,8 +2,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # User-level install of the built binaries and their desktop integration (no sudo):
 #   themes (CLI/GUI/theme service), deskd (desktop features daemon), their D-Bus activation files,
-#   systemd user units, the GSettings schema of deskd and the GNOME Shell extensions of this
-#   repository (desk-bridge is built from bridge/ with npm when bridge/build is missing).
+#   systemd user units, the GSettings schema of deskd, the translations (po/ → ~/.local/share/locale,
+#   translated .desktop and metainfo) and the GNOME Shell extensions of this repository (desk-bridge
+#   is built from bridge/ with npm when bridge/build is missing).
+#   Upgrading an install from before the language setting existed (Ukrainian-only builds) sets
+#   io.github.OlehDzhumyk.Desk language='uk' once, so the interface stays Ukrainian on an English
+#   session; new installs follow the session language (change it in the window: Features → General).
 # Run on the host after `cargo build --release` (scripts/bootstrap.sh does all of it).
 #
 # Usage: data/install.sh [--dry-run] [--bin PATH] [--deskd PATH]
@@ -32,10 +36,17 @@ DATA=${XDG_DATA_HOME:-$HOME/.local/share}
 BIN="$HOME/.local/bin"
 ROOT="${DESKTOP_THEMES_ROOT:-$DATA/desktop-themes}"
 
+# an existing install from before the language setting? (decided before the binary is replaced)
+UPGRADE_LANG=0
+if [ -x "$BIN/themes" ] && command -v dconf >/dev/null 2>&1 && [ -z "$(dconf read /io/github/OlehDzhumyk/Desk/language 2>/dev/null)" ] \
+   && ! grep -q 'name="language"' "$DATA/glib-2.0/schemas/$DESK_ID.gschema.xml" 2>/dev/null; then
+  UPGRADE_LANG=1
+fi
+
 [ "$DRY" = 1 ] || [ -x "$BIN_SRC" ] || { echo "binary not found: $BIN_SRC (build it first: cargo build --release)" >&2; exit 1; }
 [ "$DRY" = 1 ] || [ -x "$DESKD_SRC" ] || { echo "binary not found: $DESKD_SRC (build it first: cargo build --release)" >&2; exit 1; }
 run mkdir -p "$BIN" "$DATA/dbus-1/services" "$HOME/.config/systemd/user" "$DATA/applications" \
-  "$DATA/gnome-shell/extensions" "$DATA/glib-2.0/schemas"
+  "$DATA/gnome-shell/extensions" "$DATA/glib-2.0/schemas" "$DATA/metainfo"
 
 run install -m 0755 "$BIN_SRC" "$BIN/themes.new"
 run mv -f "$BIN/themes.new" "$BIN/themes"
@@ -49,12 +60,32 @@ run install -m 0644 "$SRC/data/$DESK_ID.gschema.xml" "$DATA/glib-2.0/schemas/$DE
 if command -v glib-compile-schemas >/dev/null 2>&1; then run glib-compile-schemas "$DATA/glib-2.0/schemas"
 else run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" glib-compile-schemas "$DATA/glib-2.0/schemas"; fi
 
+if [ "$UPGRADE_LANG" = 1 ]; then
+  run gsettings set "$DESK_ID" language uk
+fi
+
+# translations: one gettext domain for the programs, the bridge and the desktop files
+msgfmt_() {
+  if command -v msgfmt >/dev/null 2>&1; then run msgfmt "$@"
+  else run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" msgfmt "$@"; fi
+}
+for po in "$SRC"/po/*.po; do
+  lang=$(basename "$po" .po)
+  run mkdir -p "$DATA/locale/$lang/LC_MESSAGES"
+  msgfmt_ --check -o "$DATA/locale/$lang/LC_MESSAGES/desktop-themes-rs.mo" "$po"
+done
+TMPD=$(mktemp -d)
+trap 'rm -rf "$TMPD"' EXIT
+msgfmt_ --desktop -d "$SRC/po" --template "$SRC/data/$APP_ID.desktop.in" -o "$TMPD/$APP_ID.desktop"
+msgfmt_ --xml -d "$SRC/po" --template "$SRC/data/$APP_ID.metainfo.xml.in" -o "$TMPD/$APP_ID.metainfo.xml"
+
 if [ "$DRY" = 1 ]; then
   echo "    + sed @BIN@ -> $BIN: data/$APP_ID.{service,desktop} -> $DATA/{dbus-1/services,applications}"
 else
   sed "s|@BIN@|$BIN|g" "$SRC/data/$APP_ID.service" > "$DATA/dbus-1/services/$APP_ID.service"
-  sed "s|@BIN@|$BIN|g" "$SRC/data/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
+  sed "s|@BIN@|$BIN|g" "$TMPD/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
   sed "s|@BIN@|$BIN|g" "$SRC/data/$DESK_ID.service" > "$DATA/dbus-1/services/$DESK_ID.service"
+  install -m 0644 "$TMPD/$APP_ID.metainfo.xml" "$DATA/metainfo/$APP_ID.metainfo.xml"
 fi
 run install -m 0644 "$SRC/data/themes-doctor.service" "$HOME/.config/systemd/user/themes-doctor.service"
 run install -m 0644 "$SRC/data/deskd.service" "$HOME/.config/systemd/user/deskd.service"
