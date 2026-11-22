@@ -79,17 +79,21 @@ export class ClipboardClient {
     private _signalId = 0;
     private _propsId = 0;
     private _onChanged: () => void;
+    /** Cancels the asynchronous proxy set-up when the client is destroyed before deskd answered. */
+    private _cancellable = new Gio.Cancellable();
 
     constructor(extDir: string, onChanged: () => void) {
         this._onChanged = onChanged;
         const Wrapper = proxyClass<ClipboardProxy>(readXml(extDir, 'io.github.OlehDzhumyk.Desk.Clipboard'));
         // asynchronous construction: never block the shell while deskd is being activated
         const proxy = new Wrapper(Gio.DBus.session, DESK_BUS, CLIPBOARD_PATH, (_p, error) => {
+            if (!this._proxy)
+                return; // destroyed meanwhile (the set-up was cancelled)
             if (error)
                 console.warn(`desk-bridge: deskd proxy: ${errorText(error)}`);
             else
                 this._onChanged();
-        }, null, Gio.DBusProxyFlags.NONE);
+        }, this._cancellable, Gio.DBusProxyFlags.NONE);
         this._proxy = proxy;
         this._signalId = proxy.connectSignal('Changed', () => { this._onChanged(); });
         this._propsId = proxy.connect('g-properties-changed', () => { this._onChanged(); });
@@ -146,6 +150,7 @@ export class ClipboardClient {
     }
 
     destroy(): void {
+        this._cancellable.cancel();
         if (this._proxy) {
             if (this._signalId)
                 this._proxy.disconnectSignal(this._signalId);

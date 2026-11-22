@@ -119,6 +119,9 @@ export abstract class ClipboardPanel {
     private _grab: Clutter.Grab | null = null;
     private _refreshSerial = 0;
     private _closing = false;
+    /** The actor was destroyed: by destroy(), or by the shell tearing the stage down at logout,
+     * while a deskd reply or signal may still arrive. Nothing may touch the actor after that. */
+    private _gone = false;
 
     protected constructor(protected host: PanelHost, protected skin: string, protected anchor: Anchor) {
         this.actor = new St.Widget({
@@ -141,11 +144,15 @@ export abstract class ClipboardPanel {
             return Clutter.EVENT_PROPAGATE;
         });
         this.actor.connect('key-press-event', (_a: Clutter.Actor, ev: Clutter.Event) => this.onKey(ev));
+        this.actor.connect('destroy', () => {
+            this._gone = true;
+            this._grab = null;
+        });
         Main.layoutManager.addTopChrome(this.actor);
     }
 
     get isOpen(): boolean {
-        return this.actor.visible;
+        return !this._gone && this.actor.visible;
     }
 
     /** Query string for List() (search field). */
@@ -252,11 +259,11 @@ export abstract class ClipboardPanel {
         const serial = ++this._refreshSerial;
         try {
             const items = await this.host.client.list(this.query(), this.limit());
-            if (serial !== this._refreshSerial)
+            if (serial !== this._refreshSerial || this._gone)
                 return;
             this.items = items;
         } catch (e) {
-            if (serial !== this._refreshSerial)
+            if (serial !== this._refreshSerial || this._gone)
                 return;
             this.items = [];
             console.warn(`desk-bridge: deskd List failed: ${errorText(e)}`);
@@ -414,6 +421,8 @@ export abstract class ClipboardPanel {
     }
 
     destroy(): void {
+        if (this._gone)
+            return;
         this.close();
         Main.layoutManager.removeChrome(this.actor);
         this.actor.destroy();
