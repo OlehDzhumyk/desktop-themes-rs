@@ -28,6 +28,8 @@ case "$HS_ROOT" in */desktop-themes-headless/*) ;; *) HS_ROOT="$HOME/.cache/desk
 export HS_CONF="$HS_ROOT/config"
 export HS_DATA="$HS_ROOT/data"
 export HS_TOOLBOX="${HS_TOOLBOX:-desktop-themes-build}"
+# HS_TOOLBOX=none: dbus-daemon & co. are installed where the shell runs (CI container): no toolbox
+tbx() { if [ "$HS_TOOLBOX" = none ]; then "$@"; else toolbox run -c "$HS_TOOLBOX" "$@"; fi; }
 mkdir -p "$HS_RUNTIME" "$HS_STATE" "$HS_CONF/dconf" "$HS_DATA"
 chmod 700 "$HS_RUNTIME"
 # dconf db names become D-Bus object path elements: letters, digits and _ only
