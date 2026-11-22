@@ -1,6 +1,5 @@
-# macos sounds module (staged; theme dir ~/.local/share/sounds/macos-like)
+# macos sounds module: the theme name (macos-like) is in tokens.toml [sounds]
 
 [org/gnome/desktop/sound]
-theme-name='macos-like'
 event-sounds=true
 input-feedback-sounds=false

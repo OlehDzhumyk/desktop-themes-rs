@@ -1,6 +1,6 @@
 # Bundled themes
 
-Four themes ship in `themes/`. Third-party assets they refer to are installed by
+Five themes ship in `themes/`. Third-party assets they refer to are installed by
 `scripts/install-assets.sh` and `scripts/install-extensions.sh`; versions are pinned in
 `scripts/versions.sh`, licences are in [../CREDITS.md](../CREDITS.md).
 
@@ -24,7 +24,9 @@ a lock-screen layout.
   the launcher, Super+Q closes, Super+H minimizes, natural scrolling, hot corner on, edge tiling off,
   grayscale font rendering.
 * **Sounds**: `macos-like`, synthesized (see below).
-* **Apps**: Ptyxis palette `Pro` and JetBrains Mono 12 in the default profile.
+* **Apps**: Ptyxis palette `Pro` (referenced by name) and JetBrains Mono 12 in the default profile.
+* **Tokens** (`tokens.toml`): accent `blue`, fonts (Inter, JetBrains Mono, bold titles), the sound
+  theme and the terminal; WhiteSur's `gtk4/` and shell theme stay hand-made and win.
 * **Spotlight** (`spotlight@nin`) replaces the overview search; Super+Space must not stay bound to
   `toggle-overview` (both would fire and the shell may crash), so `spotlight.dconf` and
   `behavior.dconf` both clear it. Two small patches are applied, see ../patches/README.md.
@@ -69,11 +71,21 @@ Win+V clipboard history (desk-bridge, skin `windows11`: a flyout next to the tex
   keybinding, which replaces the `custom-keybindings` list), traditional scrolling, edge tiling on,
   hot corner off, rgba subpixel rendering.
 * **Sounds**: `windows11-like`, synthesized.
-* **Apps**: Ptyxis palette `campbell`, Cascadia Mono 12, I-beam cursor.
+* **Apps**: Ptyxis palette `campbell` (referenced by name), Cascadia Mono 12, I-beam cursor.
+* **Tokens** (`tokens.toml`): accent `blue`, Noto Sans, the sound theme and the terminal; Fluent's
+  `gtk4/` and shell theme stay hand-made and win.
 * Fluent has no GNOME Shell 49-51 stylesheet; the newest one is used, so expect small overview/panel
   glitches. `dash-to-panel` conflicts with `dash-to-dock` (macOS): never enable both. `gtk4-ding` is
   the least proven extension; drop it from `extensions.txt` if it misbehaves.
 * Segoe UI and Microsoft logos/wallpapers are not used.
+
+## lavender (tokens only)
+
+A showcase of [design tokens](design-tokens.md): the theme is `theme.conf` + `tokens.toml`. Lavender
+colours for libadwaita in light and dark, soft radii (window 14, buttons 8, cards and popovers 12),
+Adwaita Sans/Mono, a dark lavender GNOME Shell layer over the stock stylesheet (translucent panel,
+rounded quick settings), its own Ptyxis palette and a generated gradient wallpaper. Stock icons,
+cursor and behaviour; no extensions besides User Themes (added automatically for the shell layer).
 
 ## Sound themes (generated, CC0)
 

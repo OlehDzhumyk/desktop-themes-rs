@@ -9,8 +9,9 @@ manager does not know (README, tools/, ...) are ignored.
 | `theme.conf` | - | `NAME="..."`, `DESCRIPTION="..."`, `PREVIEW="path"`, optional `PREVIEW_DARK="path"`, optional `INHERITS=<theme id>` |
 | `desk.dconf` | look | skin of the shell bridge and the clipboard shortcut (see "Skin" below) |
 | `settings.dconf`, `extensions.dconf`, any other `*.dconf` not listed below | look | keys in `dconf dump` format |
+| `tokens.toml` | look (derived keys go to look, sounds, apps) | design tokens: colours, radii, fonts, terminal, sounds, ...; generates libadwaita CSS, a shell layer, a Ptyxis palette, dconf keys (see [design-tokens.md](design-tokens.md)) |
 | `extensions.txt` | look | UUIDs of extensions the theme enables, one per line (`#` comments) |
-| `gtk4/`, `gtk3/` | look | files linked into `~/.config/gtk-4.0/` and `~/.config/gtk-3.0/` (`gtk3/bookmarks` is never touched) |
+| `gtk4/`, `gtk3/` | look | files linked into `~/.config/gtk-4.0/` and `~/.config/gtk-3.0/` (`gtk3/bookmarks` is never touched); a `gtk4/` generated from `tokens.toml` is copied instead |
 | `flatpak.conf` | look | one `flatpak override --user` argument set per line |
 | `behavior.dconf` | behavior | shortcuts, Alt+Tab, touchpad, hot corners, mutter, font rendering |
 | `sounds.dconf` | sounds | `org/gnome/desktop/sound` |
@@ -101,6 +102,8 @@ are reported by `themes doctor` and the child then stands alone):
 * `extensions.txt`: lines `+uuid` add to the parent's list, `-uuid` remove from it. If the child's
   file has any plain `uuid` line, the parent's list is not used (the child lists everything itself);
   `+`/`-` lines still apply on top. Without the file the parent's list is used.
+* `tokens.toml`: deep-merged along the chain (a child's key replaces the parent's, tables merge,
+  arrays are replaced).
 * `gtk4/`, `gtk3/`, `flatpak.conf`, `apps/hooks/*`: the first theme in the chain that has them
   (directories are not merged). An inherited hook runs in its own theme's directory.
 * `theme.conf`: `PREVIEW`/`PREVIEW_DARK` and unknown keys are inherited; `NAME`, `DESCRIPTION` and
@@ -112,4 +115,6 @@ are reported by `themes doctor` and the child then stands alone):
 
 `themes/macos/gtk4/` and `themes/windows11/gtk4/` (libadwaita CSS and assets derived from WhiteSur
 and Fluent) are produced by `scripts/install-assets.sh` inside the installed theme root and are
-git-ignored.
+git-ignored. Files generated from `tokens.toml` live in `~/.cache/desktop-themes/<id>/` and are
+never written into a theme directory. Hand-made files win over generated ones: a `gtk4/` directory
+or a `user-theme name` key in the theme's dconf files switches the matching generator off.
