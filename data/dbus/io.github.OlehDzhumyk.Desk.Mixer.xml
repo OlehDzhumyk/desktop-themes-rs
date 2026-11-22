@@ -1,0 +1,76 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Volume mixer engine of deskd: the PipeWire graph (output and input devices, playback streams of
+     applications), followed through server events only. The shell bridge renders it and never opens
+     an audio connection itself. Volumes are on the cubic scale of volume sliders (0.0 .. 1.5,
+     1.0 = 100 %; the server stores volume^3), as wpctl and GNOME show them.
+
+     Versioning: the property Version (now 1). Adding members keeps it; changing or removing a member
+     increments it, and clients check it before calling. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Mixer">
+    <!-- kind: "output" (sinks) or "input" (sources). Device: (id, node name, description, icon name,
+         bus "bluetooth"|"usb"|"pci"|"" , volume, muted, is the default), sorted by description. -->
+    <method name="ListDevices">
+      <arg name="kind" type="s" direction="in"/>
+      <arg name="devices" type="a(ussssdbb)" direction="out"/>
+    </method>
+    <!-- Playback streams of applications. Stream: (id, application key, application name, icon,
+         media name, volume, muted, playing, output device id or 0). -->
+    <method name="ListStreams">
+      <arg name="streams" type="a(ussssdbbu)" direction="out"/>
+    </method>
+    <!-- One row per application (its streams merged), sorted by name. Paused streams are listed for
+         30 s after they stopped playing, or always when include_silent. Applications in the
+         GSettings key hide-apps and the event sounds of the shell are never listed.
+         App: (key, name, icon, media name, volume, muted, playing, output device id or 0,
+         stream ids). -->
+    <method name="ListApps">
+      <arg name="include_silent" type="b" direction="in"/>
+      <arg name="apps" type="a(ssssdbbuau)" direction="out"/>
+    </method>
+    <!-- Volume or mute of a device or a stream (by id). -->
+    <method name="SetVolume">
+      <arg name="id" type="u" direction="in"/>
+      <arg name="volume" type="d" direction="in"/>
+    </method>
+    <method name="SetMute">
+      <arg name="id" type="u" direction="in"/>
+      <arg name="mute" type="b" direction="in"/>
+    </method>
+    <!-- Volume or mute of every stream of an application (key from ListApps). -->
+    <method name="SetAppVolume">
+      <arg name="app" type="s" direction="in"/>
+      <arg name="volume" type="d" direction="in"/>
+    </method>
+    <method name="SetAppMute">
+      <arg name="app" type="s" direction="in"/>
+      <arg name="mute" type="b" direction="in"/>
+    </method>
+    <!-- Make a device the default output or input. For outputs, streams that had been moved to a
+         device explicitly follow the new default as well. -->
+    <method name="SetDefault">
+      <arg name="kind" type="s" direction="in"/>
+      <arg name="id" type="u" direction="in"/>
+    </method>
+    <!-- Play a stream, or every stream of an application, on an output device (0 = the default). -->
+    <method name="MoveStream">
+      <arg name="stream" type="u" direction="in"/>
+      <arg name="device" type="u" direction="in"/>
+    </method>
+    <method name="MoveApp">
+      <arg name="app" type="s" direction="in"/>
+      <arg name="device" type="u" direction="in"/>
+    </method>
+    <property name="Version" type="u" access="read"/>
+    <!-- Connected to the audio server. -->
+    <property name="Available" type="b" access="read"/>
+    <!-- Ids of the default output and input devices (0 = none). -->
+    <property name="DefaultOutput" type="u" access="read"/>
+    <property name="DefaultInput" type="u" access="read"/>
+    <!-- Something changed: a subset of "devices", "apps", "defaults", "available". Coalesced: a
+         burst of server events gives one signal, never one per audio buffer. -->
+    <signal name="Changed">
+      <arg name="what" type="as"/>
+    </signal>
+  </interface>
+</node>
