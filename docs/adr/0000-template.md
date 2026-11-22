@@ -1,6 +1,6 @@
 # NNNN. Title in the form of a decision
 
-* Status: proposed | accepted | superseded by [NNNN](NNNN-title.md)
+* Status: proposed | accepted | superseded by `NNNN-title.md`
 * Date: YYYY-MM-DD
 
 ## Context
