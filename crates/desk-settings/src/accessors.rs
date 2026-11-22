@@ -227,6 +227,7 @@ pub struct ShortcutSettings(pub gio::Settings);
 impl ShortcutSettings {
     pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Shortcuts";
     pub const CLIPBOARD_TOGGLE: &'static str = "clipboard-toggle";
+    pub const MIXER_OPEN: &'static str = "mixer-open";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -240,5 +241,128 @@ impl ShortcutSettings {
 
     pub fn set_clipboard_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::CLIPBOARD_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the volume mixer (override)
+    pub fn mixer_open(&self) -> Vec<String> {
+        self.0.strv(Self::MIXER_OPEN).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_mixer_open(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::MIXER_OPEN, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+}
+
+/// Values of `io.github.OlehDzhumyk.Desk.Mixer` `entry-point`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum EntryPoint {
+    Menu,
+    #[default]
+    MenuAndIcon,
+}
+
+impl EntryPoint {
+    pub const ALL: [EntryPoint; 2] = [
+        EntryPoint::Menu,
+        EntryPoint::MenuAndIcon,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            EntryPoint::Menu => "menu",
+            EntryPoint::MenuAndIcon => "menu-and-icon",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "menu" => EntryPoint::Menu,
+            "menu-and-icon" => EntryPoint::MenuAndIcon,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Mixer` at `/io/github/OlehDzhumyk/Desk/mixer/`.
+#[derive(Clone, Debug)]
+pub struct MixerSettings(pub gio::Settings);
+
+impl MixerSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Mixer";
+    pub const ENABLED: &'static str = "enabled";
+    pub const ENTRY_POINT: &'static str = "entry-point";
+    pub const SHOW_SILENT_APPS: &'static str = "show-silent-apps";
+    pub const REMEMBER_APP_VOLUME: &'static str = "remember-app-volume";
+    pub const VOLUME_STEP: &'static str = "volume-step";
+    pub const HIDE_APPS: &'static str = "hide-apps";
+    pub const MIXER_SHORTCUT: &'static str = "mixer-shortcut";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable the volume mixer
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Where the mixer opens
+    pub fn entry_point(&self) -> EntryPoint {
+        EntryPoint::parse(&self.0.string(Self::ENTRY_POINT))
+    }
+
+    pub fn set_entry_point(&self, v: EntryPoint) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::ENTRY_POINT, v.as_str())
+    }
+
+    /// List applications with a paused audio stream
+    pub fn show_silent_apps(&self) -> bool {
+        self.0.boolean(Self::SHOW_SILENT_APPS)
+    }
+
+    pub fn set_show_silent_apps(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SHOW_SILENT_APPS, v)
+    }
+
+    /// Restore the volume set for an application when it plays again
+    pub fn remember_app_volume(&self) -> bool {
+        self.0.boolean(Self::REMEMBER_APP_VOLUME)
+    }
+
+    pub fn set_remember_app_volume(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::REMEMBER_APP_VOLUME, v)
+    }
+
+    /// Slider step for the arrow keys, in percent
+    pub fn volume_step(&self) -> u32 {
+        self.0.uint(Self::VOLUME_STEP)
+    }
+
+    pub fn set_volume_step(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::VOLUME_STEP, v)
+    }
+
+    /// Application keys (app id or program name) never listed in the mixer
+    pub fn hide_apps(&self) -> Vec<String> {
+        self.0.strv(Self::HIDE_APPS).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_hide_apps(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::HIDE_APPS, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Shortcut that opens the volume mixer (in force)
+    pub fn mixer_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::MIXER_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_mixer_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::MIXER_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }

@@ -5,10 +5,10 @@
 FROM registry.fedoraproject.org/fedora-toolbox:45
 
 RUN dnf install -y --setopt=install_weak_deps=False \
-        git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel \
+        git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel \
         rust cargo rustfmt clippy cargo-deny \
         nodejs npm ShellCheck just jq gitleaks desktop-file-utils libxml2 \
-        dbus-daemon unzip \
+        dbus-daemon unzip pipewire wireplumber pipewire-utils \
     && dnf clean all
 
 # cargo-nextest and ast-grep, version- and checksum-pinned in the script (also used by CI).

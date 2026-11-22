@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Debounced saving of the history: a burst of changes (copying many times, pinning, deleting)
-//! writes `history.json` once, after a quiet period, instead of once per change. Shutdown flushes
+//! Debounced saving (the clipboard history, the mixer memory): a burst of changes (copying many
+//! times, pinning, deleting, dragging a slider) writes the file once, after a quiet period, instead
+//! of once per change. Shutdown flushes
 //! whatever is pending ([`Saver::flush`], called on SIGTERM/SIGINT/SIGHUP and when the main loop
 //! ends), so nothing is lost on logout.
 
 use std::sync::mpsc::{self, RecvTimeoutError, Sender};
 use std::time::{Duration, Instant};
-
-use crate::service::{Shared, lock};
 
 /// Quiet period after the last change before the history is written.
 pub const QUIET: Duration = Duration::from_secs(2);
@@ -75,14 +74,9 @@ pub struct Saver {
 }
 
 impl Saver {
-    /// Start the thread that writes `eng` after changes; it ends when every handle is dropped.
-    pub fn spawn(eng: Shared, quiet: Duration, max_wait: Duration) -> Saver {
+    /// Start the thread that calls `save` after changes; it ends when every handle is dropped.
+    pub fn spawn(save: impl Fn() + Send + 'static, quiet: Duration, max_wait: Duration) -> Saver {
         let (tx, rx) = mpsc::channel::<Msg>();
-        let save = move || {
-            if let Err(e) = lock(&eng).save() {
-                eprintln!("deskd: cannot save the clipboard history: {e}");
-            }
-        };
         std::thread::spawn(move || {
             let mut d = Debounce::new(quiet, max_wait);
             loop {
@@ -120,9 +114,8 @@ impl Saver {
         Saver { tx }
     }
 
-    /// A saver that writes nothing (tests of the D-Bus interface).
-    #[cfg(test)]
-    pub fn inert() -> Saver {
+    /// A saver that writes nothing (tests, and features with nothing to keep).
+    pub fn noop() -> Saver {
         let (tx, _rx) = mpsc::channel();
         Saver { tx }
     }
@@ -188,6 +181,7 @@ mod tests {
     #[test]
     fn flush_writes_the_pending_history() {
         use crate::clipboard::{Config, Engine};
+        use crate::service::{Shared, lock};
         use std::sync::{Arc, Mutex};
 
         let dir = std::env::temp_dir().join(format!("deskd-persist-{}", std::process::id()));
@@ -196,7 +190,8 @@ mod tests {
         let eng = Engine::new(Config::default(), data.clone(), dir.join("run"));
         let eng: Shared = Arc::new(Mutex::new(eng));
         // far-away deadlines: only the flush can write
-        let saver = Saver::spawn(eng.clone(), secs(3600), secs(3600));
+        let e2 = eng.clone();
+        let saver = Saver::spawn(move || lock(&e2).save().unwrap(), secs(3600), secs(3600));
         saver.flush();
         assert!(!data.join("history.json").exists());
         lock(&eng).push("text/plain;charset=utf-8", b"keep me", &[], "", 1);

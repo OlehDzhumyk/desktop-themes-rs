@@ -37,6 +37,7 @@ pub static FEATURE_APP: Feature = Feature {
 
 pub static FEATURES: &[&Feature] = &[
     &FEATURE_CLIPBOARD,
+    &crate::mixer::FEATURE_MIXER,
     &crate::lockscreen::FEATURE_LOCKSCREEN,
     &FEATURE_APP,
 ];
@@ -112,6 +113,7 @@ pub static DESK: Schema = Schema {
     children: &[
         ("clipboard", CLIPBOARD_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
+        ("mixer", crate::mixer::MIXER_SCHEMA),
     ],
 };
 
@@ -326,15 +328,15 @@ pub static SHORTCUT_KEYS: Schema = Schema {
     id: SHORTCUTS_SCHEMA,
     path: "/io/github/OlehDzhumyk/Desk/shortcuts/",
     rust_name: "ShortcutSettings",
-    keys: &[&SC_CLIPBOARD_TOGGLE],
+    keys: &[&SC_CLIPBOARD_TOGGLE, &crate::mixer::SC_MIXER_OPEN],
     children: &[],
 };
 
 /// Every shortcut of every feature, edited in one place (the «Keyboard shortcuts» page).
-pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD];
+pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD, &crate::mixer::SHORTCUT_MIXER];
 
 /// All schemas, parents first (the order of the generated XML).
-pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD, &SHORTCUT_KEYS];
+pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD, &SHORTCUT_KEYS, &crate::mixer::MIXER];
 
 // ------------------------------------------------------------------ pages of the window
 
@@ -444,7 +446,10 @@ pub static PAGE_SHORTCUTS: Page = Page {
     groups: &[Group {
         title: n_("Features"),
         description: "",
-        items: &[Item::Shortcut(&SHORTCUT_CLIPBOARD)],
+        items: &[
+            Item::Shortcut(&SHORTCUT_CLIPBOARD),
+            Item::Shortcut(&crate::mixer::SHORTCUT_MIXER),
+        ],
     }],
 };
 
@@ -467,6 +472,7 @@ pub static PAGE_CREDITS: Page = Page {
 /// The pages, in the order they are listed.
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
+    &crate::mixer::PAGE_MIXER,
     &crate::lockscreen::PAGE_LOCKSCREEN,
     &PAGE_SHORTCUTS,
     &PAGE_GENERAL,

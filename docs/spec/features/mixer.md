@@ -10,9 +10,38 @@ have done it, inside the Control Center "Sound" tile.
 
 ## Status
 
-**Planned** (stage 2). Origin badge: *From Windows, adapted for macOS style* (device switching alone is
-in both systems). Candidates to integrate or port with attribution: an existing GNOME Shell quick-settings
-audio extension (licence to be checked when chosen; principle 5).
+**Implemented** (stage 2). Origin badge: *From Windows, adapted for macOS* (device
+switching alone is in both systems). The engine's node/route/metadata model and the PipeWire parameter
+encoding are ported from [wiremix](https://github.com/tsowell/wiremix) (MIT OR Apache-2.0); pwvucontrol
+(GPL-3.0-or-later) was read for its node model but not copied (its WirePlumber binding is a git fork);
+COSMIC's audio applet (GPL-3.0-only) was not used. See CREDITS.md.
+
+### Decisions taken while building it
+
+* The D-Bus interface is `io.github.OlehDzhumyk.Desk.Mixer` (object `/io/github/OlehDzhumyk/Desk/Mixer`,
+  `data/dbus/`), not `...Audio` as first proposed, so it matches the feature and the settings schema.
+  It is versioned by its `Version` property (1); additions keep it.
+* Volumes on the bus are on the cubic slider scale (1.0 = 100 %, as wpctl and GNOME show them); the server
+  stores the cube. Devices with an ALSA route are changed through the route (hardware mixer, saved per
+  port, like pavucontrol); other nodes through their `Props`.
+* Choosing an output makes it the configured default (`default.configured.audio.sink`); streams that were
+  moved by hand are released to follow it, so "all playing streams move".
+* "Recently playing (<= 30 s)" means a stream that still exists but stopped running; streams that are gone
+  are gone. One one-shot deadline is armed only while such a stream exists.
+* Per-application **volume** memory (`remember-app-volume`, off by default) is ours, in
+  `~/.local/share/deskd/mixer/apps.json`; turning it off deletes it. Per-application **routing** memory
+  (AC-MIX-10, `remember-app-routing`) is left to WirePlumber's own stream restore, which already keeps the
+  target of a moved stream (open question 2: yes).
+* The bridge extends the menu of GNOME's own output slider in quick settings instead of drawing a new
+  panel, in every skin: the rows are shell popup-menu items, so theme, light/dark, accent, keyboard
+  navigation and high contrast come from the shell. `windows11` hides GNOME's device list and shows Output,
+  Volume mixer and Input; `macos` shows Output and Input and a collapsed "Apps" disclosure (open question 3:
+  shown, collapsed, only while something plays); `default` keeps GNOME's chooser and adds "Applications".
+* Shortcut: `Ctrl+Super+V` in the Windows 11 theme (as Windows opens its sound output panel); none in macOS
+  and Fedora, which have no such key. Right-click on the system area opens the mixer directly
+  (`entry-point`). The key is `mixer-shortcut`, not `toggle-shortcut`: shell keybinding names are global.
+* Not done in v1: the input level meter, per-device volume rows in the `windows11` list (the master slider
+  is GNOME's), a failure toast for a move the server refused (the row shows the server's state).
 
 ## Reference behaviour
 
@@ -67,22 +96,27 @@ the system's fallback default is shown (no error toast unless a stream was lost)
 
 ## Engine and architecture
 
-* **deskd** hosts an `Audio` engine (`io.github.OlehDzhumyk.Desk.Audio`) that talks to **PipeWire natively through `pipewire-rs`** (decided; no libpulse) and exposes `ListDevices`, `ListStreams`, `SetVolume(kind,id,v)`,
-  `SetMute`, `SetDefault(kind,id)`, `MoveStream(id,sink)`, signal `Changed`. It subscribes to server events only
+* **deskd** hosts the mixer engine (`io.github.OlehDzhumyk.Desk.Mixer`, `crates/deskd/src/mixer/`) that talks
+  to **PipeWire natively through `pipewire-rs`** on its own thread (no libpulse) and exposes `ListDevices`,
+  `ListStreams`, `ListApps`, `SetVolume`, `SetMute`, `SetAppVolume`, `SetAppMute`, `SetDefault(kind,id)`,
+  `MoveStream`, `MoveApp`, properties `Version`, `Available`, `DefaultOutput`, `DefaultInput` and a
+  coalesced signal `Changed(as)`. It subscribes to server events only
   (no polling, no peak monitoring in v1), and keeps no audio data.
 * The bridge draws the sub-panel and registers it in quick settings; it asks deskd and never opens an audio
   connection itself.
 * The bridge only renders; it never opens an audio connection and does not use the shell's `Gvc` for the mixer.
 
-## Settings (proposed, schema `io.github.OlehDzhumyk.Desk.Audio`)
+## Settings (schema `io.github.OlehDzhumyk.Desk.Mixer`, see docs/settings.md)
 
 | Key | Type | Default | Range |
 |---|---|---|---|
 | `enabled` | bool | true | |
-| `show-apps` | bool | true | |
+| `entry-point` | choice | `menu-and-icon` | `menu`, `menu-and-icon` (also right-click on the system area) |
+| `show-silent-apps` | bool | false | list applications whose stream is paused |
+| `remember-app-volume` | bool | false | restore an application's volume when it plays again |
 | `volume-step` | uint | 5 | 1..20 (%) |
-| `remember-app-routing` | bool | false | route an app to the same device next time |
-| `hide-apps` | as | `[]` | app ids never listed |
+| `hide-apps` | as | `[]` | app keys never listed |
+| `mixer-shortcut` | as | `[]` | set by themes; your override is `io.github.OlehDzhumyk.Desk.Shortcuts mixer-open` |
 
 Over-amplification follows `org.gnome.desktop.sound allow-volume-above-100-percent`; no copy.
 
@@ -137,6 +171,7 @@ changes); added resident memory <= 3 MB; no work while no UI is open beyond the 
 ## Open questions
 
 1. *(Decided)* the engine lives in deskd (PipeWire via `pipewire-rs`); the bridge renders only.
-2. Per-app routing memory: use PipeWire's own policy (WirePlumber) instead of storing our own?
-3. Should the macOS skin show the per-app disclosure at all, given macOS has none (stricter "as Apple would")?
-4. Which existing extension do we port from, if any?
+2. *(Decided)* per-app routing memory is WirePlumber's; we keep only the optional volume memory.
+3. *(Decided)* the macOS skin shows the per-app disclosure, collapsed, only while something plays; the
+   owner may still prefer to hide it (stricter "as Apple would").
+4. *(Decided)* no extension was ported; the engine follows wiremix (see Status).

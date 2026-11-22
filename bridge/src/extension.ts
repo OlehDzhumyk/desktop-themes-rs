@@ -12,14 +12,18 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {ClipboardFeature} from './clipboard/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
+import {MixerFeature} from './mixer/feature.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
 const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
+const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
 
 export default class DeskBridge extends Extension {
     private _settings: Gio.Settings | null = null;
     private _indicator: InstanceType<typeof DeskIndicator> | null = null;
     private _clipboard: ClipboardFeature | null = null;
+    private _mixer: MixerFeature | null = null;
+    private _mixerSettings: Gio.Settings | null = null;
     private _skinId = 0;
     private _langId = 0;
 
@@ -40,6 +44,7 @@ export default class DeskBridge extends Extension {
         const settings = this._schema('io.github.OlehDzhumyk.Desk');
         const clipSettings = this._schema(CLIPBOARD_SCHEMA);
         this._settings = settings;
+        this._mixerSettings = this._schema(MIXER_SCHEMA);
         initI18n(this, settings.get_string('language'));
         this._build(clipSettings);
         this._skinId = settings.connect('changed::skin', () => { this._applySkin(); });
@@ -59,6 +64,15 @@ export default class DeskBridge extends Extension {
         quickSettings.addExternalIndicator(this._indicator);
         this._clipboard = new ClipboardFeature(this.path, clipSettings, this._skin(),
             () => { launchGui('clipboard'); });
+        if (this._mixerSettings) {
+            try {
+                this._mixer = new MixerFeature(this.path, this._mixerSettings, this._skin(),
+                    () => { launchGui('mixer'); });
+            } catch (e) {
+                // a mixer failure must not take the other features down
+                console.warn(`desk-bridge: the volume mixer is unavailable: ${String(e)}`);
+            }
+        }
         this._applySkin();
     }
 
@@ -66,6 +80,8 @@ export default class DeskBridge extends Extension {
         this._indicator?.setClipboard(null);
         this._clipboard?.destroy();
         this._clipboard = null;
+        this._mixer?.destroy();
+        this._mixer = null;
         this._indicator?.destroy();
         this._indicator = null;
     }
@@ -78,6 +94,7 @@ export default class DeskBridge extends Extension {
     private _applySkin(): void {
         const skin = this._skin();
         this._clipboard?.setSkin(skin);
+        this._mixer?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
     }
 
@@ -90,5 +107,6 @@ export default class DeskBridge extends Extension {
         this._langId = 0;
         this._teardown();
         this._settings = null;
+        this._mixerSettings = null;
     }
 }

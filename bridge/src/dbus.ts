@@ -9,6 +9,7 @@ import {errorText} from './shellTypes.js';
 
 export const DESK_BUS = 'io.github.OlehDzhumyk.Desk';
 export const CLIPBOARD_PATH = '/io/github/OlehDzhumyk/Desk/Clipboard';
+export const MIXER_PATH = '/io/github/OlehDzhumyk/Desk/Mixer';
 export const THEMES_BUS = 'io.github.OlehDzhumyk.Themes';
 export const THEMES_PATH = '/io/github/OlehDzhumyk/Themes';
 
@@ -31,7 +32,7 @@ function toItem(t: Tuple): ClipItem {
     return {id, kind: kind === 'image' ? 'image' : 'text', text, mime, image, pinned, time, size};
 }
 
-function readXml(dir: string, name: string): string {
+export function readXml(dir: string, name: string): string {
     const [ok, bytes] = GLib.file_get_contents(`${dir}/dbus/${name}.xml`);
     if (!ok)
         throw new Error(`no ${name}.xml`);
@@ -39,7 +40,7 @@ function readXml(dir: string, name: string): string {
 }
 
 /** What GJS generates for a D-Bus interface: the typings only know the generic proxy. */
-interface Proxy {
+export interface Proxy {
     readonly g_name_owner: string | null;
     connectSignal(name: string, callback: () => void): number;
     disconnectSignal(id: number): void;
@@ -57,7 +58,7 @@ type ProxyConstructor<T> = new (
  * Proxy class for an interface XML. The one cast of this file: GJS builds a constructor function
  * at run time (`new Wrapper(...)`), the typings describe it as a plain call.
  */
-function proxyClass<T>(xml: string): ProxyConstructor<T> {
+export function proxyClass<T>(xml: string): ProxyConstructor<T> {
     return Gio.DBusProxy.makeProxyWrapper<T>(xml) as unknown as ProxyConstructor<T>;
 }
 

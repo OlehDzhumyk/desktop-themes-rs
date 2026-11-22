@@ -520,6 +520,15 @@ mod tests {
                 let mut fin = Settings::new();
                 fin.extend(look.settings(Module::Look));
                 fin.extend(beh.settings(Module::Behavior));
+                if look.id == "windows11" {
+                    // the mixer shortcut of the theme takes part in the check like any feature's
+                    assert!(
+                        collect_bindings(&fin)
+                            .iter()
+                            .any(|b| b.owner == "mixer-open" && b.feature),
+                        "windows11 sets the mixer shortcut"
+                    );
+                }
                 let r = resolve_conflicts(&mut fin);
                 resolved_any |= !r.stripped.is_empty();
                 let left = find_conflicts(&collect_bindings(&fin));
