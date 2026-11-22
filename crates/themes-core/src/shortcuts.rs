@@ -593,16 +593,21 @@ mod tests {
         }
 
         #[test]
-        fn a_value_set_on_the_backend_wins_over_the_default() {
-            use gio::prelude::*;
+        fn a_value_on_the_backend_wins_over_the_default() {
             let src = fixture_source("user");
-            let be = gio::memory_settings_backend_new();
-            let schema = src.lookup("org.gnome.shell.keybindings", true).unwrap();
-            let st = gio::Settings::new_full(&schema, Some(&be), None);
-            st.set_strv("toggle-message-tray", ["<Super>n"]).unwrap();
+            // a key file in a temporary directory is the backend: what a user's dconf would hold
+            let dir = crate::theme::tests::tmp_root("gnome-user-values");
+            let file = dir.join("user.ini");
+            crate::theme::tests::write(
+                &file,
+                "[org/gnome/shell/keybindings]\ntoggle-message-tray=['<Super>n']\n",
+            );
+            let be = gio::keyfile_settings_backend_new(file.to_str().unwrap(), "/", None);
             let d = schema_keybindings(&src, Some(&be));
             assert_eq!(parse_strv_of(&d, MSG_TRAY), ["<Super>n"]);
-            // another backend instance is untouched: the default comes back
+            // untouched keys still come from the schema
+            assert_eq!(parse_strv_of(&d, INPUT), ["<Super>space", "XF86Keyboard"]);
+            // a memory backend knows nothing of it: the default comes back
             let fresh = gio::memory_settings_backend_new();
             let d = schema_keybindings(&src, Some(&fresh));
             assert_eq!(parse_strv_of(&d, MSG_TRAY), ["<Super>v", "<Super>m"]);
