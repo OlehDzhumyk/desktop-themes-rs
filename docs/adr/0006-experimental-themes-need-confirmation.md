@@ -1,7 +1,7 @@
 # 0006. Experimental themes require explicit confirmation
 
-* Status: accepted (the confirmation prompt in `themes apply` and the window is tracked separately;
-  the agent hook and docs already follow this decision)
+* Status: accepted, implemented (CLI `--yes`/`-y` with a y/N prompt, window and quick-settings
+  dialogs; `.claude/hooks/guard.sh` for agents)
 * Date: 2026-11-22
 
 ## Context
@@ -13,7 +13,8 @@ extension. The theme is still useful to some users, so removing it is not the an
 
 ## Decision
 
-* A theme can mark itself experimental in `theme.conf` (NAME/DESCRIPTION say so).
+* A theme marks itself experimental in `theme.conf` with `EXPERIMENTAL=true` and an optional
+  `WARNING=` text shown in the confirmation.
 * Applying such a theme requires an explicit confirmation from the user: a dialog in the window,
   `--yes` on the CLI. It is never applied silently, by default, by mixing, or by an agent on its own
   initiative.
@@ -24,7 +25,7 @@ extension. The theme is still useful to some users, so removing it is not the an
 ## Consequences
 
 * Good: risky themes stay available without surprising anyone.
-* Bad: one more flag and dialog to maintain; the marker is currently a text convention.
+* Bad: one more flag and three dialogs (CLI, window, quick settings) to keep in sync.
 
 ## Alternatives considered
 
