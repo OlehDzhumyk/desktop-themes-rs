@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+use desk_settings::tr;
 use std::path::{Path, PathBuf};
 
 use crate::error::Result;
@@ -63,7 +64,12 @@ impl Ctx {
         c.sort();
         match c.into_iter().next() {
             Some(p) => Ok(p),
-            None => crate::bail!("не знайдено baseline-* у {}", self.root.display()),
+            None => {
+                return Err(crate::Error(tr!(
+                    "no baseline-* found in {path}",
+                    path = self.root.display()
+                )));
+            }
         }
     }
 

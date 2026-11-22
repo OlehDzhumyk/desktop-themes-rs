@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+use desk_settings::tr;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -27,7 +28,7 @@ pub fn shlex_split(s: &str) -> Result<Vec<String>> {
                     match it.next() {
                         Some('\'') => break,
                         Some(ch) => cur.push(ch),
-                        None => return Err(Error("незакрита одинарна лапка".into())),
+                        None => return Err(Error(tr!("unclosed single quote"))),
                     }
                 }
             }
@@ -43,10 +44,10 @@ pub fn shlex_split(s: &str) -> Result<Vec<String>> {
                                 cur.push('\\');
                                 cur.push(ch);
                             }
-                            None => return Err(Error("незакрита подвійна лапка".into())),
+                            None => return Err(Error(tr!("unclosed double quote"))),
                         },
                         Some(ch) => cur.push(ch),
-                        None => return Err(Error("незакрита подвійна лапка".into())),
+                        None => return Err(Error(tr!("unclosed double quote"))),
                     }
                 }
             }
@@ -110,6 +111,7 @@ pub struct Out {
 
 pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
     let mut c = Command::new(cmd);
+    desk_settings::i18n::restore_child_env(&mut c);
     c.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
     c.stdin(if input.is_some() {
         Stdio::piped()
@@ -118,7 +120,7 @@ pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
     });
     let mut child = c
         .spawn()
-        .map_err(|e| Error(format!("не вдалося запустити {cmd}: {e}")))?;
+        .map_err(|e| Error(tr!("could not start {command}: {error}", command = cmd, error = e)))?;
     if let Some(inp) = input {
         let mut stdin = child.stdin.take().expect("stdin");
         stdin.write_all(inp.as_bytes())?;
@@ -134,7 +136,11 @@ pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
 pub fn run_check(cmd: &str, args: &[&str], input: Option<&str>) -> Result<String> {
     let o = run(cmd, args, input)?;
     if !o.ok {
-        crate::bail!("команда не вдалася: {cmd} {}\n{}", args.join(" "), o.stderr);
+        return Err(Error(tr!(
+            "command failed: {command}\n{error}",
+            command = format!("{cmd} {}", args.join(" ")),
+            error = o.stderr
+        )));
     }
     Ok(o.stdout)
 }
@@ -267,12 +273,12 @@ pub fn move_path(src: &Path, dst: &Path) -> Result<()> {
         None,
     )?;
     if !o.ok {
-        crate::bail!(
-            "не вдалося перемістити {} → {}: {}",
-            src.display(),
-            dst.display(),
-            o.stderr
-        );
+        return Err(Error(tr!(
+            "could not move {from} → {to}: {error}",
+            from = src.display(),
+            to = dst.display(),
+            error = o.stderr
+        )));
     }
     Ok(())
 }
@@ -290,7 +296,7 @@ pub fn copy_tree(src: &Path, dst: &Path) -> Result<()> {
         None,
     )?;
     if !o.ok {
-        crate::bail!("не вдалося скопіювати {}: {}", src.display(), o.stderr);
+        return Err(Error(tr!("could not copy {path}: {error}", path = src.display(), error = o.stderr)));
     }
     Ok(())
 }

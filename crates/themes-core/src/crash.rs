@@ -7,6 +7,7 @@
 //! справжньої оболонки (`coredumpctl`, headless-оболонки тестів ігноруються) і за `apply.log`
 //! визначає, яка тема тоді була застосована й які розширення вона щойно додала (ймовірні винуватці).
 
+use desk_settings::tr;
 use serde::{Deserialize, Serialize};
 
 use crate::dconf;
@@ -61,7 +62,7 @@ fn signal_name(sig: i32) -> String {
         8 => "SIGFPE".into(),
         11 => "SIGSEGV".into(),
         5 => "SIGTRAP".into(),
-        n => format!("сигнал {n}"),
+        n => tr!("signal {number}", number = n),
     }
 }
 
@@ -196,19 +197,17 @@ pub fn recent_shell_crashes(ctx: &Ctx, hours: u32) -> Vec<ShellCrash> {
 
 /// Людський опис для doctor/GUI.
 pub fn describe(c: &ShellCrash) -> String {
-    let mut s = format!("GNOME Shell упав {} ({}", c.local_time, c.signal);
-    if !c.top_frame.is_empty() {
-        s.push_str(&format!(" у {}", c.top_frame));
-    }
-    s.push(')');
+    let how = if c.top_frame.is_empty() {
+        c.signal.clone()
+    } else {
+        tr!("{signal} in {frame}", signal = c.signal, frame = c.top_frame)
+    };
+    let mut s = tr!("GNOME Shell crashed {time} ({how})", time = c.local_time, how = how);
     if let Some(t) = &c.theme {
-        s.push_str(&format!("; тоді була застосована тема «{t}»"));
+        s.push_str(&tr!("; the theme “{theme}” was applied then", theme = t));
     }
     if !c.suspects.is_empty() {
-        s.push_str(&format!(
-            "; ймовірний винуватець: {}",
-            c.suspects.join(", ")
-        ));
+        s.push_str(&tr!("; likely culprit: {suspects}", suspects = c.suspects.join(", ")));
     }
     s
 }

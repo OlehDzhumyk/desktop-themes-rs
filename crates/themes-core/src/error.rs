@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+use desk_settings::tr;
 use std::fmt;
 
 #[derive(Debug)]
@@ -16,13 +17,13 @@ impl std::error::Error for Error {}
 
 impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
-        Error(format!("помилка вводу-виводу: {e}"))
+        Error(tr!("input/output error: {error}", error = e))
     }
 }
 
 impl From<serde_json::Error> for Error {
     fn from(e: serde_json::Error) -> Self {
-        Error(format!("помилка JSON: {e}"))
+        Error(tr!("JSON error: {error}", error = e))
     }
 }
 

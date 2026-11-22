@@ -15,3 +15,4 @@ gio.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 zbus.workspace = true
+desk-settings.workspace = true

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Themes
+GenericName=Desktop theme switcher
+Comment=Switch the look of GNOME: Fedora, macOS, Windows 11 and your own themes; mix modules
+Exec=@BIN@/themes gui
+Icon=preferences-desktop-appearance
+Terminal=false
+Categories=GNOME;GTK;Settings;DesktopSettings;
+# TRANSLATORS: search keywords, separated and terminated by semicolons; keep the English ones too
+Keywords=theme;appearance;macos;windows;sounds;behavior;
+StartupNotify=true
+DBusActivatable=false

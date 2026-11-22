@@ -2,6 +2,7 @@
 //! «Перевірити систему»: стан розширень, журнал, відсутні теми/значки/курсори/звуки,
 //! зміна версії GNOME. `--fix` вимикає зламані розширення і повертає полагоджені.
 
+use desk_settings::tr;
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -136,19 +137,23 @@ fn check_crashes(ctx: &Ctx, rep: &mut DoctorReport) {
     rep.shell_crashes = crate::crash::recent_shell_crashes(ctx, 48);
     if crate::crash::user_extensions_disabled() {
         rep.extensions_disabled_by_gnome = true;
-        let mut msg = "GNOME вимкнув розширення після збою оболонки (disable-user-extensions=true): \
-                       жодне розширення зараз не працює"
-            .to_string();
+        let mut msg = tr!(
+            "GNOME turned extensions off after a shell crash (disable-user-extensions=true): no \
+             extension works now"
+        );
         if let Some(c) = rep.shell_crashes.first() {
             msg.push_str(&format!(". {}", crate::crash::describe(c)));
             if let Some(t) = &c.theme {
-                msg.push_str(&format!(
-                    ". Радимо спершу перейти на безпечну тему (themes apply {}), якщо винна «{t}»",
-                    crate::BUILTIN_THEME
+                msg.push_str(". ");
+                msg.push_str(&tr!(
+                    "Better switch to the safe theme first (themes apply {safe}) if “{theme}” is to blame",
+                    safe = crate::BUILTIN_THEME,
+                    theme = t
                 ));
             }
         }
-        msg.push_str(". Увімкнути знову: themes doctor --enable-extensions");
+        msg.push_str(". ");
+        msg.push_str(&tr!("To turn them on again: themes doctor --enable-extensions"));
         rep.push("error", "extensions-disabled", msg, None, false);
     } else if let Some(c) = rep.shell_crashes.first() {
         rep.push("warning", "shell-crash", crate::crash::describe(c), None, false);
@@ -158,7 +163,7 @@ fn check_crashes(ctx: &Ctx, rep: &mut DoctorReport) {
 fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
     for t in crate::theme::all_themes(ctx) {
         if let Some(e) = &t.inherit_error {
-            rep.push("warning", "inherits", format!("тема «{}»: {e}", t.id), None, false);
+            rep.push("warning", "inherits", tr!("theme “{theme}”: {error}", theme = t.id, error = e), None, false);
         }
     }
     // (що, ключ dconf, схема, ключ схеми)
@@ -206,7 +211,7 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
             let Some(src) = st.source(m) else { continue };
             let t = Theme::new(ctx, src);
             if let Some(v) = t.settings(m).get(*key).and_then(|v| dconf::unquote_str(v)) {
-                wanted.push((kind, v, format!("тема {src} ({m})")));
+                wanted.push((kind, v, tr!("theme {theme} ({module})", theme = src, module = m)));
             }
         }
     }
@@ -227,17 +232,17 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
             _ => true,
         };
         if !ok {
-            let what = match kind {
-                "gtk" => "тему GTK",
-                "icons" => "тему значків",
-                "cursor" => "тему курсорів",
-                "sound" => "звукову тему",
-                _ => "тему оболонки",
+            let msg = match kind {
+                "gtk" => tr!("GTK theme “{name}” not found (from: {from})", name = name, from = from),
+                "icons" => tr!("icon theme “{name}” not found (from: {from})", name = name, from = from),
+                "cursor" => tr!("cursor theme “{name}” not found (from: {from})", name = name, from = from),
+                "sound" => tr!("sound theme “{name}” not found (from: {from})", name = name, from = from),
+                _ => tr!("shell theme “{name}” not found (from: {from})", name = name, from = from),
             };
             rep.push(
                 "warning",
                 "missing-asset",
-                format!("не знайдено {what} «{name}» (з: {from})"),
+                msg,
                 None,
                 false,
             );
@@ -253,7 +258,7 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
             rep.push(
                 "warning",
                 "missing-asset",
-                format!("файл шпалер не існує: {p}"),
+                tr!("the wallpaper file does not exist: {path}", path = p),
                 None,
                 false,
             );
@@ -298,7 +303,7 @@ fn check_journal(enabled: &[String], rep: &mut DoctorReport) {
             rep.push(
                 "warning",
                 "journal",
-                format!("журнал: {short}"),
+                tr!("journal: {line}", line = short),
                 Some(u.clone()),
                 false,
             );
@@ -347,7 +352,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         rep.push(
             "info",
             "gnome-version",
-            format!("версія GNOME Shell змінилася: {prev} → {cur} (після оновлення системи)"),
+            tr!("the GNOME Shell version changed: {old} → {new} (after a system update)", old = prev, new = cur),
             None,
             false,
         );
@@ -373,9 +378,9 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
                     msg = sh.ext_errors(u).join("; ");
                 }
                 let label = if i.state == ExtState::OutOfDate {
-                    "застаріле (OUT_OF_DATE) для цієї версії GNOME"
+                    tr!("out of date (OUT_OF_DATE) for this GNOME version")
                 } else {
-                    "помилка (ERROR)"
+                    tr!("error (ERROR)")
                 };
                 rep.push(
                     "error",
@@ -397,15 +402,16 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             (_, None) if !installed => rep.push(
                 "warning",
                 "extension",
-                format!("{u}: увімкнене, але не встановлене"),
+                tr!("{uuid}: enabled but not installed", uuid = u),
                 Some(u.clone()),
                 false,
             ),
             (Some(_), None) => rep.push(
                 "info",
                 "extension",
-                format!(
-                    "{u}: встановлене, але оболонка його ще не завантажила (потрібен перевхід)"
+                tr!(
+                    "{uuid}: installed, but the shell has not loaded it yet (log in again)",
+                    uuid = u
                 ),
                 Some(u.clone()),
                 false,
@@ -415,7 +421,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
                     rep.push(
                         "error",
                         "extension",
-                        format!("{u}: metadata.json не підтримує GNOME {}", major(&ver)),
+                        tr!("{uuid}: metadata.json does not support GNOME {version}", uuid = u, version = major(&ver)),
                         Some(u.clone()),
                         true,
                     );
@@ -429,7 +435,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             rep.push(
                 "warning",
                 "permanent",
-                format!("розширення {p} (міст робочого столу: «Тема» у швидких налаштуваннях, буфер обміну) не встановлене"),
+                tr!("extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) is not installed", uuid = p),
                 None,
                 false,
             );
@@ -437,7 +443,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             rep.push(
                 "warning",
                 "permanent",
-                format!("розширення {p} вимкнене"),
+                tr!("extension {uuid} is disabled", uuid = p),
                 Some(p.to_string()),
                 true,
             );
@@ -451,7 +457,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         rep.push(
             "info",
             "broken-recorded",
-            format!("{} вимкнено {} ({})", b.uuid, b.since, b.reason),
+            tr!("{uuid} turned off {since} ({reason})", uuid = b.uuid, since = b.since, reason = b.reason),
             Some(b.uuid.clone()),
             false,
         );
@@ -486,7 +492,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
                 s2.save(ctx)?;
             }
             rep.fixed
-                .extend(to_disable.iter().map(|(u, _)| format!("вимкнено {u}")));
+                .extend(to_disable.iter().map(|(u, _)| tr!("turned off {uuid}", uuid = u)));
         }
         // 2. повернути полагоджені (змінилася версія GNOME або оновилося саме розширення)
         st = State::load(ctx);
@@ -542,7 +548,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             if ctx.extension_path(p).is_some() && !en.iter().any(|u| u == p) && !s2.is_broken(p) {
                 en.push(p.to_string());
                 dconf::write(EXT_KEY, &dconf::fmt_strv(&en))?;
-                rep.fixed.push(format!("увімкнено {p}"));
+                rep.fixed.push(tr!("turned on {uuid}", uuid = p));
             }
         }
     }
@@ -575,22 +581,21 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     {
         let mut body = Vec::new();
         if rep.extensions_disabled_by_gnome {
-            body.push(
-                "GNOME вимкнув розширення після збою оболонки. Відкрийте «Теми», щоб увімкнути їх знову."
-                    .to_string(),
-            );
+            body.push(tr!(
+                "GNOME turned extensions off after a shell crash. Open Themes to turn them on again."
+            ));
         }
         if rep.version_changed {
-            body.push(format!(
-                "GNOME оновлено: {} → {}",
-                rep.previous_gnome_version.clone().unwrap_or_default(),
-                rep.gnome_version.clone().unwrap_or_default()
+            body.push(tr!(
+                "GNOME updated: {old} → {new}",
+                old = rep.previous_gnome_version.clone().unwrap_or_default(),
+                new = rep.gnome_version.clone().unwrap_or_default()
             ));
         }
         body.extend(rep.fixed.iter().cloned());
-        body.extend(rep.restored.iter().map(|u| format!("знову увімкнено {u}")));
+        body.extend(rep.restored.iter().map(|u| tr!("turned on again: {uuid}", uuid = u)));
         let _ = crate::shell::notify(
-            "Теми: перевірка системи",
+            &tr!("Themes: system check"),
             &body.join("\n"),
             "preferences-desktop-appearance-symbolic",
         );

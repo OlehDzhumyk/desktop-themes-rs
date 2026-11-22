@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Quick settings items of the bridge: «Тема» (theme switcher, formerly the themes-quick extension)
-// and, for the default skin, «Буфер обміну» (recent items, private mode, clear).
+// Quick settings items of the bridge: “Theme” (theme switcher, formerly the themes-quick extension)
+// and, for the default skin, “Clipboard” (recent items, private mode, clear).
 import Gio from 'gi://Gio';
 import GioUnix from 'gi://GioUnix';
 import GLib from 'gi://GLib';
@@ -11,14 +11,15 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {QuickMenuToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
 import {ThemesClient, type ThemeRow} from './dbus.js';
+import {_, fmt} from './i18n.js';
 import type {ClipboardFeature} from './clipboard/feature.js';
-import {oneLine} from './clipboard/panel.js';
+import {itemAccessibleName, oneLine} from './clipboard/panel.js';
 
 const THEME_ICON = 'preferences-desktop-appearance-symbolic';
 const CLIP_ICON = 'edit-paste-symbolic';
 const MODULES = ['look', 'behavior', 'sounds', 'apps'];
 
-/** Launch the «Робочий стіл» window (themes gui), optionally on a page. */
+/** Launch the window (themes gui; “Робочий стіл” in the bridge), optionally on a page. */
 export function launchGui(page?: string): void {
     try {
         if (!page) {
@@ -33,7 +34,7 @@ export function launchGui(page?: string): void {
             argv.push('--page', page);
         Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
     } catch (e) {
-        Main.notifyError('Робочий стіл', String(e));
+        Main.notifyError(_('Desktop'), String(e));
     }
 }
 
@@ -44,12 +45,12 @@ class ThemesToggle extends QuickMenuToggle {
     declare private _busy: boolean;
 
     constructor() {
-        super({title: 'Тема', iconName: THEME_ICON, toggleMode: false});
-        this.menu.setHeader(THEME_ICON, 'Тема', '');
+        super({title: _('Theme'), iconName: THEME_ICON, toggleMode: false});
+        this.menu.setHeader(THEME_ICON, _('Theme'), '');
         this._section = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._section);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this.menu.addAction('Відкрити «Робочий стіл»…', () => {
+        this.menu.addAction(_('Open “Desktop”…'), () => {
             launchGui();
             Main.panel.closeQuickSettings();
         });
@@ -69,9 +70,10 @@ class ThemesToggle extends QuickMenuToggle {
             const [themes, current] = await this._client.listAndCurrent();
             this._render(themes, current);
         } catch (e) {
-            this.subtitle = 'служба недоступна';
+            this.subtitle = _('service unavailable');
             this._section.removeAll();
-            this._section.addMenuItem(new PopupMenu.PopupMenuItem(`Помилка: ${(e as Error).message}`, {reactive: false}));
+            this._section.addMenuItem(new PopupMenu.PopupMenuItem(
+                fmt(_('Error: {error}'), {error: (e as Error).message}), {reactive: false}));
         }
     }
 
@@ -80,8 +82,8 @@ class ThemesToggle extends QuickMenuToggle {
         const uniform = MODULES.every(m => (current[m] ?? '') === look);
         const nameOf = (id: string) => themes.find(t => t[0] === id)?.[1] ?? id;
         this.checked = look !== '' && look !== 'fedora';
-        this.subtitle = look ? (uniform ? nameOf(look) : `${nameOf(look)} (змішано)`) : '';
-        this.menu.setHeader(THEME_ICON, 'Тема', this.subtitle ?? '');
+        this.subtitle = look ? (uniform ? nameOf(look) : fmt(_('{name} (mixed)'), {name: nameOf(look)})) : '';
+        this.menu.setHeader(THEME_ICON, _('Theme'), this.subtitle ?? '');
         this._section.removeAll();
         for (const [id, name, , modules] of themes) {
             const item = new PopupMenu.PopupMenuItem(name);
@@ -90,7 +92,10 @@ class ThemesToggle extends QuickMenuToggle {
             item.setOrnament(full ? PopupMenu.Ornament.CHECK : PopupMenu.Ornament.NO_DOT);
             if (active.length && !full)
                 item.label.text = `${name} · ${active.length}/${MODULES.length}`;
-            item.accessible_name = `${name}: модулі ${modules.join(', ')}`;
+            const state = full ? _('active') : active.length ? fmt(_('{count} of {total} modules active'),
+                {count: active.length, total: MODULES.length}) : '';
+            item.accessible_name = fmt(_('{name}: modules {modules}'), {name, modules: modules.join(', ')}) +
+                (state ? `, ${state}` : '');
             item.connect('activate', () => void this._apply(id, name));
             this._section.addMenuItem(item);
         }
@@ -100,15 +105,15 @@ class ThemesToggle extends QuickMenuToggle {
         if (this._busy)
             return;
         this._busy = true;
-        this.subtitle = `застосування «${name}»…`;
+        this.subtitle = fmt(_('applying “{name}”…'), {name});
         try {
             const [relogin, message, warnings] = await this._client.apply(id);
             if (relogin)
-                Main.notify('Тема', message);
+                Main.notify(_('Theme'), message);
             else if (warnings.length)
-                Main.notify('Тема', `${message}\n${warnings.join('\n')}`);
+                Main.notify(_('Theme'), `${message}\n${warnings.join('\n')}`);
         } catch (e) {
-            Main.notifyError('Тема', `Не вдалося застосувати «${name}»: ${(e as Error).message}`);
+            Main.notifyError(_('Theme'), fmt(_('Could not apply “{name}”: {error}'), {name, error: (e as Error).message}));
         } finally {
             this._busy = false;
             void this._refresh();
@@ -129,21 +134,21 @@ class ClipboardToggle extends QuickMenuToggle {
     declare private _unlisten: () => void;
 
     constructor(feature: ClipboardFeature) {
-        super({title: 'Буфер обміну', iconName: CLIP_ICON, toggleMode: false});
+        super({title: _('Clipboard'), iconName: CLIP_ICON, toggleMode: false});
         this._feature = feature;
-        this.menu.setHeader(CLIP_ICON, 'Буфер обміну', '');
+        this.menu.setHeader(CLIP_ICON, _('Clipboard'), '');
         this._section = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._section);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this._privateItem = new PopupMenu.PopupSwitchMenuItem('Приватний режим', false);
+        this._privateItem = new PopupMenu.PopupSwitchMenuItem(_('Private mode'), false);
         this._privateItem.connect('toggled', (_i: unknown, state: boolean) => {
             this._feature.client.private = state;
         });
         this.menu.addMenuItem(this._privateItem);
-        this.menu.addAction('Очистити історію', () => {
+        this.menu.addAction(_('Clear history'), () => {
             void this._feature.client.clear(true).catch(e => console.warn(e));
         });
-        this.menu.addAction('Налаштування буфера обміну…', () => {
+        this.menu.addAction(_('Clipboard settings…'), () => {
             launchGui('clipboard');
             Main.panel.closeQuickSettings();
         });
@@ -165,7 +170,7 @@ class ClipboardToggle extends QuickMenuToggle {
     _sync(): void {
         const priv = this._feature.client.private;
         this.checked = !priv;
-        this.subtitle = priv ? 'приватний режим' : '';
+        this.subtitle = priv ? _('private mode') : '';
         this._privateItem.setToggleState(priv);
     }
 
@@ -176,15 +181,16 @@ class ClipboardToggle extends QuickMenuToggle {
         try {
             items = await this._feature.client.list('', 8);
         } catch {
-            this._section.addMenuItem(new PopupMenu.PopupMenuItem('deskd недоступний', {reactive: false}));
+            this._section.addMenuItem(new PopupMenu.PopupMenuItem(_('deskd is unavailable'), {reactive: false}));
             return;
         }
         if (!items.length)
-            this._section.addMenuItem(new PopupMenu.PopupMenuItem('Історія порожня', {reactive: false}));
+            this._section.addMenuItem(new PopupMenu.PopupMenuItem(_('The history is empty'), {reactive: false}));
         for (const it of items) {
             const mi = new PopupMenu.PopupMenuItem(oneLine(it.text, 60));
             if (it.pinned)
                 mi.setOrnament(PopupMenu.Ornament.CHECK);
+            mi.accessible_name = itemAccessibleName(it);
             mi.connect('activate', () => {
                 Main.panel.closeQuickSettings();
                 this._feature.activate(it);

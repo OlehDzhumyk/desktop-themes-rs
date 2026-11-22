@@ -1,0 +1,17 @@
+[package]
+name = "desk-settings"
+description = "Single source of the settings of desktop-themes-rs (GSettings schema, typed accessors, GUI pages, docs) and its i18n helpers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+# typed GSettings accessors and reading the language setting
+gio = ["dep:gio"]
+
+[dependencies]
+gettext-rs = { version = "0.8.0", features = ["gettext-system"] }
+gio = { workspace = true, optional = true }

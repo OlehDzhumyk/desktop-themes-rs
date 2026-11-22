@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Символьні посилання ~/.config/gtk-{4,3}.0/* → тема, з резервними копіями витіснених файлів.
 
+use desk_settings::tr;
 use std::path::{Path, PathBuf};
 
 use crate::error::Result;
@@ -27,7 +28,7 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
         let d = Path::new(&dest);
         match std::fs::read_link(d) {
             Ok(t) if t == Path::new(&src) => std::fs::remove_file(d)?,
-            _ if lexists(d) => warnings.push(format!("{dest} змінено вручну — залишено як є")),
+            _ if lexists(d) => warnings.push(tr!("{path} was changed by hand; left as it is", path = dest)),
             _ => {}
         }
         st.links.remove(&dest);
@@ -37,7 +38,7 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
                 if !lexists(d) {
                     move_path(bp, d)?;
                 } else {
-                    warnings.push(format!("резервну копію {b} не відновлено (місце зайняте)"));
+                    warnings.push(tr!("backup {path} not restored (the place is taken)", path = b));
                 }
             }
         }

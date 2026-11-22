@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Тека теми та її поділ на модулі.
 
+use desk_settings::tr;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
@@ -128,18 +129,20 @@ impl Theme {
         let mut inherit_error = None;
         if let Some(pid) = own.get("INHERITS").map(|s| s.trim()).filter(|s| !s.is_empty()) {
             if !util::valid_id(pid) {
-                inherit_error = Some(format!("INHERITS: некоректний id «{pid}»"));
+                inherit_error = Some(tr!("INHERITS: invalid id “{id}”", id = pid));
             } else if chain.iter().any(|c| c == pid) {
-                inherit_error = Some(format!(
-                    "INHERITS: цикл успадкування ({} → {pid})",
-                    chain.join(" → ")
+                inherit_error = Some(tr!(
+                    "INHERITS: inheritance cycle ({chain} → {id})",
+                    chain = chain.join(" → "),
+                    id = pid
                 ));
             } else if chain.len() >= MAX_INHERIT_DEPTH {
-                inherit_error = Some(format!(
-                    "INHERITS: ланцюжок довший за {MAX_INHERIT_DEPTH}"
+                inherit_error = Some(tr!(
+                    "INHERITS: the chain is longer than {max}",
+                    max = MAX_INHERIT_DEPTH
                 ));
             } else if !ctx.themes.join(pid).is_dir() {
-                inherit_error = Some(format!("INHERITS: тему «{pid}» не знайдено"));
+                inherit_error = Some(tr!("INHERITS: theme “{id}” not found", id = pid));
             } else {
                 let p = Theme::load(ctx, pid, chain);
                 if let Some(e) = &p.inherit_error {
@@ -367,11 +370,15 @@ pub fn all_themes(ctx: &Ctx) -> Vec<Theme> {
 
 pub fn get_theme(ctx: &Ctx, id: &str) -> Result<Theme> {
     if !util::valid_id(id) {
-        crate::bail!("некоректний id теми: {id:?}");
+        return Err(crate::Error(tr!("invalid theme id: {id}", id = format!("{id:?}"))));
     }
     let t = Theme::new(ctx, id);
     if !t.dir.is_dir() {
-        crate::bail!("тему «{id}» не знайдено у {}", ctx.themes.display());
+        return Err(crate::Error(tr!(
+            "theme “{theme}” not found in {path}",
+            theme = id,
+            path = ctx.themes.display()
+        )));
     }
     Ok(t)
 }
@@ -576,7 +583,7 @@ pub(crate) mod tests {
         write(&ctx.themes.join("cy1/theme.conf"), "INHERITS=cy2\n");
         write(&ctx.themes.join("cy2/theme.conf"), "INHERITS=cy1\n");
         let cy = get_theme(&ctx, "cy1").unwrap();
-        assert!(cy.inherit_error.as_deref().unwrap().contains("цикл"));
+        assert!(cy.inherit_error.as_deref().unwrap().contains("cycle"));
         assert_eq!(cy.layers().len(), 2);
         let _ = std::fs::remove_dir_all(&root);
     }

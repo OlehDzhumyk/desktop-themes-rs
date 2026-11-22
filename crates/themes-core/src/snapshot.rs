@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! «Зберегти поточний вигляд як тему»: знімок, розкладений по модулях.
 
+use desk_settings::tr;
 use std::collections::{BTreeMap, BTreeSet};
 
 use serde::Serialize;
@@ -93,17 +94,17 @@ pub struct SnapshotResult {
 
 pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<SnapshotResult> {
     if !valid_id(id) {
-        crate::bail!("некоректний id: дозволені a-z 0-9 . _ - (до 64 символів)");
+        return Err(crate::Error(tr!("invalid id: allowed are a-z 0-9 . _ - (up to 64 characters)")));
     }
     if id == crate::BUILTIN_THEME {
-        crate::bail!("id «fedora» зарезервовано");
+        return Err(crate::Error(tr!("the id “fedora” is reserved")));
     }
     crate::util::ensure_bus();
     let _lock = Lock::acquire(ctx)?;
     let tdir = ctx.themes.join(id);
     if tdir.exists() {
         if !force {
-            crate::bail!("тема «{id}» вже існує (додайте --force для перезапису)");
+            return Err(crate::Error(tr!("the theme “{theme}” already exists (add --force to overwrite it)", theme = id)));
         }
         std::fs::remove_dir_all(&tdir)?;
     }
@@ -135,8 +136,9 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
     }
     for k in baseline.keys() {
         if SNAPSHOT_PREFIXES.iter().any(|p| k.starts_with(p)) && !cur.contains_key(k) {
-            warnings.push(format!(
-                "ключ {k} скинуто відносно baseline — у знімку не відображається"
+            warnings.push(tr!(
+                "the key {key} is reset compared to the baseline; the snapshot does not show it",
+                key = k
             ));
         }
     }
@@ -205,8 +207,9 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
         .collect();
     for u in &base_en {
         if !cur_en.contains(u) {
-            warnings.push(format!(
-                "розширення {u} з baseline зараз вимкнене — знімок цього не збереже"
+            warnings.push(tr!(
+                "the extension {uuid} from the baseline is disabled now; the snapshot will not keep that",
+                uuid = u
             ));
         }
     }
@@ -269,7 +272,7 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
         ("NAME", tname.clone()),
         (
             "DESCRIPTION",
-            format!("Знімок вигляду від {}", now("%d.%m.%Y %H:%M")),
+            tr!("Snapshot of the look from {date}", date = now("%d.%m.%Y %H:%M")),
         ),
     ];
     let preview = if dark {

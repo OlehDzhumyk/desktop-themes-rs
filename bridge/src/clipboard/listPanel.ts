@@ -2,13 +2,15 @@
 // Search-and-list clipboard panel. Skin "macos": a Spotlight-like panel centred on the screen
 // (search field, list, preview of the selected item, keyboard hints), opened with Shift+Super+V.
 // Skin "default": the same list as a compact popup at the pointer, like a menu.
+import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 
 import type {ClipItem} from '../dbus.js';
+import {_, fmt} from '../i18n.js';
 import {
-    ClipboardPanel, HORIZONTAL, VERTICAL, ago, iconButton, imageWidget, label, oneLine,
+    ClipboardPanel, HORIZONTAL, VERTICAL, ago, iconButton, imageWidget, itemAccessibleName, label, oneLine,
     type PanelHost,
 } from './panel.js';
 
@@ -24,13 +26,17 @@ export class ListPanel extends ClipboardPanel {
     constructor(host: PanelHost, skin: 'macos' | 'default') {
         super(host, skin, skin === 'macos' ? 'center' : 'pointer');
         this._full = skin === 'macos';
+        // the default skin takes its colours from the active shell theme (popup menu classes)
+        if (!this._full)
+            this.box.add_style_class_name('popup-menu-content');
 
         this._entry = new St.Entry({
             style_class: 'desk-clip-search',
-            hint_text: this._full ? 'Пошук у буфері обміну' : 'Пошук',
+            hint_text: this._full ? _('Search the clipboard') : _('Search'),
             can_focus: true,
             x_expand: true,
         });
+        this._entry.clutter_text.accessible_name = _('Search the clipboard');
         this._entry.set_primary_icon(new St.Icon({icon_name: 'edit-find-symbolic', style_class: 'desk-clip-search-icon'}));
         this._entry.clutter_text.connect('text-changed', () => this._queueSearch());
         // Enter in the search field (the input method may consume the key event itself)
@@ -42,7 +48,7 @@ export class ListPanel extends ClipboardPanel {
         const top = new St.BoxLayout({...HORIZONTAL, style_class: 'desk-clip-header'});
         top.add_child(this._entry);
         if (this._full) {
-            top.add_child(iconButton('emblem-system-symbolic', 'Налаштування буфера обміну',
+            top.add_child(iconButton('emblem-system-symbolic', _('Clipboard settings'),
                 'desk-clip-flat-button', () => {
                     this.close();
                     this.host.openSettings();
@@ -52,6 +58,8 @@ export class ListPanel extends ClipboardPanel {
 
         const body = new St.BoxLayout({...HORIZONTAL, style_class: 'desk-clip-body', y_expand: true});
         this._list = new St.BoxLayout({...VERTICAL, style_class: 'desk-clip-list'});
+        this._list.accessible_role = Atk.Role.LIST;
+        this._list.accessible_name = _('Clipboard history');
         this._scroll = new St.ScrollView({
             style_class: 'desk-clip-scroll',
             hscrollbar_policy: St.PolicyType.NEVER,
@@ -71,7 +79,7 @@ export class ListPanel extends ClipboardPanel {
 
         if (this._full) {
             const hints = new St.BoxLayout({...HORIZONTAL, style_class: 'desk-clip-hints'});
-            for (const [k, t] of [['↵', 'вставити'], ['Ctrl+P', 'закріпити'], ['Ctrl+⌫', 'видалити'], ['Esc', 'закрити']]) {
+            for (const [k, t] of [['↵', _('paste')], ['Ctrl+P', _('pin')], ['Ctrl+⌫', _('delete')], ['Esc', _('close')]]) {
                 hints.add_child(new St.Label({text: k, style_class: 'desk-clip-key'}));
                 hints.add_child(new St.Label({text: t, style_class: 'desk-clip-hint'}));
             }
@@ -125,9 +133,9 @@ export class ListPanel extends ClipboardPanel {
         this.rows = [];
         const q = this.query().trim();
         this._empty.visible = this.items.length === 0;
-        this._empty.text = q ? `Нічого не знайдено за «${q}»`
-            : this.host.client.private ? 'Приватний режим: нічого не записується'
-                : 'Історія порожня. Скопіюйте щось (Ctrl+C), і воно з\'явиться тут.';
+        this._empty.text = q ? fmt(_('Nothing found for “{query}”'), {query: q})
+            : this.host.client.private ? _('Private mode: nothing is recorded')
+                : _('The history is empty. Copy something (Ctrl+C) and it shows up here.');
         this.items.forEach((it, i) => {
             const row = this._row(it, i);
             this._list.add_child(row);
@@ -151,7 +159,12 @@ export class ListPanel extends ClipboardPanel {
     }
 
     private _row(it: ClipItem, index: number): St.Widget {
-        const row = new St.Button({style_class: 'desk-clip-row', can_focus: false, x_expand: true, reactive: true});
+        const row = new St.Button({
+            style_class: this._full ? 'desk-clip-row' : 'desk-clip-row popup-menu-item',
+            can_focus: false, x_expand: true, reactive: true,
+        });
+        row.accessible_role = Atk.Role.LIST_ITEM;
+        row.accessible_name = itemAccessibleName(it);
         const inner = new St.BoxLayout({...HORIZONTAL, x_expand: true});
         if (it.kind === 'image')
             inner.add_child(imageWidget(it, 'desk-clip-thumb', 28));
@@ -159,7 +172,7 @@ export class ListPanel extends ClipboardPanel {
             inner.add_child(new St.Icon({icon_name: 'text-x-generic-symbolic', style_class: 'desk-clip-kind'}));
         inner.add_child(label(oneLine(it.text, 160), 'desk-clip-text'));
         if (it.pinned)
-            inner.add_child(new St.Icon({icon_name: 'view-pin-symbolic', style_class: 'desk-clip-pinned'}));
+            inner.add_child(new St.Icon({icon_name: 'view-pin-symbolic', style_class: 'desk-clip-pinned', accessible_name: _('pinned')}));
         if (this._full)
             inner.add_child(new St.Label({text: ago(it.time), style_class: 'desk-clip-time', y_align: Clutter.ActorAlign.CENTER}));
         row.set_child(inner);
@@ -192,7 +205,8 @@ export class ListPanel extends ClipboardPanel {
             this._preview.add_child(l);
         }
         const meta = it.kind === 'image' ? it.text
-            : `${it.text.length} симв. · ${ago(it.time)}${it.pinned ? ' · закріплено' : ''}`;
+            : fmt(_('{count} chars · {when}'), {count: it.text.length, when: ago(it.time)}) +
+                (it.pinned ? ` · ${_('pinned')}` : '');
         this._preview.add_child(new St.Label({text: meta, style_class: 'desk-clip-preview-meta'}));
     }
 

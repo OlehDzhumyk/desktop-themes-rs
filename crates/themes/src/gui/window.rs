@@ -6,6 +6,7 @@ use std::rc::Rc;
 use std::time::Duration;
 
 use adw::prelude::*;
+use desk_settings::tr;
 use gtk::{gio, glib};
 use themes_core::Ctx;
 use themes_core::modules::Module;
@@ -65,7 +66,9 @@ pub fn add_app_actions(app: &adw::Application) {
     };
     add(
         "extension-manager",
-        Box::new(|app| spawn_flatpak(app, "com.mattjakeman.ExtensionManager", "Extension Manager")),
+        Box::new(|app| {
+            spawn_flatpak(app, "com.mattjakeman.ExtensionManager", "Extension Manager")
+        }),
     );
     add(
         "refine",
@@ -79,7 +82,7 @@ pub fn add_app_actions(app: &adw::Application) {
             let win = app.active_window();
             launcher.launch(win.as_ref(), gio::Cancellable::NONE, |r| {
                 if let Err(e) = r {
-                    eprintln!("Не вдалося відкрити теку: {e}");
+                    eprintln!("{}", tr!("Could not open the folder: {error}", error = e));
                 }
             });
         }),
@@ -88,18 +91,26 @@ pub fn add_app_actions(app: &adw::Application) {
         "about",
         Box::new(|app| {
             let d = adw::AboutDialog::builder()
-                .application_name("Теми")
+                .application_name(tr!("Themes"))
                 .application_icon("preferences-desktop-appearance")
                 .developer_name("OlehDzhumyk")
                 .version(env!("CARGO_PKG_VERSION"))
-                .comments(
-                    "Перемикання вигляду робочого столу GNOME: Fedora, macOS, Windows 11 та власні теми. \
-                     Кожна тема складається з модулів (вигляд, поведінка, звуки, програми), які можна змішувати.\n\n\
-                     Якщо після застосування теми оболонка зламалася: меню → «Скинути до стандартного вигляду» \
-                     або в терміналі «themes reset»; «themes doctor --fix» вимкне зламані розширення.",
-                )
+                .comments(tr!(
+                    "Switches the look of the GNOME desktop: Fedora, macOS, Windows 11 and your own themes. \
+                     Every theme consists of modules (look, behaviour, sounds, apps) that can be mixed.\n\n\
+                     If the shell broke after applying a theme: menu → “Reset to the standard look” \
+                     or “themes reset” in a terminal; “themes doctor --fix” disables broken extensions."
+                ))
+                .translator_credits(tr!("translator-credits"))
                 .build();
             d.present(app.active_window().as_ref());
+        }),
+    );
+    add(
+        "restart",
+        Box::new(|app| {
+            super::RESTART.store(true, std::sync::atomic::Ordering::SeqCst);
+            app.quit();
         }),
     );
     add("quit", Box::new(|app| app.quit()));
@@ -107,15 +118,17 @@ pub fn add_app_actions(app: &adw::Application) {
 }
 
 fn spawn_flatpak(app: &adw::Application, id: &str, label: &str) {
-    if let Err(e) = std::process::Command::new("flatpak")
+    if let Err(e) = desk_settings::i18n::restore_child_env(&mut std::process::Command::new("flatpak"))
         .args(["run", id])
         .spawn()
     {
         if let Some(w) = app.active_window() {
             if let Ok(w) = w.downcast::<adw::ApplicationWindow>() {
                 if let Some(t) = find_toasts(&w) {
-                    t.add_toast(adw::Toast::new(&format!(
-                        "Не вдалося запустити {label}: {e}"
+                    t.add_toast(adw::Toast::new(&tr!(
+                        "Could not start {app}: {error}",
+                        app = label,
+                        error = e
                     )));
                 }
             }
@@ -137,7 +150,7 @@ impl ThemesWindow {
         let ctx = Ctx::from_env();
         let win = adw::ApplicationWindow::builder()
             .application(app)
-            .title("Теми")
+            .title(tr!("Themes"))
             .default_width(opts.size.0)
             .default_height(opts.size.1)
             .build();
@@ -149,34 +162,31 @@ impl ThemesWindow {
             .policy(adw::ViewSwitcherPolicy::Wide)
             .build();
         header.set_title_widget(Some(&switcher));
-        let title = adw::WindowTitle::new("Теми", "");
+        let title = adw::WindowTitle::new(&tr!("Themes"), "");
 
         let save = gtk::Button::builder()
             .child(
                 &adw::ButtonContent::builder()
                     .icon_name("document-save-symbolic")
-                    .label("Зберегти як тему")
+                    .label(tr!("Save as theme"))
                     .build(),
             )
-            .tooltip_text("Зберегти поточний вигляд як тему")
+            .tooltip_text(tr!("Save the current look as a theme"))
             .action_name("win.snapshot")
             .build();
         header.pack_start(&save);
 
         let menu = gio::Menu::new();
         let s1 = gio::Menu::new();
-        s1.append(
-            Some("Налаштувати розширення"),
-            Some("app.extension-manager"),
-        );
-        s1.append(Some("Тонкі налаштування"), Some("app.refine"));
-        s1.append(Some("Відкрити теку тем"), Some("app.open-folder"));
+        s1.append(Some(&tr!("Configure extensions")), Some("app.extension-manager"));
+        s1.append(Some(&tr!("Advanced settings")), Some("app.refine"));
+        s1.append(Some(&tr!("Open the themes folder")), Some("app.open-folder"));
         let s2 = gio::Menu::new();
-        s2.append(Some("Перевірити систему"), Some("win.doctor"));
-        s2.append(Some("Скинути до стандартного вигляду"), Some("win.reset"));
-        s2.append(Some("Оновити список"), Some("win.reload"));
+        s2.append(Some(&tr!("Check the system")), Some("win.doctor"));
+        s2.append(Some(&tr!("Reset to the standard look")), Some("win.reset"));
+        s2.append(Some(&tr!("Reload the list")), Some("win.reload"));
         let s3 = gio::Menu::new();
-        s3.append(Some("Про програму «Теми»"), Some("app.about"));
+        s3.append(Some(&tr!("About Themes")), Some("app.about"));
         menu.append_section(None, &s1);
         menu.append_section(None, &s2);
         menu.append_section(None, &s3);
@@ -185,14 +195,14 @@ impl ThemesWindow {
                 .icon_name("open-menu-symbolic")
                 .menu_model(&menu)
                 .primary(true)
-                .tooltip_text("Головне меню")
+                .tooltip_text(tr!("Main menu"))
                 .build(),
         );
         toolbar.add_top_bar(&header);
         // GNOME вимкнув розширення після збою оболонки (disable-user-extensions)
         let banner = adw::Banner::builder()
-            .title("GNOME вимкнув розширення після збою оболонки")
-            .button_label("Увімкнути…")
+            .title(tr!("GNOME turned extensions off after a shell crash"))
+            .button_label(tr!("Turn on…"))
             .action_name("win.enable-extensions")
             .revealed(themes_core::crash::user_extensions_disabled())
             .build();
@@ -215,8 +225,8 @@ impl ThemesWindow {
             .build();
         let status = adw::StatusPage::builder()
             .icon_name("preferences-desktop-appearance-symbolic")
-            .title("Тем не знайдено")
-            .description(format!("Додайте теки тем у {}", ctx.themes.display()))
+            .title(tr!("No themes found"))
+            .description(tr!("Add theme folders to {path}", path = ctx.themes.display()))
             .build();
         let clamp = adw::Clamp::builder()
             .maximum_size(1600)
@@ -237,33 +247,36 @@ impl ThemesWindow {
         themes_page.append(&title);
         main_stack.set_vexpand(true);
         themes_page.append(&main_stack);
-        view.add_titled_with_icon(&themes_page, Some("themes"), "Теми", "view-grid-symbolic");
+        view.add_titled_with_icon(&themes_page, Some("themes"), &tr!("Themes"), "view-grid-symbolic");
 
         // сторінка «Змішати»
         let mix_page = adw::PreferencesPage::builder()
-            .description("Беріть окремі модулі з різних тем: наприклад, вигляд macOS із поведінкою Windows 11. Зміна застосовується одразу.")
+            .description(tr!(
+                "Take single modules from different themes: for example the macOS look with Windows 11 behaviour. A change is applied at once."
+            ))
             .build();
-        let mix_group = adw::PreferencesGroup::builder().title("Модулі").build();
+        let mix_group = adw::PreferencesGroup::builder().title(tr!("Modules")).build();
         mix_page.add(&mix_group);
         let mix_tools = adw::PreferencesGroup::new();
         let reset_row = adw::ButtonRow::builder()
-            .title("Скинути все до стандартного вигляду")
+            .title(tr!("Reset everything to the standard look"))
             .action_name("win.reset")
             .build();
         reset_row.add_css_class("destructive-action");
         mix_tools.add(&reset_row);
         mix_page.add(&mix_tools);
-        view.add_titled_with_icon(&mix_page, Some("mix"), "Змішати", "view-dual-symbolic");
+        view.add_titled_with_icon(&mix_page, Some("mix"), &tr!("Mix"), "view-dual-symbolic");
         // сторінка «Функції» (буфер обміну, подяки)
-        let feature_page = match opts.page.as_deref() {
-            Some(p @ ("clipboard" | "credits")) => Some(p),
-            _ => None,
-        };
+        let feature_page = opts
+            .page
+            .as_deref()
+            .filter(|p| super::features::page_ids().any(|id| id == *p));
         let features = super::features::build(&toasts, feature_page);
-        view.add_titled_with_icon(&features, Some("features"), "Функції", "starred-symbolic");
+        view.add_titled_with_icon(&features, Some("features"), &tr!("Features"), "starred-symbolic");
         match opts.page.as_deref() {
             Some("mix") => view.set_visible_child_name("mix"),
-            Some("features" | "clipboard" | "credits") => view.set_visible_child_name("features"),
+            Some("features") => view.set_visible_child_name("features"),
+            Some(_) if feature_page.is_some() => view.set_visible_child_name("features"),
             _ => {}
         }
 
@@ -398,11 +411,12 @@ impl ThemesWindow {
             "logout",
             None,
             Box::new(|t, _| {
-                if let Err(e) = std::process::Command::new("gnome-session-quit")
-                    .arg("--logout")
-                    .spawn()
+                if let Err(e) =
+                    desk_settings::i18n::restore_child_env(&mut std::process::Command::new("gnome-session-quit"))
+                        .arg("--logout")
+                        .spawn()
                 {
-                    t.toast(&format!("Не вдалося вийти з сесії: {e}"), 8);
+                    t.toast(&tr!("Could not log out: {error}", error = e), 8);
                 }
             }),
         );
@@ -468,6 +482,10 @@ impl ThemesWindow {
         let cards: Vec<ThemeCard> = infos.iter().cloned().map(ThemeCard::new).collect();
         for c in &cards {
             self.flow.append(&c.root);
+            // FlowBoxChild отримує назву картки для читачів екрана
+            if let Some(child) = c.root.parent() {
+                super::a11y::label(&child, &c.accessible_label());
+            }
         }
         *self.cards.borrow_mut() = cards.clone();
         *self.themes.borrow_mut() = infos.clone();
@@ -480,7 +498,7 @@ impl ThemesWindow {
                 .unwrap_or(id.to_string())
         };
         let subtitle = match (st.uniform(), st.source(Module::Look)) {
-            (Some(u), _) => format!("Активна тема: {}", name_of(u)),
+            (Some(u), _) => tr!("Active theme: {name}", name = name_of(u)),
             (None, Some(_)) => {
                 let parts: Vec<String> = Module::ALL
                     .iter()
@@ -492,9 +510,9 @@ impl ThemesWindow {
                         )
                     })
                     .collect();
-                format!("Змішано: {}", parts.join(", "))
+                tr!("Mixed: {parts}", parts = parts.join(", "))
             }
-            _ => "Тему ще не застосовано".into(),
+            _ => tr!("No theme applied yet"),
         };
         self.title.set_subtitle(&subtitle);
         self.title.set_title("");
@@ -519,7 +537,7 @@ impl ThemesWindow {
                     if t.modules.contains(&m) {
                         t.name.clone()
                     } else {
-                        format!("{} (стандартно)", t.name)
+                        tr!("{name} (standard)", name = t.name)
                     }
                 })
                 .collect();
@@ -580,34 +598,38 @@ impl ThemesWindow {
             let res = match res {
                 Ok(Ok(r)) => r,
                 Ok(Err(e)) => {
-                    t.toast(&format!("Помилка: {e}"), 10);
+                    t.toast(&tr!("Error: {error}", error = e), 10);
                     t.reload().await;
                     return;
                 }
                 Err(_) => {
-                    t.toast("Помилка: потік застосування впав", 10);
+                    t.toast(&tr!("Error: the apply thread crashed"), 10);
                     return;
                 }
             };
             let what = if modules.is_empty() {
-                format!("Тему «{}» застосовано", res.name)
+                tr!("Theme “{name}” applied", name = res.name)
             } else {
-                let m: Vec<&str> = modules.iter().map(|m| m.label()).collect();
-                format!("«{}» з теми «{}» застосовано", m.join("», «"), res.name)
+                let m: Vec<String> = modules.iter().map(|m| m.label()).collect();
+                tr!(
+                    "“{modules}” from the theme “{name}” applied",
+                    modules = m.join("”, “"),
+                    name = res.name
+                )
             };
             let mut title = what;
             if !res.warnings.is_empty() {
-                title.push_str(&format!(" (попереджень: {})", res.warnings.len()));
+                title.push_str(&tr!(" (warnings: {count})", count = res.warnings.len()));
             }
             if res.relogin {
                 let toast = t.toast(
-                    &format!("{title}. Частина змін оболонки запрацює після перевходу"),
+                    &tr!("{what}. Some shell changes start working after you log in again", what = title),
                     0,
                 );
-                toast.set_button_label(Some("Вийти з сесії"));
+                toast.set_button_label(Some(&tr!("Log out")));
                 toast.set_action_name(Some("win.logout"));
             } else if res.shell_running {
-                t.toast(&format!("{title} наживо"), 5);
+                t.toast(&tr!("{what} live", what = title), 5);
             } else {
                 t.toast(&title, 5);
             }
@@ -623,7 +645,7 @@ impl ThemesWindow {
                     if !bad.is_empty() {
                         let list: Vec<&str> = bad.iter().map(|b| b.0.as_str()).collect();
                         t.toast(
-                            &format!("Розширення з помилкою вимкнено: {}", list.join(", ")),
+                            &tr!("Extensions with errors turned off: {list}", list = list.join(", ")),
                             0,
                         );
                         t.reload().await;
@@ -635,18 +657,21 @@ impl ThemesWindow {
 
     fn ask_snapshot(self: &Rc<Self>) {
         let entry = gtk::Entry::builder()
-            .placeholder_text("Назва теми")
+            .placeholder_text(tr!("Theme name"))
             .activates_default(true)
             .build();
         let dlg = adw::AlertDialog::builder()
-            .heading("Зберегти поточний вигляд як тему")
-            .body("Поточні налаштування (вигляд, поведінка, звуки, програми), увімкнені розширення та файли GTK буде збережено як нову тему.")
+            .heading(tr!("Save the current look as a theme"))
+            .body(tr!(
+                "The current settings (look, behaviour, sounds, apps), the enabled extensions and the GTK files will be saved as a new theme."
+            ))
             .extra_child(&entry)
             .default_response("save")
             .close_response("cancel")
             .build();
-        dlg.add_response("cancel", "Скасувати");
-        dlg.add_response("save", "Зберегти");
+        dlg.add_response("cancel", &tr!("Cancel"));
+        dlg.add_response("save", &tr!("Save"));
+        super::a11y::label(&entry, &tr!("Theme name"));
         dlg.set_response_appearance("save", adw::ResponseAppearance::Suggested);
         dlg.set_response_enabled("save", false);
         {
@@ -678,9 +703,9 @@ impl ThemesWindow {
                 })
                 .await;
                 match r {
-                    Ok(Ok(r)) => t.toast(&format!("Тему «{}» збережено", r.name), 5),
-                    Ok(Err(e)) => t.toast(&format!("Помилка: {e}"), 10),
-                    Err(_) => t.toast("Помилка збереження", 10),
+                    Ok(Ok(r)) => t.toast(&tr!("Theme “{name}” saved", name = r.name), 5),
+                    Ok(Err(e)) => t.toast(&tr!("Error: {error}", error = e), 10),
+                    Err(_) => t.toast(&tr!("Saving failed"), 10),
                 };
                 t.reload().await;
             });
@@ -697,13 +722,15 @@ impl ThemesWindow {
             return;
         }
         let dlg = adw::AlertDialog::builder()
-            .heading(format!("Видалити тему «{}»?", theme.name))
-            .body("Теку теми буде переміщено до «trash» у корені тем — її можна повернути вручну.")
+            .heading(tr!("Delete the theme “{name}”?", name = theme.name))
+            .body(tr!(
+                "The theme folder will be moved to “trash” in the themes root; you can restore it by hand."
+            ))
             .default_response("cancel")
             .close_response("cancel")
             .build();
-        dlg.add_response("cancel", "Скасувати");
-        dlg.add_response("delete", "Видалити");
+        dlg.add_response("cancel", &tr!("Cancel"));
+        dlg.add_response("delete", &tr!("Delete"));
         dlg.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
         let t = self.clone();
         dlg.connect_response(None, move |_, r| {
@@ -711,8 +738,8 @@ impl ThemesWindow {
                 return;
             }
             match themes_core::apply::delete(&t.ctx, &id) {
-                Ok((name, _)) => t.toast(&format!("Тему «{name}» видалено"), 5),
-                Err(e) => t.toast(&format!("Помилка: {e}"), 10),
+                Ok((name, _)) => t.toast(&tr!("Theme “{name}” deleted", name = name), 5),
+                Err(e) => t.toast(&tr!("Error: {error}", error = e), 10),
             };
             let t = t.clone();
             glib::spawn_future_local(async move { t.reload().await });
@@ -723,11 +750,7 @@ impl ThemesWindow {
     fn run_doctor(self: &Rc<Self>, fix: bool) {
         let t = self.clone();
         let wait = self.toast(
-            if fix {
-                "Виправлення…"
-            } else {
-                "Перевірка системи…"
-            },
+            &if fix { tr!("Fixing…") } else { tr!("Checking the system…") },
             2,
         );
         glib::spawn_future_local(async move {
@@ -747,23 +770,21 @@ impl ThemesWindow {
             let rep = match r {
                 Ok(Ok(r)) => r,
                 Ok(Err(e)) => {
-                    t.toast(&format!("Помилка перевірки: {e}"), 10);
+                    t.toast(&tr!("Check failed: {error}", error = e), 10);
                     return;
                 }
                 Err(_) => return,
             };
-            let mut body = format!(
-                "GNOME Shell {} ({}), перевірено розширень: {}.\n",
-                rep.gnome_version.clone().unwrap_or("?".into()),
-                if rep.shell_running {
-                    "запущено"
-                } else {
-                    "не запущено"
-                },
-                rep.extensions_checked
+            let mut body = tr!(
+                "GNOME Shell {version} ({state}), extensions checked: {count}.",
+                version = rep.gnome_version.clone().unwrap_or("?".into()),
+                state = if rep.shell_running { tr!("running") } else { tr!("not running") },
+                count = rep.extensions_checked
             );
+            body.push('\n');
             if rep.issues.is_empty() {
-                body.push_str("\nПроблем не знайдено.");
+                body.push('\n');
+                body.push_str(&tr!("No problems found."));
             }
             for i in &rep.issues {
                 let mark = match i.severity {
@@ -777,21 +798,21 @@ impl ThemesWindow {
                 body.push_str(&format!("\n✓ {f}"));
             }
             for u in &rep.restored {
-                body.push_str(&format!("\n✓ знову увімкнено {u}"));
+                body.push_str(&format!("\n✓ {}", tr!("turned on again: {uuid}", uuid = u)));
             }
             let fixable = !fix && rep.issues.iter().any(|i| i.fixable);
             let dlg = adw::AlertDialog::builder()
                 .heading(if rep.problems() == 0 {
-                    "Система в порядку"
+                    tr!("The system is fine")
                 } else {
-                    "Результати перевірки"
+                    tr!("Check results")
                 })
                 .body(body)
                 .close_response("close")
                 .build();
-            dlg.add_response("close", "Закрити");
+            dlg.add_response("close", &tr!("Close"));
             if fixable {
-                dlg.add_response("fix", "Виправити");
+                dlg.add_response("fix", &tr!("Fix"));
                 dlg.set_response_appearance("fix", adw::ResponseAppearance::Suggested);
                 dlg.set_default_response(Some("fix"));
             }
@@ -817,35 +838,36 @@ impl ThemesWindow {
             let crashes = gio::spawn_blocking(move || themes_core::crash::recent_shell_crashes(&ctx, 48))
                 .await
                 .unwrap_or_default();
-            let mut body = String::from(
-                "Після збою GNOME Shell система вимкнула всі розширення (disable-user-extensions), \
-                 тому теми зараз працюють без них.",
+            let mut body = tr!(
+                "After a GNOME Shell crash the system turned all extensions off \
+                 (disable-user-extensions), so the themes work without them now."
             );
             let culprit = crashes.first().and_then(|c| c.theme.clone());
             if let Some(c) = crashes.first() {
                 body.push_str(&format!("\n\n{}.", themes_core::crash::describe(c)));
             }
-            body.push_str(
-                "\n\nЯкщо збій повториться, GNOME знову вимкне розширення. Безпечніше спершу перейти \
-                 на стандартну тему.",
-            );
-            let dlg = adw::AlertDialog::new(Some("Увімкнути розширення?"), Some(&body));
-            dlg.add_response("cancel", "Скасувати");
+            body.push_str("\n\n");
+            body.push_str(&tr!(
+                "If the crash happens again, GNOME turns the extensions off again. It is safer to \
+                 switch to the standard theme first."
+            ));
+            let dlg = adw::AlertDialog::new(Some(&tr!("Turn extensions on?")), Some(&body));
+            dlg.add_response("cancel", &tr!("Cancel"));
             if culprit.as_deref().is_some_and(|c| c != themes_core::BUILTIN_THEME) {
-                dlg.add_response("safe", "Перейти на «Fedora» й увімкнути");
+                dlg.add_response("safe", &tr!("Switch to “Fedora” and turn on"));
                 dlg.set_response_appearance("safe", adw::ResponseAppearance::Suggested);
             }
-            dlg.add_response("enable", "Увімкнути");
+            dlg.add_response("enable", &tr!("Turn on"));
             dlg.set_default_response(Some("cancel"));
             let t2 = t.clone();
             dlg.connect_response(None, move |_, r| {
                 let enable = |t: &Rc<ThemesWindow>| match themes_core::crash::enable_user_extensions() {
                     Ok(()) => {
-                        t.toast("Розширення знову ввімкнено", 5);
+                        t.toast(&tr!("Extensions turned on again"), 5);
                         t.banner.set_revealed(false);
                     }
                     Err(e) => {
-                        t.toast(&format!("Не вдалося: {e}"), 10);
+                        t.toast(&tr!("Failed: {error}", error = e), 10);
                     }
                 };
                 match r {
@@ -867,8 +889,8 @@ impl ThemesWindow {
         let paintable = gtk::WidgetPaintable::new(Some(&self.win));
         let snap = gtk::Snapshot::new();
         paintable.snapshot(&snap, w as f64, h as f64);
-        let node = snap.to_node().ok_or("порожній вузол рендерингу")?;
-        let renderer = self.win.renderer().ok_or("немає рендерера")?;
+        let node = snap.to_node().ok_or("empty render node")?;
+        let renderer = self.win.renderer().ok_or("no renderer")?;
         let tex = renderer.render_texture(
             &node,
             Some(&gtk::graphene::Rect::new(0.0, 0.0, w as f32, h as f32)),

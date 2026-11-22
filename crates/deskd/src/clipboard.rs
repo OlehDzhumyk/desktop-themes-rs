@@ -5,6 +5,7 @@
 //! Чиста логіка без D-Bus і GSettings (їх під'єднує `service.rs`), тож усе покрито тестами.
 //! Захоплення буфера в GNOME Wayland робить оболонка (desk-bridge), рушій лише отримує вміст.
 
+use desk_settings::tr;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
@@ -145,8 +146,9 @@ pub fn image_size(data: &[u8]) -> Option<(u32, u32)> {
 fn image_label(mime: &str, data: &[u8]) -> String {
     let fmt = image_ext(mime).to_uppercase();
     match image_size(data) {
-        Some((w, h)) => format!("Зображення {fmt} {w}×{h}"),
-        None => format!("Зображення {fmt}"),
+        // TRANSLATORS: description of a copied image in the clipboard history, e.g. "PNG image 640×480"
+        Some((w, h)) => tr!("{format} image {width}×{height}", format = fmt, width = w, height = h),
+        None => tr!("{format} image", format = fmt),
     }
 }
 
@@ -524,7 +526,7 @@ impl Engine {
             return;
         };
         let Ok(store) = serde_json::from_slice::<Store>(&bytes) else {
-            eprintln!("deskd: пошкоджений {}, ігнорую", self.store_path().display());
+            eprintln!("deskd: {} is damaged, ignoring it", self.store_path().display());
             return;
         };
         self.next_id = store.next_id.max(1);
@@ -670,7 +672,7 @@ mod tests {
         };
         let it = e.list("", 0).remove(0);
         assert_eq!(it.kind, "image");
-        assert_eq!(it.text, "Зображення PNG 640×480");
+        assert_eq!(it.text, "PNG image 640×480");
         assert!(it.image.starts_with(d.join("run").to_str().unwrap()));
         assert_eq!(e.get(id).unwrap().1, img);
         assert_eq!(

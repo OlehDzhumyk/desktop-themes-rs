@@ -6,7 +6,7 @@
 # re-test (tools/headless, tools/integration-test.sh).
 
 # Packages for the build toolbox (Fedora): Rust app + GTK theme builds + sound/wallpaper generators.
-DT_TOOLBOX_PACKAGES="git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm"
+DT_TOOLBOX_PACKAGES="git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm gettext"
 
 # --- GTK / shell themes, icons, cursors, wallpapers (vinceliuice) ---
 WHITESUR_GTK_URL=https://github.com/vinceliuice/WhiteSur-gtk-theme.git

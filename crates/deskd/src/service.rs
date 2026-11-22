@@ -24,12 +24,12 @@ fn lock(e: &Shared) -> MutexGuard<'_, Engine> {
 
 fn save(eng: &Engine) {
     if let Err(e) = eng.save() {
-        eprintln!("deskd: не вдалося зберегти історію буфера: {e}");
+        eprintln!("deskd: cannot save the clipboard history: {e}");
     }
 }
 
 fn not_found(id: u64) -> zbus::fdo::Error {
-    zbus::fdo::Error::InvalidArgs(format!("запису {id} немає"))
+    zbus::fdo::Error::InvalidArgs(format!("no item {id}"))
 }
 
 pub struct Desk {

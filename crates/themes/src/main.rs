@@ -4,6 +4,8 @@ mod gui;
 mod service;
 
 fn main() {
+    // мова: налаштування `language` (або DESKTOP_THEMES_LANGUAGE), інакше як у сеансі
+    desk_settings::i18n::init(desk_settings::i18n::language_from_gsettings);
     let args: Vec<String> = std::env::args().collect();
     let argv0 = std::path::Path::new(&args[0])
         .file_name()

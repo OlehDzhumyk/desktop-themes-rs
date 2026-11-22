@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! apps/hooks/{apply,revert}: зміни програм, які не є ключами dconf.
 
+use desk_settings::tr;
 use std::process::Command;
 
 use crate::paths::Ctx;
@@ -22,6 +23,7 @@ pub fn run_hook(
         .map(|p| p.to_path_buf())
         .unwrap_or_else(|| theme.dir.clone());
     let mut c = Command::new(&path);
+    desk_settings::i18n::restore_child_env(&mut c);
     c.current_dir(&dir)
         .env("THEME_ID", &theme.id)
         .env("THEME_DIR", &dir)
@@ -40,10 +42,12 @@ pub fn run_hook(
         Some(Ok(()))
     } else {
         let err = String::from_utf8_lossy(&out.stderr).trim().to_string();
-        Some(Err(format!(
-            "хук {name} теми {} завершився з кодом {:?}: {err}",
-            theme.id,
-            out.status.code()
+        Some(Err(tr!(
+            "hook {hook} of the theme {theme} exited with code {code}: {error}",
+            hook = name,
+            theme = theme.id,
+            code = format!("{:?}", out.status.code()),
+            error = err
         )))
     }
 }
