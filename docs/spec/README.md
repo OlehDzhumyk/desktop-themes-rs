@@ -88,7 +88,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Clipboard history | Implemented | 1 | In Windows 11 and macOS; based on Clipboard Indicator (MIT) | [clipboard](features/clipboard.md) |
 | Spotlight-style launcher (third-party today) | Partial | 0 | Based on Spotlight by itsnin (GPL-3.0-or-later) | [search](features/search.md) |
 | Liquid Glass variant | Experimental | 0 | Based on Liquid Glass extension | [liquid-glass](features/liquid-glass.md) |
-| Volume mixer and audio device switching | Planned | 2 | From Windows, adapted for macOS style | [mixer](features/mixer.md) |
+| Volume mixer and audio device switching | Implemented | 2 | From Windows, adapted for macOS | [mixer](features/mixer.md) |
 | Emoji and symbol picker | Planned | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
 | Focus modes and do-not-disturb schedules | Planned | 2 | In Windows 11 and macOS | [focus](features/focus.md) |
 | Automatic light/dark by sunset | Planned | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |

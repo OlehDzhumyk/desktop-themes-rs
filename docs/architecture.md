@@ -26,7 +26,7 @@ The repository is a Cargo workspace:
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
-| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (now: clipboard history) |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
@@ -93,7 +93,8 @@ Installed by `data/install.sh`: `~/.local/bin/themes` (+ `theme`, `themes-gui`) 
 schema of deskd, the extensions from `extensions/` and the built bridge
 (`bridge/build/desk-bridge@desktop-themes-rs`).
 
-deskd keeps the clipboard history in `~/.local/share/deskd/clipboard/` (`history.json`, `images/`,
+deskd keeps the optional per-application volumes of the mixer in `~/.local/share/deskd/mixer/apps.json`
+(0600) and the clipboard history in `~/.local/share/deskd/clipboard/` (`history.json`, `images/`,
 mode 0600/0700; text only unless «persist images» is on) and session-only images in
 `$XDG_RUNTIME_DIR/deskd/clipboard/`. These are personal and never part of the repository.
 
@@ -163,6 +164,22 @@ loads the same files at runtime).
 gdbus call --session -d io.github.OlehDzhumyk.Desk -o /io/github/OlehDzhumyk/Desk/Clipboard \
   -m io.github.OlehDzhumyk.Desk.Clipboard.List "" 5
 ```
+
+`/io/github/OlehDzhumyk/Desk/Mixer`, interface `io.github.OlehDzhumyk.Desk.Mixer` (volumes on the cubic
+slider scale, 1.0 = 100 %):
+
+| Member | Description |
+|---|---|
+| `ListDevices(s kind) -> a(ussssdbb)` | `output` or `input`: (id, node name, description, icon, bus, volume, muted, default) |
+| `ListStreams() -> a(ussssdbbu)` / `ListApps(b include_silent) -> a(ssssdbbuau)` | playback streams; one row per application (its streams merged) |
+| `SetVolume(u id, d v)`, `SetMute(u id, b)` | a device or a stream |
+| `SetAppVolume(s app, d v)`, `SetAppMute(s app, b)`, `MoveApp(s app, u device)`, `MoveStream(u, u)` | every stream of an application; device 0 = the default |
+| `SetDefault(s kind, u id)` | default output/input; streams moved by hand follow it |
+| property `Version u` (1), `Available b`, `DefaultOutput u`, `DefaultInput u`; signal `Changed(as what)` | coalesced: `devices`, `apps`, `defaults`, `available` |
+
+The engine (`crates/deskd/src/mixer/`) keeps a PipeWire connection on its own thread and changes
+nothing until asked; `model.rs` holds every rule and is tested with mocked graphs,
+`tests/mixer_pipewire.rs` runs deskd against an isolated PipeWire and WirePlumber.
 
 ## Crash protection
 
