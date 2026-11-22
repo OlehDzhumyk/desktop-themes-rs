@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Fast checks for what you changed relative to origin/main (CI still runs everything).
-#   tools/check-changed.sh [BASE]      STRICT=1 makes clippy warnings fatal
+#   tools/check-changed.sh [BASE]      clippy warnings are fatal, as in CI
 set -eu
 cd "$(git rev-parse --show-toplevel)"
 base=$(git merge-base "${1:-origin/main}" HEAD)
@@ -22,7 +22,7 @@ for f in "${changed[@]}"; do
 done
 
 step() { printf '\n== %s\n' "$*"; }
-deny=(); [ "${STRICT:-0}" = 1 ] && deny=(-- -D warnings)
+deny=(-- -D warnings)
 
 if [ $workspace = 1 ]; then pk=(--workspace); else pk=(); for c in "${crates[@]:-}"; do [ -n "$c" ] && pk+=(-p "$c"); done; fi
 if [ ${#pk[@]} -gt 0 ]; then

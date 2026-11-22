@@ -24,9 +24,7 @@ env:
 
 jobs:
   rust-fmt-clippy:
-    # fmt and clippy are REPORT-ONLY for now: the existing code base has findings (see the job
-    # summary). Remove `continue-on-error` once they are fixed.
-    name: rustfmt + clippy (report only)
+    name: rustfmt + clippy
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:45
@@ -46,7 +44,6 @@ jobs:
           key: cargo-fedora45-${{ github.job }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: cargo-fedora45-${{ github.job }}-
       - name: cargo fmt --check
-        continue-on-error: true
         run: |
           set +e
           cargo fmt --all --check > fmt.diff 2>&1
@@ -58,7 +55,6 @@ jobs:
           cat fmt.diff
           exit $rc
       - name: cargo clippy
-        continue-on-error: true
         run: |
           set +e
           cargo clippy --workspace --locked --all-targets -- -D warnings 2> clippy.log

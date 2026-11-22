@@ -6,10 +6,10 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 default:
     @just --list
 
-# everything CI checks, locally (fmt and clippy have known findings until the cleanup pass)
+# everything CI checks, locally
 check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep
 
-# fast checks for what you changed vs origin/main (STRICT=1: clippy warnings fatal)
+# fast checks for what you changed vs origin/main
 check-changed:
     tools/check-changed.sh
 
@@ -19,7 +19,7 @@ test:
       cargo nextest run --workspace --locked --status-level fail --final-status-level fail && cargo test --workspace --locked --doc; \
     else cargo test --workspace --locked; fi
 
-# format all Rust (maintainers only: changes many files today)
+# format all Rust
 fmt:
     cargo fmt --all
 

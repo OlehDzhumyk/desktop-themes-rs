@@ -18,6 +18,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- rustfmt and clippy are clean and blocking in CI now; the minimum Rust version is 1.89
+  (`File::try_lock` was already used).
 - `themes apply` exits 4 when the automatic rollback turned an extension off (was 0).
 - `themes doctor` checks deskd (service file, running, same version).
 - Snapshots include the skin and the clipboard shortcut of the look module.
