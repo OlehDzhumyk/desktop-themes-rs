@@ -68,6 +68,9 @@ pub struct State {
     pub gnome_version: Option<String>,
     #[serde(default)]
     pub last_doctor: Option<String>,
+    /// Symlinks to files generated from tokens.toml, per module (link → target).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub token_links: BTreeMap<Module, BTreeMap<String, String>>,
     /// Невідомі поля зберігаються як є.
     #[serde(flatten)]
     pub extra: serde_json::Map<String, serde_json::Value>,

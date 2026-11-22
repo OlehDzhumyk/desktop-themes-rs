@@ -1,9 +1,4 @@
-# Модуль apps (Windows 11): Ptyxis. Brave слідує GTK-темі сам (see docs/themes.md), хуків немає.
-# @DEFAULT_PTYXIS_PROFILE@ is replaced by the default Ptyxis profile UUID (dconf default-profile-uuid).
+# Модуль apps (Windows 11): Ptyxis. Палітра й шрифт терміналу — у tokens.toml ([terminal]);
+# тут лише форма курсора. Brave слідує GTK-темі сам (see docs/themes.md), хуків немає.
 [org/gnome/Ptyxis]
-use-system-font=false
-font-name='Cascadia Mono 12'
 cursor-shape='ibeam'
-
-[org/gnome/Ptyxis/Profiles/@DEFAULT_PTYXIS_PROFILE@]
-palette='campbell'

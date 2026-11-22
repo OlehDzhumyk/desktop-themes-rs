@@ -1,0 +1,33 @@
+# macOS look tokens. WhiteSur stays the base: its gtk4/ (installed by scripts/install-assets.sh)
+# and its shell theme (user-theme name in settings.dconf) are hand-made files, which always win
+# over generated ones. The tokens carry what WhiteSur does not decide: the GNOME accent, fonts,
+# the terminal palette and font, and the sound theme. Brave follows the GTK theme by itself.
+schema = 1
+
+[colors]
+accent = "blue"
+
+[fonts]
+ui = "Inter 11"
+document = "Inter 11"
+mono = "JetBrains Mono 11"
+title_weight = 700
+
+[sounds]
+theme = "macos-like"
+
+[terminal]
+name = "Graphite"
+font = "JetBrains Mono 12"
+
+# an original dark palette (always dark, like a classic terminal profile)
+[terminal.dark]
+fg = "#e8e8ea"
+bg = "#1e1e20"
+cursor = "#a3a3a8"
+palette = [
+  "#2c2c30", "#f2776b", "#7fcf84", "#e6c86f",
+  "#6fa8f2", "#c58ae6", "#6fd0d8", "#c8c8cc",
+  "#6a6a70", "#ff9488", "#9ee3a2", "#f2db93",
+  "#93c0ff", "#d8a9f2", "#94e1e7", "#f5f5f7",
+]

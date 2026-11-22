@@ -160,6 +160,19 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
         if let Some(e) = &t.inherit_error {
             rep.push("warning", "inherits", format!("тема «{}»: {e}", t.id), None, false);
         }
+        match crate::tokens::load(&t) {
+            Some(Err(e)) => {
+                for i in &e.errors {
+                    rep.push("error", "tokens", format!("тема «{}»: {i}", t.id), None, false);
+                }
+            }
+            Some(Ok(l)) => {
+                for i in &l.warnings {
+                    rep.push("info", "tokens", format!("тема «{}»: {i}", t.id), None, false);
+                }
+            }
+            None => {}
+        }
     }
     // (що, ключ dconf, схема, ключ схеми)
     let checks: &[(&str, &str, &str, &str)] = &[
@@ -256,6 +269,35 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
                 format!("файл шпалер не існує: {p}"),
                 None,
                 false,
+            );
+        }
+    }
+}
+
+/// Generated files of the active themes went missing (e.g. ~/.cache was cleaned): `--fix`
+/// regenerates them (the links point at stable paths, so they work again).
+fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
+    let mut seen = BTreeSet::new();
+    for m in [Module::Look, Module::Apps] {
+        let Some(src) = st.source(m) else { continue };
+        if !seen.insert(src.to_string()) {
+            continue;
+        }
+        let t = Theme::new(ctx, src);
+        let Ok(files) = crate::tokens::plan(&t) else { continue };
+        if files.iter().all(|f| f.status == "cached") {
+            continue;
+        }
+        if fix && crate::tokens::materialize(&t, false).is_ok() {
+            rep.fixed
+                .push(format!("згенеровано файли токенів теми «{src}»"));
+        } else {
+            rep.push(
+                "warning",
+                "tokens-cache",
+                format!("файли, згенеровані з tokens.toml теми «{src}», відсутні або застарілі (themes doctor --fix)"),
+                None,
+                true,
             );
         }
     }
@@ -446,6 +488,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_journal(&enabled, &mut rep);
     check_crashes(ctx, &mut rep);
     check_assets(ctx, &st, &mut rep);
+    check_token_cache(ctx, &st, opt.fix, &mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
         rep.push(

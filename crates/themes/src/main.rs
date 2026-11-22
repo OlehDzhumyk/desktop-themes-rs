@@ -2,6 +2,7 @@
 mod cli;
 mod gui;
 mod service;
+mod tokens_cli;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();

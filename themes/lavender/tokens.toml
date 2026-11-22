@@ -1,0 +1,141 @@
+# Lavender: a theme made only of design tokens. Everything else (libadwaita CSS, the GNOME Shell
+# layer, the Ptyxis palette, the wallpaper, dconf keys) is generated from this file when the
+# theme is applied. Reference: docs/design-tokens.md.
+schema = 1
+name = "Lavender"
+
+[colors]
+border_opacity = 0.14
+
+[colors.light]
+accent = "#6d4fc2"
+accent_fg = "#ffffff"
+window_bg = "#f7f5fc"
+window_fg = "#221c35"
+view_bg = "#fdfcff"
+view_fg = "#221c35"
+headerbar_bg = "#efebf8"
+headerbar_fg = "#221c35"
+headerbar_backdrop = "#f7f5fc"
+sidebar_bg = "#ebe6f6"
+sidebar_fg = "#221c35"
+sidebar_backdrop = "#f1eef9"
+card_bg = "#ffffff"
+card_fg = "#221c35"
+popover_bg = "#ffffff"
+popover_fg = "#221c35"
+dialog_bg = "#f7f5fc"
+dialog_fg = "#221c35"
+destructive_bg = "#c22e4c"
+destructive_fg = "#ffffff"
+success_bg = "#2c7a55"
+success_fg = "#ffffff"
+warning_bg = "#e0a526"
+warning_fg = "#000000cc"
+error_bg = "#c22e4c"
+error_fg = "#ffffff"
+shade = "#1a103014"
+
+[colors.dark]
+accent = "#8f74e6"
+accent_fg = "#ffffff"
+window_bg = "#1d1a27"
+window_fg = "#ebe7f5"
+view_bg = "#18151f"
+view_fg = "#ebe7f5"
+headerbar_bg = "#262232"
+headerbar_fg = "#ebe7f5"
+headerbar_backdrop = "#1d1a27"
+sidebar_bg = "#221e2e"
+sidebar_fg = "#ebe7f5"
+sidebar_backdrop = "#1f1b2a"
+card_bg = "#2a2638"
+card_fg = "#ebe7f5"
+popover_bg = "#2c283a"
+popover_fg = "#ebe7f5"
+dialog_bg = "#262232"
+dialog_fg = "#ebe7f5"
+destructive_bg = "#c9405b"
+destructive_fg = "#ffffff"
+success_bg = "#2f8a5f"
+success_fg = "#ffffff"
+warning_bg = "#d9a032"
+warning_fg = "#000000cc"
+error_bg = "#c9405b"
+error_fg = "#ffffff"
+shade = "#0a061440"
+
+[radii]
+window = 14
+button = 8
+card = 12
+popover = 12
+panel = 20
+
+[fonts]
+ui = "Adwaita Sans 11"
+document = "Adwaita Sans 11"
+mono = "Adwaita Mono 11"
+title_weight = 700
+
+[spacing]
+xs = 3
+sm = 6
+md = 12
+lg = 18
+xl = 24
+
+[shadows.card]
+y = 1
+blur = 4
+opacity = 0.10
+
+[shadows.popover]
+y = 4
+blur = 16
+opacity = 0.22
+
+[surface]
+panel_opacity = 0.88
+popover_opacity = 0.97
+blur = false
+
+[motion]
+fast_ms = 150
+normal_ms = 220
+slow_ms = 350
+easing = "ease-out-cubic"
+
+[shell]
+scheme = "dark"
+panel_bg = "#15121e"
+panel_fg = "#ece8f6"
+
+[terminal]
+name = "Lavender"
+font = "Adwaita Mono 12"
+
+[terminal.dark]
+fg = "#e6e1f2"
+bg = "#17141f"
+cursor = "#a58cf5"
+palette = [
+  "#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a",
+  "#8aa8f5", "#c99af2", "#7cc9d6", "#cfc8de",
+  "#5d5672", "#f79aaa", "#9fe3b8", "#f3d59c",
+  "#a9c0f8", "#dbb7f7", "#9fdbe5", "#f6f3fb",
+]
+
+[terminal.light]
+fg = "#2a2340"
+bg = "#faf8fe"
+cursor = "#6d4fc2"
+palette = [
+  "#2a2340", "#b8304a", "#2b7a4b", "#8a6510",
+  "#3b5bb5", "#8a3fb0", "#1f7480", "#d9d3e6",
+  "#6e6787", "#9e2440", "#23683f", "#74540c",
+  "#2f4c9c", "#74349a", "#195f69", "#f1eef8",
+]
+
+[wallpaper]
+style = "gradient"

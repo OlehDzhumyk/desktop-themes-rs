@@ -91,6 +91,7 @@ user's machine, not committed.
 * [docs/theme-contract.md](docs/theme-contract.md): files a theme may contain, path placeholders
 * [docs/module-system.md](docs/module-system.md): modules, managed keys, mixing rules
 * [docs/themes.md](docs/themes.md): notes on the bundled themes and their extensions
+* [docs/design-tokens.md](docs/design-tokens.md): `tokens.toml`, generators, theme from wallpaper
 * [docs/features.md](docs/features.md): desktop features (clipboard history), skins, privacy
 * [docs/README.uk.md](docs/README.uk.md): full user guide in Ukrainian
 

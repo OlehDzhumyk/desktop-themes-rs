@@ -1,0 +1,15 @@
+[Look]
+/org/gnome/desktop/background/picture-options='zoom'
+/org/gnome/desktop/background/picture-uri='file:///home/user/.cache/desktop-themes/lavender/wallpaper/light.svg'
+/org/gnome/desktop/background/picture-uri-dark='file:///home/user/.cache/desktop-themes/lavender/wallpaper/dark.svg'
+/org/gnome/desktop/interface/accent-color='purple'
+/org/gnome/desktop/interface/document-font-name='Adwaita Sans 11'
+/org/gnome/desktop/interface/font-name='Adwaita Sans 11'
+/org/gnome/desktop/interface/monospace-font-name='Adwaita Mono 11'
+/org/gnome/desktop/screensaver/picture-uri='file:///home/user/.cache/desktop-themes/lavender/wallpaper/dark.svg'
+/org/gnome/desktop/wm/preferences/titlebar-font='Adwaita Sans Bold 11'
+/org/gnome/shell/extensions/user-theme/name='desktop-themes-lavender'
+[Apps]
+/org/gnome/Ptyxis/Profiles/@DEFAULT_PTYXIS_PROFILE@/palette='desktop-themes-lavender'
+/org/gnome/Ptyxis/font-name='Adwaita Mono 12'
+/org/gnome/Ptyxis/use-system-font=false

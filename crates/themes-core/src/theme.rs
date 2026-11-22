@@ -28,6 +28,8 @@ pub struct Theme {
     pub parent: Option<Box<Theme>>,
     /// Чому `INHERITS` не вдалося розв'язати (немає теми, цикл, некоректний id).
     pub inherit_error: Option<String>,
+    /// Cache of files generated from tokens.toml (`~/.cache/desktop-themes/<id>`).
+    pub cache_dir: PathBuf,
 }
 
 /// Максимальна глибина ланцюжка успадкування.
@@ -165,6 +167,7 @@ impl Theme {
             conf,
             parent,
             inherit_error,
+            cache_dir: crate::tokens::cache_root(ctx).join(id),
         }
     }
 
@@ -240,14 +243,33 @@ impl Theme {
         by_name.into_values().collect()
     }
 
-    /// Ключі dconf модуля (список розширень керується тільки extensions.txt).
-    pub fn settings(&self, module: Module) -> Settings {
+    /// Keys of the module's *.dconf files only (no tokens, no placeholder expansion).
+    fn file_settings(&self, module: Module) -> Settings {
         let mut d = Settings::new();
         for f in self.dconf_files(module) {
             if let Ok(s) = dconf::parse_file(&f) {
                 d.extend(s);
             }
         }
+        d
+    }
+
+    /// The theme's dconf files choose the shell theme themselves (then no shell theme is
+    /// generated from tokens).
+    pub fn handmade_shell_theme(&self) -> bool {
+        self.file_settings(Module::Look)
+            .contains_key(crate::SHELL_THEME_KEY)
+    }
+
+    /// Ключі dconf модуля (список розширень керується тільки extensions.txt). Keys derived from
+    /// tokens.toml come first, the theme's *.dconf files override them.
+    pub fn settings(&self, module: Module) -> Settings {
+        let files = self.file_settings(module);
+        let handmade_shell = module == Module::Look && files.contains_key(crate::SHELL_THEME_KEY);
+        let mut d: Settings = crate::tokens::keys_for(self, module, handmade_shell)
+            .into_iter()
+            .collect();
+        d.extend(files);
         for v in d.values_mut() {
             *v = util::expand_home_value(v, &self.home);
         }
@@ -263,16 +285,23 @@ impl Theme {
 
     /// UUID розширень: батьківський список, змінений рядками `+uuid`/`-uuid` дочірньої теми
     /// (див. [`merge_extension_lines`]).
+    /// A generated shell theme needs the user-theme extension, so it is added when the tokens
+    /// produce one.
     pub fn extensions(&self) -> Vec<String> {
         let base = self
             .parent
             .as_deref()
             .map(|p| p.extensions())
             .unwrap_or_default();
-        match std::fs::read_to_string(self.dir.join("extensions.txt")) {
+        let mut v = match std::fs::read_to_string(self.dir.join("extensions.txt")) {
             Ok(text) => merge_extension_lines(&base, &text),
             Err(_) => base,
+        };
+        let ut = theme_tokens::USER_THEME_EXTENSION;
+        if !v.iter().any(|u| u == ut) && crate::tokens::outputs(self).shell {
+            v.push(ut.to_string());
         }
+        v
     }
 
     pub fn has_extensions_file(&self) -> bool {
@@ -282,12 +311,24 @@ impl Theme {
     }
 
     /// Тека `gtk4`/`gtk3` (перший шар, у якому вона є; теки не зливаються).
-    pub fn gtk_dir(&self, kind: &str) -> Option<PathBuf> {
+    pub fn handmade_gtk_dir(&self, kind: &str) -> Option<PathBuf> {
         self.find(kind).filter(|p| p.is_dir())
     }
 
+    /// The hand-made directory, else (gtk4 only) the one generated from tokens.toml.
+    pub fn gtk_dir(&self, kind: &str) -> Option<PathBuf> {
+        self.handmade_gtk_dir(kind).or_else(|| {
+            (kind == "gtk4" && crate::tokens::outputs(self).gtk)
+                .then(|| self.cache_dir.join(theme_tokens::generate::GTK4_DIR))
+        })
+    }
+
     pub fn gtk_entries(&self, kind: &str) -> Vec<String> {
-        let Some(dir) = self.gtk_dir(kind) else {
+        let Some(dir) = self.handmade_gtk_dir(kind) else {
+            // generated: known without reading the (possibly not yet written) cache
+            if self.gtk_dir(kind).is_some() {
+                return vec!["gtk.css".to_string()];
+            }
             return vec![];
         };
         let Ok(rd) = std::fs::read_dir(dir) else {
@@ -330,6 +371,7 @@ impl Theme {
         match m {
             Module::Look => {
                 !self.dconf_files(Module::Look).is_empty()
+                    || crate::tokens::has_tokens(self)
                     || self.has_extensions_file()
                     || self.find("flatpak.conf").is_some_and(|p| p.is_file())
                     || GTK_KINDS.iter().any(|k| !self.gtk_entries(k).is_empty())
@@ -338,8 +380,9 @@ impl Theme {
                 !self.dconf_files(m).is_empty()
                     || self.hook("apply").is_some()
                     || self.hook("revert").is_some()
+                    || !crate::tokens::keys_for(self, m, false).is_empty()
             }
-            _ => !self.dconf_files(m).is_empty(),
+            _ => !self.dconf_files(m).is_empty() || !crate::tokens::keys_for(self, m, false).is_empty(),
         }
     }
 

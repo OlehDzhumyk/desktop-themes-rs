@@ -1,0 +1,18 @@
+# Windows 11 look tokens. Fluent stays the base (gtk4/ from scripts/install-assets.sh, shell theme
+# in settings.dconf; hand-made files win). The tokens carry the GNOME accent, fonts, the
+# terminal (Ptyxis' own "campbell" palette and Cascadia Mono) and the sound theme.
+schema = 1
+
+[colors]
+accent = "blue"
+
+[fonts]
+ui = "Noto Sans 10"
+document = "Noto Sans 11"
+
+[sounds]
+theme = "windows11-like"
+
+[terminal]
+builtin = "campbell"
+font = "Cascadia Mono 12"

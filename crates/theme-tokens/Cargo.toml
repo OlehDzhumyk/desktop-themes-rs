@@ -1,0 +1,15 @@
+[package]
+name = "theme-tokens"
+description = "Design tokens for desktop-themes-rs: typed tokens.toml, validation (WCAG contrast), generators (libadwaita CSS, GNOME Shell CSS, Ptyxis palette, dconf), palette from image"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "theme_tokens"
+
+[dependencies]
+serde.workspace = true
+toml = { version = "1.2.2", default-features = false, features = ["parse", "display", "serde", "std"] }

@@ -87,6 +87,11 @@ enum Cmd {
         #[arg(long)]
         enable_extensions: bool,
     },
+    /// Дизайн-токени (tokens.toml): перевірка, генерація, тема з шпалер
+    Tokens {
+        #[command(subcommand)]
+        cmd: crate::tokens_cli::TokensCmd,
+    },
     /// Відкрити програму «Теми»
     Gui {
         /// Зберегти знімок вікна у PNG і вийти
@@ -152,6 +157,7 @@ fn modules_arg(only: Option<&str>, module: &[String]) -> Result<Vec<Module>, Err
 
 fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     match cmd {
+        Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
         Cmd::List => {
             let st = State::load(ctx);
             let look = st.source(Module::Look).map(String::from);
@@ -440,6 +446,7 @@ fn print_apply(r: &ApplyResult) {
             },
             r.flatpak_lines
         );
+        print_generated(r);
         return;
     }
     println!(
@@ -478,6 +485,7 @@ fn print_apply(r: &ApplyResult) {
     if r.flatpak_lines > 0 {
         println!("  flatpak overrides:     {}", r.flatpak_lines);
     }
+    print_generated(r);
     if !r.cleanup.is_empty() {
         println!("  прибрано після розширень: {}", r.cleanup.len());
     }
@@ -505,6 +513,33 @@ fn print_apply(r: &ApplyResult) {
         println!(
             "Застосовано наживо, перевхід не потрібен (відкриті програми GTK4/libadwaita варто перезапустити)."
         );
+    }
+}
+
+/// Files generated from tokens.toml and their links.
+fn print_generated(r: &ApplyResult) {
+    if r.generated.is_empty() {
+        return;
+    }
+    if r.dry_run {
+        println!("Згенеровано з tokens.toml ({}):", r.generated.len());
+    } else {
+        println!(
+            "  з tokens.toml ({}, {:.1} мс):",
+            r.generated.len(),
+            r.tokens_ms
+        );
+    }
+    for f in &r.generated {
+        let st = match f.status {
+            "cached" => "кеш актуальний",
+            "written" => "згенеровано",
+            _ => "буде згенеровано",
+        };
+        println!("    {} ({st})", f.path);
+    }
+    for l in &r.token_links {
+        println!("    посилання: {l}");
     }
 }
 
