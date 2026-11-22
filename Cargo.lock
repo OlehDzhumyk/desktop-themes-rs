@@ -211,6 +211,7 @@ version = "0.3.0"
 dependencies = [
  "gettext-rs",
  "gio",
+ "regex",
 ]
 
 [[package]]

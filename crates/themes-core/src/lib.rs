@@ -22,6 +22,7 @@ pub mod state;
 pub mod theme;
 pub mod tokens;
 pub mod util;
+pub mod values;
 
 pub use error::{Error, Result};
 pub use modules::Module;

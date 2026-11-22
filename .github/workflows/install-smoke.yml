@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# data/install.sh in a Fedora container with a throw-away HOME: no desktop session needed.
+# Checks the dry run, the installed files (compiled schemas of the app and of the extensions that
+# ship one, translated [uk] .desktop and metainfo) and a second install over the first.
+name: Install smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "data/**"
+      - "extensions/**"
+      - "bridge/**"
+      - "po/**"
+      - "scripts/**"
+      - "tools/install-smoke.sh"
+      - ".github/workflows/install-smoke.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: install-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  install-sh:
+    name: data/install.sh (dry run + real install)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git findutils grep sed gettext glib2-devel nodejs npm
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the bridge (install.sh installs bridge/build)
+        working-directory: bridge
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: tools/install-smoke.sh
+        run: tools/install-smoke.sh

@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# typos configuration. The repository mixes English code with Ukrainian text (docs, comments,
+# po/uk.po, theme files): Cyrillic words are skipped, and a few project words are whitelisted.
+[files]
+extend-exclude = [
+  "Cargo.lock",
+  "bridge/package-lock.json",
+  "po/*.po",
+  "po/*.pot",
+  "LICENSE",
+  "themes/*/gtk4/**",
+  "**/node_modules/**",
+  "target/**",
+]
+
+[default]
+# Any token containing Cyrillic letters (Ukrainian text, including apostrophes) is not checked.
+extend-ignore-re = [
+  "[\\p{Cyrillic}][\\p{Cyrillic}’ʼ'-]*",
+]
+
+[default.extend-words]
+# project and domain words that look like typos
+deskd = "deskd"
+dconf = "dconf"
+Sur = "Sur"       # WhiteSur (the GTK theme the macOS look is based on)
+gir = "gir"       # GObject introspection data (.gir)
+pn = "pn"         # short names of (name, value) pairs in the token validator
+ba = "ba"         # background alpha
+lits = "lits"     # literals, in the i18n lint
+windw = "windw"   # deliberate misspelling in a test
+tema = "tema"     # Ukrainian "тема" (theme) transliterated, id prefix in util.rs

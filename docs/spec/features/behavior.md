@@ -151,6 +151,11 @@ change one by hand have it overwritten by the next apply of the module (the base
 * **Reset to theme default** (per shortcut): clears the override and writes the active theme's value back.
 * **Conflicts:** choosing a key that another action already owns (our features, the launcher, GNOME keybindings,
   custom keybindings) is **refused** and the owner is named. The same detection runs in `themes apply`.
+  GNOME keybindings count at their **effective** values: keys that dconf does not set are taken from the
+  schema defaults of `org.gnome.shell.keybindings`, `org.gnome.desktop.wm.keybindings`,
+  `org.gnome.settings-daemon.plugins.media-keys` and the mutter keybinding schemas, read through a private
+  in-memory GSettings backend (never the session's dconf). So the default `Super+V` of the notification list is
+  found. Clashes between two system keys are not reported.
 
 Supersedes the earlier idea of tracking "user-set" keys in `state.json`: a separate override key is visible to
 `gsettings`, survives a lost `state.json` and needs no skip logic in the planner.

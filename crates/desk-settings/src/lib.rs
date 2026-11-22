@@ -6,17 +6,37 @@
 
 pub mod generate;
 pub mod i18n;
+pub mod lockscreen;
 pub mod model;
 pub mod registry;
 pub mod shortcuts;
 pub mod stable_hash;
+pub mod validate;
 
 #[cfg(feature = "gio")]
 #[rustfmt::skip]
 pub mod accessors;
 
+pub use lockscreen::*;
 pub use model::*;
 pub use registry::*;
+
+/// Every schema of the registry: ours ([`SCHEMAS`]) and those of the repository's extensions
+/// ([`EXTENSION_SCHEMAS`]).
+pub fn all_schemas() -> impl Iterator<Item = &'static Schema> {
+    SCHEMAS
+        .iter()
+        .copied()
+        .chain(EXTENSION_SCHEMAS.iter().map(|e| e.schema))
+}
+
+/// The extension that owns a schema (`None` for ours): its `schemas/` directory holds the schema.
+pub fn extension_of(schema: &str) -> Option<&'static ExtensionSchema> {
+    EXTENSION_SCHEMAS
+        .iter()
+        .copied()
+        .find(|e| e.schema.id == schema)
+}
 
 /// Is the schema installed? (`gio::Settings::new` aborts the process without it.)
 #[cfg(feature = "gio")]
@@ -28,8 +48,7 @@ pub fn schema_installed(id: &str) -> bool {
 
 /// Find a key by schema id and name.
 pub fn key(schema: &str, name: &str) -> Option<&'static Key> {
-    SCHEMAS
-        .iter()
+    all_schemas()
         .find(|s| s.id == schema)?
         .keys
         .iter()
@@ -39,8 +58,7 @@ pub fn key(schema: &str, name: &str) -> Option<&'static Key> {
 
 /// The dconf path of a key (`/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut`).
 pub fn dconf_path(k: &Key) -> String {
-    let base = SCHEMAS
-        .iter()
+    let base = all_schemas()
         .find(|s| s.id == k.schema)
         .map_or("/", |s| s.path);
     format!("{base}{}", k.name)
@@ -67,7 +85,7 @@ mod tests {
     #[test]
     fn generated_files_up_to_date() {
         for (path, want) in generate::all() {
-            let have = std::fs::read_to_string(repo().join(path)).unwrap_or_default();
+            let have = std::fs::read_to_string(repo().join(&path)).unwrap_or_default();
             assert!(have == want, "{path} is out of date: run `cargo xtask gen`");
         }
     }
@@ -75,7 +93,7 @@ mod tests {
     #[test]
     fn registry_is_consistent() {
         let mut seen = std::collections::HashSet::new();
-        for s in SCHEMAS {
+        for s in all_schemas() {
             assert!(s.path.starts_with('/') && s.path.ends_with('/'), "{}", s.id);
             for k in s.keys {
                 assert_eq!(k.schema, s.id, "{} lists a key of another schema", s.id);
@@ -98,6 +116,33 @@ mod tests {
                         step,
                     } => {
                         assert!(min <= default && default <= max && *step > 0, "{}", k.name)
+                    }
+                    Kind::Int {
+                        default,
+                        min,
+                        max,
+                        step,
+                    } => {
+                        assert!(min <= default && default <= max && *step > 0, "{}", k.name)
+                    }
+                    Kind::Double {
+                        default,
+                        min,
+                        max,
+                        step,
+                    } => {
+                        assert!(
+                            min <= default && default <= max && *step > 0.0,
+                            "{}",
+                            k.name
+                        )
+                    }
+                    Kind::Color { default } => {
+                        assert!(
+                            default.is_empty() || validate::is_css_color(default),
+                            "{}",
+                            k.name
+                        )
                     }
                     Kind::Choice { default, choices } => {
                         assert!(choices.iter().any(|c| c.value == *default), "{}", k.name)
@@ -131,7 +176,7 @@ mod tests {
                 assert!(key(k.schema, k.name).is_some(), "{} not in schema", k.name);
             }
         }
-        for s in SCHEMAS {
+        for s in all_schemas() {
             for k in s.keys {
                 if k.widget != Widget::Hidden {
                     assert!(
