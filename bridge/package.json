@@ -11,11 +11,11 @@
     "lint": "eslint src"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@girs/gjs": "5.6.0",
     "@girs/gnome-shell": "51.0.1",
-    "eslint": "^9.39.5",
-    "typescript": "6.0.3",
+    "eslint": "^10.15.0",
+    "typescript": "7.0.2",
     "typescript-eslint": "^8.73.0"
   }
 }
