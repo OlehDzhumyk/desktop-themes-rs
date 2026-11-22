@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-22 21:17+0000\n"
+"POT-Creation-Date: 2026-11-22 21:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -555,14 +555,14 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:111
+#: crates/deskd/src/main.rs:114
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:200 crates/themes/src/service.rs:234
+#: crates/deskd/src/main.rs:203 crates/themes/src/service.rs:234
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -2231,6 +2231,62 @@ msgstr ""
 
 #: bridge/src/clipboard/winFlyout.ts:143
 msgid "More"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:156
+msgid "Could not switch the device"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:197
+msgid "Applications"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:201
+msgid "Sound"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:209
+msgid "Output"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
+msgid "Input"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:301
+msgid "The audio server is not available"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:359
+msgid "No applications are playing sound"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:72
+msgid "{device}, default"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:125
+msgid "Play on…"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:169
+msgid "Unmute {app}"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:170
+msgid "Mute {app}"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:171
+msgid "{app}: volume"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:173
+msgid "{app}: volume {percent} %"
+msgstr ""
+
+#: bridge/src/mixer/rows.ts:174
+msgid "{row}, muted"
 msgstr ""
 
 #: bridge/src/quickSettings.ts:44

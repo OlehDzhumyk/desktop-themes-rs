@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-22 21:17+0000\n"
+"POT-Creation-Date: 2026-11-22 21:24+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -132,6 +132,62 @@ msgstr "Відкріпити"
 #: bridge/src/clipboard/winFlyout.ts:143
 msgid "More"
 msgstr "Більше"
+
+#: bridge/src/mixer/feature.ts:156
+msgid "Could not switch the device"
+msgstr "Не вдалося перемкнути"
+
+#: bridge/src/mixer/feature.ts:197
+msgid "Applications"
+msgstr "Програми"
+
+#: bridge/src/mixer/feature.ts:201
+msgid "Sound"
+msgstr "Звук"
+
+#: bridge/src/mixer/feature.ts:209
+msgid "Output"
+msgstr "Виведення"
+
+#: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
+msgid "Input"
+msgstr "Введення"
+
+#: bridge/src/mixer/feature.ts:301
+msgid "The audio server is not available"
+msgstr "Аудіосервер недоступний"
+
+#: bridge/src/mixer/feature.ts:359
+msgid "No applications are playing sound"
+msgstr "Немає програм, що відтворюють звук"
+
+#: bridge/src/mixer/rows.ts:72
+msgid "{device}, default"
+msgstr "{device}, типовий"
+
+#: bridge/src/mixer/rows.ts:125
+msgid "Play on…"
+msgstr "Відтворювати на…"
+
+#: bridge/src/mixer/rows.ts:169
+msgid "Unmute {app}"
+msgstr "Увімкнути звук {app}"
+
+#: bridge/src/mixer/rows.ts:170
+msgid "Mute {app}"
+msgstr "Вимкнути звук {app}"
+
+#: bridge/src/mixer/rows.ts:171
+msgid "{app}: volume"
+msgstr "{app}: гучність"
+
+#: bridge/src/mixer/rows.ts:173
+msgid "{app}: volume {percent} %"
+msgstr "{app}: гучність {percent} %"
+
+#: bridge/src/mixer/rows.ts:174
+msgid "{row}, muted"
+msgstr "{row}, без звуку"
 
 #: bridge/src/quickSettings.ts:44
 msgid "Desktop"
@@ -443,7 +499,9 @@ msgstr "Показувати беззвучні програми"
 
 #: crates/desk-settings/src/mixer.rs:84
 msgid "Also list applications that keep a sound stream open without playing"
-msgstr "Також показувати програми, які тримають звуковий потік відкритим, але нічого не відтворюють"
+msgstr ""
+"Також показувати програми, які тримають звуковий потік відкритим, але нічого "
+"не відтворюють"
 
 #: crates/desk-settings/src/mixer.rs:96
 msgid "Remember application volume"
@@ -453,7 +511,9 @@ msgstr "Запам'ятовувати гучність програм"
 msgid ""
 "A volume you set is restored when the application plays again; turning it "
 "off forgets them"
-msgstr "Встановлена гучність відновлюється, коли програма знову відтворює звук; вимкнення стирає збережене"
+msgstr ""
+"Встановлена гучність відновлюється, коли програма знову відтворює звук; "
+"вимкнення стирає збережене"
 
 #: crates/desk-settings/src/mixer.rs:113
 msgid "Volume step, %"
@@ -486,7 +546,10 @@ msgid ""
 "devices, in the sound menu of quick settings. The deskd service follows the "
 "audio server; the shell bridge draws the mixer in the style of the current "
 "theme."
-msgstr "Гучність кожної програми, що відтворює звук, і пристрої виведення та введення — у меню звуку швидких налаштувань. Служба deskd стежить за аудіосервером, а міст оболонки малює мікшер у стилі поточної теми."
+msgstr ""
+"Гучність кожної програми, що відтворює звук, і пристрої виведення та "
+"введення — у меню звуку швидких налаштувань. Служба deskd стежить за "
+"аудіосервером, а міст оболонки малює мікшер у стилі поточної теми."
 
 #: crates/desk-settings/src/mixer.rs:204
 msgid "Mixer"
@@ -747,7 +810,7 @@ msgstr ""
 "  --replace   забрати назву на шині в запущеного deskd\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:111
+#: crates/deskd/src/main.rs:114
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
@@ -756,7 +819,7 @@ msgstr ""
 "схему {schema} не встановлено (data/install.sh), працюю з типовими "
 "налаштуваннями"
 
-#: crates/deskd/src/main.rs:200 crates/themes/src/service.rs:234
+#: crates/deskd/src/main.rs:203 crates/themes/src/service.rs:234
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
