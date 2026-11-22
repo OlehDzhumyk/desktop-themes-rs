@@ -82,8 +82,8 @@ work done, say which of these applied:
   without your fix; do not repeat the case in wrappers.
 - No `sleep`, timeouts, or polling loops in tests; wait on an event, a channel, or a returned value.
   Time-based assertions are bugs.
-- Headless GNOME Shell tests only through the isolated harness (`just headless`,
-  [ADR 0005](docs/adr/0005-headless-testing-is-isolated.md)). Visual-only fixes: before/after screenshot, no test.
+- GNOME Shell end-to-end tests only in the container harness (`just e2e`,
+  [ADR 0007](docs/adr/0007-e2e-in-containers.md)). Visual-only fixes: before/after screenshot, no test.
 - Generated output (CSS, palettes) is covered by snapshot tests in `crates/theme-tokens/tests`.
   After an intended change, review the diff (`cargo insta review` or `UPDATE_SNAPSHOTS=1`).
 - Do not mass-format or fix unrelated clippy findings inside a feature change.

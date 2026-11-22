@@ -27,6 +27,8 @@ live session can lose their desktop state, and agents run many commands unattend
 * Bad: the harness needs `dbus-daemon` and gnome-shell, so it is not part of required CI
   (`headless.yml` runs on demand and weekly).
 
+End-to-end tests moved into a container: [ADR 0007](0007-e2e-in-containers.md).
+
 ## Alternatives considered
 
 * Run tests on the live session with a backup/restore: a crash mid-test still loses state.

@@ -12,5 +12,6 @@ ADR that supersedes the old one; do not rewrite history.
 | [0004](0004-design-tokens-generate-libadwaita-css.md) | Design tokens generate libadwaita CSS, which is copied, not linked |
 | [0005](0005-headless-testing-is-isolated.md) | Headless testing must be fully isolated from the live session |
 | [0006](0006-experimental-themes-need-confirmation.md) | Experimental themes require explicit confirmation |
+| [0007](0007-e2e-in-containers.md) | End-to-end tests run GNOME Shell in a throw-away container, driven over Eval |
 
 New ADR: copy `0000-template.md`, take the next number, add a row above.
