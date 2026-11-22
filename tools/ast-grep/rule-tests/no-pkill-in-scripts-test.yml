@@ -1,0 +1,8 @@
+id: no-pkill-in-scripts
+valid:
+  - "kill 1234"
+  - "echo pkill is banned"
+invalid:
+  - "pkill -f gnome-shell"
+  - "killall deskd"
+  - "echo x && pkill foo"

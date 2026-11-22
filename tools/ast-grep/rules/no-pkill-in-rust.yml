@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+id: no-pkill-in-rust
+language: rust
+severity: error
+message: Never kill by name or pattern (pkill, killall). Kill only a PID you spawned and recorded.
+rule:
+  any:
+    - pattern: Command::new("pkill")
+    - pattern: Command::new("killall")

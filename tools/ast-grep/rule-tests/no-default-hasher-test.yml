@@ -1,0 +1,7 @@
+id: no-default-hasher
+valid:
+  - "use std::hash::Hasher;"
+  - "fn f() { let h = blake_like(); }"
+invalid:
+  - "use std::collections::hash_map::DefaultHasher;"
+  - "fn f() { let h = DefaultHasher::new(); }"

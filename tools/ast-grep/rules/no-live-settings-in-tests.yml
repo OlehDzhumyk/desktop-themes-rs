@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+id: no-live-settings-in-tests
+language: rust
+severity: error
+message: >-
+  Test code must not run `dconf` or `gsettings` or write GSettings: that changes the developer's
+  live session. Use the isolated harness (tools/headless, ADR 0005) or a temporary
+  GSETTINGS_BACKEND=memory / DCONF_PROFILE environment.
+rule:
+  all:
+    - any:
+        - pattern: Command::new("dconf")
+        - pattern: Command::new("gsettings")
+        - pattern: $S.set_string($$$A)
+        - pattern: $S.set_boolean($$$A)
+        - pattern: $S.set_int($$$A)
+        - pattern: $S.set_uint($$$A)
+        - pattern: $S.set_double($$$A)
+        - pattern: $S.set_strv($$$A)
+        - pattern: $S.set_enum($$$A)
+        - pattern: $S.set_flags($$$A)
+        - pattern: $S.set_value($$$A)
+        - pattern: $S.reset($$$A)
+    - any:
+        - inside:
+            kind: mod_item
+            stopBy: end
+            follows:
+              kind: attribute_item
+              regex: cfg\(test\)
+        - inside:
+            kind: function_item
+            stopBy: end
+            follows:
+              kind: attribute_item
+              regex: '#\[(tokio::)?test'
+files:
+  - crates/**/tests/**/*.rs
+  - crates/**/src/**/*.rs
+ignores:
+  - "**/harness/**"
+  - "**/headless/**"

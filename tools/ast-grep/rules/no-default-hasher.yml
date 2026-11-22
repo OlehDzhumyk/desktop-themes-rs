@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+id: no-default-hasher
+language: rust
+severity: warning
+message: >-
+  `DefaultHasher` is not guaranteed stable across Rust releases. Do not use it for hashes that are
+  persisted, compared across runs or sent over D-Bus; use a stable hash (e.g. a fixed algorithm).
+note: |
+  Fine for in-memory HashMap use only; then suppress with `// ast-grep-ignore: no-default-hasher`.
+rule:
+  any:
+    - kind: type_identifier
+      regex: ^DefaultHasher$
+    - kind: identifier
+      regex: ^DefaultHasher$
