@@ -1,6 +1,6 @@
 {
   "name": "desk-bridge",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "private": true,
   "description": "GNOME Shell bridge extension of desktop-themes-rs (desk-bridge@desktop-themes-rs)",
   "license": "GPL-3.0-or-later",

@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-22
+
 ### Changed
 
 - desk-bridge: strict TypeScript (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`,
@@ -106,6 +108,7 @@ Initial version: the theme manager.
 - `scripts/bootstrap.sh` and the individual installers, all with `--dry-run`.
 - README, CREDITS and documentation (English, with a Ukrainian user guide).
 
-[Unreleased]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/OlehDzhumyk/desktop-themes-rs/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OlehDzhumyk/desktop-themes-rs/releases/tag/v0.1.0
