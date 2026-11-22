@@ -99,6 +99,14 @@ for d in "$SRC"/extensions/*/ "$SRC/bridge/build/$BRIDGE/"; do
   [ "$DRY" = 1 ] || [ -d "$d" ] || continue
   run rm -rf "${DATA:?}/gnome-shell/extensions/${uuid:?}"
   run cp -a "${d%/}" "$DATA/gnome-shell/extensions/$uuid"
+  # Extensions with their own GSettings schema need schemas/gschemas.compiled (not in git).
+  if ls "${d%/}"/schemas/*.gschema.xml >/dev/null 2>&1; then
+    if command -v glib-compile-schemas >/dev/null 2>&1; then
+      run glib-compile-schemas "$DATA/gnome-shell/extensions/$uuid/schemas"
+    else
+      run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" glib-compile-schemas "$DATA/gnome-shell/extensions/$uuid/schemas"
+    fi
+  fi
 done
 
 run systemctl --user daemon-reload
