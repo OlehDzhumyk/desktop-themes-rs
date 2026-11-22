@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- `themes doctor` checks the GSettings schemas: ours are installed and compiled, and every installed
+  extension that ships `schemas/*.gschema.xml` has `gschemas.compiled`; `--fix` compiles it.
+
 ### Fixed
 
 - `data/install.sh` compiles the GSettings schemas of repository extensions after copying them
