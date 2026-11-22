@@ -33,7 +33,10 @@ fn restore_backup(st: &mut State, dest: &str, warnings: &mut Vec<String>) -> Res
             if !lexists(Path::new(dest)) {
                 move_path(bp, Path::new(dest))?;
             } else {
-                warnings.push(tr!("backup {path} not restored (the place is taken)", path = b));
+                warnings.push(tr!(
+                    "backup {path} not restored (the place is taken)",
+                    path = b
+                ));
             }
         }
     }
@@ -72,7 +75,10 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
             if !d.is_symlink() && file_hash(d).as_deref() == Some(c.hash.as_str()) {
                 std::fs::remove_file(d)?;
             } else {
-                warnings.push(tr!("{path} was changed by hand; left as it is", path = dest));
+                warnings.push(tr!(
+                    "{path} was changed by hand; left as it is",
+                    path = dest
+                ));
             }
         }
         restore_backup(st, &dest, warnings)?;

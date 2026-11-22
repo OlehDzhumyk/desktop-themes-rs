@@ -182,12 +182,24 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
         match crate::tokens::load(&t) {
             Some(Err(e)) => {
                 for i in &e.errors {
-                    rep.push("error", "tokens", tr!("theme “{theme}”: {error}", theme = t.id, error = i), None, false);
+                    rep.push(
+                        "error",
+                        "tokens",
+                        tr!("theme “{theme}”: {error}", theme = t.id, error = i),
+                        None,
+                        false,
+                    );
                 }
             }
             Some(Ok(l)) => {
                 for i in &l.warnings {
-                    rep.push("info", "tokens", tr!("theme “{theme}”: {error}", theme = t.id, error = i), None, false);
+                    rep.push(
+                        "info",
+                        "tokens",
+                        tr!("theme “{theme}”: {error}", theme = t.id, error = i),
+                        None,
+                        false,
+                    );
                 }
             }
             None => {}
@@ -321,13 +333,17 @@ fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
             continue;
         }
         let t = Theme::new(ctx, src);
-        let Ok(files) = crate::tokens::plan(&t) else { continue };
+        let Ok(files) = crate::tokens::plan(&t) else {
+            continue;
+        };
         if files.iter().all(|f| f.status == "cached") {
             continue;
         }
         if fix && crate::tokens::materialize(&t, false).is_ok() {
-            rep.fixed
-                .push(tr!("generated the token files of the theme “{theme}”", theme = src));
+            rep.fixed.push(tr!(
+                "generated the token files of the theme “{theme}”",
+                theme = src
+            ));
         } else {
             rep.push(
                 "warning",

@@ -12,12 +12,18 @@ use themes_core::tokens::theme_tokens;
 use themes_core::{Ctx, Error, tokens, util};
 
 // Тексти довідки (ідентифікатори gettext; cli.rs перекладає їх під час запуску).
-const T01: &str = n_("Check tokens.toml (all themes or the given ones): syntax, ranges, WCAG AA contrast");
-const T02: &str = n_("Generate the files from the tokens into the cache (~/.cache/desktop-themes/<id>) and show the time");
+const T01: &str =
+    n_("Check tokens.toml (all themes or the given ones): syntax, ranges, WCAG AA contrast");
+const T02: &str = n_(
+    "Generate the files from the tokens into the cache (~/.cache/desktop-themes/<id>) and show the time",
+);
 const T03: &str = n_("Regenerate even if the cache is up to date");
 const T04: &str = n_("Measure N forced generations (min/median/max)");
-const T05: &str = n_("dconf keys derived from the tokens (`dconf load /` format; without Ptyxis profile keys)");
-const T06: &str = n_("Create a theme from the palette of an image (wallpaper): themes/<id>/tokens.toml + theme.conf");
+const T05: &str =
+    n_("dconf keys derived from the tokens (`dconf load /` format; without Ptyxis profile keys)");
+const T06: &str = n_(
+    "Create a theme from the palette of an image (wallpaper): themes/<id>/tokens.toml + theme.conf",
+);
 const T07: &str = n_("Id of the new theme");
 const T08: &str = n_("Name of the theme (NAME in theme.conf)");
 const T09: &str = n_("Overwrite an existing theme");
@@ -148,7 +154,10 @@ fn generate(
 ) -> Result<i32, Error> {
     let t = get_theme(ctx, id)?;
     if !tokens::has_tokens(&t) {
-        return Err(Error(tr!("the theme “{theme}” has no tokens.toml", theme = id)));
+        return Err(Error(tr!(
+            "the theme “{theme}” has no tokens.toml",
+            theme = id
+        )));
     }
     if let Some(n) = repeat {
         // end-to-end per run: read files, parse, merge, validate, render, write
@@ -197,7 +206,11 @@ fn generate(
         }
         println!(
             "{id}: {}",
-            tr!("files: {count}, {ms} ms", count = files.len(), ms = format!("{took:.2}"))
+            tr!(
+                "files: {count}, {ms} ms",
+                count = files.len(),
+                ms = format!("{took:.2}")
+            )
         );
     }
     Ok(0)
@@ -284,8 +297,8 @@ fn from_image(
                 "DESCRIPTION",
                 tr!(
                     "Theme from the palette of the image {file}",
-                    file =
-                    abs.file_name()
+                    file = abs
+                        .file_name()
                         .map(|f| f.to_string_lossy().into_owned())
                         .unwrap_or_default()
                 ),
@@ -304,9 +317,17 @@ fn from_image(
     } else {
         println!(
             "{}",
-            tr!("Theme “{name}” ({id}) created: {path}", name = name, id = id, path = dir.display())
+            tr!(
+                "Theme “{name}” ({id}) created: {path}",
+                name = name,
+                id = id,
+                path = dir.display()
+            )
         );
-        println!("  {}", tr!("seed colour: {colour}", colour = pal.seed.hex()));
+        println!(
+            "  {}",
+            tr!("seed colour: {colour}", colour = pal.seed.hex())
+        );
         let cs: Vec<String> = clusters
             .iter()
             .map(|c| format!("{} {:.0}%", c.color.hex(), c.share * 100.0))

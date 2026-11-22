@@ -141,7 +141,11 @@ pub fn check(theme: &Theme) -> Result<Option<Loaded>> {
     match load(theme) {
         None => Ok(None),
         Some(Ok(l)) => Ok(Some(l)),
-        Some(Err(e)) => Err(Error(tr!("theme “{theme}”: {error}", theme = theme.id, error = e))),
+        Some(Err(e)) => Err(Error(tr!(
+            "theme “{theme}”: {error}",
+            theme = theme.id,
+            error = e
+        ))),
     }
 }
 
@@ -220,7 +224,10 @@ pub fn unlink_module(st: &mut State, module: Module, warnings: &mut Vec<String>)
             Ok(t) if t == Path::new(&src) => {
                 let _ = std::fs::remove_file(d);
             }
-            _ if lexists(d) => warnings.push(tr!("{path} was changed by hand; left as it is", path = dest)),
+            _ if lexists(d) => warnings.push(tr!(
+                "{path} was changed by hand; left as it is",
+                path = dest
+            )),
             _ => {}
         }
     }

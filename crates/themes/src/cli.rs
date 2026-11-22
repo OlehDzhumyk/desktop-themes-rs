@@ -692,7 +692,13 @@ fn print_generated(r: &ApplyResult) {
         return;
     }
     if r.dry_run {
-        println!("{}", tr!("Generated from tokens.toml ({count}):", count = r.generated.len()));
+        println!(
+            "{}",
+            tr!(
+                "Generated from tokens.toml ({count}):",
+                count = r.generated.len()
+            )
+        );
     } else {
         println!(
             "  {}",

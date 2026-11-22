@@ -407,7 +407,10 @@ impl Theme {
                     || self.hook("revert").is_some()
                     || !crate::tokens::keys_for(self, m, false).is_empty()
             }
-            _ => !self.dconf_files(m).is_empty() || !crate::tokens::keys_for(self, m, false).is_empty(),
+            _ => {
+                !self.dconf_files(m).is_empty()
+                    || !crate::tokens::keys_for(self, m, false).is_empty()
+            }
         }
     }
 
