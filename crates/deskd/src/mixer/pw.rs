@@ -86,7 +86,7 @@ impl PwBackend {
                 let was = {
                     let mut g = lock(&graph);
                     let was = g.connected;
-                    g.reset();
+                    g.forget_server();
                     was
                 };
                 alive2.store(false, Ordering::Release);

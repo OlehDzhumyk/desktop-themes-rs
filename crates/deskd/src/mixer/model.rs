@@ -386,7 +386,7 @@ impl Graph {
     }
 
     /// The server went away: forget its objects (ids are reused by the next server).
-    pub fn reset(&mut self) {
+    pub fn forget_server(&mut self) {
         self.connected = false;
         self.nodes.clear();
         self.routes.clear();
@@ -1374,10 +1374,10 @@ mod tests {
     }
 
     #[test]
-    fn reset_forgets_the_server_but_not_the_memory() {
+    fn forgetting_the_server_keeps_the_memory() {
         let mut g = graph(true);
         g.set_app_volume("mpv", 0.2).unwrap();
-        g.reset();
+        g.forget_server();
         assert!(!g.connected);
         assert!(g.devices("output").unwrap().is_empty());
         assert!(g.memory.contains_key("mpv"));

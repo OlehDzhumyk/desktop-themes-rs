@@ -253,7 +253,7 @@ mod tests {
 
             // disconnected: requests fail with Failed, lists are empty
             m.set_backend(None);
-            lock(&m.graph).reset();
+            lock(&m.graph).forget_server();
             let e = p.set_app_volume("mpv", 0.5).await.unwrap_err();
             assert!(e.to_string().contains("Failed"), "{e}");
             assert!(p.list_apps(true).await.unwrap().is_empty());
