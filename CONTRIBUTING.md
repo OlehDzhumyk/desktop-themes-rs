@@ -130,3 +130,32 @@ makes `.github/workflows/release.yml` build the artifacts and draft the release.
 Use the issue templates. For a bug, attach the output of `themes doctor --json` (after removing
 anything private) and say which GNOME Shell version you run. Feature requests ask which operating
 system the idea comes from, so that the behaviour can be matched faithfully.
+
+## Development environment, commands and hooks
+
+A `Containerfile` builds the same Fedora 45 toolchain as CI, including `just`, `cargo-nextest`,
+`ast-grep` and `gitleaks`:
+
+```sh
+podman build -t desktop-themes-dev -f Containerfile .
+toolbox create --image localhost/desktop-themes-dev themes-dev
+```
+
+`rust-toolchain.toml` pins the Rust release Fedora 45 ships (rustup users get it automatically).
+`just --list` shows the command surface; the useful ones:
+
+```sh
+just check-changed     # while iterating: only what you changed vs origin/main
+just check             # everything CI checks (fmt and clippy have known findings for now)
+just privacy           # personal or machine-specific strings in tracked files
+just headless          # clipboard end-to-end test in the isolated headless shell
+just install-hooks     # pre-commit: gitleaks, rustfmt of staged files, privacy check
+tools/install-dev-tools.sh   # pinned cargo-nextest + ast-grep into ~/.local/bin
+```
+
+The privacy check ships only generic patterns. Put your own (user name, host names, SSIDs) in the
+untracked `.git/info/privacy-patterns` (one regex per line) so they never reach the repository.
+
+Decisions that shaped the project are in [docs/adr/](docs/adr/). AI coding agents: read
+[AGENTS.md](AGENTS.md); the Claude Code hook in `.claude/` blocks the commands that can hurt a
+live session.
