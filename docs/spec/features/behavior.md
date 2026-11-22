@@ -99,8 +99,9 @@ on the right).
    clipboard) and Y's behaviour shortcuts. The combination must not leave two owners on one key; the
    `macos` look + `windows11` behaviour case is therefore tested: `Super+Space` is the launcher *and* the
    Windows 11 input switch, a known collision that the spec resolves by **the look wins for look-owned
-   keys**: the launcher is bound and the input source keeps only its second binding (`XF86Keyboard`). (Today this is not
-   implemented, see G-BEHAV-2.)
+   keys**: the launcher is bound and the input source keeps only its second binding (`XF86Keyboard`). **Implemented:** `themes apply` finds
+   such clashes in the resulting keys (`themes_core::shortcuts::resolve_conflicts`), removes the accelerator from the
+   system key, and warns. The same rule frees `Super+V` for a Windows 11 look on a macOS behaviour.
 5. Modifier convention: `macos` maps Command to `Super`, Option to `Alt`; `windows11` uses the Windows key as
    `Super`.
 6. Shortcuts are stored as GSettings keys (`<Super>v`, `Above_Tab` etc.), never as scancodes, so layouts work.
@@ -134,12 +135,26 @@ above are errors and must be resolved in this file first.
 
 Behaviour keys are plain GNOME GSettings keys listed above, managed by the theme manager; users who
 change one by hand have it overwritten by the next apply of the module (the baseline restores it on reset).
-**Decided:** every feature's shortcut is **overridable per feature in the hub**; the theme only provides the
-default. An override is a user value of the feature's own key (for example `Clipboard toggle-shortcut`), stored
-in GSettings, and survives theme switches: the theme manager must not overwrite a shortcut key the user has
-explicitly set (it tracks "user-set" keys in `state.json` and skips them; `themes reset` clears the marks). Conflict
-checks against this registry run when the user picks a key; a conflict is shown and refused.
-Today (stage 1) the hub shows shortcuts read-only (gap G-BEHAV-5).
+**Decided (owner):** the shortcut of every feature is a **registry entry** (`crates/desk-settings`,
+`SHORTCUTS`) edited in **one place**: the window page «Keyboard shortcuts» (`themes gui --page shortcuts`) and
+`themes shortcut list|set|reset`. A theme's `desk.dconf`/`behavior.dconf` only supplies the **default**.
+
+* **Precedence:** the user's override (if set) wins over the active theme's default, which wins over the registry
+  default (`desk_settings::shortcuts::resolve`). An empty override means "follow the theme"; `['disabled']`
+  means "no shortcut".
+* **Storage:** two keys per shortcut. The *key in force* (`io.github.OlehDzhumyk.Desk.Clipboard
+  toggle-shortcut`, unchanged, so stored values and the bridge keep working) is what the bridge binds; themes
+  write their default into it. The *override* lives in `io.github.OlehDzhumyk.Desk.Shortcuts` (`clipboard-toggle`)
+  and is not a managed theme key. Every `themes apply` puts the override on top of the theme's value
+  (`shortcuts::apply_overrides`); changing the shortcut writes both keys at once. `themes reset` (a full apply of
+  `fedora`) forgets the overrides.
+* **Reset to theme default** (per shortcut): clears the override and writes the active theme's value back.
+* **Conflicts:** choosing a key that another action already owns (our features, the launcher, GNOME keybindings,
+  custom keybindings) is **refused** and the owner is named. The same detection runs in `themes apply`.
+
+Supersedes the earlier idea of tracking "user-set" keys in `state.json`: a separate override key is visible to
+`gsettings`, survives a lost `state.json` and needs no skip logic in the planner.
+Limit: only keys that are *set* in dconf are checked; GNOME defaults of untouched keys are not (G-BEHAV-3).
 
 ## Privacy & security
 
@@ -170,15 +185,15 @@ Applying behaviour is dconf writes only (no restart); the shell re-reads keybind
 
 ## Gaps found
 
-* **G-BEHAV-1** `themes/macos/spotlight.dconf` still carries a stale comment about
-  `behavior.dconf` ([themes](themes.md) G-THEMES-3); harmless but misleading.
-* **G-BEHAV-2** Mixing `macos` look with `windows11` behaviour yields two owners of `Super+Space`
-  (launcher from the look, `switch-input-source` from behaviour); nothing detects or resolves it. A
-  conflict check in `plan.rs` (warn at apply) is needed.
+* **G-BEHAV-1** *(resolved)* the stale comment in `themes/macos/spotlight.dconf` is corrected
+  ([themes](themes.md) G-THEMES-3).
+* **G-BEHAV-2** *(resolved)* Mixing `macos` look with `windows11` behaviour: `themes apply` detects the two owners
+  of `Super+Space`, the launcher keeps it, and a warning is shown (`shortcuts::resolve_conflicts`, test over all
+  look x behaviour pairs of the bundled themes).
 * **G-BEHAV-3** There is no automated test that checks a theme's registry against the GNOME default
   collisions (`tools/integration-test.sh` writes real dconf and is not run in CI). A headless
   collision test is needed.
-* **G-BEHAV-5** The hub shows feature shortcuts read-only and every theme apply rewrites them; the per-feature override decided above is not implemented.
+* **G-BEHAV-5** *(resolved)* Feature shortcuts are editable in the window and the CLI; overrides survive theme applies.
 * **G-BEHAV-4** The `windows11` theme leaves `Super+Down` (GNOME: unmaximise) and `Super+Up` as GNOME
   defaults; Windows 11 restores/minimises on `Super+Down`. Not specified yet (see
   [window-layouts](window-layouts.md)).
@@ -203,7 +218,12 @@ Applying behaviour is dconf writes only (no restart); the shell re-reads keybind
 * AC-BEHAV-09: Given any theme, When all its binding keys are collected, Then no key combination is bound to two
   different actions (target test, G-BEHAV-3).
 * AC-BEHAV-10: Given `macos` look + `windows11` behaviour, When applied, Then `themes` warns about the
-  `Super+Space` collision and the launcher wins (target, G-BEHAV-2).
+  `Super+Space` collision and the launcher wins (G-BEHAV-2; unit tests in `themes-core/src/shortcuts.rs`).
+* AC-BEHAV-12: Given the user set `themes shortcut set clipboard-toggle '<Ctrl><Alt>c'`, When any theme is applied,
+  Then the key in force is still `['<Control><Alt>c']`; after `themes shortcut reset clipboard-toggle` it is the
+  active theme's value.
+* AC-BEHAV-13: Given a shortcut already owned by another action, When the user picks it, Then the change is
+  refused and the owner is named.
 * AC-BEHAV-11: Given `windows11` behaviour is reset, When `custom-keybindings` is read, Then the user's own
   custom shortcuts are present again.
 

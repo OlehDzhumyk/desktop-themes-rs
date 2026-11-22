@@ -167,8 +167,7 @@ modules. Switching never relies on colour alone ("активна" badge text).
 * **G-THEMES-2** There is no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
   description, and the CLI, the window and quick settings apply it with one click. Intended: mandatory
   confirmation, see [liquid-glass](liquid-glass.md).
-* **G-THEMES-3** `themes/macos/spotlight.dconf` contains a stale comment ("behavior.dconf still sets
-  toggle-overview=['<Super>space']"); `behavior.dconf` already clears it.
+* **G-THEMES-3** *(resolved)* `themes/macos/spotlight.dconf` had a stale comment about `behavior.dconf`.
 * **G-THEMES-4** `themes apply` exits 0 even when the auto-rollback disabled an extension; only the
   warning and the JSON field `rolled_back` tell. Scripts must read `rolled_back`; consider a distinct
   exit code.

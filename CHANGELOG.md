@@ -8,6 +8,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Keyboard shortcuts in the settings registry: one «Keyboard shortcuts» page (`themes gui --page
+  shortcuts`) and `themes shortcut list|set|reset`; a theme only supplies the default, the user's
+  choice wins and survives theme switches, "reset to theme default" per shortcut, a taken
+  accelerator is refused. New schema `io.github.OlehDzhumyk.Desk.Shortcuts`; existing keys unchanged.
+- `themes apply` detects one accelerator owned twice (mixing look and behavior, e.g. `Super+Space`
+  or `Super+V`) and gives it to the feature, with a warning.
 - Continuous integration (`.github/workflows/ci.yml`): rustfmt and clippy (report only), tests,
   `cargo deny`, the desk-bridge build (`tsc`, eslint), shellcheck, GSettings schema, desktop file and
   D-Bus XML validation, actionlint and an offline documentation link check.

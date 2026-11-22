@@ -3,8 +3,8 @@
 toggle-shortcut=['<Super>space']
 theme-preference='default'
 
-# Super+Space must not stay on the Overview. NOTE: behavior.dconf (module "behavior") still sets
-# toggle-overview=['<Super>space'] and behavior wins over look when both set a key, so the
-# one-line fix in macos/behavior.dconf is: toggle-overview=@as []
+# Super+Space must not stay on the Overview. The macos behavior module clears it as well
+# (behavior wins over look when both set a key); this line keeps the look correct when mixed
+# with another theme's behavior.
 [org/gnome/shell/keybindings]
 toggle-overview=@as []
