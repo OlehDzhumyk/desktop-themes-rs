@@ -17,6 +17,9 @@ pub struct ThemeInfo {
     pub modules: Vec<Module>,
     pub active_modules: Vec<Module>,
     pub extensions: usize,
+    /// `EXPERIMENTAL=true`: застосування лише після підтвердження
+    pub experimental: bool,
+    pub warning: String,
 }
 
 impl ThemeInfo {
@@ -67,6 +70,18 @@ impl ThemeCard {
         stack.add_named(&picture, Some("picture"));
         overlay.set_child(Some(&stack));
 
+        // значок «експериментальна» (текстом, не лише кольором) — ліворуч угорі
+        if info.experimental {
+            let b = gtk::Label::builder()
+                .label(tr!("experimental"))
+                .css_classes(["badge", "experimental"])
+                .halign(gtk::Align::Start)
+                .valign(gtk::Align::Start)
+                .tooltip_text(&info.warning)
+                .build();
+            b.add_css_class("badges");
+            overlay.add_overlay(&b);
+        }
         // значки активних модулів
         if !info.active_modules.is_empty() {
             let badges = gtk::Box::builder()
@@ -240,7 +255,12 @@ impl ThemeCard {
         } else {
             tr!("not active")
         };
-        tr!("Theme {name}, {state}", name = i.name, state = state)
+        let label = tr!("Theme {name}, {state}", name = i.name, state = state);
+        if i.experimental {
+            format!("{label}, {}", tr!("experimental"))
+        } else {
+            label
+        }
     }
 
     pub async fn load_preview(&self, dark: bool) {

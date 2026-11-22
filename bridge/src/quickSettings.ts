@@ -10,6 +10,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {QuickMenuToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
+import {confirm} from './confirmDialog.js';
 import {ThemesClient, type ThemeRow} from './dbus.js';
 import {_, fmt} from './i18n.js';
 import type {ClipboardFeature} from './clipboard/feature.js';
@@ -105,6 +106,16 @@ class ThemesToggle extends QuickMenuToggle {
         if (this._busy)
             return;
         this._busy = true;
+        const warning = (await this._client.experimental())[id];
+        if (warning !== undefined) {
+            Main.panel.closeQuickSettings();
+            const ok = await confirm(fmt(_('Apply the experimental theme “{name}”?'), {name}), warning,
+                _('Apply anyway'));
+            if (!ok) {
+                this._busy = false;
+                return;
+            }
+        }
         this.subtitle = fmt(_('applying “{name}”…'), {name});
         try {
             const [relogin, message, warnings] = await this._client.apply(id);

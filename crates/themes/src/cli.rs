@@ -44,6 +44,7 @@ const H22: &str = n_(
 const H23: &str = n_("Open the Themes window");
 const H24: &str = n_("Save a screenshot of the window as PNG and exit");
 const H25: &str = n_("Window size, e.g. 1180x780");
+const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
 const H26: &str = n_("Page: themes | mix | features | clipboard | general | credits");
 
 #[derive(Parser)]
@@ -77,6 +78,8 @@ enum Cmd {
         dry_run: bool,
         #[arg(long, help = H12)]
         no_verify: bool,
+        #[arg(long, short = 'y', help = H27)]
+        yes: bool,
     },
     #[command(about = H13)]
     Reset {
@@ -241,6 +244,8 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                             "active_modules": active_modules,
                             "modules": t.modules(),
                             "builtin": t.builtin(), "extensions": t.extensions(),
+                            "experimental": t.experimental(),
+                            "warning": if t.experimental() { t.warning() } else { String::new() },
                             "path": t.dir,
                         })
                     })
@@ -307,8 +312,12 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             module,
             dry_run,
             no_verify,
+            yes,
         } => {
             let mods = modules_arg(only.as_deref(), &module)?;
+            if !dry_run && !yes {
+                confirm_experimental(ctx, &id, json)?;
+            }
             do_apply(ctx, &id, &mods, dry_run, no_verify, true, json)
         }
         Cmd::Reset {
@@ -460,6 +469,42 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             }
             Ok(crate::gui::run(o))
         }
+    }
+}
+
+/// Експериментальна тема: спитати y/N у терміналі; без терміналу (скрипти, --json) — відмова, якщо
+/// не передано --yes.
+fn confirm_experimental(ctx: &Ctx, id: &str, json: bool) -> Result<(), Error> {
+    use std::io::{BufRead, IsTerminal, Write};
+    let t = themes_core::theme::get_theme(ctx, id)?;
+    if !t.experimental() {
+        return Ok(());
+    }
+    let interactive = !json && std::io::stdin().is_terminal() && std::io::stderr().is_terminal();
+    if !interactive {
+        return Err(Error(tr!(
+            "“{name}” is an experimental theme: {warning}\nRun it again with --yes to apply it anyway.",
+            name = t.name(),
+            warning = t.warning()
+        )));
+    }
+    eprintln!(
+        "{}",
+        tr!("“{name}” is an experimental theme.", name = t.name())
+    );
+    eprintln!("{}", t.warning());
+    // TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
+    eprint!("{} ", tr!("Apply it anyway? [y/N]"));
+    let _ = std::io::stderr().flush();
+    let mut line = String::new();
+    std::io::stdin().lock().read_line(&mut line)?;
+    let a = line.trim().to_lowercase();
+    // TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
+    let yes_words = tr!("y|yes");
+    if a == "y" || a == "yes" || yes_words.split('|').any(|w| !w.is_empty() && a == w) {
+        Ok(())
+    } else {
+        Err(Error(tr!("Cancelled: the theme was not applied.")))
     }
 }
 

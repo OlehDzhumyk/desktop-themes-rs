@@ -55,6 +55,30 @@ pub fn language_env(setting: &str) -> Option<&'static str> {
     }
 }
 
+/// Language of the interface now ("uk", "en", ...): the first entry of LANGUAGE, else the
+/// language part of LC_ALL / LC_MESSAGES / LANG; "en" for C/POSIX.
+pub fn ui_language() -> String {
+    let first = std::env::var("LANGUAGE")
+        .ok()
+        .and_then(|l| l.split(':').next().map(str::to_string))
+        .filter(|l| !l.is_empty())
+        .or_else(|| {
+            ["LC_ALL", "LC_MESSAGES", "LANG"]
+                .iter()
+                .find_map(|v| std::env::var(v).ok().filter(|x| !x.is_empty()))
+        })
+        .unwrap_or_default();
+    let lang: String = first
+        .chars()
+        .take_while(|c| c.is_ascii_alphabetic())
+        .collect();
+    if lang.is_empty() || lang == "C" || lang == "POSIX" {
+        "en".into()
+    } else {
+        lang
+    }
+}
+
 /// Directory with `<lang>/LC_MESSAGES/desktop-themes-rs.mo`.
 pub fn localedir() -> PathBuf {
     if let Some(d) = std::env::var_os(ENV_LOCALEDIR) {

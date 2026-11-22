@@ -72,6 +72,17 @@ impl Service {
             .collect()
     }
 
+    /// Експериментальні теми: id → попередження (мовою служби). Клієнти (міст) питають
+    /// підтвердження перед `Apply` такої теми.
+    fn experimental(&self) -> HashMap<String, String> {
+        self.act.touch();
+        all_themes(&self.ctx)
+            .iter()
+            .filter(|t| t.experimental())
+            .map(|t| (t.id.clone(), t.warning()))
+            .collect()
+    }
+
     /// модуль → id теми
     fn current(&self) -> HashMap<String, String> {
         self.act.touch();

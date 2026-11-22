@@ -56,6 +56,7 @@ themes apply macos                   # whole theme
 themes apply macos --only look,sounds
 themes apply windows11 --module behavior
 themes apply macos --dry-run         # show what would change
+themes apply macos-glass --yes       # experimental themes ask y/N (or need --yes in scripts)
 themes reset                         # back to the baseline
 themes snapshot my-look --name "My look"   # save the current look as a theme
 themes doctor --fix

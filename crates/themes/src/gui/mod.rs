@@ -41,11 +41,13 @@ const CSS: &str = r#"
 .badge { background: var(--accent-bg-color); color: var(--accent-fg-color);
          border-radius: 999px; padding: 2px 10px; font-weight: bold; font-size: 0.85em; }
 .badge.partial { background: alpha(black, 0.55); color: white; }
+.badge.experimental { background: var(--warning-bg-color); color: var(--warning-fg-color); }
 .badge.origin { background: alpha(currentColor, 0.12); color: inherit; font-weight: normal; }
 .badges { margin: 10px; }
 @media (prefers-contrast: more) {
   .theme-card.active { box-shadow: 0 0 0 4px currentColor; }
-  .badge, .badge.partial, .badge.origin { background: none; color: inherit; border: 2px solid currentColor; }
+  .badge, .badge.partial, .badge.experimental { background: var(--warning-bg-color); color: var(--warning-fg-color); }
+.badge.origin { background: none; color: inherit; border: 2px solid currentColor; }
   .busy-veil { background: alpha(black, 0.6); }
 }
 .busy-veil { background: alpha(black, 0.35); border-radius: 14px 14px 0 0; }

@@ -52,6 +52,12 @@ fn load_infos(ctx: &Ctx) -> Vec<ThemeInfo> {
             preview: t.preview(),
             preview_dark: t.preview_dark(),
             builtin: t.builtin(),
+            experimental: t.experimental(),
+            warning: if t.experimental() {
+                t.warning()
+            } else {
+                String::new()
+            },
             id: t.id,
         })
         .collect()
@@ -603,7 +609,39 @@ impl ThemesWindow {
         self.mix_group.set_sensitive(id.is_none());
     }
 
+    /// Застосувати; експериментальна тема — лише після підтвердження в діалозі з її попередженням.
     pub fn apply(self: &Rc<Self>, id: String, modules: Vec<Module>) {
+        let info = self.themes.borrow().iter().find(|t| t.id == id).cloned();
+        let Some(info) = info.filter(|i| i.experimental) else {
+            self.apply_now(id, modules);
+            return;
+        };
+        let dlg = adw::AlertDialog::builder()
+            .heading(tr!(
+                "Apply the experimental theme “{name}”?",
+                name = info.name
+            ))
+            .body(&info.warning)
+            .default_response("cancel")
+            .close_response("cancel")
+            .build();
+        dlg.add_response("cancel", &tr!("Cancel"));
+        dlg.add_response("apply", &tr!("Apply anyway"));
+        dlg.set_response_appearance("apply", adw::ResponseAppearance::Destructive);
+        let t = self.clone();
+        dlg.connect_response(None, move |_, r| {
+            if r == "apply" {
+                t.apply_now(id.clone(), modules.clone());
+            } else {
+                // повернути вибір у «Змішати» до поточного стану
+                let t = t.clone();
+                glib::spawn_future_local(async move { t.reload().await });
+            }
+        });
+        dlg.present(Some(&self.win));
+    }
+
+    fn apply_now(self: &Rc<Self>, id: String, modules: Vec<Module>) {
         if self.busy.get() {
             return;
         }

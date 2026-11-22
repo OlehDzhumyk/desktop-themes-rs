@@ -34,7 +34,7 @@ pub struct Theme {
 /// Максимальна глибина ланцюжка успадкування.
 pub const MAX_INHERIT_DEPTH: usize = 8;
 /// Ключі theme.conf, які дочірня тема не успадковує.
-const OWN_CONF_KEYS: [&str; 3] = ["NAME", "DESCRIPTION", "INHERITS"];
+const OWN_CONF_KEYS: [&str; 5] = ["NAME", "DESCRIPTION", "INHERITS", "EXPERIMENTAL", "WARNING"];
 
 /// Застосовує extensions.txt дочірньої теми до списку батьківської.
 /// Рядки `+uuid` додають, `-uuid` прибирають; якщо є хоч один рядок без префікса, список
@@ -159,7 +159,7 @@ impl Theme {
         let mut conf = BTreeMap::new();
         if let Some(p) = &parent {
             for (k, v) in &p.conf {
-                if !OWN_CONF_KEYS.contains(&k.as_str()) {
+                if !OWN_CONF_KEYS.contains(&k.as_str()) && !k.starts_with("WARNING_") {
                     conf.insert(k.clone(), v.clone());
                 }
             }
@@ -208,6 +208,24 @@ impl Theme {
     }
     pub fn description(&self) -> String {
         self.conf.get("DESCRIPTION").cloned().unwrap_or_default()
+    }
+    /// `EXPERIMENTAL=true` у власному theme.conf (не успадковується): перед застосуванням
+    /// потрібне явне підтвердження (CLI `--yes`, діалог у вікні та в мості).
+    pub fn experimental(&self) -> bool {
+        self.conf
+            .get("EXPERIMENTAL")
+            .is_some_and(|v| matches!(v.trim().to_lowercase().as_str(), "true" | "yes" | "1"))
+    }
+    /// Попередження експериментальної теми: `WARNING_<МОВА>` (мова інтерфейсу, напр. `WARNING_UK`),
+    /// інакше `WARNING`.
+    pub fn warning(&self) -> String {
+        let lang = desk_settings::i18n::ui_language().to_uppercase();
+        self.conf
+            .get(&format!("WARNING_{lang}"))
+            .or_else(|| self.conf.get("WARNING"))
+            .filter(|s| !s.trim().is_empty())
+            .cloned()
+            .unwrap_or_else(|| tr!("This theme is experimental and may make GNOME Shell unstable."))
     }
     pub fn preview(&self) -> String {
         self.preview_key("PREVIEW")
@@ -554,7 +572,10 @@ pub(crate) mod tests {
         }
 
         let c = ctx.themes.join("child");
-        write(&c.join("theme.conf"), "NAME=Child\nINHERITS=parent\n");
+        write(
+            &c.join("theme.conf"),
+            "NAME=Child\nINHERITS=parent\nEXPERIMENTAL=true\nWARNING=\"may crash\"\nWARNING_XX=x\n",
+        );
         // перекриває файл батька повністю (icon-theme зникає), додає власний
         write(
             &c.join("settings.dconf"),
@@ -590,6 +611,10 @@ pub(crate) mod tests {
         assert_eq!(gt.extensions(), vec!["a@x", "c@x", "d@x"]);
         assert_eq!(gt.layers().len(), 3);
         assert_eq!(gt.name(), "grandchild");
+        // EXPERIMENTAL/WARNING belong to the theme that sets them
+        assert!(t.experimental());
+        assert!(!gt.experimental(), "EXPERIMENTAL is not inherited");
+        assert!(!gt.conf.contains_key("WARNING") && !gt.conf.contains_key("WARNING_XX"));
 
         // помилки: відсутня тема, цикл
         write(&ctx.themes.join("orphan/theme.conf"), "INHERITS=nope\n");
