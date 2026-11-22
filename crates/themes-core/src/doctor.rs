@@ -553,6 +553,24 @@ fn check_schemas_in(
     }
 }
 
+/// Values in dconf that the registry does not accept (a hand-edited key, an older free-form value):
+/// the extension or the application ignores them and falls back to the standard value.
+fn check_values(cur: &dconf::Settings, rep: &mut DoctorReport) {
+    for (path, why) in crate::values::invalid_values(cur) {
+        rep.push(
+            "warning",
+            "setting-value",
+            tr!(
+                "{key} holds a value that is not allowed ({why}); it is ignored (gsettings reset or change it in the window)",
+                key = path,
+                why = why
+            ),
+            None,
+            false,
+        );
+    }
+}
+
 fn check_schemas(ctx: &Ctx, enabled: &[String], fix: bool, rep: &mut DoctorReport) {
     let data_dirs: Vec<PathBuf> = std::env::var("XDG_DATA_DIRS")
         .unwrap_or_else(|_| "/usr/local/share:/usr/share".into())
@@ -817,6 +835,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
     check_schemas(ctx, &enabled, opt.fix, &mut rep);
+    check_values(&cur, &mut rep);
     check_deskd(&mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
@@ -1137,5 +1156,22 @@ mod tests {
         let rep = run_check(&r, &[], true);
         assert!(rep.issues.is_empty() && !rep.fixed.is_empty());
         assert!(run_check(&r, &[], false).issues.is_empty());
+    }
+
+    #[test]
+    fn stored_values_outside_the_registry_are_reported() {
+        let mut cur = dconf::Settings::new();
+        let p = "/org/gnome/shell/extensions/lockscreen-layout/";
+        cur.insert(format!("{p}tint"), "'red; margin: 0'".into());
+        cur.insert(format!("{p}clock-color"), "'#ffffff'".into());
+        cur.insert(
+            "/org/gnome/desktop/interface/gtk-theme".into(),
+            "'x'".into(),
+        );
+        let mut rep = DoctorReport::default();
+        check_values(&cur, &mut rep);
+        assert_eq!(rep.issues.len(), 1, "{:?}", rep.issues);
+        assert_eq!(rep.issues[0].kind, "setting-value");
+        assert!(rep.issues[0].message.contains("lockscreen-layout/tint"));
     }
 }

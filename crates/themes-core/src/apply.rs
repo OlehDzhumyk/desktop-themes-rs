@@ -143,7 +143,11 @@ pub fn apply_opts(
     for m in Module::ALL {
         let src = sel.get(&m).cloned();
         let s = match src.as_deref().map(|s| (s, theme_of(s))) {
-            Some((_, Some(t))) => t.settings(m),
+            Some((_, Some(t))) => {
+                let mut s = t.settings(m);
+                warnings.extend(crate::values::drop_invalid(&mut s));
+                s
+            }
             Some((sid, None)) => {
                 warnings.push(tr!(
                     "theme “{theme}” (module {module}) not found; its keys go back to the standard values",
