@@ -35,7 +35,11 @@ pub static FEATURE_APP: Feature = Feature {
     origins: &[],
 };
 
-pub static FEATURES: &[&Feature] = &[&FEATURE_CLIPBOARD, &FEATURE_APP];
+pub static FEATURES: &[&Feature] = &[
+    &FEATURE_CLIPBOARD,
+    &crate::lockscreen::FEATURE_LOCKSCREEN,
+    &FEATURE_APP,
+];
 
 // ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk
 
@@ -463,6 +467,7 @@ pub static PAGE_CREDITS: Page = Page {
 /// The pages, in the order they are listed.
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
+    &crate::lockscreen::PAGE_LOCKSCREEN,
     &PAGE_SHORTCUTS,
     &PAGE_GENERAL,
     &PAGE_CREDITS,

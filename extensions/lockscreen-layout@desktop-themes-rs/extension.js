@@ -11,6 +11,14 @@ import {Extension, InjectionManager} from 'resource:///org/gnome/shell/extension
 
 const A = Clutter.ActorAlign;
 
+// Values that end up in St style strings are checked here, whatever dconf holds (a theme or a
+// hand-edited key must not add CSS declarations). The accepted colours, weights and positions are
+// the ones of the settings registry (crates/desk-settings/src/lockscreen.rs); COLOR_RE is the literal
+// from crates/desk-settings/src/validate.rs (a test compares them).
+const COLOR_RE = /^(?:#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|rgba?\(\s*\d+(?:\.\d+)?%?\s*,\s*\d+(?:\.\d+)?%?\s*,\s*\d+(?:\.\d+)?%?\s*(?:,\s*\d+(?:\.\d+)?%?\s*)?\))$/;
+const WEIGHTS = new Set(['100', '200', '300', '400', '500', '600', '700', '800', '900', 'normal', 'bold']);
+const POSITIONS = new Set(['default', 'center-top', 'bottom-left']);
+
 export default class LockscreenLayout extends Extension {
     enable() {
         this._s = this.getSettings();
@@ -54,12 +62,14 @@ export default class LockscreenLayout extends Extension {
     _layout(d) {
         const s = this._s, clock = d._clock, stack = d._stack;
         if (!clock || !stack || d._lx) return;
-        const pos = s.get_string('clock-position');
+        const pos = POSITIONS.has(s.get_string('clock-position')) ? s.get_string('clock-position') : 'default';
         const size = s.get_int('clock-font-size'), dsize = s.get_int('date-font-size');
-        const fam = s.get_string('clock-font-family'), wt = s.get_string('clock-font-weight');
+        const fam = s.get_string('clock-font-family');
+        const wt = WEIGHTS.has(s.get_string('clock-font-weight')) ? s.get_string('clock-font-weight') : '';
         const font = fam ? `font-family: "${fam.replace(/["\\]/g, '')}";` : '';
-        const color = k => s.get_string(k) ? `color: ${s.get_string(k)};` : '';
-        clock._time.style = [size && `font-size: ${size}px;`, font, wt && `font-weight: ${wt};`, color('clock-color'), s.get_string('clock-glow') && `text-shadow: 0 0 28px ${s.get_string('clock-glow')};`].filter(Boolean).join(' ');
+        const colour = k => COLOR_RE.test(s.get_string(k)) ? s.get_string(k) : '';
+        const color = k => colour(k) ? `color: ${colour(k)};` : '';
+        clock._time.style = [size && `font-size: ${size}px;`, font, wt && `font-weight: ${wt};`, color('clock-color'), colour('clock-glow') && `text-shadow: 0 0 28px ${colour('clock-glow')};`].filter(Boolean).join(' ');
         clock._date.style = [dsize && `font-size: ${dsize}px;`, font, color('date-color')].filter(Boolean).join(' ');
         clock._hint.visible = !s.get_boolean('hide-hint');
         stack.style = `margin-top: ${2 * s.get_int('prompt-offset')}px;`;   // stack is centred, so 2x shifts the prompt by 1x
@@ -114,7 +124,7 @@ export default class LockscreenLayout extends Extension {
         if (uri === 'screensaver')   // GNOME 51 ignores this key itself; themes still set it
             uri = new Gio.Settings({schema_id: 'org.gnome.desktop.screensaver'}).get_string('picture-uri');
         const path = uri ? Gio.File.new_for_uri(uri).get_path() : null;
-        const tint = s.get_string('tint');
+        const tint = COLOR_RE.test(s.get_string('tint')) ? s.get_string('tint') : '';
         this._dropSources(d, false);
         d._backgroundGroup.get_children().forEach((w, i) => {
             if (path) this._useImage(d, d._bgManagers[i], path);
