@@ -88,7 +88,8 @@ impl Class {
     pub fn from_media_class(c: &str) -> Option<Class> {
         match c {
             "Audio/Sink" => Some(Class::Sink),
-            "Audio/Source" => Some(Class::Source),
+            // virtual sources (echo cancellation, loopbacks) are inputs as well
+            "Audio/Source" | "Audio/Source/Virtual" => Some(Class::Source),
             "Stream/Output/Audio" => Some(Class::Stream),
             _ => None,
         }
