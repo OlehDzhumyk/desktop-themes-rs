@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Fixed
+
+- `data/install.sh` compiles the GSettings schemas of repository extensions after copying them
+  (`lockscreen-layout` failed to load with a missing `gschemas.compiled` after a reinstall).
+
 ## [0.3.0] - 2026-11-22
 
 ### Changed
