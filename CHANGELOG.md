@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+
+- desk-bridge: strict TypeScript (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`,
+  `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`), target
+  ES2025 (gjs 1.90 / SpiderMonkey 140), TypeScript 7 for the build and type check, typescript-eslint
+  `strictTypeChecked` + `stylisticTypeChecked`, no `any`; typed D-Bus proxies. eslint 10. Replaces
+  the Dependabot bump of the bridge group.
+
 ### Added
 
 - Keyboard shortcuts in the settings registry: one «Keyboard shortcuts» page (`themes gui --page
