@@ -5,7 +5,7 @@ dconf files. When the theme is applied, the manager generates from them:
 
 | Output | Where | Consumer |
 |---|---|---|
-| libadwaita 1.10 stylesheet | `~/.cache/desktop-themes/<id>/gtk4/gtk.css`, linked into `~/.config/gtk-4.0/` | GTK 4 / libadwaita apps |
+| libadwaita 1.10 stylesheet | `~/.cache/desktop-themes/<id>/gtk4/gtk.css`, **copied** into `~/.config/gtk-4.0/` | GTK 4 / libadwaita apps |
 | GNOME Shell layer | `.../<id>/shell/gnome-shell/gnome-shell.css`, linked as `~/.local/share/themes/desktop-themes-<id>` | user-theme extension |
 | Ptyxis palette | `.../<id>/ptyxis/desktop-themes-<id>.palette`, linked into `~/.local/share/org.gnome.Ptyxis/palettes/` | Ptyxis |
 | wallpaper (optional) | `.../<id>/wallpaper/{light,dark}.svg` | `org.gnome.desktop.background` |
@@ -161,7 +161,10 @@ takes light and dark screenshots of the isolated headless shell with a libadwait
 ## Limitations
 
 * GTK 3 apps are not themed by tokens (Adwaita GTK 3 compiles its colours into literals).
-* Flatpak apps see `~/.config/gtk-4.0` only with an override, and the generated files behind the
-  links live in `~/.cache`, which the sandbox does not see.
+* Flatpak apps see `~/.config/gtk-4.0` only with an override (`flatpak.conf`). That is why the
+  generated `gtk.css` is copied there, not linked into `~/.cache`: the copy is recorded in
+  `state.json` with its content hash, removed (and a displaced file of yours restored) when the look
+  changes, rewritten on the next apply or by `themes doctor --fix` after a new cache generation,
+  and never touched once you edit it.
 * The shell layer has one scheme; spacing is shell-only; motion covers common widgets only; RTL
   linked groups keep libadwaita's own corners.

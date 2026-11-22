@@ -33,6 +33,13 @@ pub struct BrokenExtension {
     pub stamp: String,
 }
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct GtkCopy {
+    pub src: String,
+    /// FNV-1a 64 of the content written (hex): a file changed by the user is never touched.
+    pub hash: String,
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct State {
     #[serde(default)]
@@ -71,6 +78,10 @@ pub struct State {
     /// Symlinks to files generated from tokens.toml, per module (link → target).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub token_links: BTreeMap<Module, BTreeMap<String, String>>,
+    /// GTK files generated from tokens.toml, COPIED into ~/.config/gtk-{4,3}.0 (Flatpak apps
+    /// cannot follow links into ~/.cache): destination → source and content hash.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub gtk_copies: BTreeMap<String, GtkCopy>,
     /// Невідомі поля зберігаються як є.
     #[serde(flatten)]
     pub extra: serde_json::Map<String, serde_json::Value>,

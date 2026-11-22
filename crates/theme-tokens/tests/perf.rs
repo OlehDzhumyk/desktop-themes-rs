@@ -19,7 +19,8 @@ fn generation_time() {
     let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let tmp = std::env::temp_dir().join(format!("theme-tokens-perf-{}", std::process::id()));
     for id in ["lavender", "macos", "windows11"] {
-        let text = std::fs::read_to_string(repo.join("themes").join(id).join("tokens.toml")).unwrap();
+        let text =
+            std::fs::read_to_string(repo.join("themes").join(id).join("tokens.toml")).unwrap();
         let tg = Target {
             theme_id: id.into(),
             theme_name: id.into(),

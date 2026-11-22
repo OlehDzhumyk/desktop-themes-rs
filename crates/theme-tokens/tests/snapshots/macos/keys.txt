@@ -7,6 +7,6 @@
 [Sounds]
 /org/gnome/desktop/sound/theme-name='macos-like'
 [Apps]
-/org/gnome/Ptyxis/Profiles/@DEFAULT_PTYXIS_PROFILE@/palette='desktop-themes-macos'
+/org/gnome/Ptyxis/Profiles/@DEFAULT_PTYXIS_PROFILE@/palette='Pro'
 /org/gnome/Ptyxis/font-name='JetBrains Mono 12'
 /org/gnome/Ptyxis/use-system-font=false

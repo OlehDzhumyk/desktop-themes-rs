@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Символьні посилання ~/.config/gtk-{4,3}.0/* → тема, з резервними копіями витіснених файлів.
+//! Files generated from tokens.toml are copied instead (the cache in ~/.cache is invisible to
+//! Flatpak apps that only get `xdg-config/gtk-4.0:ro`).
 
 use std::path::{Path, PathBuf};
 
 use crate::error::Result;
 use crate::paths::Ctx;
-use crate::state::State;
+use crate::state::{GtkCopy, State};
 use crate::theme::{GTK_KINDS, Theme};
 use crate::util::{lexists, move_path, now};
 
@@ -17,7 +19,63 @@ fn target_dir(ctx: &Ctx, kind: &str) -> PathBuf {
     }
 }
 
+fn file_hash(p: &Path) -> Option<String> {
+    std::fs::read(p)
+        .ok()
+        .map(|b| format!("{:016x}", theme_tokens::cache::fnv1a64(&b)))
+}
+
+fn restore_backup(st: &mut State, dest: &str, warnings: &mut Vec<String>) -> Result<()> {
+    if let Some(b) = st.backups.remove(dest) {
+        let bp = Path::new(&b);
+        if lexists(bp) {
+            if !lexists(Path::new(dest)) {
+                move_path(bp, Path::new(dest))?;
+            } else {
+                warnings.push(format!("резервну копію {b} не відновлено (місце зайняте)"));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Rewrites generated copies whose source changed (new cache generation); copies the user
+/// edited are left alone. Returns the rewritten destinations.
+pub fn refresh_copies(st: &mut State, warnings: &mut Vec<String>) -> Vec<String> {
+    let mut done = Vec::new();
+    for (dest, c) in st.gtk_copies.iter_mut() {
+        let d = Path::new(dest);
+        let Some(src_hash) = file_hash(Path::new(&c.src)) else {
+            continue;
+        };
+        if src_hash == c.hash {
+            continue;
+        }
+        if file_hash(d).as_deref() != Some(c.hash.as_str()) {
+            warnings.push(format!("{dest} змінено вручну — не оновлено"));
+            continue;
+        }
+        if std::fs::copy(&c.src, d).is_ok() {
+            c.hash = src_hash;
+            done.push(dest.clone());
+        }
+    }
+    done
+}
+
 pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
+    let copies: Vec<(String, GtkCopy)> = std::mem::take(&mut st.gtk_copies).into_iter().collect();
+    for (dest, c) in copies {
+        let d = Path::new(&dest);
+        if lexists(d) {
+            if !d.is_symlink() && file_hash(d).as_deref() == Some(c.hash.as_str()) {
+                std::fs::remove_file(d)?;
+            } else {
+                warnings.push(format!("{dest} змінено вручну — залишено як є"));
+            }
+        }
+        restore_backup(st, &dest, warnings)?;
+    }
     let links: Vec<(String, String)> = st
         .links
         .iter()
@@ -71,6 +129,7 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
 pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String>> {
     let mut made = Vec::new();
     for kind in GTK_KINDS {
+        let generated = theme.handmade_gtk_dir(kind).is_none();
         let entries = theme.gtk_entries(kind);
         let Some(src_dir) = theme.gtk_dir(kind).filter(|_| !entries.is_empty()) else {
             continue;
@@ -97,9 +156,21 @@ pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String
                 st.backups
                     .insert(dest.to_string_lossy().into(), b.to_string_lossy().into());
             }
-            std::os::unix::fs::symlink(&src, &dest)?;
-            st.links
-                .insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
+            if generated {
+                std::fs::copy(&src, &dest)?;
+                let hash = file_hash(&dest).unwrap_or_default();
+                st.gtk_copies.insert(
+                    dest.to_string_lossy().into(),
+                    GtkCopy {
+                        src: src.to_string_lossy().into(),
+                        hash,
+                    },
+                );
+            } else {
+                std::os::unix::fs::symlink(&src, &dest)?;
+                st.links
+                    .insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
+            }
             made.push(dest.to_string_lossy().into_owned());
         }
     }

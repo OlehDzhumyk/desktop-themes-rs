@@ -301,6 +301,22 @@ fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
             );
         }
     }
+    // generated GTK files are copies: bring them up to date with the cache
+    if fix
+        && !st.gtk_copies.is_empty()
+        && let Ok(_lock) = Lock::acquire(ctx)
+    {
+        let mut s2 = State::load(ctx);
+        let mut w = Vec::new();
+        let done = crate::gtklinks::refresh_copies(&mut s2, &mut w);
+        if !done.is_empty() && s2.save(ctx).is_ok() {
+            rep.fixed
+                .extend(done.into_iter().map(|d| format!("оновлено {d}")));
+        }
+        for m in w {
+            rep.push("warning", "tokens-cache", m, None, false);
+        }
+    }
 }
 
 /// Помилки розширень у журналі за останні 30 хвилин (поточне завантаження).

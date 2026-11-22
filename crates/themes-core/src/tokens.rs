@@ -6,8 +6,9 @@
 //! * Derived dconf keys are merged *under* the theme's *.dconf files ([`Theme::settings`]):
 //!   a key written by hand wins.
 //! * Generated files live in the cache (`~/.cache/desktop-themes/<theme>/`, content-hashed)
-//!   and reach their consumers through symlinks: `gtk4/` through the usual GTK links (only when
-//!   no theme in the chain ships its own `gtk4/`), the shell theme as
+//!   and reach their consumers as follows: `gtk4/` is COPIED into ~/.config/gtk-4.0 by
+//!   `gtklinks` (only when no theme in the chain ships its own `gtk4/`; Flatpak apps with
+//!   `xdg-config/gtk-4.0:ro` cannot follow links into ~/.cache), the shell theme is linked as
 //!   `~/.local/share/themes/desktop-themes-<id>` (look module) and the Ptyxis palette as
 //!   `~/.local/share/org.gnome.Ptyxis/palettes/desktop-themes-<id>.palette` (apps module).
 
@@ -360,6 +361,37 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
         assert!(!lexists(&shell_link));
         assert!(pal.is_file(), "apps links survive a look switch");
         assert!(w.is_empty(), "{w:?}");
+
+        // generated GTK files are COPIED into ~/.config/gtk-4.0 (Flatpak), user files backed up
+        write(&ctx.gtk4.join("gtk.css"), "/* mine */");
+        let made = crate::gtklinks::link_theme(&ctx, &mut st, &th).unwrap();
+        let css = ctx.gtk4.join("gtk.css");
+        assert_eq!(made, vec![css.to_string_lossy().into_owned()]);
+        assert!(!css.is_symlink() && css.is_file());
+        assert_eq!(
+            std::fs::read(&css).unwrap(),
+            std::fs::read(root.join(".cache/tk/gtk4/gtk.css")).unwrap()
+        );
+        assert!(st.links.is_empty() && st.gtk_copies.len() == 1);
+        // a new cache generation refreshes the copy
+        std::fs::write(root.join(".cache/tk/gtk4/gtk.css"), "/* v2 */").unwrap();
+        assert_eq!(crate::gtklinks::refresh_copies(&mut st, &mut w).len(), 1);
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* v2 */");
+        crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
+        assert_eq!(
+            std::fs::read_to_string(&css).unwrap(),
+            "/* mine */",
+            "user file restored"
+        );
+        assert!(st.gtk_copies.is_empty());
+        // a copy the user edited is left alone
+        materialize(&th, true).unwrap();
+        std::fs::remove_file(&css).unwrap();
+        crate::gtklinks::link_theme(&ctx, &mut st, &th).unwrap();
+        std::fs::write(&css, "/* edited */").unwrap();
+        crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* edited */");
+        assert!(w.iter().any(|m| m.contains("вручну")), "{w:?}");
 
         // a hand-made gtk4/ and user-theme name switch generation off
         write(&t.join("gtk4/gtk.css"), "/* hand */");

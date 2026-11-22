@@ -24,7 +24,7 @@ a lock-screen layout.
   the launcher, Super+Q closes, Super+H minimizes, natural scrolling, hot corner on, edge tiling off,
   grayscale font rendering.
 * **Sounds**: `macos-like`, synthesized (see below).
-* **Apps**: the original `Graphite` Ptyxis palette and JetBrains Mono 12 in the default profile.
+* **Apps**: Ptyxis palette `Pro` (referenced by name) and JetBrains Mono 12 in the default profile.
 * **Tokens** (`tokens.toml`): accent `blue`, fonts (Inter, JetBrains Mono, bold titles), the sound
   theme and the terminal; WhiteSur's `gtk4/` and shell theme stay hand-made and win.
 * **Spotlight** (`spotlight@nin`) replaces the overview search; Super+Space must not stay bound to

@@ -79,9 +79,9 @@ LGPL-2.1-or-later.
 
 ## Terminal palettes
 
-The Windows 11 theme references Ptyxis' own `campbell` palette by name (`[terminal] builtin` in its
-tokens.toml); [Ptyxis](https://gitlab.gnome.org/chergert/ptyxis) is GPL-3.0-or-later and nothing of it
-is copied. The `Graphite` (macOS) and `Lavender` palettes are original. The palette file format
+The macOS and Windows 11 themes reference Ptyxis' own `Pro` and `campbell` palettes by name
+(`[terminal] builtin` in their tokens.toml); [Ptyxis](https://gitlab.gnome.org/chergert/ptyxis) is
+GPL-3.0-or-later and nothing of it is copied. The `Lavender` palette is original. The palette file format
 written by the token generator follows Ptyxis' `ptyxis-palette.c`.
 
 ## Design inspiration
