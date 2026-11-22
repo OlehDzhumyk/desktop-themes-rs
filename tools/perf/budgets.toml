@@ -1,0 +1,96 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Performance budgets checked by tools/perf/compare.py against the JSON written by tools/perf/run.sh.
+# Budgets apply to RELEASE builds (cargo build --release); compare.py reports a debug build as such
+# and never fails on one unless --strict is given.
+#
+# Each entry: metric path in the results JSON (dots), the limit, and a unit/comment.
+# "max" = measured value must be <= limit.
+
+[meta]
+# the machine class these numbers were calibrated on (a 12-thread laptop); CI runners are noisier,
+# so CI reports (warns) only: see .github/workflows/headless.yml
+build = "release"
+
+[[budget]]
+id = "deskd-rss-idle"
+metric = "deskd.rss_idle_kib"
+max = 20480
+unit = "KiB"
+note = "deskd resident memory after start, idle (<= 20 MB)"
+
+[[budget]]
+id = "deskd-rss-after-pushes"
+metric = "deskd.rss_after_pushes_kib"
+max = 20480
+unit = "KiB"
+note = "deskd resident memory after 200 clipboard pushes (<= 20 MB)"
+
+[[budget]]
+id = "deskd-idle-cpu"
+metric = "deskd.idle.cpu_percent"
+max = 0.1
+unit = "%"
+note = "CPU over the idle window; 0% target, 0.1% is one scheduler tick per 10 s"
+
+[[budget]]
+id = "deskd-idle-wakeups"
+metric = "deskd.idle.wakeups_per_min"
+max = 2.0
+unit = "per min"
+note = "voluntary context switches of all threads while idle; target ~0 (no polling, no timers)"
+
+[[budget]]
+id = "panel-visible"
+metric = "panel.default.visible_ms.p95"
+max = 16.0
+unit = "ms"
+note = "D-Bus call -> panel actor visible (one 60 Hz frame)"
+
+[[budget]]
+id = "panel-visible-macos"
+metric = "panel.macos.visible_ms.p95"
+max = 16.0
+unit = "ms"
+note = "same, macOS skin"
+
+[[budget]]
+id = "panel-visible-windows11"
+metric = "panel.windows11.visible_ms.p95"
+max = 16.0
+unit = "ms"
+note = "same, Windows 11 skin"
+
+[[budget]]
+id = "panel-rendered"
+metric = "panel.default.rendered_ms.p95"
+max = 50.0
+unit = "ms"
+note = "panel open -> items listed (List round trip to deskd + render); soft target"
+
+[[budget]]
+id = "themes-list"
+metric = "cli.list_ms.p50"
+max = 50.0
+unit = "ms"
+note = "`themes list` wall time (process start to exit)"
+
+[[budget]]
+id = "themes-apply"
+metric = "cli.apply_no_verify_ms.p50"
+max = 5000.0
+unit = "ms"
+note = "`themes apply X --no-verify` wall time in the headless shell (measured ~4.2 s: the deliberate ~1 s pause between dconf and extension changes plus live extension toggling); regression guard, not a goal"
+
+[[budget]]
+id = "bridge-shell-rss-delta"
+metric = "shell.rss_delta_kib"
+max = 10240
+unit = "KiB"
+note = "gnome-shell RSS with desk-bridge enabled minus disabled (median of runs)"
+
+[[budget]]
+id = "deskd-push"
+metric = "deskd.pushes.latency_ms.p95"
+max = 50.0
+unit = "ms"
+note = "Push() round trip for 0.2-8 KiB texts, as the bridge calls it on every copy"
