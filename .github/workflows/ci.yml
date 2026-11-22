@@ -116,6 +116,8 @@ jobs:
         working-directory: bridge
     steps:
       - name: Install packages
+        # bridge/ does not exist before checkout, so run this step from the workspace root.
+        working-directory: .
         run: dnf install -y --setopt=install_weak_deps=False git nodejs npm glib2-devel
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: npm ci
@@ -140,7 +142,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: shellcheck
         run: |
-          git ls-files -z | xargs -0 grep -IlZE '^#!.*(ba)?sh' | xargs -0 shellcheck --severity=warning
+          # The container runs as root on a checkout owned by another uid: let git read it.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          files=$(git ls-files -z | xargs -0 grep -IlE '^#!.*(ba)?sh' || true)
+          test -n "$files" || { echo "no shell scripts found (git ls-files failed?)"; exit 1; }
+          echo "$files" | tr '\n' '\0' | xargs -0 shellcheck --severity=warning
       - name: GSettings schema (strict)
         run: glib-compile-schemas --strict --dry-run data/
       - name: Desktop file
