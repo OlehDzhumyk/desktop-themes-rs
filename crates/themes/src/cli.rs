@@ -549,8 +549,22 @@ fn do_apply(
     } else {
         print_apply(&r);
     }
-    Ok(0)
+    Ok(apply_exit_code(&r))
 }
+
+/// 0, or 4 when the theme was applied and the automatic rollback then turned an extension off:
+/// scripts must not take that for a clean apply.
+fn apply_exit_code(r: &ApplyResult) -> i32 {
+    if r.rolled_back.is_empty() {
+        0
+    } else {
+        EXIT_ROLLED_BACK
+    }
+}
+
+/// Exit code of `themes apply` when the automatic rollback had to turn an extension off
+/// (3 is `themes doctor` with problems).
+const EXIT_ROLLED_BACK: i32 = 4;
 
 fn print_apply(r: &ApplyResult) {
     let mods: Vec<&str> = r.applied_modules.iter().map(|m| m.id()).collect();
@@ -734,5 +748,18 @@ fn or_dash(v: &[String]) -> String {
         "-".into()
     } else {
         v.join(", ")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn apply_fails_after_a_rollback() {
+        let mut r = ApplyResult::default();
+        assert_eq!(apply_exit_code(&r), 0);
+        r.rolled_back = vec!["broken@example".into()];
+        assert_eq!(apply_exit_code(&r), EXIT_ROLLED_BACK);
     }
 }
