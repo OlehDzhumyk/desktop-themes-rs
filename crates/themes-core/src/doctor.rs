@@ -179,6 +179,19 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
                 false,
             );
         }
+        match crate::tokens::load(&t) {
+            Some(Err(e)) => {
+                for i in &e.errors {
+                    rep.push("error", "tokens", tr!("theme “{theme}”: {error}", theme = t.id, error = i), None, false);
+                }
+            }
+            Some(Ok(l)) => {
+                for i in &l.warnings {
+                    rep.push("info", "tokens", tr!("theme “{theme}”: {error}", theme = t.id, error = i), None, false);
+                }
+            }
+            None => {}
+        }
     }
     // (що, ключ dconf, схема, ключ схеми)
     let checks: &[(&str, &str, &str, &str)] = &[
@@ -294,6 +307,54 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
                 None,
                 false,
             );
+        }
+    }
+}
+
+/// Generated files of the active themes went missing (e.g. ~/.cache was cleaned): `--fix`
+/// regenerates them (the links point at stable paths, so they work again).
+fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
+    let mut seen = BTreeSet::new();
+    for m in [Module::Look, Module::Apps] {
+        let Some(src) = st.source(m) else { continue };
+        if !seen.insert(src.to_string()) {
+            continue;
+        }
+        let t = Theme::new(ctx, src);
+        let Ok(files) = crate::tokens::plan(&t) else { continue };
+        if files.iter().all(|f| f.status == "cached") {
+            continue;
+        }
+        if fix && crate::tokens::materialize(&t, false).is_ok() {
+            rep.fixed
+                .push(tr!("generated the token files of the theme “{theme}”", theme = src));
+        } else {
+            rep.push(
+                "warning",
+                "tokens-cache",
+                tr!(
+                    "the files generated from tokens.toml of the theme “{theme}” are missing or out of date (themes doctor --fix)",
+                    theme = src
+                ),
+                None,
+                true,
+            );
+        }
+    }
+    // generated GTK files are copies: bring them up to date with the cache
+    if fix
+        && !st.gtk_copies.is_empty()
+        && let Ok(_lock) = Lock::acquire(ctx)
+    {
+        let mut s2 = State::load(ctx);
+        let mut w = Vec::new();
+        let done = crate::gtklinks::refresh_copies(&mut s2, &mut w);
+        if !done.is_empty() && s2.save(ctx).is_ok() {
+            rep.fixed
+                .extend(done.into_iter().map(|d| tr!("updated {path}", path = d)));
+        }
+        for m in w {
+            rep.push("warning", "tokens-cache", m, None, false);
         }
     }
 }
@@ -492,6 +553,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_journal(&enabled, &mut rep);
     check_crashes(ctx, &mut rep);
     check_assets(ctx, &st, &mut rep);
+    check_token_cache(ctx, &st, opt.fix, &mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
         rep.push(

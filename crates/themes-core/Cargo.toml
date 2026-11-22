@@ -14,5 +14,6 @@ name = "themes_core"
 gio.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+theme-tokens.workspace = true
 zbus.workspace = true
 desk-settings.workspace = true

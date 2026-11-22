@@ -1118,6 +1118,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "theme-tokens"
+version = "2.1.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "themes"
 version = "2.1.0"
 dependencies = [
@@ -1140,6 +1148,7 @@ dependencies = [
  "gio",
  "serde",
  "serde_json",
+ "theme-tokens",
  "zbus",
 ]
 

@@ -45,6 +45,7 @@ const H23: &str = n_("Open the Themes window");
 const H24: &str = n_("Save a screenshot of the window as PNG and exit");
 const H25: &str = n_("Window size, e.g. 1180x780");
 const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
+const H28: &str = n_("Design tokens (tokens.toml): check, generate, a theme from a wallpaper");
 const H26: &str = n_("Page: themes | mix | features | clipboard | general | credits");
 
 #[derive(Parser)]
@@ -126,6 +127,11 @@ enum Cmd {
             help = H22
         )]
         enable_extensions: bool,
+    },
+    #[command(about = H28)]
+    Tokens {
+        #[command(subcommand)]
+        cmd: crate::tokens_cli::TokensCmd,
     },
     #[command(about = H23)]
     Gui {
@@ -225,6 +231,7 @@ fn modules_arg(only: Option<&str>, module: &[String]) -> Result<Vec<Module>, Err
 
 fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     match cmd {
+        Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
         Cmd::List => {
             let st = State::load(ctx);
             let look = st.source(Module::Look).map(String::from);
@@ -583,6 +590,7 @@ fn print_apply(r: &ApplyResult) {
             },
             r.flatpak_lines
         );
+        print_generated(r);
         return;
     }
     println!(
@@ -645,6 +653,7 @@ fn print_apply(r: &ApplyResult) {
         let pad = width.saturating_sub(l.chars().count());
         println!("  {l}{}  {v}", " ".repeat(pad));
     }
+    print_generated(r);
     for w in &r.warnings {
         println!("  {}", tr!("warning: {text}", text = w));
     }
@@ -674,6 +683,36 @@ fn print_apply(r: &ApplyResult) {
                 "Applied live, no new login needed (open GTK4/libadwaita apps should be restarted)."
             )
         );
+    }
+}
+
+/// Files generated from tokens.toml and their links.
+fn print_generated(r: &ApplyResult) {
+    if r.generated.is_empty() {
+        return;
+    }
+    if r.dry_run {
+        println!("{}", tr!("Generated from tokens.toml ({count}):", count = r.generated.len()));
+    } else {
+        println!(
+            "  {}",
+            tr!(
+                "from tokens.toml ({count}, {ms} ms):",
+                count = r.generated.len(),
+                ms = format!("{:.1}", r.tokens_ms)
+            )
+        );
+    }
+    for f in &r.generated {
+        let st = match f.status {
+            "cached" => tr!("cache up to date"),
+            "written" => tr!("generated"),
+            _ => tr!("will be generated"),
+        };
+        println!("    {} ({st})", f.path);
+    }
+    for l in &r.token_links {
+        println!("    {}", tr!("link: {path}", path = l));
     }
 }
 

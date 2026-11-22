@@ -93,6 +93,7 @@ user's machine, not committed.
 * [docs/theme-contract.md](docs/theme-contract.md): files a theme may contain, path placeholders
 * [docs/module-system.md](docs/module-system.md): modules, managed keys, mixing rules
 * [docs/themes.md](docs/themes.md): notes on the bundled themes and their extensions
+* [docs/design-tokens.md](docs/design-tokens.md): `tokens.toml`, generators, theme from wallpaper
 * [docs/features.md](docs/features.md): desktop features (clipboard history), skins, privacy
 * [docs/settings.md](docs/settings.md): every setting (generated from the settings registry)
 * [docs/i18n.md](docs/i18n.md): translations and the language setting

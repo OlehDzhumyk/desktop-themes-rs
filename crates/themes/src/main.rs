@@ -2,6 +2,7 @@
 mod cli;
 mod gui;
 mod service;
+mod tokens_cli;
 
 fn main() {
     // мова: налаштування `language` (або DESKTOP_THEMES_LANGUAGE), інакше як у сеансі

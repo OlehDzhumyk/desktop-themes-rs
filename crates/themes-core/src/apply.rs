@@ -57,6 +57,14 @@ pub struct ApplyResult {
     pub rolled_back: Vec<String>,
     /// Ключі, виправлені після того, як розширення відпрацювали.
     pub cleanup: Vec<String>,
+    /// Files generated from tokens.toml (dry run: what would be generated).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub generated: Vec<crate::tokens::GeneratedFile>,
+    /// Symlinks to generated files (shell theme, Ptyxis palette).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub token_links: Vec<String>,
+    /// Time spent on token generation (cache check included), milliseconds.
+    pub tokens_ms: f64,
 }
 
 /// Чинний список розширень: значення з dconf або типове схеми.
@@ -222,6 +230,18 @@ pub fn apply_opts(
     changed_keys.extend(dplan.resets.iter().cloned());
     changed_keys.sort();
 
+    // themes whose tokens feed the affected modules: invalid tokens stop the apply here
+    let mut token_themes: Vec<Theme> = Vec::new();
+    for m in &affected {
+        if let Some(t) = sel.get(m).and_then(|s| theme_of(s))
+            && crate::tokens::has_tokens(&t)
+            && !token_themes.iter().any(|x| x.id == t.id)
+        {
+            crate::tokens::check(&t)?;
+            token_themes.push(t);
+        }
+    }
+
     let look = affected.contains(&Module::Look);
     let mut res = ApplyResult {
         ok: true,
@@ -257,9 +277,49 @@ pub fn apply_opts(
                 .collect();
             res.flatpak_lines = target.flatpak_lines().len();
         }
+        for t in &token_themes {
+            res.generated.extend(crate::tokens::plan(t)?);
+        }
+        for m in [Module::Look, Module::Apps] {
+            if let Some(t) = affected
+                .contains(&m)
+                .then(|| sel.get(&m).and_then(|s| theme_of(s)))
+                .flatten()
+            {
+                res.token_links.extend(
+                    crate::tokens::links_for(ctx, &t, m)
+                        .into_iter()
+                        .map(|(d, _)| d.to_string_lossy().into_owned()),
+                );
+            }
+        }
         res.shell_running = Shell::connect().is_some();
         return Ok(res);
     }
+
+    // 0. files generated from tokens (content-hashed cache) and their links; before dconf, so
+    // the shell theme exists when user-theme reads its new name
+    let t0 = std::time::Instant::now();
+    for t in &token_themes {
+        res.generated
+            .extend(crate::tokens::materialize(t, false)?.0);
+    }
+    for m in [Module::Look, Module::Apps] {
+        if !affected.contains(&m) {
+            continue;
+        }
+        crate::tokens::unlink_module(&mut st, m, &mut warnings);
+        if let Some(t) = sel.get(&m).and_then(|s| theme_of(s)) {
+            res.token_links.extend(crate::tokens::link_module(
+                ctx,
+                &mut st,
+                m,
+                &t,
+                &mut warnings,
+            )?);
+        }
+    }
+    res.tokens_ms = t0.elapsed().as_secs_f64() * 1000.0;
 
     // 1. dconf
     dconf::reset(&dplan.resets);
@@ -385,7 +445,7 @@ pub fn apply_opts(
         ctx,
         &format!(
             // формат apply.log, його розбирає crash.rs
-            "apply {id} modules={} (було: {}) keys_changed={} resets={} ext={} gtk_links={} flatpak={} live={} relogin={}{}", // i18n-ok
+            "apply {id} modules={} (було: {}) keys_changed={} resets={} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}", // i18n-ok
             affected
                 .iter()
                 .map(|m| m.id())
@@ -401,6 +461,8 @@ pub fn apply_opts(
             },
             res.gtk_links.len(),
             res.flatpak_lines,
+            res.generated.len(),
+            res.tokens_ms,
             res.live,
             res.relogin,
             if res.warnings.is_empty() {
