@@ -30,6 +30,10 @@ const SNAPSHOT_PREFIXES: &[&str] = &[
     "/org/gnome/shell/app-switcher/",
     "/org/gnome/shell/window-switcher/",
     "/org/gnome/desktop/peripherals/touchpad/",
+    // skin and the default clipboard shortcut of the look module (desk.dconf); the user's own
+    // shortcut choices (Desk/shortcuts/) and the other clipboard preferences are not theme data
+    "/io/github/OlehDzhumyk/Desk/skin",
+    "/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut",
 ];
 
 /// Евристика модуля для ключа, якого не задає жодна тема.
@@ -359,5 +363,15 @@ mod tests {
             module_for_key("/org/gnome/desktop/interface/enable-animations", &known),
             Module::Behavior
         );
+    }
+
+    #[test]
+    fn snapshot_takes_the_skin_and_shortcut_but_not_user_choices() {
+        let taken = |k: &str| SNAPSHOT_PREFIXES.iter().any(|p| k.starts_with(p));
+        assert!(taken("/io/github/OlehDzhumyk/Desk/skin"));
+        assert!(taken("/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut"));
+        assert!(!taken("/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle"));
+        assert!(!taken("/io/github/OlehDzhumyk/Desk/clipboard/history-size"));
+        assert!(!taken("/io/github/OlehDzhumyk/Desk/language"));
     }
 }
