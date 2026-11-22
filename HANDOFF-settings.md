@@ -69,8 +69,7 @@
 3. Pin icon identical for pinned/unpinned (only `.checked` colour differs): use different icons
    (e.g. view-pin-symbolic vs view-pin-outline / a filled variant) + the accessible names already
    say «Закріпити»/«Відкріпити».
-4. WinFlyout `_expanded` index survives a delete/refresh: reset `_expanded = -1` in `refresh()`
-   or key it by item id.
+4. DONE (4e06c16): WinFlyout keeps the expanded card by item id.
 5. Lock-screen style strings from settings are injected unvalidated
    (extensions/lockscreen-layout): move those keys into the registry with validation (colour regex,
    font name charset, size ranges via `Kind::UInt` ranges) and validate again in the extension.
