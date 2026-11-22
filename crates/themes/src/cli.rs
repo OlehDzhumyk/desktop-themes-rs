@@ -16,7 +16,9 @@ use themes_core::{Ctx, Error};
 
 // Тексти довідки (ідентифікатори gettext): атрибути clap не бачить xgettext, тож вони тут.
 const H01: &str = n_("GNOME desktop theme switcher (modules: look, behavior, sounds, apps)");
-const H02: &str = n_("Without arguments it opens the Themes window. --json gives machine-readable output.\nRoot: ~/.local/share/desktop-themes (DESKTOP_THEMES_ROOT)");
+const H02: &str = n_(
+    "Without arguments it opens the Themes window. --json gives machine-readable output.\nRoot: ~/.local/share/desktop-themes (DESKTOP_THEMES_ROOT)",
+);
 const H03: &str = n_("Machine-readable output (JSON)");
 const H04: &str = n_("List the themes (* = active for the look)");
 const H05: &str = n_("Where every module comes from");
@@ -36,7 +38,9 @@ const H18: &str = n_("Turn broken extensions off (and repaired ones back on), se
 const H19: &str = n_("SEC");
 const H20: &str = n_("Wait up to N seconds for GNOME Shell to start (for running at login)");
 const H21: &str = n_("Do not send notifications");
-const H22: &str = n_("Turn the extensions back on that GNOME turned off after a shell crash (disable-user-extensions). Do it only after removing the cause of the crash.");
+const H22: &str = n_(
+    "Turn the extensions back on that GNOME turned off after a shell crash (disable-user-extensions). Do it only after removing the cause of the crash.",
+);
 const H23: &str = n_("Open the Themes window");
 const H24: &str = n_("Save a screenshot of the window as PNG and exit");
 const H25: &str = n_("Window size, e.g. 1180x780");
@@ -289,7 +293,10 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                     );
                 }
                 if let Some(u) = st.uniform() {
-                    println!("{}", tr!("(all modules from the theme “{theme}”)", theme = u));
+                    println!(
+                        "{}",
+                        tr!("(all modules from the theme “{theme}”)", theme = u)
+                    );
                 }
             }
             Ok(0)
@@ -356,7 +363,11 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             } else {
                 println!(
                     "{}",
-                    tr!("Theme “{name}” deleted (moved to {path})", name = name, path = moved)
+                    tr!(
+                        "Theme “{name}” deleted (moved to {path})",
+                        name = name,
+                        path = moved
+                    )
                 );
             }
             Ok(0)
@@ -370,7 +381,10 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             if enable_extensions {
                 if themes_core::crash::user_extensions_disabled() {
                     themes_core::crash::enable_user_extensions()?;
-                    println!("{}", tr!("Extensions turned on again (disable-user-extensions=false)."));
+                    println!(
+                        "{}",
+                        tr!("Extensions turned on again (disable-user-extensions=false).")
+                    );
                 } else {
                     println!("{}", tr!("Extensions are already on."));
                 }
@@ -389,9 +403,16 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
                 println!(
                     "GNOME Shell: {} ({})",
                     r.gnome_version.clone().unwrap_or("?".into()),
-                    if r.shell_running { tr!("running") } else { tr!("not running") }
+                    if r.shell_running {
+                        tr!("running")
+                    } else {
+                        tr!("not running")
+                    }
                 );
-                println!("{}", tr!("Extensions checked: {count}", count = r.extensions_checked));
+                println!(
+                    "{}",
+                    tr!("Extensions checked: {count}", count = r.extensions_checked)
+                );
                 if r.issues.is_empty() {
                     println!("{}", tr!("No problems found."));
                 }
@@ -455,8 +476,11 @@ fn do_apply(
     if !dry_run && !no_verify && r.shell_running && r.extensions_changed {
         if let Ok(bad) = verify_live(ctx, Duration::from_secs(5)) {
             for (u, why) in &bad {
-                r.warnings
-                    .push(tr!("automatic rollback: extension {uuid} turned off ({reason})", uuid = u, reason = why));
+                r.warnings.push(tr!(
+                    "automatic rollback: extension {uuid} turned off ({reason})",
+                    uuid = u,
+                    reason = why
+                ));
             }
             r.rolled_back = bad.into_iter().map(|b| b.0).collect();
         }
@@ -494,7 +518,10 @@ fn print_apply(r: &ApplyResult) {
                 r.resets.join(", ")
             }
         );
-        println!("{}", tr!("Extensions: {list}", list = r.enabled_extensions.join(", ")));
+        println!(
+            "{}",
+            tr!("Extensions: {list}", list = r.enabled_extensions.join(", "))
+        );
         if r.extensions_changed {
             println!(
                 "  + {}   − {}",
@@ -524,7 +551,10 @@ fn print_apply(r: &ApplyResult) {
     );
     // підписи вирівнюються за найдовшим (довжина залежить від мови)
     let mut rows: Vec<(String, String)> = vec![
-        (tr!("before:"), themes_core::apply::fmt_sel(&r.previous_modules)),
+        (
+            tr!("before:"),
+            themes_core::apply::fmt_sel(&r.previous_modules),
+        ),
         (tr!("now:"), themes_core::apply::fmt_sel(&r.modules)),
         (
             tr!("dconf keys changed:"),
@@ -553,12 +583,19 @@ fn print_apply(r: &ApplyResult) {
         rows.push(("flatpak overrides:".into(), r.flatpak_lines.to_string()));
     }
     if !r.cleanup.is_empty() {
-        rows.push((tr!("cleaned up after extensions:"), r.cleanup.len().to_string()));
+        rows.push((
+            tr!("cleaned up after extensions:"),
+            r.cleanup.len().to_string(),
+        ));
     }
     if !r.hooks.is_empty() {
         rows.push((tr!("hooks:"), r.hooks.join(", ")));
     }
-    let width = rows.iter().map(|(l, _)| l.chars().count()).max().unwrap_or(0);
+    let width = rows
+        .iter()
+        .map(|(l, _)| l.chars().count())
+        .max()
+        .unwrap_or(0);
     for (l, v) in rows {
         let pad = width.saturating_sub(l.chars().count());
         println!("  {l}{}  {v}", " ".repeat(pad));

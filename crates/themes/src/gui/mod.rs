@@ -166,7 +166,9 @@ fn restart(conn: Option<&zbus::Connection>) {
     if let Some(c) = conn {
         let _ = zbus::block_on(c.release_name(WINDOW_NAME));
     }
-    let Ok(exe) = std::env::current_exe() else { return };
+    let Ok(exe) = std::env::current_exe() else {
+        return;
+    };
     let mut cmd = std::process::Command::new(exe);
     desk_settings::i18n::restore_child_env(&mut cmd);
     let err = cmd.arg("gui").exec();

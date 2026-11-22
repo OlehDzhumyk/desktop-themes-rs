@@ -64,7 +64,9 @@ pub fn localedir() -> PathBuf {
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/share")));
     if let Some(d) = data.map(|d| d.join("locale"))
-        && d.join("uk/LC_MESSAGES").join(format!("{DOMAIN}.mo")).exists()
+        && d.join("uk/LC_MESSAGES")
+            .join(format!("{DOMAIN}.mo"))
+            .exists()
     {
         return d;
     }
@@ -97,7 +99,9 @@ fn reexec(lang: &str, orig: &str) {
     use std::os::unix::process::CommandExt;
     let mut args = std::env::args_os();
     let Some(argv0) = args.next() else { return };
-    let Ok(exe) = std::env::current_exe() else { return };
+    let Ok(exe) = std::env::current_exe() else {
+        return;
+    };
     let err = Command::new(exe)
         .arg0(argv0)
         .args(args)
@@ -134,7 +138,10 @@ mod tests {
         use crate::tr as t;
         use crate::trn as tn;
         // no catalogue bound in tests: the English id comes back
-        assert_eq!(t!("Theme “{name}” applied", name = "macOS"), "Theme “macOS” applied");
+        assert_eq!(
+            t!("Theme “{name}” applied", name = "macOS"),
+            "Theme “macOS” applied"
+        );
         assert_eq!(t!("{a} → {b}", a = 1, b = "x"), "1 → x");
         assert_eq!(tn!("{n} item", "{n} items", 3, n = 3), "3 items");
         assert_eq!(super::language_env("system"), None);

@@ -94,7 +94,9 @@ pub struct SnapshotResult {
 
 pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<SnapshotResult> {
     if !valid_id(id) {
-        return Err(crate::Error(tr!("invalid id: allowed are a-z 0-9 . _ - (up to 64 characters)")));
+        return Err(crate::Error(tr!(
+            "invalid id: allowed are a-z 0-9 . _ - (up to 64 characters)"
+        )));
     }
     if id == crate::BUILTIN_THEME {
         return Err(crate::Error(tr!("the id “fedora” is reserved")));
@@ -104,7 +106,10 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
     let tdir = ctx.themes.join(id);
     if tdir.exists() {
         if !force {
-            return Err(crate::Error(tr!("the theme “{theme}” already exists (add --force to overwrite it)", theme = id)));
+            return Err(crate::Error(tr!(
+                "the theme “{theme}” already exists (add --force to overwrite it)",
+                theme = id
+            )));
         }
         std::fs::remove_dir_all(&tdir)?;
     }
@@ -272,7 +277,10 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
         ("NAME", tname.clone()),
         (
             "DESCRIPTION",
-            tr!("Snapshot of the look from {date}", date = now("%d.%m.%Y %H:%M")),
+            tr!(
+                "Snapshot of the look from {date}",
+                date = now("%d.%m.%Y %H:%M")
+            ),
         ),
     ];
     let preview = if dark {

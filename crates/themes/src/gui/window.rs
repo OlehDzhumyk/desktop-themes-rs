@@ -66,9 +66,7 @@ pub fn add_app_actions(app: &adw::Application) {
     };
     add(
         "extension-manager",
-        Box::new(|app| {
-            spawn_flatpak(app, "com.mattjakeman.ExtensionManager", "Extension Manager")
-        }),
+        Box::new(|app| spawn_flatpak(app, "com.mattjakeman.ExtensionManager", "Extension Manager")),
     );
     add(
         "refine",
@@ -118,9 +116,10 @@ pub fn add_app_actions(app: &adw::Application) {
 }
 
 fn spawn_flatpak(app: &adw::Application, id: &str, label: &str) {
-    if let Err(e) = desk_settings::i18n::restore_child_env(&mut std::process::Command::new("flatpak"))
-        .args(["run", id])
-        .spawn()
+    if let Err(e) =
+        desk_settings::i18n::restore_child_env(&mut std::process::Command::new("flatpak"))
+            .args(["run", id])
+            .spawn()
     {
         if let Some(w) = app.active_window() {
             if let Ok(w) = w.downcast::<adw::ApplicationWindow>() {
@@ -178,9 +177,15 @@ impl ThemesWindow {
 
         let menu = gio::Menu::new();
         let s1 = gio::Menu::new();
-        s1.append(Some(&tr!("Configure extensions")), Some("app.extension-manager"));
+        s1.append(
+            Some(&tr!("Configure extensions")),
+            Some("app.extension-manager"),
+        );
         s1.append(Some(&tr!("Advanced settings")), Some("app.refine"));
-        s1.append(Some(&tr!("Open the themes folder")), Some("app.open-folder"));
+        s1.append(
+            Some(&tr!("Open the themes folder")),
+            Some("app.open-folder"),
+        );
         let s2 = gio::Menu::new();
         s2.append(Some(&tr!("Check the system")), Some("win.doctor"));
         s2.append(Some(&tr!("Reset to the standard look")), Some("win.reset"));
@@ -226,7 +231,10 @@ impl ThemesWindow {
         let status = adw::StatusPage::builder()
             .icon_name("preferences-desktop-appearance-symbolic")
             .title(tr!("No themes found"))
-            .description(tr!("Add theme folders to {path}", path = ctx.themes.display()))
+            .description(tr!(
+                "Add theme folders to {path}",
+                path = ctx.themes.display()
+            ))
             .build();
         let clamp = adw::Clamp::builder()
             .maximum_size(1600)
@@ -247,7 +255,12 @@ impl ThemesWindow {
         themes_page.append(&title);
         main_stack.set_vexpand(true);
         themes_page.append(&main_stack);
-        view.add_titled_with_icon(&themes_page, Some("themes"), &tr!("Themes"), "view-grid-symbolic");
+        view.add_titled_with_icon(
+            &themes_page,
+            Some("themes"),
+            &tr!("Themes"),
+            "view-grid-symbolic",
+        );
 
         // сторінка «Змішати»
         let mix_page = adw::PreferencesPage::builder()
@@ -255,7 +268,9 @@ impl ThemesWindow {
                 "Take single modules from different themes: for example the macOS look with Windows 11 behaviour. A change is applied at once."
             ))
             .build();
-        let mix_group = adw::PreferencesGroup::builder().title(tr!("Modules")).build();
+        let mix_group = adw::PreferencesGroup::builder()
+            .title(tr!("Modules"))
+            .build();
         mix_page.add(&mix_group);
         let mix_tools = adw::PreferencesGroup::new();
         let reset_row = adw::ButtonRow::builder()
@@ -272,7 +287,12 @@ impl ThemesWindow {
             .as_deref()
             .filter(|p| super::features::page_ids().any(|id| id == *p));
         let features = super::features::build(&toasts, feature_page);
-        view.add_titled_with_icon(&features, Some("features"), &tr!("Features"), "starred-symbolic");
+        view.add_titled_with_icon(
+            &features,
+            Some("features"),
+            &tr!("Features"),
+            "starred-symbolic",
+        );
         match opts.page.as_deref() {
             Some("mix") => view.set_visible_child_name("mix"),
             Some("features") => view.set_visible_child_name("features"),
@@ -411,10 +431,11 @@ impl ThemesWindow {
             "logout",
             None,
             Box::new(|t, _| {
-                if let Err(e) =
-                    desk_settings::i18n::restore_child_env(&mut std::process::Command::new("gnome-session-quit"))
-                        .arg("--logout")
-                        .spawn()
+                if let Err(e) = desk_settings::i18n::restore_child_env(
+                    &mut std::process::Command::new("gnome-session-quit"),
+                )
+                .arg("--logout")
+                .spawn()
                 {
                     t.toast(&tr!("Could not log out: {error}", error = e), 8);
                 }
@@ -593,7 +614,8 @@ impl ThemesWindow {
             let id2 = id.clone();
             let mods = modules.clone();
             let res =
-                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, false)).await;
+                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, false))
+                    .await;
             t.set_busy(None);
             let res = match res {
                 Ok(Ok(r)) => r,
@@ -623,7 +645,10 @@ impl ThemesWindow {
             }
             if res.relogin {
                 let toast = t.toast(
-                    &tr!("{what}. Some shell changes start working after you log in again", what = title),
+                    &tr!(
+                        "{what}. Some shell changes start working after you log in again",
+                        what = title
+                    ),
                     0,
                 );
                 toast.set_button_label(Some(&tr!("Log out")));
@@ -645,7 +670,10 @@ impl ThemesWindow {
                     if !bad.is_empty() {
                         let list: Vec<&str> = bad.iter().map(|b| b.0.as_str()).collect();
                         t.toast(
-                            &tr!("Extensions with errors turned off: {list}", list = list.join(", ")),
+                            &tr!(
+                                "Extensions with errors turned off: {list}",
+                                list = list.join(", ")
+                            ),
                             0,
                         );
                         t.reload().await;
@@ -750,7 +778,11 @@ impl ThemesWindow {
     fn run_doctor(self: &Rc<Self>, fix: bool) {
         let t = self.clone();
         let wait = self.toast(
-            &if fix { tr!("Fixing…") } else { tr!("Checking the system…") },
+            &if fix {
+                tr!("Fixing…")
+            } else {
+                tr!("Checking the system…")
+            },
             2,
         );
         glib::spawn_future_local(async move {
@@ -778,7 +810,11 @@ impl ThemesWindow {
             let mut body = tr!(
                 "GNOME Shell {version} ({state}), extensions checked: {count}.",
                 version = rep.gnome_version.clone().unwrap_or("?".into()),
-                state = if rep.shell_running { tr!("running") } else { tr!("not running") },
+                state = if rep.shell_running {
+                    tr!("running")
+                } else {
+                    tr!("not running")
+                },
                 count = rep.extensions_checked
             );
             body.push('\n');
@@ -835,9 +871,10 @@ impl ThemesWindow {
         let t = self.clone();
         glib::spawn_future_local(async move {
             let ctx = t.ctx.clone();
-            let crashes = gio::spawn_blocking(move || themes_core::crash::recent_shell_crashes(&ctx, 48))
-                .await
-                .unwrap_or_default();
+            let crashes =
+                gio::spawn_blocking(move || themes_core::crash::recent_shell_crashes(&ctx, 48))
+                    .await
+                    .unwrap_or_default();
             let mut body = tr!(
                 "After a GNOME Shell crash the system turned all extensions off \
                  (disable-user-extensions), so the themes work without them now."
@@ -853,7 +890,10 @@ impl ThemesWindow {
             ));
             let dlg = adw::AlertDialog::new(Some(&tr!("Turn extensions on?")), Some(&body));
             dlg.add_response("cancel", &tr!("Cancel"));
-            if culprit.as_deref().is_some_and(|c| c != themes_core::BUILTIN_THEME) {
+            if culprit
+                .as_deref()
+                .is_some_and(|c| c != themes_core::BUILTIN_THEME)
+            {
                 dlg.add_response("safe", &tr!("Switch to “Fedora” and turn on"));
                 dlg.set_response_appearance("safe", adw::ResponseAppearance::Suggested);
             }
@@ -861,15 +901,16 @@ impl ThemesWindow {
             dlg.set_default_response(Some("cancel"));
             let t2 = t.clone();
             dlg.connect_response(None, move |_, r| {
-                let enable = |t: &Rc<ThemesWindow>| match themes_core::crash::enable_user_extensions() {
-                    Ok(()) => {
-                        t.toast(&tr!("Extensions turned on again"), 5);
-                        t.banner.set_revealed(false);
-                    }
-                    Err(e) => {
-                        t.toast(&tr!("Failed: {error}", error = e), 10);
-                    }
-                };
+                let enable =
+                    |t: &Rc<ThemesWindow>| match themes_core::crash::enable_user_extensions() {
+                        Ok(()) => {
+                            t.toast(&tr!("Extensions turned on again"), 5);
+                            t.banner.set_revealed(false);
+                        }
+                        Err(e) => {
+                            t.toast(&tr!("Failed: {error}", error = e), 10);
+                        }
+                    };
                 match r {
                     "safe" => {
                         t2.apply(themes_core::BUILTIN_THEME.into(), vec![]);

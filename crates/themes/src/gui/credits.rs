@@ -60,7 +60,10 @@ pub fn parse(md: &str) -> Vec<Section> {
             continue;
         }
         let cells: Vec<&str> = l.trim_matches('|').split('|').map(str::trim).collect();
-        if cells.iter().all(|c| c.chars().all(|ch| ch == '-' || ch == ':')) {
+        if cells
+            .iter()
+            .all(|c| c.chars().all(|ch| ch == '-' || ch == ':'))
+        {
             continue; // |---|---|
         }
         if !header_seen {
@@ -74,7 +77,11 @@ pub fn parse(md: &str) -> Vec<Section> {
         } else {
             String::new()
         };
-        let used_for = if cells.len() > 2 { clean(cells[1]) } else { String::new() };
+        let used_for = if cells.len() > 2 {
+            clean(cells[1])
+        } else {
+            String::new()
+        };
         sec.entries.push(Entry {
             name,
             url,
@@ -108,7 +115,10 @@ mod tests {
 
     #[test]
     fn real_credits_has_clipboard_indicator() {
-        let all: Vec<Entry> = parse(CREDITS_MD).into_iter().flat_map(|s| s.entries).collect();
+        let all: Vec<Entry> = parse(CREDITS_MD)
+            .into_iter()
+            .flat_map(|s| s.entries)
+            .collect();
         assert!(all.len() > 10);
         assert!(all.iter().any(|e| e.name.contains("Clipboard Indicator")));
     }

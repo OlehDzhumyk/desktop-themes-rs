@@ -118,9 +118,13 @@ pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
     } else {
         Stdio::null()
     });
-    let mut child = c
-        .spawn()
-        .map_err(|e| Error(tr!("could not start {command}: {error}", command = cmd, error = e)))?;
+    let mut child = c.spawn().map_err(|e| {
+        Error(tr!(
+            "could not start {command}: {error}",
+            command = cmd,
+            error = e
+        ))
+    })?;
     if let Some(inp) = input {
         let mut stdin = child.stdin.take().expect("stdin");
         stdin.write_all(inp.as_bytes())?;
@@ -296,7 +300,11 @@ pub fn copy_tree(src: &Path, dst: &Path) -> Result<()> {
         None,
     )?;
     if !o.ok {
-        return Err(Error(tr!("could not copy {path}: {error}", path = src.display(), error = o.stderr)));
+        return Err(Error(tr!(
+            "could not copy {path}: {error}",
+            path = src.display(),
+            error = o.stderr
+        )));
     }
     Ok(())
 }

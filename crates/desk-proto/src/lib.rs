@@ -64,8 +64,13 @@ pub struct ClipItem {
     default_path = "/io/github/OlehDzhumyk/Desk/Clipboard"
 )]
 pub trait Clipboard {
-    fn push(&self, mime: &str, data: &[u8], offered: &[&str], source_app: &str)
-    -> zbus::Result<u64>;
+    fn push(
+        &self,
+        mime: &str,
+        data: &[u8],
+        offered: &[&str],
+        source_app: &str,
+    ) -> zbus::Result<u64>;
     fn list(&self, query: &str, limit: u32) -> zbus::Result<Vec<ClipItem>>;
     fn get(&self, id: u64) -> zbus::Result<(String, Vec<u8>)>;
     fn activate(&self, id: u64) -> zbus::Result<(String, Vec<u8>)>;
@@ -125,7 +130,10 @@ mod tests {
     #[test]
     fn schema_has_skin_choices() {
         for s in skin::ALL {
-            assert!(SCHEMA_XML.contains(&format!("<choice value=\"{s}\"/>")), "{s}");
+            assert!(
+                SCHEMA_XML.contains(&format!("<choice value=\"{s}\"/>")),
+                "{s}"
+            );
         }
         assert!(SCHEMA_XML.contains(&format!("id=\"{CLIPBOARD_SCHEMA_ID}\"")));
     }

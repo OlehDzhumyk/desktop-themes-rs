@@ -153,17 +153,31 @@ fn check_crashes(ctx: &Ctx, rep: &mut DoctorReport) {
             }
         }
         msg.push_str(". ");
-        msg.push_str(&tr!("To turn them on again: themes doctor --enable-extensions"));
+        msg.push_str(&tr!(
+            "To turn them on again: themes doctor --enable-extensions"
+        ));
         rep.push("error", "extensions-disabled", msg, None, false);
     } else if let Some(c) = rep.shell_crashes.first() {
-        rep.push("warning", "shell-crash", crate::crash::describe(c), None, false);
+        rep.push(
+            "warning",
+            "shell-crash",
+            crate::crash::describe(c),
+            None,
+            false,
+        );
     }
 }
 
 fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
     for t in crate::theme::all_themes(ctx) {
         if let Some(e) = &t.inherit_error {
-            rep.push("warning", "inherits", tr!("theme “{theme}”: {error}", theme = t.id, error = e), None, false);
+            rep.push(
+                "warning",
+                "inherits",
+                tr!("theme “{theme}”: {error}", theme = t.id, error = e),
+                None,
+                false,
+            );
         }
     }
     // (що, ключ dconf, схема, ключ схеми)
@@ -211,7 +225,11 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
             let Some(src) = st.source(m) else { continue };
             let t = Theme::new(ctx, src);
             if let Some(v) = t.settings(m).get(*key).and_then(|v| dconf::unquote_str(v)) {
-                wanted.push((kind, v, tr!("theme {theme} ({module})", theme = src, module = m)));
+                wanted.push((
+                    kind,
+                    v,
+                    tr!("theme {theme} ({module})", theme = src, module = m),
+                ));
             }
         }
     }
@@ -233,19 +251,33 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
         };
         if !ok {
             let msg = match kind {
-                "gtk" => tr!("GTK theme “{name}” not found (from: {from})", name = name, from = from),
-                "icons" => tr!("icon theme “{name}” not found (from: {from})", name = name, from = from),
-                "cursor" => tr!("cursor theme “{name}” not found (from: {from})", name = name, from = from),
-                "sound" => tr!("sound theme “{name}” not found (from: {from})", name = name, from = from),
-                _ => tr!("shell theme “{name}” not found (from: {from})", name = name, from = from),
+                "gtk" => tr!(
+                    "GTK theme “{name}” not found (from: {from})",
+                    name = name,
+                    from = from
+                ),
+                "icons" => tr!(
+                    "icon theme “{name}” not found (from: {from})",
+                    name = name,
+                    from = from
+                ),
+                "cursor" => tr!(
+                    "cursor theme “{name}” not found (from: {from})",
+                    name = name,
+                    from = from
+                ),
+                "sound" => tr!(
+                    "sound theme “{name}” not found (from: {from})",
+                    name = name,
+                    from = from
+                ),
+                _ => tr!(
+                    "shell theme “{name}” not found (from: {from})",
+                    name = name,
+                    from = from
+                ),
             };
-            rep.push(
-                "warning",
-                "missing-asset",
-                msg,
-                None,
-                false,
-            );
+            rep.push("warning", "missing-asset", msg, None, false);
         }
     }
     for key in [
@@ -352,7 +384,11 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         rep.push(
             "info",
             "gnome-version",
-            tr!("the GNOME Shell version changed: {old} → {new} (after a system update)", old = prev, new = cur),
+            tr!(
+                "the GNOME Shell version changed: {old} → {new} (after a system update)",
+                old = prev,
+                new = cur
+            ),
             None,
             false,
         );
@@ -421,7 +457,11 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
                     rep.push(
                         "error",
                         "extension",
-                        tr!("{uuid}: metadata.json does not support GNOME {version}", uuid = u, version = major(&ver)),
+                        tr!(
+                            "{uuid}: metadata.json does not support GNOME {version}",
+                            uuid = u,
+                            version = major(&ver)
+                        ),
                         Some(u.clone()),
                         true,
                     );
@@ -457,7 +497,12 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         rep.push(
             "info",
             "broken-recorded",
-            tr!("{uuid} turned off {since} ({reason})", uuid = b.uuid, since = b.since, reason = b.reason),
+            tr!(
+                "{uuid} turned off {since} ({reason})",
+                uuid = b.uuid,
+                since = b.since,
+                reason = b.reason
+            ),
             Some(b.uuid.clone()),
             false,
         );
@@ -491,8 +536,11 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
                 }
                 s2.save(ctx)?;
             }
-            rep.fixed
-                .extend(to_disable.iter().map(|(u, _)| tr!("turned off {uuid}", uuid = u)));
+            rep.fixed.extend(
+                to_disable
+                    .iter()
+                    .map(|(u, _)| tr!("turned off {uuid}", uuid = u)),
+            );
         }
         // 2. повернути полагоджені (змінилася версія GNOME або оновилося саме розширення)
         st = State::load(ctx);
@@ -593,7 +641,11 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             ));
         }
         body.extend(rep.fixed.iter().cloned());
-        body.extend(rep.restored.iter().map(|u| tr!("turned on again: {uuid}", uuid = u)));
+        body.extend(
+            rep.restored
+                .iter()
+                .map(|u| tr!("turned on again: {uuid}", uuid = u)),
+        );
         let _ = crate::shell::notify(
             &tr!("Themes: system check"),
             &body.join("\n"),

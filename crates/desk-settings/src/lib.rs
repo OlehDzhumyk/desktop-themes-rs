@@ -65,14 +65,23 @@ mod tests {
             for k in s.keys {
                 assert_eq!(k.schema, s.id, "{} lists a key of another schema", s.id);
                 assert!(seen.insert((s.id, k.name)), "duplicate {}.{}", s.id, k.name);
-                assert!(FEATURES.iter().any(|f| f.id == k.feature), "{}: feature", k.name);
+                assert!(
+                    FEATURES.iter().any(|f| f.id == k.feature),
+                    "{}: feature",
+                    k.name
+                );
                 assert!(!k.label.is_empty() && !k.schema_summary().is_empty());
                 if let Some(dep) = k.sensitive_if {
                     let d = key(s.id, dep).expect("sensitive_if key");
                     assert!(matches!(d.kind, Kind::Bool { .. }));
                 }
                 match &k.kind {
-                    Kind::UInt { default, min, max, step } => {
+                    Kind::UInt {
+                        default,
+                        min,
+                        max,
+                        step,
+                    } => {
                         assert!(min <= default && default <= max && *step > 0, "{}", k.name)
                     }
                     Kind::Choice { default, choices } => {
@@ -94,7 +103,11 @@ mod tests {
         for s in SCHEMAS {
             for k in s.keys {
                 if k.widget != Widget::Hidden {
-                    assert!(PAGES.iter().any(|p| p.keys().any(|x| std::ptr::eq(x, *k))), "{}", k.name);
+                    assert!(
+                        PAGES.iter().any(|p| p.keys().any(|x| std::ptr::eq(x, *k))),
+                        "{}",
+                        k.name
+                    );
                 }
             }
         }
@@ -107,7 +120,10 @@ mod tests {
         let xml = generate::gschema_xml();
         for (schema, path) in [
             ("io.github.OlehDzhumyk.Desk", "/io/github/OlehDzhumyk/Desk/"),
-            ("io.github.OlehDzhumyk.Desk.Clipboard", "/io/github/OlehDzhumyk/Desk/clipboard/"),
+            (
+                "io.github.OlehDzhumyk.Desk.Clipboard",
+                "/io/github/OlehDzhumyk/Desk/clipboard/",
+            ),
         ] {
             assert!(xml.contains(&format!("<schema id=\"{schema}\" path=\"{path}\">")));
         }
@@ -121,7 +137,12 @@ mod tests {
             (CLIPBOARD_SCHEMA, "persist-images", "b", "false"),
             (CLIPBOARD_SCHEMA, "private-mode", "b", "false"),
             (CLIPBOARD_SCHEMA, "paste-on-select", "b", "true"),
-            (CLIPBOARD_SCHEMA, "toggle-shortcut", "as", "['<Shift><Super>v']"),
+            (
+                CLIPBOARD_SCHEMA,
+                "toggle-shortcut",
+                "as",
+                "['<Shift><Super>v']",
+            ),
         ] {
             let k = key(schema, name).unwrap_or_else(|| panic!("{name} missing"));
             assert_eq!(k.kind.gvariant_type(), ty, "{name}");

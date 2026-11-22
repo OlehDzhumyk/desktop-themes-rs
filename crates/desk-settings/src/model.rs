@@ -58,7 +58,10 @@ impl Kind {
             format!("'{}'", v.replace('\\', "\\\\").replace('\'', "\\'"))
         }
         fn list(v: &[&str]) -> String {
-            format!("[{}]", v.iter().map(|x| s(x)).collect::<Vec<_>>().join(", "))
+            format!(
+                "[{}]",
+                v.iter().map(|x| s(x)).collect::<Vec<_>>().join(", ")
+            )
         }
         match self {
             Kind::Bool { default } => default.to_string(),
@@ -104,11 +107,19 @@ pub struct Key {
 
 impl Key {
     pub fn schema_summary(&self) -> &'static str {
-        if self.summary.is_empty() { self.label } else { self.summary }
+        if self.summary.is_empty() {
+            self.label
+        } else {
+            self.summary
+        }
     }
 
     pub fn schema_description(&self) -> &'static str {
-        if self.doc.is_empty() { self.description } else { self.doc }
+        if self.doc.is_empty() {
+            self.description
+        } else {
+            self.doc
+        }
     }
 }
 
@@ -155,7 +166,10 @@ pub enum Item {
         destructive: bool,
     },
     /// An information row whose subtitle the window fills by `id` (e.g. the deskd status).
-    Status { id: &'static str, label: &'static str },
+    Status {
+        id: &'static str,
+        label: &'static str,
+    },
 }
 
 #[derive(Debug)]
@@ -199,9 +213,12 @@ pub struct Page {
 
 impl Page {
     pub fn keys(&self) -> impl Iterator<Item = &'static Key> + '_ {
-        self.groups.iter().flat_map(|g| g.items.iter()).filter_map(|i| match i {
-            Item::Key(k) => Some(*k),
-            _ => None,
-        })
+        self.groups
+            .iter()
+            .flat_map(|g| g.items.iter())
+            .filter_map(|i| match i {
+                Item::Key(k) => Some(*k),
+                _ => None,
+            })
     }
 }

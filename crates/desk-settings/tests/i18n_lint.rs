@@ -16,10 +16,16 @@ fn repo() -> PathBuf {
 }
 
 fn files(dir: &Path, ext: &str, out: &mut Vec<PathBuf>) {
-    let Ok(rd) = std::fs::read_dir(dir) else { return };
+    let Ok(rd) = std::fs::read_dir(dir) else {
+        return;
+    };
     for e in rd.flatten() {
         let p = e.path();
-        let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("").to_string();
+        let name = p
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+            .to_string();
         if p.is_dir() {
             if !matches!(name.as_str(), "target" | "node_modules" | "build" | "tests") {
                 files(&p, ext, out);
@@ -92,23 +98,43 @@ fn no_ukrainian_literals_in_code() {
             if t.starts_with("//") || t.starts_with('*') || t.starts_with("/*") {
                 continue;
             }
-            let lits: Vec<String> = ['\'', '"', '`'].iter().flat_map(|q| literals(line, *q)).collect();
+            let lits: Vec<String> = ['\'', '"', '`']
+                .iter()
+                .flat_map(|q| literals(line, *q))
+                .collect();
             if lits.iter().any(|l| cyrillic(l)) {
                 bad.push(format!("{}:{}: {}", p.display(), i + 1, t));
             }
         }
     }
-    assert!(bad.is_empty(), "translatable text must be English + po/uk.po:\n{}", bad.join("\n"));
+    assert!(
+        bad.is_empty(),
+        "translatable text must be English + po/uk.po:\n{}",
+        bad.join("\n")
+    );
 }
 
 #[test]
 fn no_raw_literals_in_ui_setters() {
     let root = repo();
     let setters = [
-        ".title(\"", ".subtitle(\"", ".label(\"", ".description(\"", ".tooltip_text(\"",
-        ".heading(\"", ".body(\"", ".placeholder_text(\"", ".button_label(\"", ".set_title(\"",
-        ".set_subtitle(\"", ".set_label(\"", ".set_description(\"", ".application_name(\"",
-        ".comments(\"", "Toast::new(\"", "Some(\"",
+        ".title(\"",
+        ".subtitle(\"",
+        ".label(\"",
+        ".description(\"",
+        ".tooltip_text(\"",
+        ".heading(\"",
+        ".body(\"",
+        ".placeholder_text(\"",
+        ".button_label(\"",
+        ".set_title(\"",
+        ".set_subtitle(\"",
+        ".set_label(\"",
+        ".set_description(\"",
+        ".application_name(\"",
+        ".comments(\"",
+        "Toast::new(\"",
+        "Some(\"",
     ];
     let mut bad = Vec::new();
     let mut rs = Vec::new();
@@ -134,9 +160,18 @@ fn no_raw_literals_in_ui_setters() {
         }
     }
     let props = [
-        "label: '", "text: '", "hint_text: '", "accessible_name: '", "title: '",
-        "PopupMenuItem('", "addAction('", "notify('", "notifyError('", "SwitchMenuItem('",
-        "setHeader(THEME_ICON, '", "setHeader(CLIP_ICON, '",
+        "label: '",
+        "text: '",
+        "hint_text: '",
+        "accessible_name: '",
+        "title: '",
+        "PopupMenuItem('",
+        "addAction('",
+        "notify('",
+        "notifyError('",
+        "SwitchMenuItem('",
+        "setHeader(THEME_ICON, '",
+        "setHeader(CLIP_ICON, '",
     ];
     let mut ts = Vec::new();
     files(&root.join("bridge/src"), ".ts", &mut ts);
@@ -145,7 +180,10 @@ fn no_raw_literals_in_ui_setters() {
         for (i, line) in src.lines().enumerate() {
             for s in props {
                 if let Some(pos) = line.find(s) {
-                    let lit: String = line[pos + s.len()..].chars().take_while(|c| *c != '\'').collect();
+                    let lit: String = line[pos + s.len()..]
+                        .chars()
+                        .take_while(|c| *c != '\'')
+                        .collect();
                     if lit.chars().any(char::is_alphabetic) {
                         bad.push(format!("{}:{}: {}", p.display(), i + 1, line.trim()));
                     }
@@ -153,7 +191,11 @@ fn no_raw_literals_in_ui_setters() {
             }
         }
     }
-    assert!(bad.is_empty(), "user-visible literals must be translated:\n{}", bad.join("\n"));
+    assert!(
+        bad.is_empty(),
+        "user-visible literals must be translated:\n{}",
+        bad.join("\n")
+    );
 }
 
 /// msgid → (msgstr, fuzzy) from a .po file.
@@ -164,7 +206,9 @@ fn parse_po(text: &str) -> BTreeMap<String, (String, bool)> {
     }
     let mut out = BTreeMap::new();
     for block in text.split("\n\n") {
-        let fuzzy = block.lines().any(|l| l.starts_with("#,") && l.contains("fuzzy"));
+        let fuzzy = block
+            .lines()
+            .any(|l| l.starts_with("#,") && l.contains("fuzzy"));
         let (mut id, mut st, mut cur) = (String::new(), String::new(), 0);
         for l in block.lines() {
             if l.starts_with("msgid ") {
@@ -293,7 +337,11 @@ fn every_message_is_translated() {
             ids.insert((id, p.display().to_string()));
         }
     }
-    assert!(ids.len() > 200, "the scanner found too few messages: {}", ids.len());
+    assert!(
+        ids.len() > 200,
+        "the scanner found too few messages: {}",
+        ids.len()
+    );
     let mut missing = Vec::new();
     for (id, file) in &ids {
         match po.get(id) {
@@ -301,12 +349,20 @@ fn every_message_is_translated() {
             _ => missing.push(format!("{file}: {id:?}")),
         }
     }
-    assert!(missing.is_empty(), "not translated in po/uk.po (run `cargo xtask pot`, then translate):\n{}", missing.join("\n"));
+    assert!(
+        missing.is_empty(),
+        "not translated in po/uk.po (run `cargo xtask pot`, then translate):\n{}",
+        missing.join("\n")
+    );
     let mut bad = Vec::new();
     for (id, (s, _)) in &po {
         if !s.is_empty() && placeholders(id) != placeholders(s) {
             bad.push(format!("{id:?} → {s:?}"));
         }
     }
-    assert!(bad.is_empty(), "translations must keep the placeholders:\n{}", bad.join("\n"));
+    assert!(
+        bad.is_empty(),
+        "translations must keep the placeholders:\n{}",
+        bad.join("\n")
+    );
 }

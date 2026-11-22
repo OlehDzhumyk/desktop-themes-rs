@@ -191,7 +191,11 @@ mod tests {
     #[test]
     fn introspection_matches_xml() {
         let mut xml = String::new();
-        let eng = Engine::new(Default::default(), "/nonexistent".into(), "/nonexistent".into());
+        let eng = Engine::new(
+            Default::default(),
+            "/nonexistent".into(),
+            "/nonexistent".into(),
+        );
         let iface = ClipboardIface {
             eng: Arc::new(Mutex::new(eng)),
             set_private: |_| {},

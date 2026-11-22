@@ -89,7 +89,10 @@ impl ThemeCard {
                         &gtk::Label::builder()
                             .label(m.label())
                             .css_classes(["badge", "partial"])
-                            .tooltip_text(tr!("The module “{module}” is taken from this theme", module = m.label()))
+                            .tooltip_text(tr!(
+                                "The module “{module}” is taken from this theme",
+                                module = m.label()
+                            ))
                             .build(),
                     );
                 }
@@ -155,7 +158,11 @@ impl ThemeCard {
             .collect();
         let mut meta = tr!(
             "Modules: {list}",
-            list = if mods.is_empty() { "—".to_string() } else { mods.join(" · ") }
+            list = if mods.is_empty() {
+                "—".to_string()
+            } else {
+                mods.join(" · ")
+            }
         );
         if info.extensions > 0 {
             meta.push_str("   ");
@@ -194,7 +201,10 @@ impl ThemeCard {
             .css_classes(["flat", "circular"])
             .tooltip_text(tr!("Theme actions"))
             .build();
-        super::a11y::label(&mb, &tr!("Actions for the theme “{name}”", name = info.name));
+        super::a11y::label(
+            &mb,
+            &tr!("Actions for the theme “{name}”", name = info.name),
+        );
         row.append(&mb);
         let rc = gtk::GestureClick::builder()
             .button(gdk::BUTTON_SECONDARY)

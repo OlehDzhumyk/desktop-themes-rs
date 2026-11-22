@@ -16,16 +16,25 @@ use std::process::{Command, ExitCode};
 use desk_settings::{generate as gen_, i18n::DOMAIN};
 
 fn repo() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("..").canonicalize().expect("repository root")
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .canonicalize()
+        .expect("repository root")
 }
 
 fn run(cmd: &mut Command) -> Result<(), String> {
     let st = cmd.status().map_err(|e| format!("{cmd:?}: {e}"))?;
-    if st.success() { Ok(()) } else { Err(format!("{cmd:?} failed: {st}")) }
+    if st.success() {
+        Ok(())
+    } else {
+        Err(format!("{cmd:?} failed: {st}"))
+    }
 }
 
 fn files(dir: &Path, ext: &str, out: &mut Vec<PathBuf>) {
-    let Ok(rd) = std::fs::read_dir(dir) else { return };
+    let Ok(rd) = std::fs::read_dir(dir) else {
+        return;
+    };
     let mut v: Vec<PathBuf> = rd.flatten().map(|e| e.path()).collect();
     v.sort();
     for p in v {
@@ -41,7 +50,10 @@ fn files(dir: &Path, ext: &str, out: &mut Vec<PathBuf>) {
 }
 
 fn rel(root: &Path, p: &Path) -> String {
-    p.strip_prefix(root).unwrap_or(p).to_string_lossy().into_owned()
+    p.strip_prefix(root)
+        .unwrap_or(p)
+        .to_string_lossy()
+        .into_owned()
 }
 
 fn generate(write: bool) -> Result<(), String> {
@@ -62,7 +74,10 @@ fn generate(write: bool) -> Result<(), String> {
     if stale.is_empty() {
         Ok(())
     } else {
-        Err(format!("out of date (run `cargo xtask gen`): {}", stale.join(", ")))
+        Err(format!(
+            "out of date (run `cargo xtask gen`): {}",
+            stale.join(", ")
+        ))
     }
 }
 
@@ -72,7 +87,11 @@ fn pot() -> Result<(), String> {
     std::fs::create_dir_all(&tmp).map_err(|e| e.to_string())?;
     let common = |c: &mut Command| {
         c.current_dir(&root)
-            .args(["--from-code=UTF-8", "--add-comments=TRANSLATORS", "--sort-by-file"])
+            .args([
+                "--from-code=UTF-8",
+                "--add-comments=TRANSLATORS",
+                "--sort-by-file",
+            ])
             .arg(format!("--package-name={DOMAIN}"))
             .arg("--msgid-bugs-address=https://github.com/OlehDzhumyk/desktop-themes-rs/issues");
     };
@@ -85,10 +104,19 @@ fn pot() -> Result<(), String> {
     let out = tmp.join("rust.pot");
     let mut c = Command::new("xgettext");
     common(&mut c);
-    c.args(["-L", "Rust", "-k", "-ktr!", "-ktrn!:1,2", "-kn_", "-kgettext", "-kngettext:1,2"])
-        .arg("-o")
-        .arg(&out)
-        .args(rs.iter().map(|p| rel(&root, p)));
+    c.args([
+        "-L",
+        "Rust",
+        "-k",
+        "-ktr!",
+        "-ktrn!:1,2",
+        "-kn_",
+        "-kgettext",
+        "-kngettext:1,2",
+    ])
+    .arg("-o")
+    .arg(&out)
+    .args(rs.iter().map(|p| rel(&root, p)));
     run(&mut c)?;
     parts.push(out);
 
@@ -113,14 +141,24 @@ fn pot() -> Result<(), String> {
     parts.push(out);
 
     let pot = root.join("po").join(format!("{DOMAIN}.pot"));
-    run(Command::new("msgcat").arg("--use-first").arg("-o").arg(&pot).args(&parts))?;
+    run(Command::new("msgcat")
+        .arg("--use-first")
+        .arg("-o")
+        .arg(&pot)
+        .args(&parts))?;
     let _ = std::fs::remove_dir_all(&tmp);
     println!("wrote {}", rel(&root, &pot));
     let mut pos = vec![];
     files(&root.join("po"), ".po", &mut pos);
     for po in pos {
         run(Command::new("msgmerge")
-            .args(["--quiet", "--update", "--backup=none", "--no-fuzzy-matching", "--sort-by-file"])
+            .args([
+                "--quiet",
+                "--update",
+                "--backup=none",
+                "--no-fuzzy-matching",
+                "--sort-by-file",
+            ])
             .arg(&po)
             .arg(&pot))?;
         println!("merged {}", rel(&root, &po));

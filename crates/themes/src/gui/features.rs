@@ -17,7 +17,11 @@ use super::a11y;
 use super::credits::{self, Section as CreditsSection};
 
 fn t(s: &str) -> String {
-    if s.is_empty() { String::new() } else { desk_settings::i18n::gettext(s) }
+    if s.is_empty() {
+        String::new()
+    } else {
+        desk_settings::i18n::gettext(s)
+    }
 }
 
 /// Підсторінка з власним заголовком (кнопка «Назад» і назва).
@@ -30,7 +34,11 @@ fn subpage(title: &str, tag: &str, child: &impl IsA<gtk::Widget>) -> adw::Naviga
     hb.add_css_class("flat");
     tv.add_top_bar(&hb);
     tv.set_content(Some(child));
-    adw::NavigationPage::builder().title(title).tag(tag).child(&tv).build()
+    adw::NavigationPage::builder()
+        .title(title)
+        .tag(tag)
+        .child(&tv)
+        .build()
 }
 
 fn schema(id: &str) -> Option<gio::Settings> {
@@ -52,7 +60,11 @@ pub fn origin_label(o: &Origin) -> String {
     match o {
         Origin::Has(s) => t(s),
         Origin::BasedOn { project, licence } => {
-            tr!("Based on {project} ({licence})", project = project, licence = licence)
+            tr!(
+                "Based on {project} ({licence})",
+                project = project,
+                licence = licence
+            )
         }
     }
 }
@@ -103,9 +115,20 @@ fn value_text(k: &'static Key, s: &gio::Settings) -> String {
     match &k.kind {
         Kind::Accel { .. } => shortcut_label(&s.strv(k.name)),
         Kind::Choice { .. } => choice_label(k, &s.string(k.name)),
-        Kind::StrList { .. } => s.strv(k.name).iter().map(|x| x.as_str()).collect::<Vec<_>>().join(", "),
+        Kind::StrList { .. } => s
+            .strv(k.name)
+            .iter()
+            .map(|x| x.as_str())
+            .collect::<Vec<_>>()
+            .join(", "),
         Kind::Str { .. } => s.string(k.name).to_string(),
-        Kind::Bool { .. } => if s.boolean(k.name) { tr!("on") } else { tr!("off") },
+        Kind::Bool { .. } => {
+            if s.boolean(k.name) {
+                tr!("on")
+            } else {
+                tr!("off")
+            }
+        }
         Kind::UInt { .. } => s.uint(k.name).to_string(),
     }
 }
@@ -141,7 +164,10 @@ fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
     let desc = t(k.description);
     match &k.kind {
         Kind::Bool { .. } => {
-            let r = adw::SwitchRow::builder().title(t(k.label)).subtitle(desc).build();
+            let r = adw::SwitchRow::builder()
+                .title(t(k.label))
+                .subtitle(desc)
+                .build();
             s.bind(k.name, &r, "active").build();
             r.upcast()
         }
@@ -154,7 +180,8 @@ fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
         }
         Kind::Choice { choices, .. } => {
             let labels: Vec<String> = choices.iter().map(|c| t(c.label)).collect();
-            let model = gtk::StringList::new(&labels.iter().map(String::as_str).collect::<Vec<_>>());
+            let model =
+                gtk::StringList::new(&labels.iter().map(String::as_str).collect::<Vec<_>>());
             let r = adw::ComboRow::builder()
                 .title(t(k.label))
                 .subtitle(desc)
@@ -219,7 +246,12 @@ fn clear_history(toasts: &adw::ToastOverlay) {
     });
 }
 
-fn action_row(id: &'static str, label: &str, destructive: bool, toasts: &adw::ToastOverlay) -> adw::ButtonRow {
+fn action_row(
+    id: &'static str,
+    label: &str,
+    destructive: bool,
+    toasts: &adw::ToastOverlay,
+) -> adw::ButtonRow {
     let row = adw::ButtonRow::builder().title(t(label)).build();
     if destructive {
         row.add_css_class("destructive-action");
@@ -229,7 +261,9 @@ fn action_row(id: &'static str, label: &str, destructive: bool, toasts: &adw::To
         "clear-history" => {
             let dlg = adw::AlertDialog::new(
                 Some(&tr!("Clear the clipboard history?")),
-                Some(&tr!("All items will be deleted, pinned ones too. This cannot be undone.")),
+                Some(&tr!(
+                    "All items will be deleted, pinned ones too. This cannot be undone."
+                )),
             );
             dlg.add_responses(&[("cancel", &tr!("Cancel")), ("clear", &tr!("Clear"))]);
             dlg.set_response_appearance("clear", adw::ResponseAppearance::Destructive);
@@ -291,9 +325,11 @@ fn settings_group(
     for item in g.items {
         let w: Option<gtk::Widget> = match item {
             Item::Key(k) => settings.get(k.schema).and_then(|s| key_row(k, s)),
-            Item::Action { id, label, destructive } => {
-                Some(action_row(id, label, *destructive, toasts).upcast())
-            }
+            Item::Action {
+                id,
+                label,
+                destructive,
+            } => Some(action_row(id, label, *destructive, toasts).upcast()),
             Item::Status { id, label } => Some(status_row(id, label).upcast()),
         };
         if let Some(w) = w {
@@ -309,7 +345,9 @@ fn credits_groups(page: &adw::PreferencesPage) {
         if entries.is_empty() {
             continue;
         }
-        let g = adw::PreferencesGroup::builder().title(title.as_str()).build();
+        let g = adw::PreferencesGroup::builder()
+            .title(title.as_str())
+            .build();
         for e in entries {
             let mut sub = Vec::new();
             if !e.used_for.is_empty() {
@@ -345,7 +383,9 @@ fn credits_groups(page: &adw::PreferencesPage) {
 
 /// Сторінка з реєстру.
 fn build_page(p: &'static Page, toasts: &adw::ToastOverlay) -> adw::NavigationPage {
-    let page = adw::PreferencesPage::builder().description(t(p.description)).build();
+    let page = adw::PreferencesPage::builder()
+        .description(t(p.description))
+        .build();
     if let Some(f) = p.feature
         && !f.origins.is_empty()
     {
@@ -414,12 +454,17 @@ pub fn build(toasts: &adw::ToastOverlay, open: Option<&str>) -> adw::NavigationV
         .description(t(desk_settings::ROOT_DESCRIPTION))
         .build();
     for section in [Section::Features, Section::App, Section::About] {
-        let pages: Vec<&'static Page> =
-            desk_settings::PAGES.iter().copied().filter(|p| p.section == section).collect();
+        let pages: Vec<&'static Page> = desk_settings::PAGES
+            .iter()
+            .copied()
+            .filter(|p| p.section == section)
+            .collect();
         if pages.is_empty() {
             continue;
         }
-        let g = adw::PreferencesGroup::builder().title(t(section.title())).build();
+        let g = adw::PreferencesGroup::builder()
+            .title(t(section.title()))
+            .build();
         for p in pages {
             let row = adw::ActionRow::builder()
                 .title(t(p.title))

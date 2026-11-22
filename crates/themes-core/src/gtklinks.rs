@@ -28,7 +28,10 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
         let d = Path::new(&dest);
         match std::fs::read_link(d) {
             Ok(t) if t == Path::new(&src) => std::fs::remove_file(d)?,
-            _ if lexists(d) => warnings.push(tr!("{path} was changed by hand; left as it is", path = dest)),
+            _ if lexists(d) => warnings.push(tr!(
+                "{path} was changed by hand; left as it is",
+                path = dest
+            )),
             _ => {}
         }
         st.links.remove(&dest);
@@ -38,7 +41,10 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
                 if !lexists(d) {
                     move_path(bp, d)?;
                 } else {
-                    warnings.push(tr!("backup {path} not restored (the place is taken)", path = b));
+                    warnings.push(tr!(
+                        "backup {path} not restored (the place is taken)",
+                        path = b
+                    ));
                 }
             }
         }

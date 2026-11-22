@@ -25,6 +25,7 @@ The repository is a Cargo workspace:
 | `crates/themes-core` | library | the theme manager: theme contract (incl. inheritance), modules, plan/apply, dconf, doctor, crash detection |
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
+| `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
 | `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (now: clipboard history) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` to ES modules (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 

@@ -49,7 +49,9 @@ pub fn current_map(ctx: &Ctx) -> HashMap<String, String> {
 
 /// Виконати синхронну роботу бібліотеки в окремому потоці (не блокуючи виконавця zbus напряму).
 fn off_thread<T: Send + 'static>(f: impl FnOnce() -> T + Send + 'static) -> T {
-    std::thread::spawn(f).join().expect("service thread crashed")
+    std::thread::spawn(f)
+        .join()
+        .expect("service thread crashed")
 }
 
 #[zbus::interface(name = "io.github.OlehDzhumyk.Themes")]

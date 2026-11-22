@@ -452,7 +452,9 @@ fn live_check(
     } else {
         let locked = shell.screen_locked();
         if locked && !added.is_empty() {
-            warnings.push(tr!("the session is locked; new extensions turn on after unlocking"));
+            warnings.push(tr!(
+                "the session is locked; new extensions turn on after unlocking"
+            ));
         }
         let on: Vec<String> = if locked {
             vec![]
@@ -505,7 +507,11 @@ fn live_check(
             let swap = (added.iter().any(|u| u == a) && removed.iter().any(|u| u == b))
                 || (added.iter().any(|u| u == b) && removed.iter().any(|u| u == a));
             if swap {
-                reasons.push(tr!("swapping {old} ↔ {new} live leaves panel artefacts", old = b, new = a));
+                reasons.push(tr!(
+                    "swapping {old} ↔ {new} live leaves panel artefacts",
+                    old = b,
+                    new = a
+                ));
             }
         }
     }
@@ -605,7 +611,9 @@ pub fn ext_stamp(ctx: &Ctx, uuid: &str) -> String {
 /// Видалити тему (у trash/). fedora й активні теми видаляти не можна.
 pub fn delete(ctx: &Ctx, id: &str) -> Result<(String, String)> {
     if id == crate::BUILTIN_THEME {
-        return Err(Error(tr!("the theme “fedora” cannot be deleted: it is the standard look")));
+        return Err(Error(tr!(
+            "the theme “fedora” cannot be deleted: it is the standard look"
+        )));
     }
     let t = get_theme(ctx, id)?;
     let _lock = Lock::acquire(ctx)?;

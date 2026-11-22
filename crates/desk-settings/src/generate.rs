@@ -23,7 +23,9 @@ pub fn all() -> Vec<(&'static str, String)> {
 }
 
 fn xml_escape(s: &str) -> String {
-    s.replace('&', "&amp;").replace('<', "&lt;").replace('>', "&gt;")
+    s.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
 }
 
 // ------------------------------------------------------------------ GSettings XML
@@ -44,7 +46,12 @@ pub fn gschema_xml() -> String {
         }
         let _ = writeln!(o, "  <schema id=\"{}\" path=\"{}\">", s.id, s.path);
         for k in s.keys {
-            let _ = writeln!(o, "    <key name=\"{}\" type=\"{}\">", k.name, k.kind.gvariant_type());
+            let _ = writeln!(
+                o,
+                "    <key name=\"{}\" type=\"{}\">",
+                k.name,
+                k.kind.gvariant_type()
+            );
             match &k.kind {
                 Kind::UInt { min, max, .. } => {
                     let _ = writeln!(o, "      <range min=\"{min}\" max=\"{max}\"/>");
@@ -58,8 +65,16 @@ pub fn gschema_xml() -> String {
                 }
                 _ => {}
             }
-            let _ = writeln!(o, "      <default>{}</default>", xml_escape(&k.kind.default_text()));
-            let _ = writeln!(o, "      <summary>{}</summary>", xml_escape(k.schema_summary()));
+            let _ = writeln!(
+                o,
+                "      <default>{}</default>",
+                xml_escape(&k.kind.default_text())
+            );
+            let _ = writeln!(
+                o,
+                "      <summary>{}</summary>",
+                xml_escape(k.schema_summary())
+            );
             let d = k.schema_description();
             if !d.is_empty() {
                 let _ = writeln!(o, "      <description>{}</description>", xml_escape(d));
@@ -209,10 +224,16 @@ pub fn accessors_rs() -> String {
 fn kind_doc(k: &Kind) -> (String, String) {
     match k {
         Kind::Bool { .. } => ("boolean".into(), String::new()),
-        Kind::UInt { min, max, step, .. } => ("unsigned".into(), format!("{min}…{max} (step {step})")),
+        Kind::UInt { min, max, step, .. } => {
+            ("unsigned".into(), format!("{min}…{max} (step {step})"))
+        }
         Kind::Choice { choices, .. } => (
             "choice".into(),
-            choices.iter().map(|c| format!("`{}`", c.value)).collect::<Vec<_>>().join(", "),
+            choices
+                .iter()
+                .map(|c| format!("`{}`", c.value))
+                .collect::<Vec<_>>()
+                .join(", "),
         ),
         Kind::Str { .. } => ("string".into(), String::new()),
         Kind::StrList { .. } => ("string list".into(), String::new()),
@@ -273,12 +294,18 @@ pub fn settings_md() -> String {
             "| {} (`{}`) | {} |",
             f.title,
             f.id,
-            if origins.is_empty() { "—".into() } else { origins.join("; ") }
+            if origins.is_empty() {
+                "—".into()
+            } else {
+                origins.join("; ")
+            }
         );
     }
     for s in SCHEMAS {
         let _ = writeln!(o, "\n## `{}`\n\nPath `{}`.\n", s.id, s.path);
-        o.push_str("| Key | Type | Default | Range / choices | Label | Description | Feature | Window |\n");
+        o.push_str(
+            "| Key | Type | Default | Range / choices | Label | Description | Feature | Window |\n",
+        );
         o.push_str("|---|---|---|---|---|---|---|---|\n");
         for k in s.keys {
             let (ty, range) = kind_doc(&k.kind);
@@ -306,7 +333,13 @@ pub fn settings_md() -> String {
         let groups: Vec<&str> = p
             .groups
             .iter()
-            .map(|g| if g.title.is_empty() { "(actions)" } else { g.title })
+            .map(|g| {
+                if g.title.is_empty() {
+                    "(actions)"
+                } else {
+                    g.title
+                }
+            })
             .collect();
         let groups = match p.kind {
             PageKind::Credits => "generated from CREDITS.md".to_string(),

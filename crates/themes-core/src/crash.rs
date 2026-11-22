@@ -127,7 +127,11 @@ fn local(unix: i64) -> String {
 
 /// `coredumpctl info PID`: (командний рядок, верхня функція стека).
 fn coredump_details(pid: u32) -> (String, String) {
-    let Ok(o) = run("coredumpctl", &["info", "--no-pager", &pid.to_string()], None) else {
+    let Ok(o) = run(
+        "coredumpctl",
+        &["info", "--no-pager", &pid.to_string()],
+        None,
+    ) else {
         return (String::new(), String::new());
     };
     let mut cmdline = String::new();
@@ -200,14 +204,25 @@ pub fn describe(c: &ShellCrash) -> String {
     let how = if c.top_frame.is_empty() {
         c.signal.clone()
     } else {
-        tr!("{signal} in {frame}", signal = c.signal, frame = c.top_frame)
+        tr!(
+            "{signal} in {frame}",
+            signal = c.signal,
+            frame = c.top_frame
+        )
     };
-    let mut s = tr!("GNOME Shell crashed {time} ({how})", time = c.local_time, how = how);
+    let mut s = tr!(
+        "GNOME Shell crashed {time} ({how})",
+        time = c.local_time,
+        how = how
+    );
     if let Some(t) = &c.theme {
         s.push_str(&tr!("; the theme “{theme}” was applied then", theme = t));
     }
     if !c.suspects.is_empty() {
-        s.push_str(&tr!("; likely culprit: {suspects}", suspects = c.suspects.join(", ")));
+        s.push_str(&tr!(
+            "; likely culprit: {suspects}",
+            suspects = c.suspects.join(", ")
+        ));
     }
     s
 }

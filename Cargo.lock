@@ -218,6 +218,7 @@ name = "deskd"
 version = "2.1.0"
 dependencies = [
  "desk-proto",
+ "desk-settings",
  "futures-util",
  "gio",
  "serde",
@@ -1122,6 +1123,7 @@ version = "2.1.0"
 dependencies = [
  "clap",
  "desk-proto",
+ "desk-settings",
  "gtk4",
  "libadwaita",
  "serde",
@@ -1134,6 +1136,7 @@ dependencies = [
 name = "themes-core"
 version = "2.1.0"
 dependencies = [
+ "desk-settings",
  "gio",
  "serde",
  "serde_json",

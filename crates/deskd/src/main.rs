@@ -111,7 +111,10 @@ fn main() {
     let conn = match conn {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("deskd: {}", tr!("cannot own {name}: {error}", name = BUS_NAME, error = e));
+            eprintln!(
+                "deskd: {}",
+                tr!("cannot own {name}: {error}", name = BUS_NAME, error = e)
+            );
             std::process::exit(1);
         }
     };

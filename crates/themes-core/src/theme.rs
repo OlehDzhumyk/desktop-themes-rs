@@ -127,7 +127,11 @@ impl Theme {
         chain.push(id.to_string());
         let mut parent = None;
         let mut inherit_error = None;
-        if let Some(pid) = own.get("INHERITS").map(|s| s.trim()).filter(|s| !s.is_empty()) {
+        if let Some(pid) = own
+            .get("INHERITS")
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+        {
             if !util::valid_id(pid) {
                 inherit_error = Some(tr!("INHERITS: invalid id “{id}”", id = pid));
             } else if chain.iter().any(|c| c == pid) {
@@ -370,7 +374,10 @@ pub fn all_themes(ctx: &Ctx) -> Vec<Theme> {
 
 pub fn get_theme(ctx: &Ctx, id: &str) -> Result<Theme> {
     if !util::valid_id(id) {
-        return Err(crate::Error(tr!("invalid theme id: {id}", id = format!("{id:?}"))));
+        return Err(crate::Error(tr!(
+            "invalid theme id: {id}",
+            id = format!("{id:?}")
+        )));
     }
     let t = Theme::new(ctx, id);
     if !t.dir.is_dir() {
@@ -504,7 +511,10 @@ pub(crate) mod tests {
     #[test]
     fn extension_line_merge() {
         let base: Vec<String> = ["a", "b", "c"].iter().map(|s| s.to_string()).collect();
-        assert_eq!(merge_extension_lines(&base, "+d\n-b\n# x\n"), vec!["a", "c", "d"]);
+        assert_eq!(
+            merge_extension_lines(&base, "+d\n-b\n# x\n"),
+            vec!["a", "c", "d"]
+        );
         assert_eq!(merge_extension_lines(&base, "+a\n"), vec!["a", "b", "c"]);
         assert_eq!(merge_extension_lines(&base, "x\ny # c\n-x\n"), vec!["y"]);
         assert_eq!(merge_extension_lines(&base, ""), base);
@@ -525,8 +535,14 @@ pub(crate) mod tests {
             "[org/gnome/desktop/interface]\ngtk-theme='P'\nicon-theme='PI'\n",
         );
         write(&p.join("spot.dconf"), "[org/x]\na=1\n");
-        write(&p.join("behavior.dconf"), "[org/gnome/mutter]\nedge-tiling=true\n");
-        write(&p.join("sounds.dconf"), "[org/gnome/desktop/sound]\ntheme-name='p'\n");
+        write(
+            &p.join("behavior.dconf"),
+            "[org/gnome/mutter]\nedge-tiling=true\n",
+        );
+        write(
+            &p.join("sounds.dconf"),
+            "[org/gnome/desktop/sound]\ntheme-name='p'\n",
+        );
         write(&p.join("extensions.txt"), "a@x\nb@x\nc@x\n");
         write(&p.join("flatpak.conf"), "--env=A=1\n");
         write(&p.join("gtk4/gtk.css"), "x");
