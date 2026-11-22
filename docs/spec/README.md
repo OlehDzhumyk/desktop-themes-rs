@@ -79,6 +79,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Feature | Status | Stage | Origin badge | Spec |
 |---|---|---|---|---|
 | Theme switching, modules, mixing, inheritance, reset | Implemented | 0 | Original | [themes](features/themes.md) |
+| Token-only showcase theme `lavender` | Partial | 1.5 | Original | [themes](features/themes.md) |
 | Doctor and crash protection | Implemented | 0 | Original | [doctor](features/doctor.md) |
 | Quick settings theme menu | Implemented | 1 | Original | [quick-settings-theme](features/quick-settings-theme.md) |
 | Per-theme behaviour and keybindings | Implemented | 0 | In Windows 11 and macOS (each theme follows its system) | [behavior](features/behavior.md) |

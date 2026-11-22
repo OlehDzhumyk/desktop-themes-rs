@@ -67,14 +67,12 @@ the system's fallback default is shown (no error toast unless a stream was lost)
 
 ## Engine and architecture
 
-* **deskd** hosts an `Audio` engine (`io.github.OlehDzhumyk.Desk.Audio`) that talks the PulseAudio protocol
-  (served by PipeWire) via libpulse and exposes `ListDevices`, `ListStreams`, `SetVolume(kind,id,v)`,
+* **deskd** hosts an `Audio` engine (`io.github.OlehDzhumyk.Desk.Audio`) that talks to **PipeWire natively through `pipewire-rs`** (decided; no libpulse) and exposes `ListDevices`, `ListStreams`, `SetVolume(kind,id,v)`,
   `SetMute`, `SetDefault(kind,id)`, `MoveStream(id,sink)`, signal `Changed`. It subscribes to server events only
   (no polling, no peak monitoring in v1), and keeps no audio data.
 * The bridge draws the sub-panel and registers it in quick settings; it asks deskd and never opens an audio
   connection itself.
-* Alternative to decide (open question 1): the bridge uses the shell's own `Gvc.MixerControl` (already running in
-  the shell process) and deskd holds only preferences.
+* The bridge only renders; it never opens an audio connection and does not use the shell's `Gvc` for the mixer.
 
 ## Settings (proposed, schema `io.github.OlehDzhumyk.Desk.Audio`)
 
@@ -138,7 +136,7 @@ changes); added resident memory <= 3 MB; no work while no UI is open beyond the 
 
 ## Open questions
 
-1. Engine in deskd (consistent with the architecture) or the bridge on `Gvc` (zero extra process memory)?
+1. *(Decided)* the engine lives in deskd (PipeWire via `pipewire-rs`); the bridge renders only.
 2. Per-app routing memory: use PipeWire's own policy (WirePlumber) instead of storing our own?
 3. Should the macOS skin show the per-app disclosure at all, given macOS has none (stricter "as Apple would")?
 4. Which existing extension do we port from, if any?

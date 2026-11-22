@@ -28,7 +28,7 @@ taskbar, icons, cursors, fonts, sounds, keyboard conventions) in a GNOME session
   `<id>` is `[a-z0-9][a-z0-9._-]{0,63}`. Files the manager does not know are ignored.
 * Bundled: `fedora` (built-in, stock look, cannot be deleted, is the **safe theme**), `macos`,
   `macos-glass` (Experimental, inherits `macos`, see [liquid-glass](liquid-glass.md)), `windows11`.
-  Further themes are the user's own (snapshots, hand-made).
+  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see [design-tokens](../../design-tokens.md)); **Partial** until its generated output is complete (stage 1.5, PR in review). Further themes are the user's own (snapshots, hand-made).
 * `themes list` shows id, name, modules the theme provides, which of its modules are active, and the
   description; `*` marks the theme that provides the **look** module. `--json` gives
   `id, name, description, preview, preview_dark, active, active_modules, modules, builtin, extensions, path`.
@@ -164,9 +164,9 @@ modules. Switching never relies on colour alone ("активна" badge text).
   `SNAPSHOT_PREFIXES` in `crates/themes-core/src/snapshot.rs` has no `/io/github/OlehDzhumyk/Desk/`,
   so a snapshot theme falls back to the default skin. Intended: include the `Desk` keys in the look
   module's `desk.dconf`.
-* **G-THEMES-2** There is no `EXPERIMENTAL` marker: `macos-glass` is flagged only by words in its
-  description, and the CLI, the window and quick settings apply it with one click. Intended: see
-  [liquid-glass](liquid-glass.md).
+* **G-THEMES-2** There is no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
+  description, and the CLI, the window and quick settings apply it with one click. Intended: mandatory
+  confirmation, see [liquid-glass](liquid-glass.md).
 * **G-THEMES-3** `themes/macos/spotlight.dconf` contains a stale comment ("behavior.dconf still sets
   toggle-overview=['<Super>space']"); `behavior.dconf` already clears it.
 * **G-THEMES-4** `themes apply` exits 0 even when the auto-rollback disabled an extension; only the
@@ -208,7 +208,7 @@ modules. Switching never relies on colour alone ("активна" badge text).
 
 ## Open questions
 
-1. Should `apply` of an Experimental theme require `--yes` / a dialog ([liquid-glass](liquid-glass.md))?
+1. *(Decided)* Experimental themes (`EXPERIMENTAL=true`, `WARNING="..."` in `theme.conf`) stay bundled but need explicit confirmation before apply: CLI `y/N` (`--yes` skips), GUI dialog, quick-settings dialog ([liquid-glass](liquid-glass.md)).
 2. Distinct exit code when rollback happened (G-THEMES-4)?
 3. Should third-party themes with hooks need an explicit "trust" step stored in `state.json`?
 4. Should `reset` offer to keep the user's wallpaper (a frequent ask)?

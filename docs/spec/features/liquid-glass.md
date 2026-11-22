@@ -46,8 +46,8 @@ the extension injects, hit during painting (not confirmed).
 
 Because the failure mode is "the whole session loses its extensions", an Experimental theme must:
 
-1. **Be marked** in `theme.conf` with `EXPERIMENTAL="reason text"` (new key), and shown with an
-   "Experimental" badge in the window, `themes list` (a column/JSON field `experimental`), and the quick-settings
+1. **Be marked** in `theme.conf` with `EXPERIMENTAL=true` and `WARNING="reason text"` (new keys; the
+   warning is shown in every confirmation), and shown with an "Experimental" badge in the window, `themes list` (a column/JSON field `experimental`), and the quick-settings
    menu.
 2. **Need confirmation:** the window shows a dialog explaining the crash and the way back
    («Відкрити ризиковану тему?», buttons «Скасувати» (default) / «Застосувати»); the CLI requires `--yes`
@@ -128,8 +128,7 @@ laptop in the overview or in menu open (not measured today).
 
 ## Open questions
 
-1. Keep `macos-glass` in the repository's bundled list while it can crash the shell, or move it to an opt-in
-   `themes-experimental/` directory the installer does not copy by default?
+1. *(Decided)* `macos-glass` stays bundled; confirmation is mandatory (above).
 2. Is the crash reproducible in the headless shell (software rendering) so a regression test can exist?
 3. Disable glass automatically on battery or in power-saver mode?
 4. Report upstream with a stack trace (principle 5)?

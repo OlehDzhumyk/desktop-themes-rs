@@ -134,8 +134,12 @@ above are errors and must be resolved in this file first.
 
 Behaviour keys are plain GNOME GSettings keys listed above, managed by the theme manager; users who
 change one by hand have it overwritten by the next apply of the module (the baseline restores it on reset).
-The hub's feature pages show shortcuts **read-only**, with "set by the theme" and a link to the theme
-(planned: per-key override stored outside the theme, see open questions).
+**Decided:** every feature's shortcut is **overridable per feature in the hub**; the theme only provides the
+default. An override is a user value of the feature's own key (for example `Clipboard toggle-shortcut`), stored
+in GSettings, and survives theme switches: the theme manager must not overwrite a shortcut key the user has
+explicitly set (it tracks "user-set" keys in `state.json` and skips them; `themes reset` clears the marks). Conflict
+checks against this registry run when the user picks a key; a conflict is shown and refused.
+Today (stage 1) the hub shows shortcuts read-only (gap G-BEHAV-5).
 
 ## Privacy & security
 
@@ -174,6 +178,7 @@ Applying behaviour is dconf writes only (no restart); the shell re-reads keybind
 * **G-BEHAV-3** There is no automated test that checks a theme's registry against the GNOME default
   collisions (`tools/integration-test.sh` writes real dconf and is not run in CI). A headless
   collision test is needed.
+* **G-BEHAV-5** The hub shows feature shortcuts read-only and every theme apply rewrites them; the per-feature override decided above is not implemented.
 * **G-BEHAV-4** The `windows11` theme leaves `Super+Down` (GNOME: unmaximise) and `Super+Up` as GNOME
   defaults; Windows 11 restores/minimises on `Super+Down`. Not specified yet (see
   [window-layouts](window-layouts.md)).
@@ -204,8 +209,7 @@ Applying behaviour is dconf writes only (no restart); the shell re-reads keybind
 
 ## Open questions
 
-1. Should the user be able to override individual shortcuts per feature (stored in a user file that the
-   theme manager layers on top), or only by editing a theme?
+1. *(Decided)* per-feature override in the hub; the theme provides defaults (see Settings).
 2. Is `Super+I` right for opening the hub in the Windows skin, given GNOME's own Settings?
 3. Windows 11 `Super+Down` / `Super+Up` semantics, and macOS tiling keys, to be fixed with
    [window-layouts](window-layouts.md).

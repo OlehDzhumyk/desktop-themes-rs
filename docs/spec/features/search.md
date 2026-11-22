@@ -25,6 +25,9 @@ search engine in deskd (provider-based, privacy-preserving) drawn by the bridge 
   box that finds apps, files, settings and the web; the Search flyout has filters (apps, documents, web,
   settings); typing immediately searches.
 
+> **Transitional:** `spotlight@nin` stays only until the own engine below replaces it. The two Shell 51 patches are
+> offered upstream regardless.
+
 ## Our behaviour: current implementation
 
 | Theme | Component | Open | Notes |
@@ -170,8 +173,7 @@ polling; deskd stays <= 20 MB with all providers loaded.
 
 ## Open questions
 
-1. Build the engine or contribute the missing pieces to Spotlight upstream (principle 5)? The plan above
-   assumes an own engine because the skins must be uniform; confirm.
+1. *(Decided)* we build the own search engine in deskd; `spotlight@nin` is **transitional** and is removed from the bundled themes when the engine ships. The two GNOME 51 fixes (`patches/spotlight@nin`) are still sent upstream to itsnin (principle 5).
 2. Which indexer is guaranteed on Silverblue (`localsearch`) and what is the fallback when it is disabled?
 3. Calculator scope: arithmetic only, or units and currencies (currency needs the network: out)?
 4. Should `Super` tap on the Windows skin open search or the start menu with pinned apps?
