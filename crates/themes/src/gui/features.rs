@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use adw::prelude::*;
 use desk_proto::ClipboardProxy;
 use desk_settings::{Group, Item, Key, Kind, Origin, Page, PageKind, Section, Widget, tr};
-use gtk::{gio, glib};
+use gtk::{gdk, gio, glib};
 
 use super::a11y;
 use super::credits::{self, Section as CreditsSection};
@@ -85,6 +85,11 @@ fn origin_group(origins: &[Origin]) -> adw::PreferencesGroup {
 
 /// Людський вигляд скорочення: ['<Shift><Super>v'] → «Shift+Super+V».
 pub fn shortcut_label(accels: &glib::StrV) -> String {
+    let v: Vec<String> = accels.iter().map(|a| a.to_string()).collect();
+    shortcut_text(&v)
+}
+
+fn shortcut_text(accels: &[String]) -> String {
     let parts: Vec<String> = accels
         .iter()
         .filter_map(|a| {
@@ -309,6 +314,127 @@ fn status_row(id: &'static str, label: &str) -> adw::ActionRow {
     row
 }
 
+/// Dialog that waits for a key combination: Esc cancels, Backspace turns the shortcut off.
+fn capture_shortcut(parent: &impl IsA<gtk::Widget>, title: &str, done: impl Fn(String) + 'static) {
+    let dlg = adw::AlertDialog::new(
+        Some(title),
+        Some(&tr!(
+            "Press the new shortcut. Esc cancels, Backspace turns the shortcut off."
+        )),
+    );
+    dlg.add_response("cancel", &tr!("Cancel"));
+    dlg.set_close_response("cancel");
+    let keys = gtk::EventControllerKey::new();
+    keys.set_propagation_phase(gtk::PropagationPhase::Capture);
+    let d2 = dlg.clone();
+    keys.connect_key_pressed(move |_, key, _, state| {
+        let mods = state & gtk::accelerator_get_default_mod_mask();
+        if key == gdk::Key::Escape && mods.is_empty() {
+            d2.close();
+            return glib::Propagation::Stop;
+        }
+        if key == gdk::Key::BackSpace && mods.is_empty() {
+            done(desk_settings::shortcuts::DISABLED.to_string());
+            d2.close();
+            return glib::Propagation::Stop;
+        }
+        let key = key.to_lower();
+        if gtk::accelerator_valid(key, mods) {
+            done(gtk::accelerator_name(key, mods).to_string());
+            d2.close();
+        }
+        glib::Propagation::Stop
+    });
+    dlg.add_controller(keys);
+    dlg.present(Some(parent));
+}
+
+/// A shortcut of a feature: the keys in force, where they come from, change and reset.
+fn shortcut_row(sc: &'static desk_settings::Shortcut, toasts: &adw::ToastOverlay) -> adw::ActionRow {
+    use desk_settings::shortcuts::Source;
+    let ctx = themes_core::Ctx::from_env();
+    let row = adw::ActionRow::builder().title(t(sc.label)).build();
+    let val = gtk::Label::new(None);
+    val.add_css_class("dim-label");
+    let change = gtk::Button::builder()
+        .label(tr!("Change"))
+        .valign(gtk::Align::Center)
+        .build();
+    let reset = gtk::Button::builder()
+        .icon_name("edit-undo-symbolic")
+        .tooltip_text(tr!("Reset to the theme default"))
+        .valign(gtk::Align::Center)
+        .build();
+    reset.add_css_class("flat");
+    a11y::label(&reset, &tr!("Reset {name} to the theme default", name = t(sc.label)));
+    a11y::label(&change, &tr!("Change the shortcut: {name}", name = t(sc.label)));
+    row.add_suffix(&val);
+    row.add_suffix(&change);
+    row.add_suffix(&reset);
+
+    let refresh = {
+        let (row, val, reset, ctx) = (row.clone(), val.clone(), reset.clone(), ctx.clone());
+        move || {
+            let cur = themes_core::dconf::dump().unwrap_or_default();
+            let Some(r) = themes_core::shortcuts::status(&ctx, &cur)
+                .into_iter()
+                .find(|r| r.id == sc.id)
+            else {
+                return;
+            };
+            val.set_label(&shortcut_text(&r.in_force));
+            row.set_subtitle(&match r.resolved.source {
+                Source::Override => tr!(
+                    "Your choice (theme default: {accels})",
+                    accels = shortcut_text(&r.theme_default)
+                ),
+                Source::Theme => tr!("Theme default"),
+                Source::Default => tr!("Standard default"),
+            });
+            reset.set_sensitive(r.resolved.source == Source::Override);
+        }
+    };
+    refresh();
+
+    let refresh = std::rc::Rc::new(refresh);
+    {
+        let (refresh, toasts, ctx) = (refresh.clone(), toasts.clone(), ctx.clone());
+        reset.connect_clicked(move |_| {
+            match themes_core::shortcuts::reset(&ctx, sc.id) {
+                Ok(c) => {
+                    for x in &c {
+                        toasts.add_toast(adw::Toast::new(&themes_core::shortcuts::describe(x)));
+                    }
+                }
+                Err(e) => toasts.add_toast(adw::Toast::new(&e.0)),
+            }
+            refresh();
+        });
+    }
+    {
+        let toasts = toasts.clone();
+        change.connect_clicked(move |b| {
+            let (refresh, toasts, ctx) = (refresh.clone(), toasts.clone(), ctx.clone());
+            capture_shortcut(b, &t(sc.label), move |accel| {
+                match themes_core::shortcuts::set_override(&ctx, sc.id, &[accel]) {
+                    Ok(c) if c.is_empty() => {}
+                    Ok(c) => {
+                        let text: Vec<String> =
+                            c.iter().map(themes_core::shortcuts::describe).collect();
+                        toasts.add_toast(adw::Toast::new(&tr!(
+                            "Refused: {conflict}",
+                            conflict = text.join("; ")
+                        )));
+                    }
+                    Err(e) => toasts.add_toast(adw::Toast::new(&e.0)),
+                }
+                refresh();
+            });
+        });
+    }
+    row
+}
+
 fn settings_group(
     g: &Group,
     settings: &HashMap<&'static str, gio::Settings>,
@@ -331,6 +457,7 @@ fn settings_group(
                 destructive,
             } => Some(action_row(id, label, *destructive, toasts).upcast()),
             Item::Status { id, label } => Some(status_row(id, label).upcast()),
+            Item::Shortcut(sc) => Some(shortcut_row(sc, toasts).upcast()),
         };
         if let Some(w) = w {
             pg.add(&w);

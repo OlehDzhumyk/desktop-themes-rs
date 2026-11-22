@@ -46,7 +46,8 @@ const H24: &str = n_("Save a screenshot of the window as PNG and exit");
 const H25: &str = n_("Window size, e.g. 1180x780");
 const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
 const H28: &str = n_("Design tokens (tokens.toml): check, generate, a theme from a wallpaper");
-const H26: &str = n_("Page: themes | mix | features | clipboard | general | credits");
+const H26: &str = n_("Page: themes | mix | features | clipboard | shortcuts | general | credits");
+const H29: &str = n_("Keyboard shortcuts of the features (the theme gives the default)");
 
 #[derive(Parser)]
 #[command(
@@ -127,6 +128,11 @@ enum Cmd {
             help = H22
         )]
         enable_extensions: bool,
+    },
+    #[command(about = H29)]
+    Shortcut {
+        #[command(subcommand)]
+        cmd: crate::shortcut_cli::ShortcutCmd,
     },
     #[command(about = H28)]
     Tokens {
@@ -232,6 +238,7 @@ fn modules_arg(only: Option<&str>, module: &[String]) -> Result<Vec<Module>, Err
 fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     match cmd {
         Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
+        Cmd::Shortcut { cmd } => crate::shortcut_cli::exec(ctx, cmd, json),
         Cmd::List => {
             let st = State::load(ctx);
             let look = st.source(Module::Look).map(String::from);
