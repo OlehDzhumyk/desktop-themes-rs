@@ -11,7 +11,9 @@ Usage (through run.sh): input.py ACTION [ACTION ...]
   move:X,Y            move the pointer
   sleep:SECONDS       wait (keeps the main loop running)
   shot:FILE.png       screenshot
+HS_NO_SHOTS=1 skips the ScreenCast stream (no PipeWire needed): keys work, shot: is a no-op.
 """
+import os
 import subprocess
 import sys
 import time
@@ -50,17 +52,22 @@ sid = bus.call_sync(RD, rd_session, "org.freedesktop.DBus.Properties", "Get",
                     Gio.DBusCallFlags.NONE, 5000, None).unpack()[0]
 (sc_session,) = call(SC, "/org/gnome/Mutter/ScreenCast", SC, "CreateSession",
                      GLib.Variant("(a{sv})", ({"remote-desktop-session-id": GLib.Variant("s", sid)},)), "(o)").unpack()
-(stream,) = call(SC, sc_session, SC + ".Session", "RecordMonitor",
-                 GLib.Variant("(sa{sv})", ("", {"cursor-mode": GLib.Variant("u", 1)})), "(o)").unpack()
+NO_SHOTS = os.environ.get("HS_NO_SHOTS") == "1"
 loop = GLib.MainLoop()
 node = {}
-bus.signal_subscribe(SC, SC + ".Stream", "PipeWireStreamAdded", stream, None, Gio.DBusSignalFlags.NONE,
-                     lambda *a: (node.__setitem__("id", a[5].unpack()[0]), loop.quit()))
-call(RD, rd_session, RD + ".Session", "Start", None, None)
-GLib.timeout_add_seconds(10, loop.quit)
-loop.run()
-if "id" not in node:
-    sys.exit("PipeWireStreamAdded did not arrive")
+stream = None
+if NO_SHOTS:
+    call(RD, rd_session, RD + ".Session", "Start", None, None)
+else:
+    (stream,) = call(SC, sc_session, SC + ".Session", "RecordMonitor",
+                     GLib.Variant("(sa{sv})", ("", {"cursor-mode": GLib.Variant("u", 1)})), "(o)").unpack()
+    bus.signal_subscribe(SC, SC + ".Stream", "PipeWireStreamAdded", stream, None, Gio.DBusSignalFlags.NONE,
+                         lambda *a: (node.__setitem__("id", a[5].unpack()[0]), loop.quit()))
+    call(RD, rd_session, RD + ".Session", "Start", None, None)
+    GLib.timeout_add_seconds(10, loop.quit)
+    loop.run()
+    if "id" not in node:
+        sys.exit("PipeWireStreamAdded did not arrive")
 pump(0.5)
 
 
@@ -92,6 +99,9 @@ def pointer(x, y):
 
 
 def shot(out):
+    if NO_SHOTS:
+        print("screenshot skipped (HS_NO_SHOTS=1): " + out)
+        return
     r = subprocess.run(["gst-launch-1.0", "-q", "pipewiresrc", "path=%d" % node["id"], "num-buffers=5", "!",
                         "videoconvert", "!", "pngenc", "snapshot=true", "!", "filesink", "location=" + out],
                        timeout=30)

@@ -1,0 +1,176 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Continuous integration. Rust jobs run in a Fedora 45 container (the target platform: GTK 4,
+# libadwaita and GNOME Shell 51 come from the distribution, as on the developer's machine).
+# The headless GNOME Shell end-to-end test lives in headless.yml (manual/scheduled, see there).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_HOME: ${{ github.workspace }}/.cargo-home
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  rust-fmt-clippy:
+    # fmt and clippy are REPORT-ONLY for now: the existing code base has findings (see the job
+    # summary). Remove `continue-on-error` once they are fixed.
+    name: rustfmt + clippy (report only)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel \
+            rust cargo rustfmt clippy
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .cargo-home/registry
+            .cargo-home/git
+            target
+          key: cargo-fedora45-${{ github.job }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-fedora45-${{ github.job }}-
+      - name: cargo fmt --check
+        continue-on-error: true
+        run: |
+          set +e
+          cargo fmt --all --check > fmt.diff 2>&1
+          rc=$?
+          {
+            echo "### rustfmt: $([ $rc = 0 ] && echo clean || echo "$(grep -c '^Diff in' fmt.diff) hunks differ")"
+            if [ $rc != 0 ]; then echo '```diff'; head -n 80 fmt.diff; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat fmt.diff
+          exit $rc
+      - name: cargo clippy
+        continue-on-error: true
+        run: |
+          set +e
+          cargo clippy --workspace --locked --all-targets -- -D warnings 2> clippy.log
+          rc=$?
+          {
+            echo "### clippy: $([ $rc = 0 ] && echo clean || echo "$(grep -c '^\(warning\|error\)' clippy.log) messages")"
+            if [ $rc != 0 ]; then echo '```'; head -n 80 clippy.log; echo '```'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat clippy.log
+          exit $rc
+
+  rust-test:
+    name: cargo test
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .cargo-home/registry
+            .cargo-home/git
+            target
+          key: cargo-fedora45-${{ github.job }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-fedora45-${{ github.job }}-
+      - name: Build
+        run: cargo build --workspace --locked
+      - name: Test
+        run: cargo test --workspace --locked
+
+  rust-deny:
+    name: cargo deny (licences, advisories)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: dnf install -y --setopt=install_weak_deps=False git cargo cargo-deny
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: cargo deny check
+        run: cargo deny check
+
+  bridge:
+    name: desk-bridge (tsc, eslint, build)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    defaults:
+      run:
+        working-directory: bridge
+    steps:
+      - name: Install packages
+        # bridge/ does not exist before checkout, so run this step from the workspace root.
+        working-directory: .
+        run: dnf install -y --setopt=install_weak_deps=False git nodejs npm glib2-devel
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: npm ci
+        run: npm ci --no-audit --no-fund
+      - name: tsc --noEmit
+        run: npm run typecheck
+      - name: eslint
+        run: npm run lint
+      - name: Build the extension
+        run: npm run build
+
+  static-checks:
+    name: shellcheck, schemas, desktop file, D-Bus XML
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git ShellCheck glib2-devel desktop-file-utils libxml2 python3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: shellcheck
+        run: |
+          # The container runs as root on a checkout owned by another uid: let git read it.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          files=$(git ls-files -z | xargs -0 grep -IlE '^#!.*(ba)?sh' || true)
+          test -n "$files" || { echo "no shell scripts found (git ls-files failed?)"; exit 1; }
+          echo "$files" | tr '\n' '\0' | xargs -0 shellcheck --severity=warning
+      - name: GSettings schema (strict)
+        run: glib-compile-schemas --strict --dry-run data/
+      - name: Desktop file
+        run: desktop-file-validate data/*.desktop
+      - name: D-Bus interface XML and extension metadata
+        run: |
+          xmllint --noout data/dbus/*.xml data/*.gschema.xml
+          python3 -m json.tool bridge/static/metadata.json > /dev/null
+
+  workflows:
+    name: actionlint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: actionlint
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+
+  docs:
+    name: docs links (offline)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check relative links and anchors
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --offline --include-fragments --no-progress --exclude-path node_modules --exclude-path target --exclude-path .cargo-home '**/*.md'
+          fail: true
