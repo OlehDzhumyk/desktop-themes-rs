@@ -124,13 +124,20 @@ mod tests {
         let mut c = Coalesce::new(ms(40), ms(150));
         assert_eq!(c.deadline(), None);
         c.touch(0, t0);
-        assert_eq!(c.deadline(), None, "an event that changed nothing is not pending");
+        assert_eq!(
+            c.deadline(),
+            None,
+            "an event that changed nothing is not pending"
+        );
         for i in 0..20 {
             c.touch(dirty::DEVICES, t0 + ms(i));
         }
         c.touch(dirty::DEFAULTS, t0 + ms(20));
         assert_eq!(c.take_due(t0 + ms(59)), None);
-        assert_eq!(c.take_due(t0 + ms(60)), Some(dirty::DEVICES | dirty::DEFAULTS));
+        assert_eq!(
+            c.take_due(t0 + ms(60)),
+            Some(dirty::DEVICES | dirty::DEFAULTS)
+        );
         assert_eq!(c.take_due(t0 + ms(1000)), None);
         // a drag: an event every 10 ms for a second
         let t1 = t0 + ms(2000);

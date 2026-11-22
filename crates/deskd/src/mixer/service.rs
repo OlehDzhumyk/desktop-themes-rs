@@ -89,9 +89,7 @@ impl MixerIface {
 
     #[zbus(property)]
     fn default_output(&self) -> u32 {
-        lock(&self.mixer.graph)
-            .default_id(Class::Sink)
-            .unwrap_or(0)
+        lock(&self.mixer.graph).default_id(Class::Sink).unwrap_or(0)
     }
 
     #[zbus(property)]
@@ -170,7 +168,11 @@ mod tests {
         );
         g.node_params(60, Some(vec![1.0, 1.0]), Some(false));
         g.node_state(60, true, Instant::now());
-        g.metadata(0, Some("default.audio.sink"), Some(r#"{"name":"speakers"}"#));
+        g.metadata(
+            0,
+            Some("default.audio.sink"),
+            Some(r#"{"name":"speakers"}"#),
+        );
         let graph = Arc::new(Mutex::new(g));
         let log = Arc::new(Mutex::new(Vec::new()));
         let m = Arc::new(Mixer::new(graph.clone(), Notifier::inert(), None));
@@ -206,7 +208,9 @@ mod tests {
                 .serve_at(MIXER_PATH, MixerIface { mixer: m.clone() })
                 .build();
             let client = zbus::connection::Builder::unix_stream(b).p2p().build();
-            let (server, client) = futures_util::future::try_join(server, client).await.unwrap();
+            let (server, client) = futures_util::future::try_join(server, client)
+                .await
+                .unwrap();
 
             let p = MixerProxy::builder(&client)
                 .destination("io.github.OlehDzhumyk.Desk")

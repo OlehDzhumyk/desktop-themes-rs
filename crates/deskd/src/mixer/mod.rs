@@ -36,6 +36,10 @@ pub fn lock(g: &SharedGraph) -> MutexGuard<'_, Graph> {
 /// Carries out [`Op`]s on the audio server.
 pub trait Backend: Send {
     fn exec(&self, ops: Vec<Op>);
+    /// Still connected or connecting (false once its thread has ended).
+    fn alive(&self) -> bool {
+        true
+    }
 }
 
 /// The engine: the graph, the connection that feeds it, and the side effects of requests.
@@ -99,11 +103,22 @@ impl Mixer {
         drop(old);
     }
 
+    /// The mixer is switched on (it has a backend, live or ended).
     pub fn has_backend(&self) -> bool {
         self.backend
             .lock()
             .unwrap_or_else(|p| p.into_inner())
             .is_some()
+    }
+
+    /// A backend is connected or still connecting: never replace it (its end would reset the
+    /// graph under the new one).
+    pub fn backend_alive(&self) -> bool {
+        self.backend
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .as_ref()
+            .is_some_and(|b| b.alive())
     }
 
     fn exec(&self, ops: Vec<Op>) -> Result<(), MixError> {
@@ -174,7 +189,10 @@ pub mod testing {
                         g.node_params(node, None, Some(mute));
                     }
                     Op::Metadata {
-                        subject, key, value, ..
+                        subject,
+                        key,
+                        value,
+                        ..
                     } => {
                         // the session manager answers a configured default with the effective one
                         let key = key.replace("default.configured.", "default.");

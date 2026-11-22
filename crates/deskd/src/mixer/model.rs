@@ -406,7 +406,10 @@ impl Graph {
 
     /// A node appeared or its properties changed. Returns the dirty flags.
     pub fn add_node(&mut self, id: u32, props: Props) -> u8 {
-        let Some(class) = props.get("media.class").and_then(|c| Class::from_media_class(c)) else {
+        let Some(class) = props
+            .get("media.class")
+            .and_then(|c| Class::from_media_class(c))
+        else {
             return 0;
         };
         let n = self.nodes.entry(id).or_insert_with(|| Node {
@@ -634,7 +637,11 @@ impl Graph {
     /// The route that carries a device node's volume, if it has one.
     fn route_of(&self, n: &Node) -> Option<(u32, &Route)> {
         let (dev, card_device) = n.route_key()?;
-        let r = self.routes.get(&dev)?.iter().find(|r| r.device == card_device)?;
+        let r = self
+            .routes
+            .get(&dev)?
+            .iter()
+            .find(|r| r.device == card_device)?;
         Some((dev, r))
     }
 
@@ -1049,7 +1056,11 @@ mod tests {
         for id in [30, 31, 40] {
             g.node_params(id, Some(vec![0.125, 0.125]), Some(false));
         }
-        g.metadata(0, Some("default.audio.sink"), Some(r#"{"name":"speakers"}"#));
+        g.metadata(
+            0,
+            Some("default.audio.sink"),
+            Some(r#"{"name":"speakers"}"#),
+        );
         g.add_link(100, 50, 30);
         g.add_link(101, 60, 31);
         g
@@ -1065,7 +1076,10 @@ mod tests {
         assert_eq!(to_linear(f64::NAN), 0.0);
         // the balance between channels survives a volume change
         let v = scaled(&[0.5, 0.25], 0.5);
-        assert!((v[0] - 0.125).abs() < 1e-6 && (v[1] - 0.0625).abs() < 1e-6, "{v:?}");
+        assert!(
+            (v[0] - 0.125).abs() < 1e-6 && (v[1] - 0.0625).abs() < 1e-6,
+            "{v:?}"
+        );
         assert_eq!(scaled(&[0.0, 0.0], 1.0), vec![1.0, 1.0]);
         assert!((level(&[0.125, 0.001]) - 0.5).abs() < 1e-6);
     }
@@ -1088,7 +1102,11 @@ mod tests {
             "org.mozilla.firefox".into(),
         );
         g.add_node(52, p);
-        assert!(g.apps(Instant::now(), true).iter().any(|a| a.key == "org.mozilla.firefox"));
+        assert!(
+            g.apps(Instant::now(), true)
+                .iter()
+                .any(|a| a.key == "org.mozilla.firefox")
+        );
     }
 
     #[test]
@@ -1101,7 +1119,11 @@ mod tests {
         mon.insert("stream.monitor".into(), "true".into());
         g.add_node(71, mon);
         g.cfg.hide_apps = vec!["mpv".into()];
-        let keys: Vec<String> = g.apps(Instant::now(), true).into_iter().map(|a| a.key).collect();
+        let keys: Vec<String> = g
+            .apps(Instant::now(), true)
+            .into_iter()
+            .map(|a| a.key)
+            .collect();
         assert_eq!(keys, vec!["firefox"]);
     }
 
@@ -1114,7 +1136,10 @@ mod tests {
         let names = |g: &mut Graph, t, silent| -> Vec<String> {
             g.apps(t, silent).into_iter().map(|a| a.key).collect()
         };
-        assert_eq!(names(&mut g, t0 + Duration::from_secs(29), false), ["firefox", "mpv"]);
+        assert_eq!(
+            names(&mut g, t0 + Duration::from_secs(29), false),
+            ["firefox", "mpv"]
+        );
         assert_eq!(names(&mut g, t0 + LINGER, false), ["firefox"]);
         assert_eq!(names(&mut g, t0 + LINGER, true), ["firefox", "mpv"]);
         assert_eq!(g.next_expiry(t0 + LINGER), None);
@@ -1128,12 +1153,21 @@ mod tests {
         assert_eq!(
             ops,
             vec![
-                Op::NodeVolumes { node: 50, volumes: vec![v, v] },
-                Op::NodeVolumes { node: 51, volumes: vec![v, v] },
+                Op::NodeVolumes {
+                    node: 50,
+                    volumes: vec![v, v]
+                },
+                Op::NodeVolumes {
+                    node: 51,
+                    volumes: vec![v, v]
+                },
             ]
         );
         assert!(!remembered);
-        assert_eq!(g.set_app_volume("nope", 0.3), Err(MixError::NoSuchApp("nope".into())));
+        assert_eq!(
+            g.set_app_volume("nope", 0.3),
+            Err(MixError::NoSuchApp("nope".into()))
+        );
         g.connected = false;
         assert_eq!(g.set_volume(30, 0.3), Err(MixError::Unavailable));
     }
@@ -1149,7 +1183,10 @@ mod tests {
         // no route yet: the node itself
         assert_eq!(
             g.set_mute(32, true).unwrap().0,
-            vec![Op::NodeMute { node: 32, mute: true }]
+            vec![Op::NodeMute {
+                node: 32,
+                mute: true
+            }]
         );
         let flags = g.device_route(
             7,
@@ -1163,7 +1200,11 @@ mod tests {
         assert_eq!(flags, dirty::DEVICES);
         let d = g.devices("output").unwrap();
         let bi = d.iter().find(|d| d.id == 32).unwrap();
-        assert!((bi.volume - 0.2).abs() < 1e-6, "route volume shown: {}", bi.volume);
+        assert!(
+            (bi.volume - 0.2).abs() < 1e-6,
+            "route volume shown: {}",
+            bi.volume
+        );
         assert_eq!(
             g.set_volume(32, 0.5).unwrap().0,
             vec![Op::Route {
@@ -1174,7 +1215,13 @@ mod tests {
                 mute: None,
             }]
         );
-        assert!(matches!(g.set_mute(32, true).unwrap().0[0], Op::Route { mute: Some(true), .. }));
+        assert!(matches!(
+            g.set_mute(32, true).unwrap().0[0],
+            Op::Route {
+                mute: Some(true),
+                ..
+            }
+        ));
     }
 
     #[test]
@@ -1182,7 +1229,9 @@ mod tests {
         let mut g = graph(false);
         let outs = g.devices("output").unwrap();
         assert_eq!(
-            outs.iter().map(|d| (d.id, d.is_default)).collect::<Vec<_>>(),
+            outs.iter()
+                .map(|d| (d.id, d.is_default))
+                .collect::<Vec<_>>(),
             vec![(31, false), (30, true)]
         );
         // mpv was moved to the headphones by hand; firefox follows the default
@@ -1199,18 +1248,29 @@ mod tests {
         );
         assert_eq!(&ops[1..], &Graph::follow_default(60));
         // the server confirms: the effective default changes
-        let f = g.metadata(0, Some("default.audio.sink"), Some(r#"{"name":"headphones"}"#));
+        let f = g.metadata(
+            0,
+            Some("default.audio.sink"),
+            Some(r#"{"name":"headphones"}"#),
+        );
         assert_eq!(f, dirty::DEFAULTS | dirty::DEVICES);
         assert_eq!(g.default_id(Class::Sink), Some(31));
         // the default device disappears: nothing is default until the server picks another
         g.remove(31);
         assert_eq!(g.default_id(Class::Sink), None);
-        g.metadata(0, Some("default.audio.sink"), Some(r#"{"name":"speakers"}"#));
+        g.metadata(
+            0,
+            Some("default.audio.sink"),
+            Some(r#"{"name":"speakers"}"#),
+        );
         assert_eq!(g.default_id(Class::Sink), Some(30));
         // inputs: no stream moves, kinds are checked
         assert_eq!(g.set_default("input", 40).unwrap().len(), 1);
         assert_eq!(g.set_default("input", 30), Err(MixError::WrongKind(30)));
-        assert_eq!(g.set_default("both", 30), Err(MixError::BadKind("both".into())));
+        assert_eq!(
+            g.set_default("both", 30),
+            Err(MixError::BadKind("both".into()))
+        );
     }
 
     #[test]
@@ -1227,7 +1287,10 @@ mod tests {
                 value: Some("31".into()),
             }
         );
-        assert_eq!(g.move_stream(50, 0).unwrap(), Graph::follow_default(50).to_vec());
+        assert_eq!(
+            g.move_stream(50, 0).unwrap(),
+            Graph::follow_default(50).to_vec()
+        );
         assert_eq!(g.move_stream(50, 40), Err(MixError::WrongKind(40)));
         assert_eq!(g.move_stream(30, 31), Err(MixError::WrongKind(30)));
     }
@@ -1259,8 +1322,14 @@ mod tests {
         assert_eq!(
             ops,
             vec![
-                Op::NodeVolumes { node: 61, volumes: vec![v, v] },
-                Op::NodeMute { node: 61, mute: true },
+                Op::NodeVolumes {
+                    node: 61,
+                    volumes: vec![v, v]
+                },
+                Op::NodeMute {
+                    node: 61,
+                    mute: true
+                },
             ]
         );
         // only once: the app may change its volume afterwards
@@ -1268,7 +1337,13 @@ mod tests {
         assert!(ops.is_empty());
         // memory off: nothing remembered, nothing restored
         let mut g = graph(false);
-        g.memory.insert("mpv".into(), Remembered { volume: 0.1, mute: false });
+        g.memory.insert(
+            "mpv".into(),
+            Remembered {
+                volume: 0.1,
+                mute: false,
+            },
+        );
         g.add_node(62, stream("mpv", "mpv"));
         assert!(g.node_params(62, Some(vec![1.0]), None).1.is_empty());
     }
@@ -1277,12 +1352,25 @@ mod tests {
     fn unchanged_events_are_not_dirty() {
         let mut g = graph(false);
         assert_eq!(g.add_node(30, sink("speakers", "Speakers")), 0);
-        assert_eq!(g.node_params(30, Some(vec![0.125, 0.125]), Some(false)).0, 0);
+        assert_eq!(
+            g.node_params(30, Some(vec![0.125, 0.125]), Some(false)).0,
+            0
+        );
         assert_eq!(g.node_state(50, true, Instant::now()), 0);
-        assert_eq!(g.metadata(0, Some("default.audio.sink"), Some(r#"{"name":"speakers"}"#)), 0);
+        assert_eq!(
+            g.metadata(
+                0,
+                Some("default.audio.sink"),
+                Some(r#"{"name":"speakers"}"#)
+            ),
+            0
+        );
         assert_eq!(g.add_link(100, 50, 30), 0);
         assert_eq!(g.metadata(0, Some("unrelated"), Some("x")), 0);
-        assert_eq!(dirty::names(dirty::APPS | dirty::DEFAULTS), ["apps", "defaults"]);
+        assert_eq!(
+            dirty::names(dirty::APPS | dirty::DEFAULTS),
+            ["apps", "defaults"]
+        );
     }
 
     #[test]

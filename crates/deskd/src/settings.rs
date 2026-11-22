@@ -42,7 +42,9 @@ pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
 }
 
 /// Whether the mixer is on, and the engine's part of its settings.
-pub fn read_mixer(s: &desk_settings::accessors::MixerSettings) -> (bool, crate::mixer::model::Config) {
+pub fn read_mixer(
+    s: &desk_settings::accessors::MixerSettings,
+) -> (bool, crate::mixer::model::Config) {
     (
         s.enabled(),
         crate::mixer::model::Config {

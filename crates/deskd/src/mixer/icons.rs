@@ -47,7 +47,9 @@ pub fn resolve(dirs: &[PathBuf], candidates: &[String]) -> Option<String> {
         .filter(|c| !c.is_empty() && !c.contains('/'))
         .find_map(|c| {
             dirs.iter().find_map(|d| {
-                let p: PathBuf = Path::new(d).join("applications").join(format!("{c}.desktop"));
+                let p: PathBuf = Path::new(d)
+                    .join("applications")
+                    .join(format!("{c}.desktop"));
                 std::fs::read_to_string(p).ok().and_then(|e| icon_of(&e))
             })
         })

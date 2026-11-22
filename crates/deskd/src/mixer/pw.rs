@@ -10,6 +10,8 @@
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::JoinHandle;
 use std::time::Instant;
 
@@ -38,11 +40,16 @@ enum Cmd {
 pub struct PwBackend {
     tx: pw::channel::Sender<Cmd>,
     thread: Option<JoinHandle<()>>,
+    alive: Arc<AtomicBool>,
 }
 
 impl Backend for PwBackend {
     fn exec(&self, ops: Vec<Op>) {
         let _ = self.tx.send(Cmd::Exec(ops));
+    }
+
+    fn alive(&self) -> bool {
+        self.alive.load(Ordering::Acquire)
     }
 }
 
@@ -64,6 +71,8 @@ impl PwBackend {
         on_lost: impl FnOnce() + Send + 'static,
     ) -> PwBackend {
         let (tx, rx) = pw::channel::channel::<Cmd>();
+        let alive = Arc::new(AtomicBool::new(true));
+        let alive2 = alive.clone();
         let thread = std::thread::Builder::new()
             .name("deskd-pipewire".into())
             .spawn(move || {
@@ -80,6 +89,7 @@ impl PwBackend {
                     g.reset();
                     was
                 };
+                alive2.store(false, Ordering::Release);
                 if was {
                     notifier.touch(dirty::ALL);
                 }
@@ -91,6 +101,7 @@ impl PwBackend {
         PwBackend {
             tx,
             thread: Some(thread),
+            alive,
         }
     }
 }
@@ -112,7 +123,10 @@ fn copy_props(d: &DictRef) -> Props {
 
 fn deserialize(param: Option<&Pod>) -> Option<Object> {
     let pod = param?;
-    match PodDeserializer::deserialize_any_from(pod.as_bytes()).ok()?.1 {
+    match PodDeserializer::deserialize_any_from(pod.as_bytes())
+        .ok()?
+        .1
+    {
         Value::Object(o) => Some(o),
         _ => None,
     }
@@ -330,7 +344,8 @@ fn run(
                                 let notifier = notifier.clone();
                                 move |_seq, kind, _index, _next, param| {
                                     if kind == ParamType::Route
-                                        && let Some(route) = deserialize(param).and_then(parse_route)
+                                        && let Some(route) =
+                                            deserialize(param).and_then(parse_route)
                                     {
                                         notifier.touch(lock(&graph).device_route(id, route));
                                     }

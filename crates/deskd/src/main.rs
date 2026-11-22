@@ -69,20 +69,22 @@ fn features() -> Vec<String> {
 /// later; after that, the next client request tries (see [`Mixer::wanted`]).
 #[cfg(feature = "pipewire")]
 fn start_mixer(m: &Arc<Mixer>) {
+    if m.backend_alive() {
+        return;
+    }
     let weak = Arc::downgrade(m);
-    let backend =
-        mixer::pw::PwBackend::spawn(m.graph.clone(), m.notifier.clone(), move || {
-            glib::MainContext::default().invoke(move || {
-                glib::timeout_add_seconds_local_once(2, move || {
-                    if let Some(m) = weak.upgrade()
-                        && !mixer::lock(&m.graph).connected
-                        && m.has_backend()
-                    {
-                        start_mixer(&m);
-                    }
-                });
+    let backend = mixer::pw::PwBackend::spawn(m.graph.clone(), m.notifier.clone(), move || {
+        glib::MainContext::default().invoke(move || {
+            glib::timeout_add_seconds_local_once(2, move || {
+                if let Some(m) = weak.upgrade()
+                    && !mixer::lock(&m.graph).connected
+                    && m.has_backend()
+                {
+                    start_mixer(&m);
+                }
             });
         });
+    });
     m.set_backend(Some(Box::new(backend)));
 }
 

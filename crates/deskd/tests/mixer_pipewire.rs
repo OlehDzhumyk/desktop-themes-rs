@@ -22,7 +22,8 @@ use futures_util::StreamExt;
 const APP: &str = "org.example.MixerTest";
 
 fn have(prog: &str) -> bool {
-    std::env::var_os("PATH").is_some_and(|p| std::env::split_paths(&p).any(|d| d.join(prog).is_file()))
+    std::env::var_os("PATH")
+        .is_some_and(|p| std::env::split_paths(&p).any(|d| d.join(prog).is_file()))
 }
 
 /// The processes of this test; dropping it kills them (and only them).
@@ -47,7 +48,11 @@ impl Env {
         let _ = std::fs::remove_dir_all(&dir);
         let here = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/pipewire");
         for (sub, file, from) in [
-            ("cfg/wireplumber/wireplumber.conf.d", "90-test.conf", "wireplumber.conf"),
+            (
+                "cfg/wireplumber/wireplumber.conf.d",
+                "90-test.conf",
+                "wireplumber.conf",
+            ),
             ("cfg/pipewire/client.conf.d", "90-test.conf", "client.conf"),
         ] {
             std::fs::create_dir_all(dir.join(sub)).unwrap();
@@ -125,7 +130,11 @@ async fn devices(p: &MixerProxy<'_>) -> Vec<MixerDevice> {
 }
 
 async fn app(p: &MixerProxy<'_>) -> Option<MixerApp> {
-    p.list_apps(true).await.unwrap().into_iter().find(|a| a.key == APP)
+    p.list_apps(true)
+        .await
+        .unwrap()
+        .into_iter()
+        .find(|a| a.key == APP)
 }
 
 /// Re-check after every `Changed` until `check` says yes.
@@ -161,15 +170,29 @@ fn mixer_against_an_isolated_pipewire() {
     let conf = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/pipewire/pipewire.conf");
     let mut pw = env.cmd("pipewire");
     pw.arg("-c").arg(&conf).env("PIPEWIRE_DEBUG", "3");
-    procs.0.push(start_until(pw, true, "Listening on 'pipewire-0'"));
+    procs
+        .0
+        .push(start_until(pw, true, "Listening on 'pipewire-0'"));
 
-    procs.0.push(env.cmd("wireplumber").stdout(Stdio::null()).stderr(Stdio::null()).spawn().unwrap());
+    let log = |n: &str| std::fs::File::create(env.dir.join(n)).unwrap();
+    procs.0.push(
+        env.cmd("wireplumber")
+            .stdout(Stdio::null())
+            .stderr(log("wireplumber.log"))
+            .spawn()
+            .unwrap(),
+    );
 
     // a hang guard, not a timing assertion: kill what this test started and fail
     let pids: Vec<u32> = procs.0.iter().map(Child::id).collect();
     let (done, watchdog) = mpsc::channel::<()>();
+    let logs = env.dir.clone();
     let guard = std::thread::spawn(move || {
         if watchdog.recv_timeout(Duration::from_secs(120)) == Err(mpsc::RecvTimeoutError::Timeout) {
+            for n in ["deskd.log", "wireplumber.log"] {
+                let t = std::fs::read_to_string(logs.join(n)).unwrap_or_default();
+                eprintln!("--- {n}\n{t}");
+            }
             for pid in pids {
                 let _ = Command::new("kill").arg(pid.to_string()).status();
             }
@@ -187,7 +210,7 @@ fn mixer_against_an_isolated_pipewire() {
         let mut owners = dbus.receive_name_owner_changed().await.unwrap();
 
         let mut deskd = env.cmd(env!("CARGO_BIN_EXE_deskd"));
-        deskd.stdout(Stdio::null()).stderr(Stdio::null());
+        deskd.stdout(Stdio::null()).stderr(log("deskd.log"));
         procs.0.push(deskd.spawn().unwrap());
         let name = zbus::names::BusName::try_from(BUS_NAME).unwrap();
         while !dbus.name_has_owner(name.clone()).await.unwrap() {
@@ -218,20 +241,34 @@ fn mixer_against_an_isolated_pipewire() {
 
         // an application starts playing
         let mut cat = env.cmd("pw-cat");
-        cat.args(["--playback", "--raw", "--format", "s16", "--rate", "48000", "--channels", "2"])
-            .arg("-P")
-            .arg(format!("{{ application.name = \"Mixer Test\" application.id = \"{APP}\" }}"))
-            .arg("-")
-            .stdin(std::fs::File::open("/dev/zero").unwrap())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null());
+        cat.args([
+            "--playback",
+            "--raw",
+            "--format",
+            "s16",
+            "--rate",
+            "48000",
+            "--channels",
+            "2",
+        ])
+        .arg("-P")
+        .arg(format!(
+            "{{ application.name = \"Mixer Test\" application.id = \"{APP}\" }}"
+        ))
+        .arg("-")
+        .stdin(std::fs::File::open("/dev/zero").unwrap())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
         procs.0.push(cat.spawn().unwrap());
         let a = wait_for!(changed, app(&p).await.filter(|a| a.device == speakers));
         assert_eq!(a.name, "Mixer Test");
 
         // AC-MIX-02: the server shows 30 % for that stream
         p.set_app_volume(APP, 0.3).await.unwrap();
-        wait_for!(changed, app(&p).await.filter(|a| (a.volume - 0.3).abs() < 0.01));
+        wait_for!(
+            changed,
+            app(&p).await.filter(|a| (a.volume - 0.3).abs() < 0.01)
+        );
         p.set_app_mute(APP, true).await.unwrap();
         wait_for!(changed, app(&p).await.filter(|a| a.mute));
         p.set_app_mute(APP, false).await.unwrap();
@@ -241,7 +278,9 @@ fn mixer_against_an_isolated_pipewire() {
         p.set_default("output", headphones).await.unwrap();
         wait_for!(changed, {
             let d = devices(&p).await;
-            d.iter().any(|x| x.id == headphones && x.is_default).then_some(())
+            d.iter()
+                .any(|x| x.id == headphones && x.is_default)
+                .then_some(())
         });
         assert_eq!(p.default_output().await.unwrap(), headphones);
         wait_for!(changed, app(&p).await.filter(|a| a.device == headphones));
@@ -254,7 +293,10 @@ fn mixer_against_an_isolated_pipewire() {
         p.set_volume(headphones, 0.5).await.unwrap();
         wait_for!(changed, {
             let d = devices(&p).await;
-            d.iter().find(|x| x.id == headphones).filter(|x| (x.volume - 0.5).abs() < 0.01).map(|_| ())
+            d.iter()
+                .find(|x| x.id == headphones)
+                .filter(|x| (x.volume - 0.5).abs() < 0.01)
+                .map(|_| ())
         });
 
         // AC-MIX-07: the audio server stops; deskd reports it and refuses requests
