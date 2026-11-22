@@ -212,7 +212,7 @@ export async function panelItems() {
 // recorded. leaks() then reports what is still alive:
 //   handlers  connected to objects the code did NOT create (shell objects, settings, the display):
 //             these outlive the extension; handlers on its own objects go with those objects
-//   sources   timeouts/idles still pending
+//   sources   timeouts/idles the code added itself and that are still pending
 //   actors    actors it created that were never destroyed and are still on the stage
 //   orphans   actors it created that were never destroyed, are off the stage and carry destroy
 //             handlers: they die in a garbage collection, which is exactly when "call back into
@@ -229,6 +229,13 @@ function fromFragment() {
     const stack = new Error().stack ?? '';
     const line = stack.split('\n').find(l => l.includes(_fragment));
     return line ? line.replace(/^.*?@/, '').replace(/^.*\/(?=[^/]*$)/, '') : null;
+}
+
+/** Where the caller of the patched function is, when that caller is code under the fragment. */
+function directCaller() {
+    // [0] directCaller, [1] the patched function, [2] its caller
+    const line = (new Error().stack ?? '').split('\n')[2] ?? '';
+    return line.includes(_fragment) ? line.replace(/^.*?@/, '').replace(/^.*\/(?=[^/]*$)/, '') : null;
 }
 
 function typeName(obj) {
@@ -280,9 +287,11 @@ export function startTracking(fragment = UUID) {
     };
     proto.connect = record('connect');
     proto.connect_after = record('connect_after');
-    const source = name => (...args) => {
+    // sources count only when the extension's code adds them itself: the shell's own one-shot
+    // timeouts (e.g. from Main.popModal called by the extension) are not the extension's to remove
+    const source = name => function (...args) {
         const id = _orig[name](...args);
-        const where = fromFragment();
+        const where = directCaller();
         if (where)
             _sources.set(id, {kind: name, where});
         return id;
