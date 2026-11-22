@@ -52,8 +52,31 @@
 * docs/i18n.md (source language, domain, language setting, how to add a language) — referenced
   from docs/settings.md, not written yet; README note "no i18n yet" to update; docs/architecture.md
   mention of desk-settings/xtask (minimal additive edit).
-* deskd: debounce `save()` (perf agent: sync_all+rename per push, p95 24 ms).
+* deskd: debounce `save()` (perf agent: sync_all+rename per push, p95 24 ms). Tried: a 1.5 s
+  `save_soon` for Push/Activate works, but glib 0.22 here has no `unix_signal_add_local`, so a
+  SIGTERM at logout could lose the last 1.5 s; reverted. Needs a SIGTERM hook (e.g. `signal-hook`
+  crate or zbus-side flush) before debouncing.
 * Keyboard-focus order review in the GUI; large-text check (text-scaling-factor 1.5 screenshots).
+
+## Gaps reported by the spec agent (not done yet)
+1. windows11 flyout: not reachable by Tab, items need accessible names. Partly done in this branch
+   (cards have LIST_ITEM role + names, Tab/Shift+Tab call `navigate_focus`), but cards are
+   `can_focus: false`, so Tab only reaches buttons: make cards focusable and sync focus ↔ selection.
+2. bridge stylesheet.css: macos/windows11 skins are dark-only with hard-coded accent #60cdff /
+   #2f6fe4. Follow light/dark (St.Settings color_scheme → `.desk-light` class) and the accent
+   (St.Settings accent_color → inline style or class per accent); coordinate with the tokens agent
+   (skin colours may come from design tokens).
+3. Pin icon identical for pinned/unpinned (only `.checked` colour differs): use different icons
+   (e.g. view-pin-symbolic vs view-pin-outline / a filled variant) + the accessible names already
+   say «Закріпити»/«Відкріпити».
+4. WinFlyout `_expanded` index survives a delete/refresh: reset `_expanded = -1` in `refresh()`
+   or key it by item id.
+5. Lock-screen style strings from settings are injected unvalidated
+   (extensions/lockscreen-layout): move those keys into the registry with validation (colour regex,
+   font name charset, size ranges via `Kind::UInt` ranges) and validate again in the extension.
+6. Decision needed: per-feature shortcut overrides in the registry (user value) with theme-provided
+   defaults (theme writes a `*-default` key or the registry reads the theme's desk.dconf). Today
+   `toggle-shortcut` is written by themes and shown read-only.
 
 ## Next commands
 ```sh
