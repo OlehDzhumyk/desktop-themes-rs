@@ -1,0 +1,66 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not test on your only session if you can avoid it, and
+        read the `themes doctor` output before pasting it: it can contain paths of your home
+        directory. Security problems: see SECURITY.md and report them privately instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. themes apply macos
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `themes doctor --json`
+      description: Run it in the session where the problem happens. Remove anything private.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `themes --version`, or the commit hash if built from source
+    validations:
+      required: true
+  - type: input
+    id: shell
+    attributes:
+      label: GNOME Shell version and distribution
+      description: Output of `gnome-shell --version` and your distribution (for example Fedora Silverblue 45)
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Theme manager (CLI / window)
+        - deskd / clipboard history
+        - desk-bridge shell extension
+        - Installation scripts
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "`journalctl --user -b | grep -i -E 'deskd|desk-bridge|themes'` and `~/.local/share/desktop-themes/apply.log` (relevant lines)"
+      render: text
