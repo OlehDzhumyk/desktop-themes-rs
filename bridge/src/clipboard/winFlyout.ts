@@ -18,7 +18,8 @@ export class WinFlyout extends ClipboardPanel {
     private _list: St.BoxLayout;
     private _clearBtn: St.Button;
     private _status: St.Label;
-    private _expanded = -1;
+    /** Id of the card whose «…» actions are shown (an id, so it does not move to another item). */
+    private _expanded: ClipItem['id'] | null = null;
 
     constructor(host: PanelHost) {
         super(host, 'windows11', 'caret');
@@ -70,7 +71,7 @@ export class WinFlyout extends ClipboardPanel {
     }
 
     protected override onOpen(): void {
-        this._expanded = -1;
+        this._expanded = null;
     }
 
     protected override focusInitial(): void {
@@ -131,7 +132,7 @@ export class WinFlyout extends ClipboardPanel {
         inner.add_child(content);
 
         const side = new St.BoxLayout({...VERTICAL, style_class: 'desk-clip-card-side', y_align: Clutter.ActorAlign.START});
-        if (this._expanded === index) {
+        if (this._expanded === it.id) {
             side.add_child(iconButton('user-trash-symbolic', _('Delete'), 'desk-clip-card-button',
                 () => void this.remove(it)));
             side.add_child(iconButton(it.pinned ? 'view-pin-symbolic' : 'view-pin-symbolic',
@@ -139,7 +140,7 @@ export class WinFlyout extends ClipboardPanel {
                 `desk-clip-card-button${it.pinned ? ' checked' : ''}`, () => void this.togglePin(it)));
         } else {
             side.add_child(iconButton('view-more-horizontal-symbolic', _('More'), 'desk-clip-card-button', () => {
-                this._expanded = index;
+                this._expanded = it.id;
                 this.render();
                 this.highlight();
             }));
