@@ -92,8 +92,8 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Emoji and symbol picker | Planned | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
 | Focus modes and do-not-disturb schedules | Planned | 2 | In Windows 11 and macOS | [focus](features/focus.md) |
 | Automatic light/dark by sunset | Planned | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |
-| Theme from wallpaper | Planned | 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
-| Settings hub "Desktop" | Planned | 2 | Original | [settings-hub](features/settings-hub.md) |
+| Theme from wallpaper | Partial | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
+| Settings hub "Desktop" | Partial | 1.5 / 2 | Original | [settings-hub](features/settings-hub.md) |
 | Screenshots, annotation, screen recording | Planned | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |
 | OCR text extractor | Planned | 3 | In Windows 11 and macOS | [ocr](features/ocr.md) |
 | Colour picker | Planned | 3 | In Windows 11 (PowerToys) and macOS | [color-picker](features/color-picker.md) |
@@ -109,7 +109,7 @@ what is intended.
 
 * A change of behaviour edits the spec in the same pull request.
 * Acceptance criteria are numbered and never renumbered; a removed one is marked *(withdrawn)*.
-* Other stage 1.5 work this tree refers to: design tokens ([design-tokens](../design-tokens.md),
-  [theme-contract](../theme-contract.md)), the settings registry ([settings](../settings.md),
+* Other stage 1.5 work this tree refers to: design tokens (design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request),
+  [theme-contract](../theme-contract.md)), the settings registry (settings (`docs/settings.md`, lands with its stage 1.5 pull request),
   [architecture](../architecture.md)), performance budgets (`tools/perf/budgets.toml`). Until those
-  land, the references in the specs are to their intended content.
+  land, references in the specs name their intended content.

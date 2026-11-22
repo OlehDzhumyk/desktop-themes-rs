@@ -48,7 +48,7 @@ stereo Vorbis (`.oga`), loudness about -16 LUFS, true peak <= -1 dBFS, produced 
 `network-connectivity-established`, `network-connectivity-lost`, `power-plug`, `power-unplug`,
 `screen-capture`, `service-login`, `service-logout`, `trash-empty`, `window-attention`.
 
-Character: `macos-like` is soft, glassy, bell-like (Tink-like short tones, warm low tones for errors);
+Character: `macos-like` is soft, glassy, bell-like (short tones, warm low tones for errors);
 `windows11-like` is clean, short and rounded, with a gentle rising arpeggio for login. They must be
 distinguishable at a glance, equally loud, never harsh, and each under 3 s.
 

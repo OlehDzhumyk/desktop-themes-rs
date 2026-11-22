@@ -110,7 +110,7 @@ Our UI follows what the user already told the system:
 ## Performance budgets
 
 The numbers below are release-build budgets; the measurable list lives in
-`tools/perf/budgets.toml` (stage 1.5) and is enforced by `tools/perf/compare.py`.
+[`tools/perf/budgets.toml`](../../tools/perf/budgets.toml) and is checked by `tools/perf/compare.py` (see [tools/perf/README.md](../../tools/perf/README.md)); the table below is the human summary and the toml wins on any difference.
 
 | Budget | Limit |
 |---|---|

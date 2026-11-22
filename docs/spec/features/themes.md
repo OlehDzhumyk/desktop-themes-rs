@@ -28,7 +28,7 @@ taskbar, icons, cursors, fonts, sounds, keyboard conventions) in a GNOME session
   `<id>` is `[a-z0-9][a-z0-9._-]{0,63}`. Files the manager does not know are ignored.
 * Bundled: `fedora` (built-in, stock look, cannot be deleted, is the **safe theme**), `macos`,
   `macos-glass` (Experimental, inherits `macos`, see [liquid-glass](liquid-glass.md)), `windows11`.
-  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see [design-tokens](../../design-tokens.md)); **Partial** until its generated output is complete (stage 1.5, PR in review). Further themes are the user's own (snapshots, hand-made).
+  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)); **Partial** until its generated output is complete (stage 1.5, PR in review). Further themes are the user's own (snapshots, hand-made).
 * `themes list` shows id, name, modules the theme provides, which of its modules are active, and the
   description; `*` marks the theme that provides the **look** module. `--json` gives
   `id, name, description, preview, preview_dark, active, active_modules, modules, builtin, extensions, path`.

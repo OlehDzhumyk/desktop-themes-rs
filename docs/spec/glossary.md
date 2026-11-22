@@ -98,4 +98,4 @@ started on demand, exits after 90 s idle.
 
 **Tokens (design tokens).** The declarative description of a theme's colours, fonts and shapes
 (`tokens.toml`) from which libadwaita and shell CSS, terminal palettes and so on are generated
-([design-tokens](../design-tokens.md)). Planned in stage 1.5.
+(design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)). Planned in stage 1.5.
