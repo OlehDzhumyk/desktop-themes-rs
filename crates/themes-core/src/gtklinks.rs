@@ -3,6 +3,7 @@
 //! Files generated from tokens.toml are copied instead (the cache in ~/.cache is invisible to
 //! Flatpak apps that only get `xdg-config/gtk-4.0:ro`).
 
+use desk_settings::tr;
 use std::path::{Path, PathBuf};
 
 use crate::error::Result;
@@ -32,7 +33,10 @@ fn restore_backup(st: &mut State, dest: &str, warnings: &mut Vec<String>) -> Res
             if !lexists(Path::new(dest)) {
                 move_path(bp, Path::new(dest))?;
             } else {
-                warnings.push(format!("резервну копію {b} не відновлено (місце зайняте)"));
+                warnings.push(tr!(
+                    "backup {path} not restored (the place is taken)",
+                    path = b
+                ));
             }
         }
     }
@@ -52,7 +56,7 @@ pub fn refresh_copies(st: &mut State, warnings: &mut Vec<String>) -> Vec<String>
             continue;
         }
         if file_hash(d).as_deref() != Some(c.hash.as_str()) {
-            warnings.push(format!("{dest} змінено вручну — не оновлено"));
+            warnings.push(tr!("{path} was changed by hand; not updated", path = dest));
             continue;
         }
         if std::fs::copy(&c.src, d).is_ok() {
@@ -71,7 +75,10 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
             if !d.is_symlink() && file_hash(d).as_deref() == Some(c.hash.as_str()) {
                 std::fs::remove_file(d)?;
             } else {
-                warnings.push(format!("{dest} змінено вручну — залишено як є"));
+                warnings.push(tr!(
+                    "{path} was changed by hand; left as it is",
+                    path = dest
+                ));
             }
         }
         restore_backup(st, &dest, warnings)?;
@@ -85,7 +92,10 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
         let d = Path::new(&dest);
         match std::fs::read_link(d) {
             Ok(t) if t == Path::new(&src) => std::fs::remove_file(d)?,
-            _ if lexists(d) => warnings.push(format!("{dest} змінено вручну — залишено як є")),
+            _ if lexists(d) => warnings.push(tr!(
+                "{path} was changed by hand; left as it is",
+                path = dest
+            )),
             _ => {}
         }
         st.links.remove(&dest);
@@ -95,7 +105,10 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
                 if !lexists(d) {
                     move_path(bp, d)?;
                 } else {
-                    warnings.push(format!("резервну копію {b} не відновлено (місце зайняте)"));
+                    warnings.push(tr!(
+                        "backup {path} not restored (the place is taken)",
+                        path = b
+                    ));
                 }
             }
         }

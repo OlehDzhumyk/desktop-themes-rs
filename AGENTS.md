@@ -9,7 +9,8 @@ A GNOME desktop theme and features manager, GPL-3.0-or-later, developed on Fedor
 Rust workspace: `themes-core` (library: plan, apply, dconf), `themes` (CLI plus GTK 4 / libadwaita
 window), `desk-proto` and `deskd` (session daemon over zbus), `theme-tokens` (design tokens and
 generators). `bridge/` is the TypeScript GNOME Shell extension. `themes/` holds the bundled themes,
-`docs/` the specs, `docs/adr/` the decisions. Start with [docs/architecture.md](docs/architecture.md).
+`docs/spec/` the product specs ([README](docs/spec/README.md), [glossary](docs/spec/glossary.md)),
+`docs/adr/` the decisions. Start with [docs/architecture.md](docs/architecture.md).
 
 ## Glossary
 
@@ -58,8 +59,9 @@ work done, say which of these applied:
 - **Skins**: `macos`, `windows11`, `default`, in the bridge and in `docs/features.md`.
 - **Entry points**: CLI (`crates/themes/src/cli.rs`), GUI window, quick-settings toggle, D-Bus service.
   A feature in one is usually wanted in all.
-- **Strings**: user-facing text exists in Ukrainian and English; new strings get both
-  ([docs/README.uk.md](docs/README.uk.md) is the Ukrainian guide).
+- **Strings**: English gettext ids in code, Ukrainian in `po/uk.po`; run `just i18n`
+  ([docs/i18n.md](docs/i18n.md)). New settings go in the registry (`crates/desk-settings`), then
+  `just gen`; never hand-edit the generated schema, accessors or `docs/settings.md`.
 - **Accessibility**: labels, keyboard path, focus order, contrast (tokens are validated for WCAG).
 - **Docs**: `docs/` pages (`theme-contract.md`, `module-system.md`, ...), README, CHANGELOG
   `Unreleased`; a new decision gets an ADR.

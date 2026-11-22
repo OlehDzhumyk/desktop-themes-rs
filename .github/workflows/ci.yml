@@ -143,7 +143,7 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git ShellCheck glib2-devel desktop-file-utils libxml2 python3 jq
+            git ShellCheck glib2-devel desktop-file-utils libxml2 python3 gettext appstream jq
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: shellcheck
         run: |
@@ -156,8 +156,19 @@ jobs:
         run: .claude/hooks/guard.test.sh
       - name: GSettings schema (strict)
         run: glib-compile-schemas --strict --dry-run data/
-      - name: Desktop file
-        run: desktop-file-validate data/*.desktop
+      - name: Desktop file and metainfo
+        # The .desktop and metainfo files are gettext templates; build them as data/install.sh does.
+        run: |
+          for t in data/*.desktop.in; do
+            out="$RUNNER_TEMP/$(basename "${t%.in}")"
+            msgfmt --desktop -d po --template "$t" -o "$out"
+            desktop-file-validate "$out"
+          done
+          for t in data/*.metainfo.xml.in; do
+            out="$RUNNER_TEMP/$(basename "${t%.in}")"
+            msgfmt --xml -d po --template "$t" -o "$out"
+            appstreamcli validate --no-net --explain "$out" || echo "::warning::appstream findings in $t (report only)"
+          done
       - name: D-Bus interface XML and extension metadata
         run: |
           xmllint --noout data/dbus/*.xml data/*.gschema.xml

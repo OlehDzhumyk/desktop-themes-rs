@@ -1,54 +1,61 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* desk-bridge: clipboard panels. One class per skin on the panel: .desk-skin-default,
-   .desk-skin-macos, .desk-skin-windows11. Colours are original (inspired by, not copied from, the
-   look of macOS and Windows 11). */
+   .desk-skin-macos, .desk-skin-windows11.
+   - default: no colours of its own; the panel and rows carry the shell theme's popup-menu classes,
+     so it follows the active shell theme (and its high-contrast variant).
+   - macos / windows11: the skins' own palettes (original, inspired by, not copied from, macOS and
+     Windows 11).
+   The skins follow the system through classes the bridge sets on the panel: .desk-light (colour
+   scheme not dark), .desk-accent-<colour> (GNOME accent colour; #60cdff / #2f6fe4 are only the
+   fallbacks) and .desk-hc (high contrast).
+   Sizes are in em so the panels grow with the text scaling factor; .desk-hc (set when high
+   contrast is on) adds outlines so the selection never depends on colour alone. */
 
 .desk-clip-backdrop { background-color: transparent; }
 
-/* ------------------------------------------------------------------ shared */
-.desk-clip-panel {
-  color: #f2f2f2;
-  font-size: 10.5pt;
-}
+/* ------------------------------------------------------------------ shared layout */
+.desk-clip-panel { font-size: 10.5pt; }
 .desk-clip-text, .desk-clip-card-text { color: inherit; }
-.desk-clip-empty { padding: 18px 12px; color: rgba(255,255,255,0.6); text-align: center; }
+.desk-clip-empty { padding: 1.3em 0.9em; text-align: center; }
 .desk-clip-button-icon { icon-size: 16px; }
-.desk-clip-flat-button {
-  border-radius: 8px; padding: 6px; margin-left: 6px;
-  color: rgba(255,255,255,0.7);
-}
-.desk-clip-flat-button:hover { background-color: rgba(255,255,255,0.1); color: #fff; }
-.desk-clip-search {
-  border: none; box-shadow: none;
-  caret-color: #fff; selection-background-color: rgba(120,160,255,0.5);
-}
-.desk-clip-search-icon { icon-size: 16px; padding-right: 8px; color: rgba(255,255,255,0.6); }
-.desk-clip-kind { icon-size: 16px; color: rgba(255,255,255,0.55); padding-right: 10px; }
+.desk-clip-flat-button { border-radius: 8px; padding: 6px; margin-left: 6px; }
+.desk-clip-search { border: none; box-shadow: none; }
+.desk-clip-search-icon { icon-size: 16px; padding-right: 8px; }
+.desk-clip-kind { icon-size: 16px; padding-right: 10px; }
 .desk-clip-thumb { padding-right: 10px; }
-.desk-clip-pinned { icon-size: 14px; color: rgba(255,255,255,0.7); padding-left: 8px; }
-.desk-clip-time { color: rgba(255,255,255,0.45); font-size: 9pt; padding-left: 10px; }
+.desk-clip-pinned { icon-size: 14px; padding-left: 8px; }
+.desk-clip-time { font-size: 9pt; padding-left: 10px; }
+.desk-clip-row { border: 1px solid transparent; }
+.desk-hc .desk-clip-row:selected,
+.desk-hc .desk-clip-card:selected { border: 2px solid; border-color: currentColor; }
+.desk-hc .desk-clip-tab.active { text-decoration: underline; }
 
-/* ------------------------------------------------------------------ default: compact menu */
+/* ------------------------------------------------------------------ default: compact menu (shell theme) */
 .desk-clip-panel.desk-skin-default {
-  width: 380px;
-  max-height: 460px;
+  width: 27em;
+  max-height: 33em;
   padding: 8px;
-  border-radius: 14px;
-  background-color: #2a2a2e;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
 }
 .desk-skin-default .desk-clip-header { padding-bottom: 6px; }
-.desk-skin-default .desk-clip-search {
-  background-color: rgba(255,255,255,0.08); border-radius: 9px; padding: 6px 10px;
-}
-.desk-skin-default .desk-clip-row { border-radius: 8px; padding: 7px 10px; }
-.desk-skin-default .desk-clip-row:selected { background-color: rgba(255,255,255,0.12); }
-.desk-skin-default .desk-clip-scroll { max-height: 400px; }
+.desk-skin-default .desk-clip-search { border-radius: 9px; padding: 6px 10px; }
+.desk-skin-default .desk-clip-row { padding: 7px 10px; }
+.desk-skin-default .desk-clip-scroll { max-height: 28.5em; }
+
+/* ------------------------------------------------------------------ skin palettes (macos, windows11) */
+.desk-skin-macos, .desk-skin-windows11 { color: #f2f2f2; }
+.desk-skin-macos .desk-clip-empty, .desk-skin-windows11 .desk-clip-empty { color: rgba(255,255,255,0.6); }
+.desk-skin-macos .desk-clip-flat-button { color: rgba(255,255,255,0.7); }
+.desk-skin-macos .desk-clip-flat-button:hover,
+.desk-skin-macos .desk-clip-flat-button:focus { background-color: rgba(255,255,255,0.1); color: #fff; }
+.desk-skin-macos .desk-clip-search { caret-color: #fff; selection-background-color: rgba(120,160,255,0.5); }
+.desk-skin-macos .desk-clip-search-icon { color: rgba(255,255,255,0.6); }
+.desk-skin-macos .desk-clip-kind { color: rgba(255,255,255,0.55); }
+.desk-skin-macos .desk-clip-pinned { color: rgba(255,255,255,0.7); }
+.desk-skin-macos .desk-clip-time { color: rgba(255,255,255,0.45); }
 
 /* ------------------------------------------------------------------ macos: Spotlight-like */
 .desk-clip-panel.desk-skin-macos {
-  width: 760px;
+  width: 54em;
   padding: 10px;
   border-radius: 26px;
   background-color: rgba(38,38,42,0.93);
@@ -62,27 +69,29 @@
 }
 .desk-skin-macos .desk-clip-search-icon { icon-size: 22px; }
 .desk-skin-macos .desk-clip-body { spacing: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
-.desk-skin-macos .desk-clip-scroll { width: 420px; max-height: 380px; }
+.desk-skin-macos .desk-clip-scroll { width: 30em; max-height: 27em; }
 .desk-skin-macos .desk-clip-row { border-radius: 10px; padding: 8px 12px; }
+.desk-skin-macos .desk-clip-row:hover { background-color: rgba(255,255,255,0.06); }
 .desk-skin-macos .desk-clip-row:selected { background-color: #2f6fe4; color: #fff; }
 .desk-skin-macos .desk-clip-row:selected .desk-clip-time,
 .desk-skin-macos .desk-clip-row:selected .desk-clip-kind { color: rgba(255,255,255,0.85); }
 .desk-skin-macos .desk-clip-preview {
-  width: 290px; max-height: 380px;
+  width: 20.5em; max-height: 27em;
   padding: 12px; border-radius: 14px; background-color: rgba(255,255,255,0.05);
 }
-.desk-clip-preview-text { font-family: "JetBrains Mono", monospace; font-size: 9.5pt; color: rgba(255,255,255,0.85); }
-.desk-clip-preview-meta { padding-top: 10px; color: rgba(255,255,255,0.5); font-size: 9pt; }
+.desk-clip-preview-text { font-family: "JetBrains Mono", monospace; font-size: 9.5pt; }
+.desk-clip-preview-meta { padding-top: 10px; font-size: 9pt; }
+.desk-skin-macos .desk-clip-preview-text { color: rgba(255,255,255,0.85); }
+.desk-skin-macos .desk-clip-preview-meta { color: rgba(255,255,255,0.5); }
 .desk-skin-macos .desk-clip-hints { padding: 10px 10px 2px 10px; spacing: 6px; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 8px; }
-.desk-clip-key {
-  font-size: 8.5pt; padding: 1px 6px; border-radius: 5px;
-  background-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
-}
-.desk-clip-hint { font-size: 8.5pt; color: rgba(255,255,255,0.5); padding-right: 12px; }
+.desk-clip-key { font-size: 8.5pt; padding: 1px 6px; border-radius: 5px; }
+.desk-clip-hint { font-size: 8.5pt; padding-right: 12px; }
+.desk-skin-macos .desk-clip-key { background-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+.desk-skin-macos .desk-clip-hint { color: rgba(255,255,255,0.5); }
 
 /* ------------------------------------------------------------------ windows11: Win+V flyout */
 .desk-clip-panel.desk-skin-windows11 {
-  width: 360px;
+  width: 26em;
   padding: 0 0 8px 0;
   border-radius: 8px;
   background-color: #2b2b2b;
@@ -96,16 +105,14 @@
   padding: 6px 12px; border-radius: 4px; color: rgba(255,255,255,0.9);
   border-bottom: 3px solid transparent;
 }
-.desk-clip-tab:hover { background-color: rgba(255,255,255,0.06); }
+.desk-clip-tab:hover, .desk-clip-tab:focus { background-color: rgba(255,255,255,0.06); }
 .desk-clip-tab.active { border-bottom-color: #60cdff; font-weight: 600; }
 .desk-clip-tab:insensitive { color: rgba(255,255,255,0.35); }
 .desk-clip-headline { padding: 10px 14px 6px 14px; }
 .desk-clip-title { font-weight: 600; }
-.desk-clip-clear {
-  padding: 4px 10px; border-radius: 4px; color: #60cdff;
-}
-.desk-clip-clear:hover { background-color: rgba(255,255,255,0.06); }
-.desk-skin-windows11 .desk-clip-scroll { max-height: 420px; }
+.desk-clip-clear { padding: 4px 10px; border-radius: 4px; color: #60cdff; }
+.desk-clip-clear:hover, .desk-clip-clear:focus { background-color: rgba(255,255,255,0.06); }
+.desk-skin-windows11 .desk-clip-scroll { max-height: 30em; }
 .desk-clip-cards { padding: 2px 10px; spacing: 6px; }
 .desk-clip-card {
   padding: 10px 6px 10px 12px;
@@ -114,12 +121,66 @@
   border: 1px solid rgba(255,255,255,0.04);
 }
 .desk-clip-card:hover { background-color: rgba(255,255,255,0.085); }
-.desk-clip-card:selected { border-color: #60cdff; }
+.desk-clip-card:selected, .desk-clip-card:focus { border-color: #60cdff; border-width: 2px; }
 .desk-clip-card-text { max-height: 4.5em; }
 .desk-clip-card-side { spacing: 2px; padding-left: 6px; }
-.desk-clip-card-button {
-  padding: 5px; border-radius: 4px; color: rgba(255,255,255,0.75);
-}
-.desk-clip-card-button:hover { background-color: rgba(255,255,255,0.09); color: #fff; }
+.desk-clip-card-button { padding: 5px; border-radius: 4px; color: rgba(255,255,255,0.75); }
+.desk-clip-card-button:hover, .desk-clip-card-button:focus { background-color: rgba(255,255,255,0.09); color: #fff; }
 .desk-clip-card-button.checked { color: #60cdff; }
-.desk-skin-windows11 .desk-clip-empty { padding: 34px 20px; }
+.desk-skin-windows11 .desk-clip-empty { padding: 2.4em 1.4em; }
+
+/* ------------------------------------------------------------------ accent colour (GNOME accent) */
+.desk-accent-blue   .desk-clip-tab.active, .desk-accent-blue   .desk-clip-card:selected, .desk-accent-blue   .desk-clip-card:focus { border-color: #3584e4; }
+.desk-accent-teal   .desk-clip-tab.active, .desk-accent-teal   .desk-clip-card:selected, .desk-accent-teal   .desk-clip-card:focus { border-color: #2190a4; }
+.desk-accent-green  .desk-clip-tab.active, .desk-accent-green  .desk-clip-card:selected, .desk-accent-green  .desk-clip-card:focus { border-color: #3a944a; }
+.desk-accent-yellow .desk-clip-tab.active, .desk-accent-yellow .desk-clip-card:selected, .desk-accent-yellow .desk-clip-card:focus { border-color: #c88800; }
+.desk-accent-orange .desk-clip-tab.active, .desk-accent-orange .desk-clip-card:selected, .desk-accent-orange .desk-clip-card:focus { border-color: #ed5b00; }
+.desk-accent-red    .desk-clip-tab.active, .desk-accent-red    .desk-clip-card:selected, .desk-accent-red    .desk-clip-card:focus { border-color: #e62d42; }
+.desk-accent-pink   .desk-clip-tab.active, .desk-accent-pink   .desk-clip-card:selected, .desk-accent-pink   .desk-clip-card:focus { border-color: #d56199; }
+.desk-accent-purple .desk-clip-tab.active, .desk-accent-purple .desk-clip-card:selected, .desk-accent-purple .desk-clip-card:focus { border-color: #9141ac; }
+.desk-accent-slate  .desk-clip-tab.active, .desk-accent-slate  .desk-clip-card:selected, .desk-accent-slate  .desk-clip-card:focus { border-color: #6f8396; }
+.desk-accent-blue   .desk-clip-clear, .desk-accent-blue   .desk-clip-card-button.checked { color: #3584e4; }
+.desk-accent-teal   .desk-clip-clear, .desk-accent-teal   .desk-clip-card-button.checked { color: #2190a4; }
+.desk-accent-green  .desk-clip-clear, .desk-accent-green  .desk-clip-card-button.checked { color: #3a944a; }
+.desk-accent-yellow .desk-clip-clear, .desk-accent-yellow .desk-clip-card-button.checked { color: #c88800; }
+.desk-accent-orange .desk-clip-clear, .desk-accent-orange .desk-clip-card-button.checked { color: #ed5b00; }
+.desk-accent-red    .desk-clip-clear, .desk-accent-red    .desk-clip-card-button.checked { color: #e62d42; }
+.desk-accent-pink   .desk-clip-clear, .desk-accent-pink   .desk-clip-card-button.checked { color: #d56199; }
+.desk-accent-purple .desk-clip-clear, .desk-accent-purple .desk-clip-card-button.checked { color: #9141ac; }
+.desk-accent-slate  .desk-clip-clear, .desk-accent-slate  .desk-clip-card-button.checked { color: #6f8396; }
+.desk-accent-blue.desk-skin-macos   .desk-clip-row:selected { background-color: #3584e4; }
+.desk-accent-teal.desk-skin-macos   .desk-clip-row:selected { background-color: #2190a4; }
+.desk-accent-green.desk-skin-macos  .desk-clip-row:selected { background-color: #3a944a; }
+.desk-accent-yellow.desk-skin-macos .desk-clip-row:selected { background-color: #c88800; }
+.desk-accent-orange.desk-skin-macos .desk-clip-row:selected { background-color: #ed5b00; }
+.desk-accent-red.desk-skin-macos    .desk-clip-row:selected { background-color: #e62d42; }
+.desk-accent-pink.desk-skin-macos   .desk-clip-row:selected { background-color: #d56199; }
+.desk-accent-purple.desk-skin-macos .desk-clip-row:selected { background-color: #9141ac; }
+.desk-accent-slate.desk-skin-macos  .desk-clip-row:selected { background-color: #6f8396; }
+
+/* ------------------------------------------------------------------ light colour scheme */
+.desk-light.desk-skin-macos, .desk-light.desk-skin-windows11 { color: #1f1f1f; }
+.desk-light.desk-clip-panel.desk-skin-macos {
+  background-color: rgba(246,246,248,0.95); border-color: rgba(0,0,0,0.12); box-shadow: 0 18px 48px rgba(0,0,0,0.25);
+}
+.desk-light.desk-clip-panel.desk-skin-windows11 {
+  background-color: #f3f3f3; border-color: rgba(0,0,0,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+}
+.desk-light .desk-clip-empty, .desk-light .desk-clip-search-icon, .desk-light .desk-clip-kind,
+.desk-light .desk-clip-time, .desk-light .desk-clip-hint, .desk-light .desk-clip-preview-meta { color: rgba(0,0,0,0.55); }
+.desk-light.desk-skin-macos .desk-clip-search { caret-color: #000; }
+.desk-light .desk-clip-flat-button, .desk-light .desk-clip-pinned, .desk-light .desk-clip-preview-text { color: rgba(0,0,0,0.75); }
+.desk-light .desk-clip-flat-button:hover, .desk-light .desk-clip-flat-button:focus,
+.desk-light .desk-clip-tab:hover, .desk-light .desk-clip-tab:focus,
+.desk-light .desk-clip-clear:hover, .desk-light .desk-clip-clear:focus,
+.desk-light.desk-skin-macos .desk-clip-row:hover { background-color: rgba(0,0,0,0.06); }
+.desk-light.desk-skin-macos .desk-clip-body, .desk-light.desk-skin-macos .desk-clip-hints { border-color: rgba(0,0,0,0.1); }
+.desk-light.desk-skin-macos .desk-clip-preview { background-color: rgba(0,0,0,0.04); }
+.desk-light .desk-clip-key { background-color: rgba(0,0,0,0.08); color: rgba(0,0,0,0.75); }
+.desk-light .desk-clip-tab { color: rgba(0,0,0,0.9); }
+.desk-light .desk-clip-tab:insensitive { color: rgba(0,0,0,0.35); }
+.desk-light .desk-clip-card { background-color: #ffffff; border-color: rgba(0,0,0,0.06); }
+.desk-light .desk-clip-card:hover { background-color: #fafafa; }
+.desk-light .desk-clip-card-button { color: rgba(0,0,0,0.7); }
+.desk-light .desk-clip-card-button:hover, .desk-light .desk-clip-card-button:focus { background-color: rgba(0,0,0,0.06); color: #000; }
+.desk-light.desk-skin-macos .desk-clip-row:selected { color: #fff; }

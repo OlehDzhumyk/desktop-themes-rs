@@ -120,6 +120,7 @@ export class ClipboardClient {
 const THEMES_XML = `<node><interface name="io.github.OlehDzhumyk.Themes">
   <method name="List"><arg type="a(sssas)" direction="out"/></method>
   <method name="Current"><arg type="a{ss}" direction="out"/></method>
+  <method name="Experimental"><arg type="a{ss}" direction="out"/></method>
   <method name="Apply"><arg type="s" direction="in"/><arg type="as" direction="in"/>
     <arg type="b" direction="out"/><arg type="s" direction="out"/><arg type="as" direction="out"/></method>
   <signal name="Changed"><arg type="a{ss}"/></signal>
@@ -142,6 +143,16 @@ export class ThemesClient {
     async listAndCurrent(): Promise<[ThemeRow[], Record<string, string>]> {
         const [[themes], [current]] = await Promise.all([this._proxy.ListAsync(), this._proxy.CurrentAsync()]);
         return [themes as ThemeRow[], current as Record<string, string>];
+    }
+
+    /** Experimental themes: id → warning text (needs confirmation before Apply). */
+    async experimental(): Promise<Record<string, string>> {
+        try {
+            const [map] = await this._proxy.ExperimentalAsync();
+            return map as Record<string, string>;
+        } catch {
+            return {}; // an older service without the method
+        }
     }
 
     async apply(id: string): Promise<[boolean, string, string[]]> {

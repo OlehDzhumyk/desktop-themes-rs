@@ -21,3 +21,4 @@ serde_json.workspace = true
 zbus.workspace = true
 themes-core.workspace = true
 desk-proto.workspace = true
+desk-settings = { workspace = true, features = ["gio"] }

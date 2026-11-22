@@ -26,8 +26,9 @@ example. Everything is done at user level: no sudo, no rpm-ostree layering.
 * Safe by design: a baseline snapshot of your own dconf, automatic rollback of extensions that
   error out, `themes doctor`, and `themes reset`.
 
-> The user interface and the in-code comments are currently in **Ukrainian** (no i18n yet).
-> The documentation here is English, with a Ukrainian section below.
+> The user interface is translated with gettext: English source strings, Ukrainian in `po/uk.po`
+> (language setting: system / українська / English, see [docs/i18n.md](docs/i18n.md)). In-code
+> comments are mostly Ukrainian. The documentation here is English, with a Ukrainian section below.
 
 ## Quick start
 
@@ -55,6 +56,7 @@ themes apply macos                   # whole theme
 themes apply macos --only look,sounds
 themes apply windows11 --module behavior
 themes apply macos --dry-run         # show what would change
+themes apply macos-glass --yes       # experimental themes ask y/N (or need --yes in scripts)
 themes reset                         # back to the baseline
 themes snapshot my-look --name "My look"   # save the current look as a theme
 themes doctor --fix
@@ -93,6 +95,9 @@ user's machine, not committed.
 * [docs/themes.md](docs/themes.md): notes on the bundled themes and their extensions
 * [docs/design-tokens.md](docs/design-tokens.md): `tokens.toml`, generators, theme from wallpaper
 * [docs/features.md](docs/features.md): desktop features (clipboard history), skins, privacy
+* [docs/settings.md](docs/settings.md): every setting (generated from the settings registry)
+* [docs/i18n.md](docs/i18n.md): translations and the language setting
+* [docs/spec/](docs/spec/README.md): functional specifications of every feature (behaviour, acceptance criteria, status)
 * [docs/README.uk.md](docs/README.uk.md): full user guide in Ukrainian
 
 ## Development
@@ -144,4 +149,4 @@ dconf. Після цього один раз вийдіть із сесії й �
 
 Повний посібник користувача (команди, як додати тему, що робити, якщо щось зламалося):
 [docs/README.uk.md](docs/README.uk.md). Ліцензія: GPL-3.0-or-later; сторонні проєкти й їхні ліцензії
-перелічено в [CREDITS.md](CREDITS.md). Інтерфейс програми наразі лише українською.
+перелічено в [CREDITS.md](CREDITS.md). Інтерфейс перекладено (українська / англійська); мову можна вибрати у вікні: Функції → Загальні.

@@ -2,6 +2,7 @@
 //! Картка теми.
 
 use adw::prelude::*;
+use desk_settings::tr;
 use gtk::{gdk, gio};
 use themes_core::modules::Module;
 
@@ -16,6 +17,9 @@ pub struct ThemeInfo {
     pub modules: Vec<Module>,
     pub active_modules: Vec<Module>,
     pub extensions: usize,
+    /// `EXPERIMENTAL=true`: застосування лише після підтвердження
+    pub experimental: bool,
+    pub warning: String,
 }
 
 impl ThemeInfo {
@@ -66,6 +70,18 @@ impl ThemeCard {
         stack.add_named(&picture, Some("picture"));
         overlay.set_child(Some(&stack));
 
+        // значок «експериментальна» (текстом, не лише кольором) — ліворуч угорі
+        if info.experimental {
+            let b = gtk::Label::builder()
+                .label(tr!("experimental"))
+                .css_classes(["badge", "experimental"])
+                .halign(gtk::Align::Start)
+                .valign(gtk::Align::Start)
+                .tooltip_text(&info.warning)
+                .build();
+            b.add_css_class("badges");
+            overlay.add_overlay(&b);
+        }
         // значки активних модулів
         if !info.active_modules.is_empty() {
             let badges = gtk::Box::builder()
@@ -78,7 +94,7 @@ impl ThemeCard {
             if info.fully_active() {
                 badges.append(
                     &gtk::Label::builder()
-                        .label("активна")
+                        .label(tr!("active"))
                         .css_classes(["badge"])
                         .build(),
                 );
@@ -88,7 +104,10 @@ impl ThemeCard {
                         &gtk::Label::builder()
                             .label(m.label())
                             .css_classes(["badge", "partial"])
-                            .tooltip_text(format!("Модуль «{}» узято з цієї теми", m.label()))
+                            .tooltip_text(tr!(
+                                "The module “{module}” is taken from this theme",
+                                module = m.label()
+                            ))
                             .build(),
                     );
                 }
@@ -152,13 +171,17 @@ impl ThemeCard {
             .iter()
             .map(|m| m.label().to_lowercase())
             .collect();
-        let mut meta = if mods.is_empty() {
-            "Модулі: —".to_string()
-        } else {
-            format!("Модулі: {}", mods.join(" · "))
-        };
+        let mut meta = tr!(
+            "Modules: {list}",
+            list = if mods.is_empty() {
+                "—".to_string()
+            } else {
+                mods.join(" · ")
+            }
+        );
         if info.extensions > 0 {
-            meta.push_str(&format!("   Розширень: {}", info.extensions));
+            meta.push_str("   ");
+            meta.push_str(&tr!("Extensions: {count}", count = info.extensions));
         }
         texts.append(
             &gtk::Label::builder()
@@ -173,7 +196,7 @@ impl ThemeCard {
         let apply_sec = gio::Menu::new();
         for m in &info.modules {
             apply_sec.append(
-                Some(&format!("Застосувати лише «{}»", m.label())),
+                Some(&tr!("Apply only “{module}”", module = m.label())),
                 Some(&format!("win.apply-module(('{}','{}'))", info.id, m.id())),
             );
         }
@@ -181,7 +204,7 @@ impl ThemeCard {
         if !info.builtin && info.active_modules.is_empty() {
             let del = gio::Menu::new();
             del.append(
-                Some("Видалити тему…"),
+                Some(&tr!("Delete theme…")),
                 Some(&format!("win.delete-theme('{}')", info.id)),
             );
             menu.append_section(None, &del);
@@ -191,8 +214,12 @@ impl ThemeCard {
             .menu_model(&menu)
             .valign(gtk::Align::Start)
             .css_classes(["flat", "circular"])
-            .tooltip_text("Дії з темою")
+            .tooltip_text(tr!("Theme actions"))
             .build();
+        super::a11y::label(
+            &mb,
+            &tr!("Actions for the theme “{name}”", name = info.name),
+        );
         row.append(&mb);
         let rc = gtk::GestureClick::builder()
             .button(gdk::BUTTON_SECONDARY)
@@ -203,10 +230,10 @@ impl ThemeCard {
         }
         root.add_controller(rc);
         root.append(&row);
-        root.set_tooltip_text(Some(if info.fully_active() {
-            "Активна тема"
+        root.set_tooltip_text(Some(&if info.fully_active() {
+            tr!("Active theme")
         } else {
-            "Натисніть, щоб застосувати всю тему"
+            tr!("Click to apply the whole theme")
         }));
         ThemeCard {
             root,
@@ -214,6 +241,25 @@ impl ThemeCard {
             picture,
             stack,
             veil,
+        }
+    }
+
+    /// Назва картки для читачів екрана: тема, стан і модулі.
+    pub fn accessible_label(&self) -> String {
+        let i = &self.info;
+        let state = if i.fully_active() {
+            tr!("active")
+        } else if !i.active_modules.is_empty() {
+            let m: Vec<String> = i.active_modules.iter().map(|m| m.label()).collect();
+            tr!("partly active: {modules}", modules = m.join(", "))
+        } else {
+            tr!("not active")
+        };
+        let label = tr!("Theme {name}, {state}", name = i.name, state = state);
+        if i.experimental {
+            format!("{label}, {}", tr!("experimental"))
+        } else {
+            label
         }
     }
 

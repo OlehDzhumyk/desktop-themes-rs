@@ -8,14 +8,16 @@ base=$(git merge-base "${1:-origin/main}" HEAD)
 mapfile -t changed < <({ git diff --name-only "$base"; git ls-files --others --exclude-standard; } | sort -u)
 [ ${#changed[@]} -gt 0 ] || { echo "check-changed: nothing changed vs ${1:-origin/main}"; exit 0; }
 
-crates=() workspace=0 bridge=0 sh=()
+crates=() workspace=0 bridge=0 gen=0 sh=()
 for f in "${changed[@]}"; do
   [ -e "$f" ] || continue
   case "$f" in
     Cargo.toml|Cargo.lock|rust-toolchain.toml|rustfmt.toml|data/*) workspace=1 ;;
     crates/*/*) c=${f#crates/}; c=${c%%/*}; [[ " ${crates[*]:-} " == *" $c "* ]] || crates+=("$c") ;;
+    xtask/*) [[ " ${crates[*]:-} " == *" xtask "* ]] || crates+=(xtask) ;;
     bridge/*) bridge=1 ;;
   esac
+  case "$f" in crates/desk-settings/*|xtask/*|po/*|data/*.xml|data/*.in|docs/settings.md) gen=1 ;; esac
   case "$f" in *.sh|.githooks/*) sh+=("$f") ;; esac
 done
 
@@ -35,6 +37,11 @@ if [ ${#pk[@]} -gt 0 ]; then
     step "rustfmt (changed files; existing unformatted files report too)"
     rustfmt --check --edition 2024 "${existing[@]}" 2>&1 | grep -E '^Diff in' | sed 's/:[0-9]*:$//' | sort -u || true
   fi
+fi
+if [ $gen = 1 ]; then
+  step "cargo xtask check (generated schema/accessors/docs in sync) + i18n lint"
+  cargo xtask check
+  cargo test -p desk-settings --locked --test i18n_lint
 fi
 if [ $bridge = 1 ]; then
   step "bridge typecheck + lint"

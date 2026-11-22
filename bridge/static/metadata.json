@@ -1,9 +1,10 @@
 {
   "uuid": "desk-bridge@desktop-themes-rs",
-  "name": "Робочий стіл (міст)",
-  "description": "Міст між GNOME Shell і службою deskd (desktop-themes-rs): «Тема» у швидких налаштуваннях, історія буфера обміну (Win+V у стилі Windows 11, панель у стилі macOS або меню). Інтерфейс малює оболонка, логіка — у deskd.",
+  "name": "Desk bridge (desktop-themes-rs)",
+  "description": "Bridge between GNOME Shell and the deskd service of desktop-themes-rs: “Theme” in quick settings and the clipboard history (a Windows 11-style Win+V flyout, a macOS-style panel or a menu). The shell draws the UI; the logic lives in deskd.",
   "shell-version": ["51"],
   "settings-schema": "io.github.OlehDzhumyk.Desk",
+  "gettext-domain": "desktop-themes-rs",
   "version": 1,
   "url": "https://github.com/OlehDzhumyk/desktop-themes-rs"
 }

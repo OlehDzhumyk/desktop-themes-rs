@@ -18,3 +18,5 @@ tilingshell@ferrarodomenico\.com
 user-theme@gnome-shell-extensions\.gcampax\.github\.com
 # placeholder addresses
 [A-Za-z0-9._-]+@example\.(com|org|net)
+# gettext template placeholder
+LL@li\.org

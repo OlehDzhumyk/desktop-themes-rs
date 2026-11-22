@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Зв'язок із GNOME Shell через D-Bus (org.gnome.Shell.Extensions), сповіщення.
 
+use desk_settings::tr;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
@@ -307,7 +308,7 @@ pub fn notify(summary: &str, body: &str, icon: &str) -> Result<()> {
         let p = NotificationsProxy::new(&conn).await?;
         // без підказки desktop-entry: із нею GNOME Shell 51 у тестах не показував банер
         let hints: HashMap<&str, OwnedVariant> = HashMap::new();
-        p.notify("Теми", 0, icon, summary, body, &[], hints, -1)
+        p.notify(&tr!("Themes"), 0, icon, summary, body, &[], hints, -1)
             .await
     })?;
     Ok(())

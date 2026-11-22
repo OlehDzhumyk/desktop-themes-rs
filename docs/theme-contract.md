@@ -6,7 +6,7 @@ manager does not know (README, tools/, ...) are ignored.
 
 | File | Module | Purpose |
 |---|---|---|
-| `theme.conf` | - | `NAME="..."`, `DESCRIPTION="..."`, `PREVIEW="path"`, optional `PREVIEW_DARK="path"`, optional `INHERITS=<theme id>` |
+| `theme.conf` | - | `NAME="..."`, `DESCRIPTION="..."`, `PREVIEW="path"`, optional `PREVIEW_DARK="path"`, optional `INHERITS=<theme id>`, optional `EXPERIMENTAL=true` with `WARNING="..."` (and per-language `WARNING_UK="..."`): applying the theme then needs an explicit confirmation (CLI `--yes` or a y/N prompt, a dialog in the window and in quick settings) |
 | `desk.dconf` | look | skin of the shell bridge and the clipboard shortcut (see "Skin" below) |
 | `settings.dconf`, `extensions.dconf`, any other `*.dconf` not listed below | look | keys in `dconf dump` format |
 | `tokens.toml` | look (derived keys go to look, sounds, apps) | design tokens: colours, radii, fonts, terminal, sounds, ...; generates libadwaita CSS, a shell layer, a Ptyxis palette, dconf keys (see [design-tokens.md](design-tokens.md)) |
@@ -106,8 +106,8 @@ are reported by `themes doctor` and the child then stands alone):
   arrays are replaced).
 * `gtk4/`, `gtk3/`, `flatpak.conf`, `apps/hooks/*`: the first theme in the chain that has them
   (directories are not merged). An inherited hook runs in its own theme's directory.
-* `theme.conf`: `PREVIEW`/`PREVIEW_DARK` and unknown keys are inherited; `NAME`, `DESCRIPTION` and
-  `INHERITS` are not.
+* `theme.conf`: `PREVIEW`/`PREVIEW_DARK` and unknown keys are inherited; `NAME`, `DESCRIPTION`,
+  `INHERITS`, `EXPERIMENTAL` and `WARNING*` are not.
 
 `macos-glass` is `INHERITS=macos` plus `glass.dconf` and `+liquid-glass@...`.
 

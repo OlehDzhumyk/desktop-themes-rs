@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Base of the clipboard panels: a modal surface over the current monitor with a list of items that
 // deskd returns, keyboard navigation and activation (paste). Skins subclass it for layout and style.
+import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -11,6 +12,7 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import type {ClipItem, ClipboardClient} from '../dbus.js';
+import {_, fmt} from '../i18n.js';
 
 export const VERTICAL = {orientation: Clutter.Orientation.VERTICAL};
 export const HORIZONTAL = {orientation: Clutter.Orientation.HORIZONTAL};
@@ -25,16 +27,28 @@ export interface PanelHost {
 
 export type Anchor = 'pointer' | 'caret' | 'center' | 'bottom-right';
 
-/** Relative time in Ukrainian, short. */
+/** Relative time, short. */
 export function ago(unix: number): string {
     const s = Math.max(0, Math.floor(Date.now() / 1000) - unix);
     if (s < 60)
-        return 'щойно';
+        return _('just now');
     if (s < 3600)
-        return `${Math.floor(s / 60)} хв тому`;
+        return fmt(_('{n} min ago'), {n: Math.floor(s / 60)});
     if (s < 86400)
-        return `${Math.floor(s / 3600)} год тому`;
-    return `${Math.floor(s / 86400)} д тому`;
+        return fmt(_('{n} h ago'), {n: Math.floor(s / 3600)});
+    return fmt(_('{n} d ago'), {n: Math.floor(s / 86400)});
+}
+
+/** What a screen reader says for an item: its text (or image description) and state. */
+export function itemAccessibleName(item: ClipItem): string {
+    const text = oneLine(item.text, 120);
+    return item.pinned ? fmt(_('{text}, pinned'), {text}) : text;
+}
+
+/** Animations follow org.gnome.desktop.interface enable-animations and the reduced-motion setting. */
+export function animationsEnabled(): boolean {
+    const s = St.Settings.get();
+    return s.enable_animations && s.reduced_motion !== St.ReducedMotion.REDUCE;
 }
 
 /** One line preview of a text item (whitespace collapsed). */
@@ -67,12 +81,25 @@ export function imageWidget(item: ClipItem, styleClass: string, size: number): S
     return new St.Icon({icon_name: 'image-x-generic-symbolic', icon_size: size, style_class: styleClass});
 }
 
-export function iconButton(icon: string, accessible: string, styleClass: string, onClick: () => void): St.Button {
+/** Pin icon: filled when pinned, an outline (shipped with the extension) when not, so the state is
+ * not conveyed by colour alone. */
+export function pinIcon(pinned: boolean): Gio.Icon {
+    if (pinned)
+        return new Gio.ThemedIcon({name: 'view-pin-symbolic'});
+    const [file] = GLib.filename_from_uri(import.meta.url);
+    const root = Gio.File.new_for_path(file).get_parent()!.get_parent()!;
+    return new Gio.FileIcon({file: root.get_child('icons').get_child('desk-pin-outline-symbolic.svg')});
+}
+
+export function iconButton(icon: string | Gio.Icon, accessible: string, styleClass: string,
+    onClick: () => void): St.Button {
     const b = new St.Button({
         style_class: styleClass,
         can_focus: true,
         accessible_name: accessible,
-        child: new St.Icon({icon_name: icon, style_class: 'desk-clip-button-icon'}),
+        child: typeof icon === 'string'
+            ? new St.Icon({icon_name: icon, style_class: 'desk-clip-button-icon'})
+            : new St.Icon({gicon: icon, style_class: 'desk-clip-button-icon'}),
     });
     b.connect('clicked', () => onClick());
     return b;
@@ -95,6 +122,8 @@ export abstract class ClipboardPanel {
             style_class: `desk-clip-backdrop desk-skin-${skin}`,
         });
         this.box = new St.BoxLayout({...VERTICAL, style_class: `desk-clip-panel desk-skin-${skin}`, reactive: true});
+        this.box.accessible_role = Atk.Role.DIALOG;
+        this.box.accessible_name = _('Clipboard history');
         this.actor.add_child(this.box);
         this.actor.connect('button-press-event', (_a: Clutter.Actor, ev: Clutter.Event) => {
             const [x, y] = ev.get_coords();
@@ -157,10 +186,38 @@ export abstract class ClipboardPanel {
             return;
         }
         this.selected = 0;
+        this._syncSystemClasses();
         this.onOpen();
         void this.refresh().then(() => this._place(anchor));
         this._place(anchor);
         this.focusInitial();
+        // a short fade only when the user has not turned animations off
+        this.box.remove_all_transitions();
+        if (animationsEnabled()) {
+            this.box.opacity = 0;
+            this.box.ease({opacity: 255, duration: 120, mode: Clutter.AnimationMode.EASE_OUT_QUAD});
+        } else {
+            this.box.opacity = 255;
+        }
+    }
+
+    /**
+     * Classes that let the skins follow the system (stylesheet.css):
+     * .desk-light (colour scheme is not dark), .desk-accent-<colour> (GNOME accent colour) and
+     * .desk-hc (high contrast: outlines, so nothing depends on colour alone).
+     */
+    private _syncSystemClasses(): void {
+        const st = St.Settings.get();
+        const set = (cls: string, on: boolean) => {
+            if (on)
+                this.box.add_style_class_name(cls);
+            else
+                this.box.remove_style_class_name(cls);
+        };
+        set('desk-hc', st.high_contrast);
+        set('desk-light', st.color_scheme !== St.SystemColorScheme.PREFER_DARK);
+        const accents = ['blue', 'teal', 'green', 'yellow', 'orange', 'red', 'pink', 'purple', 'slate'];
+        accents.forEach((a, i) => set(`desk-accent-${a}`, st.accent_color === i));
     }
 
     /** Called before the first refresh (reset search etc.). */
@@ -198,14 +255,22 @@ export abstract class ClipboardPanel {
 
     protected highlight(): void {
         this.rows.forEach((r, i) => {
-            if (i === this.selected)
+            if (i === this.selected) {
                 r.add_style_pseudo_class('selected');
-            else
+                r.add_accessible_state(Atk.StateType.SELECTED);
+            } else {
                 r.remove_style_pseudo_class('selected');
+                r.remove_accessible_state(Atk.StateType.SELECTED);
+            }
         });
         const row = this.rows[this.selected];
-        if (row)
+        if (row) {
             this.scrollTo(row);
+            // keyboard focus on a row (Tab reached the list): it follows the selection
+            const focus = global.stage.get_key_focus();
+            if (focus && focus !== row && this.rows.includes(focus as St.Widget) && row.can_focus)
+                row.grab_key_focus();
+        }
     }
 
     /** Scroll a row into view (skins with a St.ScrollView override). */
@@ -263,6 +328,21 @@ export abstract class ClipboardPanel {
         case Clutter.KEY_Page_Down:
             this.move(5);
             return Clutter.EVENT_STOP;
+        case Clutter.KEY_Home:
+            this.move(-this.items.length);
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_End:
+            this.move(this.items.length);
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_Tab:
+        case Clutter.KEY_ISO_Left_Tab: {
+            // Tab / Shift+Tab walk the focusable controls of the panel (search, buttons)
+            const back = sym === Clutter.KEY_ISO_Left_Tab ||
+                (ev.get_state() & Clutter.ModifierType.SHIFT_MASK) !== 0;
+            const from = global.stage.get_key_focus();
+            this.box.navigate_focus(from, back ? St.DirectionType.TAB_BACKWARD : St.DirectionType.TAB_FORWARD, true);
+            return Clutter.EVENT_STOP;
+        }
         case Clutter.KEY_Return:
         case Clutter.KEY_KP_Enter:
             this.activateSelected();

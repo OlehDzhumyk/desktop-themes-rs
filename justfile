@@ -7,7 +7,7 @@ default:
     @just --list
 
 # everything CI checks, locally (fmt and clippy have known findings until the cleanup pass)
-check: fmt-check lint test bridge shellcheck privacy ast-grep
+check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep
 
 # fast checks for what you changed vs origin/main (STRICT=1: clippy warnings fatal)
 check-changed:
@@ -45,6 +45,19 @@ shellcheck:
 # personal/machine-specific strings in tracked files (generic + your untracked patterns)
 privacy:
     tools/privacy-check.sh --all
+
+# generated files (GSettings schema, accessors, docs/settings.md) match the settings registry
+xtask-check:
+    cargo xtask check
+
+# regenerate them after editing crates/desk-settings/src/registry.rs
+gen:
+    cargo xtask gen
+
+# translation template + merge into po/*.po, then the i18n lint
+i18n:
+    cargo xtask pot
+    cargo test -p desk-settings --locked --test i18n_lint
 
 # structural lint rules (tools/ast-grep) and their own tests
 ast-grep:
