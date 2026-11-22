@@ -12,7 +12,6 @@ use crate::model::*;
 pub const DESK_SCHEMA: &str = "io.github.OlehDzhumyk.Desk";
 pub const CLIPBOARD_SCHEMA: &str = "io.github.OlehDzhumyk.Desk.Clipboard";
 pub const SHORTCUTS_SCHEMA: &str = "io.github.OlehDzhumyk.Desk.Shortcuts";
-pub const MIXER_SCHEMA: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 /// gettext domain of the Rust programs, the schema, the bridge and the desktop files.
 pub const GETTEXT_DOMAIN: &str = "desktop-themes-rs";
 
@@ -36,7 +35,12 @@ pub static FEATURE_APP: Feature = Feature {
     origins: &[],
 };
 
-pub static FEATURES: &[&Feature] = &[&FEATURE_CLIPBOARD, &FEATURE_MIXER, &FEATURE_APP];
+pub static FEATURES: &[&Feature] = &[
+    &FEATURE_CLIPBOARD,
+    &crate::mixer::FEATURE_MIXER,
+    &crate::lockscreen::FEATURE_LOCKSCREEN,
+    &FEATURE_APP,
+];
 
 // ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk
 
@@ -109,7 +113,7 @@ pub static DESK: Schema = Schema {
     children: &[
         ("clipboard", CLIPBOARD_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
-        ("mixer", MIXER_SCHEMA),
+        ("mixer", crate::mixer::MIXER_SCHEMA),
     ],
 };
 
@@ -296,219 +300,6 @@ pub static CLIPBOARD: Schema = Schema {
     children: &[],
 };
 
-// ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk.Mixer
-// Volume mixer (stage 2, docs/spec/features/mixer.md). Kept in one block, apart from other features.
-
-pub static FEATURE_MIXER: Feature = Feature {
-    id: "mixer",
-    title: n_("Volume mixer"),
-    origins: &[
-        Origin::Has(n_("From Windows, adapted for macOS")),
-        Origin::BasedOn {
-            project: "wiremix",
-            licence: "MIT OR Apache-2.0",
-        },
-    ],
-};
-
-const fn mixer_bool(
-    name: &'static str,
-    default: bool,
-    label: &'static str,
-    description: &'static str,
-    summary: &'static str,
-) -> Key {
-    Key {
-        schema: MIXER_SCHEMA,
-        name,
-        kind: Kind::Bool { default },
-        label,
-        description,
-        summary,
-        doc: "",
-        feature: "mixer",
-        widget: Widget::Edit,
-        sensitive_if: None,
-    }
-}
-
-pub static MIXER_ENABLED: Key = mixer_bool(
-    "enabled",
-    true,
-    n_("Volume mixer"),
-    n_("Volume of each application and the choice of output and input devices"),
-    "Enable the volume mixer",
-);
-
-pub static MIXER_ENTRY_POINT: Key = Key {
-    schema: MIXER_SCHEMA,
-    name: "entry-point",
-    kind: Kind::Choice {
-        default: "menu-and-icon",
-        choices: &[
-            Choice {
-                value: "menu",
-                label: n_("In the sound menu of quick settings"),
-            },
-            Choice {
-                value: "menu-and-icon",
-                label: n_("Also by right-clicking the volume icon in the top bar"),
-            },
-        ],
-    },
-    label: n_("Where to open it"),
-    description: n_("The keyboard shortcut works in both cases"),
-    summary: "Where the mixer opens",
-    doc: "'menu': inside the volume menu of quick settings only; 'menu-and-icon': a secondary \
-          click on the system area of the top bar opens it directly as well.",
-    feature: "mixer",
-    widget: Widget::Edit,
-    sensitive_if: Some("enabled"),
-};
-
-pub static MIXER_SHOW_SILENT: Key = Key {
-    sensitive_if: Some("enabled"),
-    ..mixer_bool(
-        "show-silent-apps",
-        false,
-        n_("Show silent applications"),
-        n_("Also list applications that keep a sound stream open without playing"),
-        "List applications with a paused audio stream",
-    )
-};
-
-pub static MIXER_REMEMBER: Key = Key {
-    doc: "Stored in ~/.local/share/deskd/mixer/apps.json (mode 0600): application ids with a \
-          volume and a mute flag. Turning it off forgets them and deletes the file.",
-    sensitive_if: Some("enabled"),
-    ..mixer_bool(
-        "remember-app-volume",
-        false,
-        n_("Remember application volume"),
-        n_("A volume you set is restored when the application plays again; turning it off forgets them"),
-        "Restore the volume set for an application when it plays again",
-    )
-};
-
-pub static MIXER_VOLUME_STEP: Key = Key {
-    schema: MIXER_SCHEMA,
-    name: "volume-step",
-    kind: Kind::UInt {
-        default: 5,
-        min: 1,
-        max: 20,
-        step: 1,
-    },
-    label: n_("Volume step, %"),
-    description: n_("How much an arrow key changes a slider (Shift: 1 %)"),
-    summary: "Slider step for the arrow keys, in percent",
-    doc: "",
-    feature: "mixer",
-    widget: Widget::Edit,
-    sensitive_if: Some("enabled"),
-};
-
-pub static MIXER_HIDE_APPS: Key = Key {
-    schema: MIXER_SCHEMA,
-    name: "hide-apps",
-    kind: Kind::StrList { default: &[] },
-    label: n_("Hidden applications"),
-    description: "",
-    summary: "Application keys (app id or program name) never listed in the mixer",
-    doc: "",
-    feature: "mixer",
-    widget: Widget::Hidden,
-    sensitive_if: None,
-};
-
-pub static MIXER_SHORTCUT: Key = Key {
-    schema: MIXER_SCHEMA,
-    name: "mixer-shortcut",
-    kind: Kind::Accel { default: &[] },
-    label: n_("Keyboard shortcut"),
-    description: "",
-    summary: "Shortcut that opens the volume mixer (in force)",
-    doc: "The accelerators the bridge binds. Themes write their default here from desk.dconf \
-          (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an \
-          override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is \
-          not called toggle-shortcut because shell keybinding names are global.",
-    feature: "mixer",
-    widget: Widget::Hidden,
-    sensitive_if: None,
-};
-
-pub static MIXER: Schema = Schema {
-    id: MIXER_SCHEMA,
-    path: "/io/github/OlehDzhumyk/Desk/mixer/",
-    rust_name: "MixerSettings",
-    keys: &[
-        &MIXER_ENABLED,
-        &MIXER_ENTRY_POINT,
-        &MIXER_SHOW_SILENT,
-        &MIXER_REMEMBER,
-        &MIXER_VOLUME_STEP,
-        &MIXER_HIDE_APPS,
-        &MIXER_SHORTCUT,
-    ],
-    children: &[],
-};
-
-pub static SC_MIXER_OPEN: Key = Key {
-    schema: SHORTCUTS_SCHEMA,
-    name: "mixer-open",
-    kind: Kind::Accel { default: &[] },
-    label: n_("Open the volume mixer"),
-    description: "",
-    summary: "Your shortcut for the volume mixer (override)",
-    doc: "Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the \
-          theme default and is kept when the theme changes.",
-    feature: "mixer",
-    widget: Widget::Hidden,
-    sensitive_if: None,
-};
-
-pub static SHORTCUT_MIXER: Shortcut = Shortcut {
-    id: "mixer-open",
-    label: n_("Open the volume mixer"),
-    feature: "mixer",
-    key: &MIXER_SHORTCUT,
-    override_key: &SC_MIXER_OPEN,
-};
-
-pub static PAGE_MIXER: Page = Page {
-    id: "mixer",
-    title: n_("Volume mixer"),
-    subtitle: n_("Volume of each application, output and input devices"),
-    description: n_(
-        "The volume of every application that plays sound and the output and input devices, in \
-         the sound menu of quick settings. The deskd service follows the audio server; the shell \
-         bridge draws the mixer in the style of the current theme.",
-    ),
-    icon: "audio-volume-high-symbolic",
-    section: Section::Features,
-    kind: PageKind::Settings,
-    feature: Some(&FEATURE_MIXER),
-    groups: &[
-        Group {
-            title: n_("Mixer"),
-            description: "",
-            items: &[
-                Item::Key(&MIXER_ENABLED),
-                Item::Key(&MIXER_SHOW_SILENT),
-                Item::Key(&MIXER_REMEMBER),
-                Item::Key(&MIXER_VOLUME_STEP),
-            ],
-        },
-        Group {
-            title: n_("How to open"),
-            description: n_("The shortcut is set on the «Keyboard shortcuts» page."),
-            items: &[Item::Key(&MIXER_ENTRY_POINT)],
-        },
-    ],
-};
-
-// ------------------------------------------------------------------ end of the mixer block
-
 // ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk.Shortcuts
 
 pub static SC_CLIPBOARD_TOGGLE: Key = Key {
@@ -537,15 +328,15 @@ pub static SHORTCUT_KEYS: Schema = Schema {
     id: SHORTCUTS_SCHEMA,
     path: "/io/github/OlehDzhumyk/Desk/shortcuts/",
     rust_name: "ShortcutSettings",
-    keys: &[&SC_CLIPBOARD_TOGGLE, &SC_MIXER_OPEN],
+    keys: &[&SC_CLIPBOARD_TOGGLE, &crate::mixer::SC_MIXER_OPEN],
     children: &[],
 };
 
 /// Every shortcut of every feature, edited in one place (the «Keyboard shortcuts» page).
-pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD, &SHORTCUT_MIXER];
+pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD, &crate::mixer::SHORTCUT_MIXER];
 
 /// All schemas, parents first (the order of the generated XML).
-pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD, &SHORTCUT_KEYS, &MIXER];
+pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD, &SHORTCUT_KEYS, &crate::mixer::MIXER];
 
 // ------------------------------------------------------------------ pages of the window
 
@@ -657,7 +448,7 @@ pub static PAGE_SHORTCUTS: Page = Page {
         description: "",
         items: &[
             Item::Shortcut(&SHORTCUT_CLIPBOARD),
-            Item::Shortcut(&SHORTCUT_MIXER),
+            Item::Shortcut(&crate::mixer::SHORTCUT_MIXER),
         ],
     }],
 };
@@ -681,7 +472,8 @@ pub static PAGE_CREDITS: Page = Page {
 /// The pages, in the order they are listed.
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
-    &PAGE_MIXER,
+    &crate::mixer::PAGE_MIXER,
+    &crate::lockscreen::PAGE_LOCKSCREEN,
     &PAGE_SHORTCUTS,
     &PAGE_GENERAL,
     &PAGE_CREDITS,

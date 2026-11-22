@@ -60,7 +60,7 @@ the bridge and the window alike: there is no second settings dialog.
 | `flatpak.rs` | records exactly which `flatpak override --user` arguments a theme added, removes only those |
 | `hooks.rs` | `apps/hooks/apply` and `revert` executables |
 | `shell.rs` | D-Bus talk to GNOME Shell (extension states, enable/disable), notifications |
-| `doctor.rs` | `themes doctor [--fix]`: broken extensions, journal errors, missing themes/icons/files, GNOME version change |
+| `doctor.rs` | `themes doctor [--fix]`: broken extensions, journal errors, missing themes/icons/files, GNOME version change, GSettings schemas not compiled |
 | `snapshot.rs` | "save current look as a theme": lays the current settings out by module |
 | `state.rs`, `lock.rs` | `state.json` (what was applied) and the `.lock` file shared by CLI, GUI and service |
 | `crash.rs` | GNOME's crash protection (`disable-user-extensions`), last real shell crashes, culprit theme/extensions |

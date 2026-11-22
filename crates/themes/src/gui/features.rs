@@ -41,7 +41,23 @@ fn subpage(title: &str, tag: &str, child: &impl IsA<gtk::Widget>) -> adw::Naviga
         .build()
 }
 
+/// The settings of a registry schema: ours come from the user's schema directory, those of an
+/// extension from the `schemas/` directory next to the installed extension (compiled by
+/// `data/install.sh` and `themes doctor --fix`).
 fn schema(id: &str) -> Option<gio::Settings> {
+    if let Some(ext) = desk_settings::extension_of(id) {
+        let dir = glib::user_data_dir()
+            .join("gnome-shell/extensions")
+            .join(ext.uuid)
+            .join("schemas");
+        let src = gio::SettingsSchemaSource::from_directory(&dir, None, false).ok()?;
+        let schema = src.lookup(id, false)?;
+        return Some(gio::Settings::new_full(
+            &schema,
+            None::<&gio::SettingsBackend>,
+            None,
+        ));
+    }
     let src = gio::SettingsSchemaSource::default()?;
     src.lookup(id, true)?;
     Some(gio::Settings::new(id))
@@ -126,7 +142,9 @@ fn value_text(k: &'static Key, s: &gio::Settings) -> String {
             .map(|x| x.as_str())
             .collect::<Vec<_>>()
             .join(", "),
-        Kind::Str { .. } => s.string(k.name).to_string(),
+        Kind::Str { .. } | Kind::Color { .. } => s.string(k.name).to_string(),
+        Kind::Int { .. } => s.int(k.name).to_string(),
+        Kind::Double { .. } => format!("{:.2}", s.double(k.name)),
         Kind::Bool { .. } => {
             if s.boolean(k.name) {
                 tr!("on")
@@ -144,7 +162,11 @@ fn display_row(k: &'static Key, s: &gio::Settings) -> adw::ActionRow {
     let desc = t(k.description);
     match &k.kind {
         // коротке значення праворуч, опис — підзаголовком
-        Kind::Accel { .. } | Kind::Bool { .. } | Kind::UInt { .. } => {
+        Kind::Accel { .. }
+        | Kind::Bool { .. }
+        | Kind::UInt { .. }
+        | Kind::Int { .. }
+        | Kind::Double { .. } => {
             if !desc.is_empty() {
                 row.set_subtitle(&desc);
             }
@@ -165,6 +187,38 @@ fn display_row(k: &'static Key, s: &gio::Settings) -> adw::ActionRow {
     row
 }
 
+/// A colour entry that writes only what the registry accepts (a CSS colour or empty): anything
+/// else is marked as an error and not stored.
+fn colour_row(k: &'static Key, s: &gio::Settings, desc: &str) -> adw::EntryRow {
+    let r = adw::EntryRow::builder().title(t(k.label)).build();
+    r.set_text(&s.string(k.name));
+    if !desc.is_empty() {
+        a11y::description(&r, desc);
+    }
+    let settings = s.clone();
+    r.connect_changed(move |row| {
+        let text = row.text();
+        let text = text.trim();
+        if text.is_empty() || desk_settings::validate::is_css_color(text) {
+            row.remove_css_class("error");
+            if settings.string(k.name) != text {
+                let _ = settings.set_string(k.name, text);
+            }
+        } else {
+            row.add_css_class("error");
+        }
+    });
+    // a change from outside (a theme was applied) shows up in the entry
+    let row = r.clone();
+    s.connect_changed(Some(k.name), move |s, _| {
+        let now = s.string(k.name);
+        if row.text().trim() != now {
+            row.set_text(&now);
+        }
+    });
+    r
+}
+
 fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
     let desc = t(k.description);
     match &k.kind {
@@ -183,6 +237,22 @@ fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
             s.bind(k.name, &r, "value").build();
             r.upcast()
         }
+        Kind::Int { min, max, step, .. } => {
+            let r = adw::SpinRow::with_range(*min as f64, *max as f64, *step as f64);
+            r.set_title(&t(k.label));
+            r.set_subtitle(&desc);
+            s.bind(k.name, &r, "value").build();
+            r.upcast()
+        }
+        Kind::Double { min, max, step, .. } => {
+            let r = adw::SpinRow::with_range(*min, *max, *step);
+            r.set_digits(2);
+            r.set_title(&t(k.label));
+            r.set_subtitle(&desc);
+            s.bind(k.name, &r, "value").build();
+            r.upcast()
+        }
+        Kind::Color { .. } => colour_row(k, s, &desc).upcast(),
         Kind::Choice { choices, .. } => {
             let labels: Vec<String> = choices.iter().map(|c| t(c.label)).collect();
             let model =

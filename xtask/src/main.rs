@@ -60,7 +60,7 @@ fn generate(write: bool) -> Result<(), String> {
     let root = repo();
     let mut stale = vec![];
     for (path, content) in gen_::all() {
-        let p = root.join(path);
+        let p = root.join(&path);
         if std::fs::read_to_string(&p).ok().as_deref() == Some(content.as_str()) {
             continue;
         }

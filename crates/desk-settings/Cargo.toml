@@ -15,3 +15,11 @@ gio = ["dep:gio"]
 [dependencies]
 gettext-rs = { version = "0.8.0", features = ["gettext-system"] }
 gio = { workspace = true, optional = true }
+
+[dev-dependencies]
+# the test that checks the JavaScript colour pattern of the lock screen extension against the Rust grammar
+regex = { version = "1", default-features = false, features = ["std", "unicode-perl"] }
+
+[package.metadata.cargo-machete]
+# the crate gettext-rs is used as `gettextrs`
+ignored = ["gettext-rs"]

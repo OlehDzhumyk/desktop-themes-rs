@@ -6,6 +6,25 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- `themes doctor` checks the GSettings schemas: ours are installed and compiled, and every installed
+  extension that ships `schemas/*.gschema.xml` has `gschemas.compiled`; `--fix` compiles it.
+- Shortcut conflict detection also sees GNOME's own defaults (schema defaults of the shell, window
+  manager, media-keys and mutter keybinding schemas, read through a private in-memory GSettings
+  backend), so e.g. Super+V of the notification list clashes with a clipboard shortcut even when
+  dconf does not set it. Clashes between two system keys are no longer reported by `themes apply`.
+
+- The lock screen settings (`lockscreen-layout`) are in the settings registry: generated schema, a
+  «Lock screen» page in the window, docs/settings.md and Ukrainian texts. The clock position, font
+  weight and colours are validated choices and CSS colours (`#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`,
+  `rgba()`) instead of free strings; the extension, `themes apply` (values of a theme) and
+  `themes doctor` (values in dconf) refuse anything else. Keys, types and defaults are unchanged, so
+  stored values keep working; a value outside the accepted set (for example a colour name such as
+  `red`, or a weight such as `350`) is ignored and the standard look is used.
+- CI: typos, cargo-machete and zizmor jobs (`hygiene.yml`) and a smoke test of `data/install.sh` in a
+  throw-away HOME (`tools/install-smoke.sh`).
+
 ### Fixed
 
 - `data/install.sh` compiles the GSettings schemas of repository extensions after copying them

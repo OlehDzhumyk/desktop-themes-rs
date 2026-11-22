@@ -29,6 +29,23 @@ pub enum Kind {
         max: u32,
         step: u32,
     },
+    /// `i` with a range → spin row (signed, e.g. a pixel offset)
+    Int {
+        default: i32,
+        min: i32,
+        max: i32,
+        step: i32,
+    },
+    /// `d` with a range → spin row
+    Double {
+        default: f64,
+        min: f64,
+        max: f64,
+        step: f64,
+    },
+    /// `s`: a CSS colour (`#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb()`, `rgba()`) or empty; GSettings cannot
+    /// check it, so [`crate::validate`] does (the window, theme apply, the extension that uses it)
+    Color { default: &'static str },
     /// `s` with `<choices>` → combo row
     Choice {
         default: &'static str,
@@ -47,7 +64,9 @@ impl Kind {
         match self {
             Kind::Bool { .. } => "b",
             Kind::UInt { .. } => "u",
-            Kind::Choice { .. } | Kind::Str { .. } => "s",
+            Kind::Int { .. } => "i",
+            Kind::Double { .. } => "d",
+            Kind::Choice { .. } | Kind::Str { .. } | Kind::Color { .. } => "s",
             Kind::StrList { .. } | Kind::Accel { .. } => "as",
         }
     }
@@ -66,7 +85,11 @@ impl Kind {
         match self {
             Kind::Bool { default } => default.to_string(),
             Kind::UInt { default, .. } => default.to_string(),
-            Kind::Choice { default, .. } | Kind::Str { default } => s(default),
+            Kind::Int { default, .. } => default.to_string(),
+            Kind::Double { default, .. } => format!("{default:?}"),
+            Kind::Choice { default, .. } | Kind::Str { default } | Kind::Color { default } => {
+                s(default)
+            }
             Kind::StrList { default } | Kind::Accel { default } => list(default),
         }
     }
@@ -133,6 +156,26 @@ pub struct Schema {
     pub keys: &'static [&'static Key],
     /// `(child name, schema id)`
     pub children: &'static [(&'static str, &'static str)],
+}
+
+/// A schema that belongs to a GNOME Shell extension of this repository: the generated
+/// `.gschema.xml` goes into the extension's own `schemas/` directory (it is compiled there, next to
+/// the extension, not into the user's schema directory). Same keys, pages and checks as [`Schema`].
+#[derive(Debug)]
+pub struct ExtensionSchema {
+    /// Extension uuid (directory name below `extensions/`).
+    pub uuid: &'static str,
+    pub schema: &'static Schema,
+}
+
+impl ExtensionSchema {
+    /// Path of the generated schema file, relative to the repository root.
+    pub fn file(&self) -> String {
+        format!(
+            "extensions/{}/schemas/{}.gschema.xml",
+            self.uuid, self.schema.id
+        )
+    }
 }
 
 /// Where a feature comes from: shown as badges on its page and in docs/settings.md.
