@@ -11,6 +11,7 @@ use crate::model::*;
 
 pub const DESK_SCHEMA: &str = "io.github.OlehDzhumyk.Desk";
 pub const CLIPBOARD_SCHEMA: &str = "io.github.OlehDzhumyk.Desk.Clipboard";
+pub const SHORTCUTS_SCHEMA: &str = "io.github.OlehDzhumyk.Desk.Shortcuts";
 /// gettext domain of the Rust programs, the schema, the bridge and the desktop files.
 pub const GETTEXT_DOMAIN: &str = "desktop-themes-rs";
 
@@ -104,7 +105,7 @@ pub static DESK: Schema = Schema {
     path: "/io/github/OlehDzhumyk/Desk/",
     rust_name: "DeskSettings",
     keys: &[&SKIN, &LANGUAGE],
-    children: &[("clipboard", CLIPBOARD_SCHEMA)],
+    children: &[("clipboard", CLIPBOARD_SCHEMA), ("shortcuts", SHORTCUTS_SCHEMA)],
 };
 
 // ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk.Clipboard
@@ -228,11 +229,15 @@ pub static CLIP_TOGGLE_SHORTCUT: Key = Key {
         default: &["<Shift><Super>v"],
     },
     label: n_("Keyboard shortcut"),
-    description: n_("Set by the theme (desk.dconf in the Look module)"),
-    summary: "Shortcut that opens the clipboard panel",
-    doc: "Themes set it in desk.dconf: Super+V for Windows 11, Shift+Super+V for macOS.",
+    description: "",
+    summary: "Shortcut that opens the clipboard panel (in force)",
+    doc: "The accelerators the bridge binds. Themes write their default here from desk.dconf \
+          (Super+V for Windows 11, Shift+Super+V for macOS); an override in \
+          io.github.OlehDzhumyk.Desk.Shortcuts clipboard-toggle replaces it and is re-applied \
+          after every theme apply. Change it in the window (Keyboard shortcuts) or with \
+          `themes shortcut`.",
     feature: "clipboard",
-    widget: Widget::Display,
+    widget: Widget::Hidden,
     sensitive_if: None,
 };
 
@@ -286,8 +291,43 @@ pub static CLIPBOARD: Schema = Schema {
     children: &[],
 };
 
+// ------------------------------------------------------------------ io.github.OlehDzhumyk.Desk.Shortcuts
+
+pub static SC_CLIPBOARD_TOGGLE: Key = Key {
+    schema: SHORTCUTS_SCHEMA,
+    name: "clipboard-toggle",
+    kind: Kind::Accel { default: &[] },
+    label: n_("Open the clipboard panel"),
+    description: "",
+    summary: "Your shortcut for the clipboard panel (override)",
+    doc: "Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the \
+          theme default and is kept when the theme changes.",
+    feature: "clipboard",
+    widget: Widget::Hidden,
+    sensitive_if: None,
+};
+
+pub static SHORTCUT_CLIPBOARD: Shortcut = Shortcut {
+    id: "clipboard-toggle",
+    label: n_("Open the clipboard panel"),
+    feature: "clipboard",
+    key: &CLIP_TOGGLE_SHORTCUT,
+    override_key: &SC_CLIPBOARD_TOGGLE,
+};
+
+pub static SHORTCUT_KEYS: Schema = Schema {
+    id: SHORTCUTS_SCHEMA,
+    path: "/io/github/OlehDzhumyk/Desk/shortcuts/",
+    rust_name: "ShortcutSettings",
+    keys: &[&SC_CLIPBOARD_TOGGLE],
+    children: &[],
+};
+
+/// Every shortcut of every feature, edited in one place (the «Keyboard shortcuts» page).
+pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD];
+
 /// All schemas, parents first (the order of the generated XML).
-pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD];
+pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD, &SHORTCUT_KEYS];
 
 // ------------------------------------------------------------------ pages of the window
 
@@ -345,9 +385,8 @@ pub static PAGE_CLIPBOARD: Page = Page {
         },
         Group {
             title: n_("How to open"),
-            description: "",
+            description: n_("The shortcut is set on the «Keyboard shortcuts» page."),
             items: &[
-                Item::Key(&CLIP_TOGGLE_SHORTCUT),
                 Item::Key(&SKIN),
                 Item::Status {
                     id: "deskd",
@@ -383,6 +422,25 @@ pub static PAGE_GENERAL: Page = Page {
     }],
 };
 
+pub static PAGE_SHORTCUTS: Page = Page {
+    id: "shortcuts",
+    title: n_("Keyboard shortcuts"),
+    subtitle: n_("All shortcuts of the features in one place"),
+    description: n_(
+        "The theme provides the default shortcut; your own choice wins over it and stays when you \
+         switch themes. A shortcut that another action already uses is refused.",
+    ),
+    icon: "input-keyboard-symbolic",
+    section: Section::App,
+    kind: PageKind::Settings,
+    feature: Some(&FEATURE_APP),
+    groups: &[Group {
+        title: n_("Features"),
+        description: "",
+        items: &[Item::Shortcut(&SHORTCUT_CLIPBOARD)],
+    }],
+};
+
 pub static PAGE_CREDITS: Page = Page {
     id: "credits",
     title: n_("Credits"),
@@ -400,4 +458,4 @@ pub static PAGE_CREDITS: Page = Page {
 };
 
 /// The pages, in the order they are listed.
-pub static PAGES: &[&Page] = &[&PAGE_CLIPBOARD, &PAGE_GENERAL, &PAGE_CREDITS];
+pub static PAGES: &[&Page] = &[&PAGE_CLIPBOARD, &PAGE_SHORTCUTS, &PAGE_GENERAL, &PAGE_CREDITS];

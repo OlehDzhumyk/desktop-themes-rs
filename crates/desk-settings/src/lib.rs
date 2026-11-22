@@ -8,6 +8,7 @@ pub mod generate;
 pub mod i18n;
 pub mod model;
 pub mod registry;
+pub mod shortcuts;
 
 #[cfg(feature = "gio")]
 #[rustfmt::skip]
@@ -33,6 +34,19 @@ pub fn key(schema: &str, name: &str) -> Option<&'static Key> {
         .iter()
         .copied()
         .find(|k| k.name == name)
+}
+
+/// The dconf path of a key (`/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut`).
+pub fn dconf_path(k: &Key) -> String {
+    let base = SCHEMAS
+        .iter()
+        .find(|s| s.id == k.schema)
+        .map_or("/", |s| s.path);
+    format!("{base}{}", k.name)
+}
+
+pub fn shortcut(id: &str) -> Option<&'static Shortcut> {
+    SHORTCUTS.iter().copied().find(|s| s.id == id)
 }
 
 pub fn page(id: &str) -> Option<&'static Page> {
@@ -93,6 +107,20 @@ mod tests {
             for (_, child) in s.children {
                 assert!(SCHEMAS.iter().any(|x| x.id == *child));
             }
+        }
+        // shortcuts: both keys exist, are accelerator lists, and the override starts unset
+        for sc in SHORTCUTS {
+            for k in [sc.key, sc.override_key] {
+                assert!(key(k.schema, k.name).is_some(), "{}", sc.id);
+                assert!(matches!(k.kind, Kind::Accel { .. }), "{}", sc.id);
+            }
+            assert!(matches!(&sc.override_key.kind, Kind::Accel { default } if default.is_empty()));
+            assert!(FEATURES.iter().any(|f| f.id == sc.feature), "{}", sc.id);
+            assert!(
+                PAGES.iter().any(|p| p.shortcuts().any(|x| std::ptr::eq(x, *sc))),
+                "{} is on no page",
+                sc.id
+            );
         }
         // every key on a page is in its schema; editable keys are on some page
         for p in PAGES {

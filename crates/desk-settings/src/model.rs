@@ -155,10 +155,28 @@ pub struct Feature {
     pub origins: &'static [Origin],
 }
 
+/// A keyboard shortcut of a feature. Two keys carry it: `key` holds the accelerators in force
+/// (what the bridge binds; themes write the theme default into it) and `override_key` the user's
+/// own choice, which wins over the theme and survives theme switches (see [`crate::shortcuts`]).
+#[derive(Debug)]
+pub struct Shortcut {
+    pub id: &'static str,
+    /// Row title (gettext id).
+    pub label: &'static str,
+    /// Feature id ([`Feature::id`]).
+    pub feature: &'static str,
+    /// The key in force ([`Kind::Accel`]).
+    pub key: &'static Key,
+    /// The user override: empty = follow the theme, `["disabled"]` = no shortcut.
+    pub override_key: &'static Key,
+}
+
 /// An entry of a preference group.
 #[derive(Debug)]
 pub enum Item {
     Key(&'static Key),
+    /// An editable shortcut row (change, reset to the theme default, conflict check).
+    Shortcut(&'static Shortcut),
     /// A button row; the window binds the handler by `id`.
     Action {
         id: &'static str,
@@ -212,6 +230,16 @@ pub struct Page {
 }
 
 impl Page {
+    pub fn shortcuts(&self) -> impl Iterator<Item = &'static Shortcut> + '_ {
+        self.groups
+            .iter()
+            .flat_map(|g| g.items.iter())
+            .filter_map(|i| match i {
+                Item::Shortcut(s) => Some(*s),
+                _ => None,
+            })
+    }
+
     pub fn keys(&self) -> impl Iterator<Item = &'static Key> + '_ {
         self.groups
             .iter()

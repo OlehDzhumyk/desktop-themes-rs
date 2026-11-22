@@ -26,6 +26,7 @@
       <description>'system' follows the session locale (LANGUAGE, LC_MESSAGES); 'uk' or 'en' overrides it for desktop-themes-rs only (the window, the themes command, deskd and desk-bridge).</description>
     </key>
     <child name="clipboard" schema="io.github.OlehDzhumyk.Desk.Clipboard"/>
+    <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
   </schema>
 
   <schema id="io.github.OlehDzhumyk.Desk.Clipboard" path="/io/github/OlehDzhumyk/Desk/clipboard/">
@@ -73,12 +74,20 @@
     </key>
     <key name="toggle-shortcut" type="as">
       <default>['&lt;Shift&gt;&lt;Super&gt;v']</default>
-      <summary>Shortcut that opens the clipboard panel</summary>
-      <description>Themes set it in desk.dconf: Super+V for Windows 11, Shift+Super+V for macOS.</description>
+      <summary>Shortcut that opens the clipboard panel (in force)</summary>
+      <description>The accelerators the bridge binds. Themes write their default here from desk.dconf (Super+V for Windows 11, Shift+Super+V for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts clipboard-toggle replaces it and is re-applied after every theme apply. Change it in the window (Keyboard shortcuts) or with `themes shortcut`.</description>
     </key>
     <key name="excluded-apps" type="as">
       <default>['org.keepassxc.KeePassXC', 'KeePassXC', 'keepassxc', 'Bitwarden', 'bitwarden', 'com.bitwarden.desktop', '1Password', '1password', 'org.gnome.World.Secrets', 'secrets', 'org.gnome.seahorse.Application', 'Seahorse', 'proton-pass', 'Proton Pass', 'me.proton.Pass']</default>
       <summary>Applications whose copies are never recorded (WM class or app id)</summary>
+    </key>
+  </schema>
+
+  <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
+    <key name="clipboard-toggle" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for the clipboard panel (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
   </schema>
 </schemalist>

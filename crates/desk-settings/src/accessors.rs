@@ -201,7 +201,7 @@ impl ClipboardSettings {
         self.0.set_boolean(Self::PASTE_ON_SELECT, v)
     }
 
-    /// Shortcut that opens the clipboard panel
+    /// Shortcut that opens the clipboard panel (in force)
     pub fn toggle_shortcut(&self) -> Vec<String> {
         self.0.strv(Self::TOGGLE_SHORTCUT).iter().map(|s| s.to_string()).collect()
     }
@@ -217,5 +217,28 @@ impl ClipboardSettings {
 
     pub fn set_excluded_apps(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::EXCLUDED_APPS, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
+#[derive(Clone, Debug)]
+pub struct ShortcutSettings(pub gio::Settings);
+
+impl ShortcutSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Shortcuts";
+    pub const CLIPBOARD_TOGGLE: &'static str = "clipboard-toggle";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Your shortcut for the clipboard panel (override)
+    pub fn clipboard_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::CLIPBOARD_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_clipboard_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CLIPBOARD_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
