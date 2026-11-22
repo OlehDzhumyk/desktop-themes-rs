@@ -10,6 +10,10 @@ All notable changes to this project are documented in this file. The format is b
 
 - `themes doctor` checks the GSettings schemas: ours are installed and compiled, and every installed
   extension that ships `schemas/*.gschema.xml` has `gschemas.compiled`; `--fix` compiles it.
+- Shortcut conflict detection also sees GNOME's own defaults (schema defaults of the shell, window
+  manager, media-keys and mutter keybinding schemas, read through a private in-memory GSettings
+  backend), so e.g. Super+V of the notification list clashes with a clipboard shortcut even when
+  dconf does not set it. Clashes between two system keys are no longer reported by `themes apply`.
 
 ### Fixed
 

@@ -180,7 +180,8 @@ pub fn apply_opts(
     });
     // one accelerator, two owners (mixing look and behavior): the feature keeps it
     {
-        let mut fin = cur.clone();
+        // GNOME's own keybinding defaults count too (e.g. Super+V of the notification list)
+        let mut fin = crate::shortcuts::effective(&cur);
         fin.extend(dplan.writes.clone());
         for k in &dplan.resets {
             fin.remove(k);
