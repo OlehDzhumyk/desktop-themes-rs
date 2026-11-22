@@ -5,6 +5,9 @@
      so it follows the active shell theme (and its high-contrast variant).
    - macos / windows11: the skins' own palettes (original, inspired by, not copied from, macOS and
      Windows 11).
+   The skins follow the system through classes the bridge sets on the panel: .desk-light (colour
+   scheme not dark), .desk-accent-<colour> (GNOME accent colour; #60cdff / #2f6fe4 are only the
+   fallbacks) and .desk-hc (high contrast).
    Sizes are in em so the panels grow with the text scaling factor; .desk-hc (set when high
    contrast is on) adds outlines so the selection never depends on colour alone. */
 
@@ -118,10 +121,66 @@
   border: 1px solid rgba(255,255,255,0.04);
 }
 .desk-clip-card:hover { background-color: rgba(255,255,255,0.085); }
-.desk-clip-card:selected { border-color: #60cdff; border-width: 2px; }
+.desk-clip-card:selected, .desk-clip-card:focus { border-color: #60cdff; border-width: 2px; }
 .desk-clip-card-text { max-height: 4.5em; }
 .desk-clip-card-side { spacing: 2px; padding-left: 6px; }
 .desk-clip-card-button { padding: 5px; border-radius: 4px; color: rgba(255,255,255,0.75); }
 .desk-clip-card-button:hover, .desk-clip-card-button:focus { background-color: rgba(255,255,255,0.09); color: #fff; }
 .desk-clip-card-button.checked { color: #60cdff; }
 .desk-skin-windows11 .desk-clip-empty { padding: 2.4em 1.4em; }
+
+/* ------------------------------------------------------------------ accent colour (GNOME accent) */
+.desk-accent-blue   .desk-clip-tab.active, .desk-accent-blue   .desk-clip-card:selected, .desk-accent-blue   .desk-clip-card:focus { border-color: #3584e4; }
+.desk-accent-teal   .desk-clip-tab.active, .desk-accent-teal   .desk-clip-card:selected, .desk-accent-teal   .desk-clip-card:focus { border-color: #2190a4; }
+.desk-accent-green  .desk-clip-tab.active, .desk-accent-green  .desk-clip-card:selected, .desk-accent-green  .desk-clip-card:focus { border-color: #3a944a; }
+.desk-accent-yellow .desk-clip-tab.active, .desk-accent-yellow .desk-clip-card:selected, .desk-accent-yellow .desk-clip-card:focus { border-color: #c88800; }
+.desk-accent-orange .desk-clip-tab.active, .desk-accent-orange .desk-clip-card:selected, .desk-accent-orange .desk-clip-card:focus { border-color: #ed5b00; }
+.desk-accent-red    .desk-clip-tab.active, .desk-accent-red    .desk-clip-card:selected, .desk-accent-red    .desk-clip-card:focus { border-color: #e62d42; }
+.desk-accent-pink   .desk-clip-tab.active, .desk-accent-pink   .desk-clip-card:selected, .desk-accent-pink   .desk-clip-card:focus { border-color: #d56199; }
+.desk-accent-purple .desk-clip-tab.active, .desk-accent-purple .desk-clip-card:selected, .desk-accent-purple .desk-clip-card:focus { border-color: #9141ac; }
+.desk-accent-slate  .desk-clip-tab.active, .desk-accent-slate  .desk-clip-card:selected, .desk-accent-slate  .desk-clip-card:focus { border-color: #6f8396; }
+.desk-accent-blue   .desk-clip-clear, .desk-accent-blue   .desk-clip-card-button.checked { color: #3584e4; }
+.desk-accent-teal   .desk-clip-clear, .desk-accent-teal   .desk-clip-card-button.checked { color: #2190a4; }
+.desk-accent-green  .desk-clip-clear, .desk-accent-green  .desk-clip-card-button.checked { color: #3a944a; }
+.desk-accent-yellow .desk-clip-clear, .desk-accent-yellow .desk-clip-card-button.checked { color: #c88800; }
+.desk-accent-orange .desk-clip-clear, .desk-accent-orange .desk-clip-card-button.checked { color: #ed5b00; }
+.desk-accent-red    .desk-clip-clear, .desk-accent-red    .desk-clip-card-button.checked { color: #e62d42; }
+.desk-accent-pink   .desk-clip-clear, .desk-accent-pink   .desk-clip-card-button.checked { color: #d56199; }
+.desk-accent-purple .desk-clip-clear, .desk-accent-purple .desk-clip-card-button.checked { color: #9141ac; }
+.desk-accent-slate  .desk-clip-clear, .desk-accent-slate  .desk-clip-card-button.checked { color: #6f8396; }
+.desk-accent-blue.desk-skin-macos   .desk-clip-row:selected { background-color: #3584e4; }
+.desk-accent-teal.desk-skin-macos   .desk-clip-row:selected { background-color: #2190a4; }
+.desk-accent-green.desk-skin-macos  .desk-clip-row:selected { background-color: #3a944a; }
+.desk-accent-yellow.desk-skin-macos .desk-clip-row:selected { background-color: #c88800; }
+.desk-accent-orange.desk-skin-macos .desk-clip-row:selected { background-color: #ed5b00; }
+.desk-accent-red.desk-skin-macos    .desk-clip-row:selected { background-color: #e62d42; }
+.desk-accent-pink.desk-skin-macos   .desk-clip-row:selected { background-color: #d56199; }
+.desk-accent-purple.desk-skin-macos .desk-clip-row:selected { background-color: #9141ac; }
+.desk-accent-slate.desk-skin-macos  .desk-clip-row:selected { background-color: #6f8396; }
+
+/* ------------------------------------------------------------------ light colour scheme */
+.desk-light.desk-skin-macos, .desk-light.desk-skin-windows11 { color: #1f1f1f; }
+.desk-light.desk-clip-panel.desk-skin-macos {
+  background-color: rgba(246,246,248,0.95); border-color: rgba(0,0,0,0.12); box-shadow: 0 18px 48px rgba(0,0,0,0.25);
+}
+.desk-light.desk-clip-panel.desk-skin-windows11 {
+  background-color: #f3f3f3; border-color: rgba(0,0,0,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+}
+.desk-light .desk-clip-empty, .desk-light .desk-clip-search-icon, .desk-light .desk-clip-kind,
+.desk-light .desk-clip-time, .desk-light .desk-clip-hint, .desk-light .desk-clip-preview-meta { color: rgba(0,0,0,0.55); }
+.desk-light.desk-skin-macos .desk-clip-search { caret-color: #000; }
+.desk-light .desk-clip-flat-button, .desk-light .desk-clip-pinned, .desk-light .desk-clip-preview-text { color: rgba(0,0,0,0.75); }
+.desk-light .desk-clip-flat-button:hover, .desk-light .desk-clip-flat-button:focus,
+.desk-light .desk-clip-tab:hover, .desk-light .desk-clip-tab:focus,
+.desk-light .desk-clip-clear:hover, .desk-light .desk-clip-clear:focus,
+.desk-light.desk-skin-macos .desk-clip-row:hover { background-color: rgba(0,0,0,0.06); }
+.desk-light.desk-skin-macos .desk-clip-body, .desk-light.desk-skin-macos .desk-clip-hints { border-color: rgba(0,0,0,0.1); }
+.desk-light.desk-skin-macos .desk-clip-preview { background-color: rgba(0,0,0,0.04); }
+.desk-light .desk-clip-key { background-color: rgba(0,0,0,0.08); color: rgba(0,0,0,0.75); }
+.desk-light .desk-clip-tab { color: rgba(0,0,0,0.9); }
+.desk-light .desk-clip-tab:insensitive { color: rgba(0,0,0,0.35); }
+.desk-light .desk-clip-card { background-color: #ffffff; border-color: rgba(0,0,0,0.06); }
+.desk-light .desk-clip-card:hover { background-color: #fafafa; }
+.desk-light .desk-clip-card-button { color: rgba(0,0,0,0.7); }
+.desk-light .desk-clip-card-button:hover, .desk-light .desk-clip-card-button:focus { background-color: rgba(0,0,0,0.06); color: #000; }
+.desk-light.desk-skin-macos .desk-clip-row:selected { color: #fff; }

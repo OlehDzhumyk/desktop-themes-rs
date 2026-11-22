@@ -10,7 +10,8 @@ import St from 'gi://St';
 import type {ClipItem} from '../dbus.js';
 import {_} from '../i18n.js';
 import {
-    ClipboardPanel, HORIZONTAL, VERTICAL, iconButton, imageWidget, itemAccessibleName, label, type PanelHost,
+    ClipboardPanel, HORIZONTAL, VERTICAL, iconButton, imageWidget, itemAccessibleName, label, pinIcon,
+    type PanelHost,
 } from './panel.js';
 
 export class WinFlyout extends ClipboardPanel {
@@ -121,7 +122,7 @@ export class WinFlyout extends ClipboardPanel {
     }
 
     private _card(it: ClipItem, index: number): St.Widget {
-        const card = new St.Button({style_class: 'desk-clip-card', x_expand: true, can_focus: false, reactive: true});
+        const card = new St.Button({style_class: 'desk-clip-card', x_expand: true, can_focus: true, reactive: true});
         card.accessible_role = Atk.Role.LIST_ITEM;
         card.accessible_name = itemAccessibleName(it);
         const inner = new St.BoxLayout({...HORIZONTAL, x_expand: true});
@@ -135,7 +136,7 @@ export class WinFlyout extends ClipboardPanel {
         if (this._expanded === it.id) {
             side.add_child(iconButton('user-trash-symbolic', _('Delete'), 'desk-clip-card-button',
                 () => void this.remove(it)));
-            side.add_child(iconButton(it.pinned ? 'view-pin-symbolic' : 'view-pin-symbolic',
+            side.add_child(iconButton(pinIcon(it.pinned),
                 it.pinned ? _('Unpin') : _('Pin'),
                 `desk-clip-card-button${it.pinned ? ' checked' : ''}`, () => void this.togglePin(it)));
         } else {
@@ -144,13 +145,20 @@ export class WinFlyout extends ClipboardPanel {
                 this.render();
                 this.highlight();
             }));
-            const pin = iconButton('view-pin-symbolic', it.pinned ? _('Unpin') : _('Pin'),
+            const pin = iconButton(pinIcon(it.pinned), it.pinned ? _('Unpin') : _('Pin'),
                 `desk-clip-card-button pin${it.pinned ? ' checked' : ''}`, () => void this.togglePin(it));
             side.add_child(pin);
         }
         inner.add_child(side);
         card.set_child(inner);
         card.connect('clicked', () => this.activate(it));
+        // Tab / focus moves the selection too, so Enter, Delete and Ctrl+P act on the focused card
+        card.connect('key-focus-in', () => {
+            if (this.selected !== index) {
+                this.selected = index;
+                this.highlight();
+            }
+        });
         card.connect('notify::hover', () => {
             if (card.hover && this.selected !== index) {
                 this.selected = index;

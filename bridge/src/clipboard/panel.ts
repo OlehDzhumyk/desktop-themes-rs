@@ -81,12 +81,25 @@ export function imageWidget(item: ClipItem, styleClass: string, size: number): S
     return new St.Icon({icon_name: 'image-x-generic-symbolic', icon_size: size, style_class: styleClass});
 }
 
-export function iconButton(icon: string, accessible: string, styleClass: string, onClick: () => void): St.Button {
+/** Pin icon: filled when pinned, an outline (shipped with the extension) when not, so the state is
+ * not conveyed by colour alone. */
+export function pinIcon(pinned: boolean): Gio.Icon {
+    if (pinned)
+        return new Gio.ThemedIcon({name: 'view-pin-symbolic'});
+    const [file] = GLib.filename_from_uri(import.meta.url);
+    const root = Gio.File.new_for_path(file).get_parent()!.get_parent()!;
+    return new Gio.FileIcon({file: root.get_child('icons').get_child('desk-pin-outline-symbolic.svg')});
+}
+
+export function iconButton(icon: string | Gio.Icon, accessible: string, styleClass: string,
+    onClick: () => void): St.Button {
     const b = new St.Button({
         style_class: styleClass,
         can_focus: true,
         accessible_name: accessible,
-        child: new St.Icon({icon_name: icon, style_class: 'desk-clip-button-icon'}),
+        child: typeof icon === 'string'
+            ? new St.Icon({icon_name: icon, style_class: 'desk-clip-button-icon'})
+            : new St.Icon({gicon: icon, style_class: 'desk-clip-button-icon'}),
     });
     b.connect('clicked', () => onClick());
     return b;
@@ -173,11 +186,7 @@ export abstract class ClipboardPanel {
             return;
         }
         this.selected = 0;
-        // high contrast (org.gnome.desktop.a11y.interface): skins add outlines, see stylesheet.css
-        if (St.Settings.get().high_contrast)
-            this.box.add_style_class_name('desk-hc');
-        else
-            this.box.remove_style_class_name('desk-hc');
+        this._syncSystemClasses();
         this.onOpen();
         void this.refresh().then(() => this._place(anchor));
         this._place(anchor);
@@ -190,6 +199,25 @@ export abstract class ClipboardPanel {
         } else {
             this.box.opacity = 255;
         }
+    }
+
+    /**
+     * Classes that let the skins follow the system (stylesheet.css):
+     * .desk-light (colour scheme is not dark), .desk-accent-<colour> (GNOME accent colour) and
+     * .desk-hc (high contrast: outlines, so nothing depends on colour alone).
+     */
+    private _syncSystemClasses(): void {
+        const st = St.Settings.get();
+        const set = (cls: string, on: boolean) => {
+            if (on)
+                this.box.add_style_class_name(cls);
+            else
+                this.box.remove_style_class_name(cls);
+        };
+        set('desk-hc', st.high_contrast);
+        set('desk-light', st.color_scheme !== St.SystemColorScheme.PREFER_DARK);
+        const accents = ['blue', 'teal', 'green', 'yellow', 'orange', 'red', 'pink', 'purple', 'slate'];
+        accents.forEach((a, i) => set(`desk-accent-${a}`, st.accent_color === i));
     }
 
     /** Called before the first refresh (reset search etc.). */
@@ -236,8 +264,13 @@ export abstract class ClipboardPanel {
             }
         });
         const row = this.rows[this.selected];
-        if (row)
+        if (row) {
             this.scrollTo(row);
+            // keyboard focus on a row (Tab reached the list): it follows the selection
+            const focus = global.stage.get_key_focus();
+            if (focus && focus !== row && this.rows.includes(focus as St.Widget) && row.can_focus)
+                row.grab_key_focus();
+        }
     }
 
     /** Scroll a row into view (skins with a St.ScrollView override). */
