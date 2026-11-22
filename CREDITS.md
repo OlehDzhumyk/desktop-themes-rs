@@ -100,3 +100,10 @@ their respective owners; this project is not affiliated with or endorsed by them
   original. The generated GNOME Shell layer `@import`s the shell's own stylesheet from its resource
   at run time (nothing copied); `crates/theme-tokens/src/adwaita.rs` lists libadwaita 1.10's default
   colour values (LGPL-2.1-or-later) as facts for validation.
+
+## Developer workflow
+
+| Project | Used for | Licence |
+|---|---|---|
+| [T3 Code](https://github.com/pingdotgg/t3code) (Ping.gg) | agent workflow conventions adapted (not copied): `AGENTS.md` structure, "hit every surface" checklist, the agent context budget check | MIT |
+| [just](https://github.com/casey/just), [cargo-nextest](https://github.com/nextest-rs/nextest), [ast-grep](https://github.com/ast-grep/ast-grep), [insta](https://github.com/mitsuhiko/insta), [gitleaks](https://github.com/gitleaks/gitleaks) | developer tooling, not redistributed | CC0-1.0, Apache-2.0 / MIT, MIT, Apache-2.0, MIT |

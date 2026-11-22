@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Pre-commit: secrets (gitleaks, if installed), rustfmt on staged Rust files, privacy check.
+# Install with `just install-hooks`. Skip once with `git commit --no-verify`.
+set -u
+cd "$(git rev-parse --show-toplevel)" || exit 1
+rc=0
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --no-banner >/dev/null 2>&1 || {
+    echo "pre-commit: gitleaks found a possible secret (run: gitleaks protect --staged --redact -v)" >&2
+    rc=1
+  }
+else
+  echo "pre-commit: gitleaks not installed, skipping secret scan" >&2
+fi
+
+mapfile -d '' -t rs < <(git diff --cached --name-only -z --diff-filter=ACMR -- '*.rs')
+if [ ${#rs[@]} -gt 0 ]; then
+  if command -v rustfmt >/dev/null 2>&1; then
+    # rustfmt also follows `mod` declarations; only report diffs in files that are staged.
+    out=$(rustfmt --check --edition 2024 "${rs[@]}" 2>&1 || true)
+    bad=""
+    for f in "${rs[@]}"; do
+      case "$out" in *"Diff in $PWD/$f"*|*"Diff in $f"*) bad="$bad $f" ;; esac
+    done
+    if [ -n "$bad" ]; then
+      echo "pre-commit: not rustfmt-clean:$bad (run: rustfmt --edition 2024 <file>)" >&2
+      rc=1
+    fi
+  else
+    echo "pre-commit: rustfmt not installed, skipping format check" >&2
+  fi
+fi
+
+tools/privacy-check.sh --staged || rc=1
+exit $rc

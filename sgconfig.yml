@@ -1,0 +1,5 @@
+# ast-grep configuration: deterministic lint rules. Run `ast-grep scan` (or `just ast-grep`).
+ruleDirs:
+  - tools/ast-grep/rules
+testConfigs:
+  - testDir: tools/ast-grep/rule-tests

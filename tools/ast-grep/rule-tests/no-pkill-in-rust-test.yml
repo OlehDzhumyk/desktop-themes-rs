@@ -1,0 +1,5 @@
+id: no-pkill-in-rust
+valid:
+  - 'fn f() { Command::new("kill").arg("123"); }'
+invalid:
+  - 'fn f() { Command::new("pkill").arg("-f"); }'

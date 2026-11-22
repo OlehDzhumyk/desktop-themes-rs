@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+id: no-pkill-in-scripts
+language: bash
+severity: error
+message: >-
+  Never kill by name or pattern (pkill, killall): it kills other people's and your own agent
+  processes. Kill only a PID you spawned and recorded.
+rule:
+  kind: command
+  has:
+    field: name
+    kind: command_name
+    regex: ^(pkill|killall)$
+files:
+  - scripts/**
+  - tools/**
+  - .githooks/**
+  - .claude/**

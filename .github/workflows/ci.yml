@@ -79,7 +79,8 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo tar gzip
+          command -v curl >/dev/null || dnf install -y --setopt=install_weak_deps=False curl
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -89,10 +90,14 @@ jobs:
             target
           key: cargo-fedora45-${{ github.job }}-${{ hashFiles('Cargo.lock') }}
           restore-keys: cargo-fedora45-${{ github.job }}-
+      - name: Install cargo-nextest (pinned, checksum-verified)
+        run: tools/install-dev-tools.sh /usr/local/bin nextest
       - name: Build
         run: cargo build --workspace --locked
-      - name: Test
-        run: cargo test --workspace --locked
+      - name: Test (nextest, failures only)
+        run: cargo nextest run --workspace --locked --profile ci
+      - name: Doctests (nextest does not run them)
+        run: cargo test --workspace --locked --doc
 
   rust-deny:
     name: cargo deny (licences, advisories)
@@ -138,7 +143,7 @@ jobs:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
-            git ShellCheck glib2-devel desktop-file-utils libxml2 python3 gettext appstream
+            git ShellCheck glib2-devel desktop-file-utils libxml2 python3 gettext appstream jq
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: shellcheck
         run: |
@@ -147,6 +152,8 @@ jobs:
           files=$(git ls-files -z | xargs -0 grep -IlE '^#!.*(ba)?sh' || true)
           test -n "$files" || { echo "no shell scripts found (git ls-files failed?)"; exit 1; }
           echo "$files" | tr '\n' '\0' | xargs -0 shellcheck --severity=warning
+      - name: Claude Code guard hook (table test)
+        run: .claude/hooks/guard.test.sh
       - name: GSettings schema (strict)
         run: glib-compile-schemas --strict --dry-run data/
       - name: Desktop file and metainfo
@@ -166,6 +173,32 @@ jobs:
         run: |
           xmllint --noout data/dbus/*.xml data/*.gschema.xml
           python3 -m json.tool bridge/static/metadata.json > /dev/null
+
+  privacy:
+    # Generic patterns only (home paths, private IPs, .local hosts, e-mail): personal patterns live
+    # in untracked files on developers' machines, see tools/privacy-check.sh.
+    name: privacy check (generic patterns)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: tools/privacy-check.sh
+        run: tools/privacy-check.sh --all
+
+  ast-grep:
+    name: ast-grep rules (tools/ast-grep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install ast-grep (pinned, checksum-verified)
+        run: tools/install-dev-tools.sh "$HOME/.local/bin" ast-grep
+      - name: Rule tests
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          ast-grep test --skip-snapshot-tests
+      - name: Scan (errors fail, warnings are reported)
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          ast-grep scan
 
   workflows:
     name: actionlint
