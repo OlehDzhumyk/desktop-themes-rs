@@ -184,3 +184,29 @@
 .desk-light .desk-clip-card-button { color: rgba(0,0,0,0.7); }
 .desk-light .desk-clip-card-button:hover, .desk-light .desk-clip-card-button:focus { background-color: rgba(0,0,0,0.06); color: #000; }
 .desk-light.desk-skin-macos .desk-clip-row:selected { color: #fff; }
+
+/* ------------------------------------------------------------------ volume mixer (quick settings) */
+/* The mixer sits in the menu of GNOME's output slider, so colours, light/dark and the accent come
+   from the shell theme (-st-accent-color, GNOME 47+); only layout differs between the skins. */
+.desk-mixer-heading { font-weight: bold; padding-top: 8px; }
+.desk-mixer-heading .popup-menu-ornament { width: 0; }
+.desk-mixer-note { font-size: 9.5pt; }
+.desk-mixer-note .popup-menu-item-label { color: inherit; }
+.desk-mixer-app { spacing: 10px; padding-top: 4px; padding-bottom: 4px; }
+.desk-mixer-app-icon { icon-size: 24px; }
+.desk-mixer-app.compact .desk-mixer-app-icon { icon-size: 16px; }
+.desk-mixer-app-name { font-weight: 600; }
+.desk-mixer-app-media { font-size: 9pt; }
+.desk-mixer-app.compact .desk-mixer-app-media { width: 0; }
+.desk-mixer-slider { min-width: 9em; }
+.desk-mixer-app.muted .desk-mixer-slider { -barlevel-active-background-color: rgba(127,127,127,0.6); }
+.desk-mixer-button { border-radius: 99px; padding: 6px; }
+.desk-mixer-button:checked { color: -st-accent-fg-color; background-color: -st-accent-color; }
+.desk-mixer-targets { padding-left: 2.2em; }
+.desk-mixer-badge { font-size: 8.5pt; }
+.desk-hc .desk-mixer-button:checked, .desk-mixer-button:focus { outline: 2px solid -st-accent-color; }
+/* windows11: denser rows, rounded slider area like the Windows 11 mixer */
+.desk-skin-windows11 .desk-mixer-app { border-radius: 6px; }
+/* macos: compact rows inside the disclosure, as in the Control Center sound page */
+.desk-skin-macos .desk-mixer-heading { font-size: 9pt; }
+.desk-skin-macos .desk-mixer-app { spacing: 8px; }

@@ -5,3 +5,7 @@ skin='windows11'
 
 [io/github/OlehDzhumyk/Desk/clipboard]
 toggle-shortcut=['<Super>v']
+
+# Volume mixer flyout: Win+Ctrl+V, as Windows 11 opens its sound output panel.
+[io/github/OlehDzhumyk/Desk/mixer]
+mixer-shortcut=['<Control><Super>v']

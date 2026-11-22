@@ -20,3 +20,13 @@ zbus.workspace = true
 desk-proto.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
 signal-hook = { version = "0.4.6", default-features = false, features = ["iterator"] }
+pipewire = { version = "0.10.1", optional = true }
+
+[features]
+default = ["pipewire"]
+# the PipeWire backend of the mixer engine (needs pipewire-devel and clang to build)
+pipewire = ["dep:pipewire"]
+
+[dev-dependencies]
+# peer-to-peer connections: the D-Bus API tests need no bus daemon
+zbus = { workspace = true, features = ["p2p"] }

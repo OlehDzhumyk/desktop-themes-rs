@@ -35,3 +35,21 @@ pub fn set_private_async(value: bool) {
         }
     });
 }
+
+/// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
+pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
+    desk_settings::accessors::MixerSettings::new()
+}
+
+/// Whether the mixer is on, and the engine's part of its settings.
+pub fn read_mixer(
+    s: &desk_settings::accessors::MixerSettings,
+) -> (bool, crate::mixer::model::Config) {
+    (
+        s.enabled(),
+        crate::mixer::model::Config {
+            remember: s.remember_app_volume(),
+            hide_apps: s.hide_apps(),
+        },
+    )
+}

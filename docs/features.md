@@ -42,3 +42,38 @@ licence file of the extension; compatible with GPL-3.0-or-later):
 
 Storage, history rules, search and the UI are new (deskd and the skins). The installed Clipboard
 Indicator is no longer enabled by any bundled theme.
+
+## Volume mixer
+
+| | |
+|---|---|
+| Open | the chevron next to the volume slider in quick settings; right-click on the system area of the top bar (`entry-point`); Windows 11 theme: **Ctrl+Super+V** (`mixer-shortcut` in the theme's `desk.dconf`; change it on the «Keyboard shortcuts» page or with `themes shortcut set mixer-open ...`) |
+| Shows | one row per application that plays sound (icon, name, what plays, slider, mute, «Play on…»), output and input devices with the default checked |
+| Keys | Left/Right: `volume-step` (5 %), Shift: 1 %, Home/End, M mutes the focused row; Up/Down move between rows; Esc closes |
+| Limits | 100 %, or 150 % when `org.gnome.desktop.sound allow-volume-above-100-percent` is on |
+| Engine | deskd follows PipeWire (events only, no audio data) and exposes `io.github.OlehDzhumyk.Desk.Mixer`; the bridge never opens an audio connection |
+| Storage | only with «Запам'ятовувати гучність програм»: `~/.local/share/deskd/mixer/apps.json` (0600: app ids, volume, mute); turning it off deletes it |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Mixer`: `enabled`, `entry-point`, `show-silent-apps`, `remember-app-volume`, `volume-step`, `hide-apps`, `mixer-shortcut`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `mixer-open` |
+
+Skins (all inside the quick settings sound menu, in the shell theme's colours, light/dark and accent):
+
+* **windows11**: «Мікшер гучності» sub-panel with «Виведення» (devices), the application sliders and
+  «Введення», like the Windows 11 volume mixer flyout.
+* **macos**: «Звук» page as in Control Center: «Виведення» and «Введення» with check marks and plain
+  device names (Bluetooth first), and a collapsed «Програми» disclosure, shown only while something
+  plays. macOS has no per-application volume; the badge says «Запозичено з Windows, адаптовано під
+  macOS».
+* **default**: GNOME's own device chooser, with a «Програми» group of sliders under it.
+
+```sh
+gdbus call --session -d io.github.OlehDzhumyk.Desk -o /io/github/OlehDzhumyk/Desk/Mixer \
+  -m io.github.OlehDzhumyk.Desk.Mixer.ListApps false
+```
+
+### Based on wiremix
+
+The PipeWire side of the engine (which objects to bind, how `Props`, `Route` and metadata events are
+read and written, the cubic volume scale) is adapted from
+[wiremix](https://github.com/tsowell/wiremix) (Copyright Thomas Sowell, **MIT OR Apache-2.0**; used under
+MIT, compatible with GPL-3.0-or-later), `src/wirehose/` → `crates/deskd/src/mixer/pw.rs` and `model.rs`
+(attribution in the file headers). The application model, defaults, memory and the UI are new.

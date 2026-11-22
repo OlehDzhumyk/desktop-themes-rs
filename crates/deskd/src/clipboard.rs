@@ -155,7 +155,7 @@ fn image_label(mime: &str, data: &[u8]) -> String {
     }
 }
 
-fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
+pub(crate) fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
     use std::os::unix::fs::OpenOptionsExt;
     let tmp = path.with_extension("tmp");
     {
@@ -171,7 +171,7 @@ fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
     std::fs::rename(&tmp, path)
 }
 
-fn ensure_private_dir(p: &Path) -> std::io::Result<()> {
+pub(crate) fn ensure_private_dir(p: &Path) -> std::io::Result<()> {
     use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
     if !p.is_dir() {
         std::fs::DirBuilder::new()

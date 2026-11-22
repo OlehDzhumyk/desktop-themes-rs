@@ -8,6 +8,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Volume mixer: one slider (and mute, «Play on…») per application that plays sound, output and input
+  device switching, in the quick settings sound menu, skinned for Windows 11 («Мікшер гучності»,
+  Ctrl+Super+V), macOS (Control Center «Звук» page with a collapsed «Програми» disclosure) and Fedora
+  (GNOME's chooser plus «Програми»). deskd follows PipeWire through events only and exposes
+  `io.github.OlehDzhumyk.Desk.Mixer`; settings `io.github.OlehDzhumyk.Desk.Mixer` (shortcut, entry point,
+  silent apps, optional per-app volume memory, arrow-key step). Building deskd now needs
+  `pipewire-devel` and `clang-devel` (cargo feature `pipewire`, on by default).
 - `themes doctor` checks the GSettings schemas: ours are installed and compiled, and every installed
   extension that ships `schemas/*.gschema.xml` has `gschemas.compiled`; `--fix` compiles it.
 - Shortcut conflict detection also sees GNOME's own defaults (schema defaults of the shell, window

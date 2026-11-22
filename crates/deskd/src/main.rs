@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! deskd — служба функцій робочого столу на сесійній шині (`io.github.OlehDzhumyk.Desk`).
 //!
-//! Містить рушії функцій (поки що — історію буфера обміну); інтерфейс у GNOME Shell малює міст
+//! Містить рушії функцій (історію буфера обміну, мікшер гучності); інтерфейс у GNOME Shell малює міст
 //! `desk-bridge@desktop-themes-rs`, а логіка й стан живуть тут. Активується шиною (D-Bus-файл
 //! служби вказує на юніт systemd --user `deskd.service`).
 
 mod clipboard;
+mod mixer;
 mod persist;
 mod service;
 mod settings;
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 
-use desk_proto::{BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH};
+use desk_proto::{BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, MIXER_PATH};
 use desk_settings::tr;
 use gio::glib;
 use gio::prelude::*;
@@ -20,6 +21,7 @@ use signal_hook::consts::{SIGHUP, SIGINT, SIGTERM};
 use signal_hook::iterator::Signals;
 
 use clipboard::{Config, Engine};
+use mixer::Mixer;
 use service::{ClipboardIface, Desk, Shared};
 
 fn usage() {
@@ -54,6 +56,41 @@ fn emit_changed(conn: &zbus::Connection) {
     });
 }
 
+/// Engines this build hosts (the `Features` property).
+fn features() -> Vec<String> {
+    let mut f = vec!["clipboard".to_string()];
+    if cfg!(feature = "pipewire") {
+        f.push("mixer".into());
+    }
+    f
+}
+
+/// Connect the mixer to PipeWire (again). After a lost connection one retry follows two seconds
+/// later; after that, the next client request tries (see [`Mixer::wanted`]).
+#[cfg(feature = "pipewire")]
+fn start_mixer(m: &Arc<Mixer>) {
+    if m.backend_alive() {
+        return;
+    }
+    let weak = Arc::downgrade(m);
+    let backend = mixer::pw::PwBackend::spawn(m.graph.clone(), m.notifier.clone(), move || {
+        glib::MainContext::default().invoke(move || {
+            glib::timeout_add_seconds_local_once(2, move || {
+                if let Some(m) = weak.upgrade()
+                    && !mixer::lock(&m.graph).connected
+                    && m.has_backend()
+                {
+                    start_mixer(&m);
+                }
+            });
+        });
+    });
+    m.set_backend(Some(Box::new(backend)));
+}
+
+#[cfg(not(feature = "pipewire"))]
+fn start_mixer(_m: &Arc<Mixer>) {}
+
 fn main() {
     desk_settings::i18n::init(desk_settings::i18n::language_from_gsettings);
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -86,14 +123,58 @@ fn main() {
     eng.load();
     let eng: Shared = Arc::new(Mutex::new(eng));
 
-    let saver = persist::Saver::spawn(eng.clone(), persist::QUIET, persist::MAX_WAIT);
+    let saver = {
+        let eng = eng.clone();
+        persist::Saver::spawn(
+            move || {
+                if let Err(e) = service::lock(&eng).save() {
+                    eprintln!("deskd: cannot save the clipboard history: {e}");
+                }
+            },
+            persist::QUIET,
+            persist::MAX_WAIT,
+        )
+    };
     let clip = ClipboardIface {
         eng: eng.clone(),
         saver: saver.clone(),
         set_private: settings::set_private_async,
     };
     let desk = Desk {
-        features: vec!["clipboard".into()],
+        features: features(),
+    };
+
+    // the mixer: its graph, the coalesced Changed signal (sent once the bus connection exists)
+    let mixer_settings = settings::mixer_settings();
+    let (mixer_on, mixer_cfg) = mixer_settings
+        .as_ref()
+        .map(settings::read_mixer)
+        .unwrap_or((true, Default::default()));
+    let store = mixer::store::default_path();
+    let mut graph = mixer::model::Graph::new(mixer_cfg, {
+        let dirs = mixer::icons::data_dirs();
+        Box::new(move |c: &[String]| mixer::icons::resolve(&dirs, c))
+    });
+    graph.memory = mixer::store::load(&store);
+    let graph = Arc::new(Mutex::new(graph));
+    let bus: Arc<OnceLock<zbus::Connection>> = Arc::new(OnceLock::new());
+    let notifier = mixer::notify::Notifier::spawn(
+        {
+            let g = graph.clone();
+            move |now| mixer::lock(&g).next_expiry(now)
+        },
+        {
+            let bus = bus.clone();
+            move |flags| {
+                if let Some(conn) = bus.get() {
+                    zbus::block_on(mixer::service::emit(conn, flags));
+                }
+            }
+        },
+    );
+    let mixer = Arc::new(Mixer::new(graph, notifier, Some(store)));
+    let mixer_iface = mixer::service::MixerIface {
+        mixer: mixer.clone(),
     };
     let conn = zbus::block_on(async {
         let mut flags = zbus::fdo::RequestNameFlags::ALLOW_REPLACEMENT;
@@ -103,6 +184,7 @@ fn main() {
         let conn = zbus::connection::Builder::session()
             .serve_at(DESK_PATH, desk)
             .serve_at(CLIPBOARD_PATH, clip)
+            .serve_at(MIXER_PATH, mixer_iface)
             .build()
             .await?;
         let reply = conn
@@ -125,7 +207,55 @@ fn main() {
     };
     eprintln!("deskd {}: running as {BUS_NAME}", env!("CARGO_PKG_VERSION"));
 
+    let _ = bus.set(conn.clone());
+
     let main_loop = glib::MainLoop::new(None, false);
+
+    if mixer_on {
+        start_mixer(&mixer);
+    }
+    {
+        // a client asked while disconnected: try again, at most every few seconds
+        let weak = Arc::downgrade(&mixer);
+        let last: Arc<Mutex<Option<std::time::Instant>>> = Arc::default();
+        mixer.on_reconnect(move || {
+            let now = std::time::Instant::now();
+            let mut l = last.lock().unwrap_or_else(|p| p.into_inner());
+            if l.is_some_and(|t| now.duration_since(t) < std::time::Duration::from_secs(5)) {
+                return;
+            }
+            *l = Some(now);
+            let weak = weak.clone();
+            glib::MainContext::default().invoke(move || {
+                if let Some(m) = weak.upgrade()
+                    && m.has_backend()
+                    && !mixer::lock(&m.graph).connected
+                {
+                    start_mixer(&m);
+                }
+            });
+        });
+    }
+    if let Some(s) = &mixer_settings {
+        let m = mixer.clone();
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, key| {
+            let (on, cfg) = settings::read_mixer(&typed);
+            match key {
+                "enabled" if on => start_mixer(&m),
+                "enabled" => m.set_backend(None),
+                "remember-app-volume" | "hide-apps" => {
+                    let forget = !cfg.remember;
+                    mixer::lock(&m.graph).cfg = cfg;
+                    if forget {
+                        m.forget();
+                    }
+                    m.notifier.touch(mixer::model::dirty::APPS);
+                }
+                _ => {}
+            }
+        });
+    }
 
     // інший deskd забрав назву (--replace) — виходимо
     {
@@ -182,5 +312,8 @@ fn main() {
     }
     main_loop.run();
     saver.flush();
+    mixer.set_backend(None);
+    mixer.flush();
     drop(gsettings);
+    drop(mixer_settings);
 }

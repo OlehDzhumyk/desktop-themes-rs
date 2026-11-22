@@ -195,7 +195,7 @@ mod tests {
         );
         let iface = ClipboardIface {
             eng: Arc::new(Mutex::new(eng)),
-            saver: Saver::inert(),
+            saver: Saver::noop(),
             set_private: |_| {},
         };
         iface.introspect_to_writer(&mut xml, 0);
