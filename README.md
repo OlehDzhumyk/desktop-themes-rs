@@ -1,12 +1,17 @@
 # desktop-themes-rs
 
 A desktop theme manager for **GNOME** (developed on Fedora Silverblue, GNOME Shell 51). It switches
-the whole look of the desktop between **Fedora** (stock), **macOS**, **macOS Liquid Glass** and
-**Windows 11**, and lets you **mix modules**: the macOS look with Windows 11 keyboard behaviour, for
+the whole look of the desktop between **Fedora** (stock), **macOS**, **macOS Liquid Glass**
+(experimental: it crashed GNOME Shell 51.1 on real hardware) and **Windows 11**, and lets you **mix modules**: the macOS look with Windows 11 keyboard behaviour, for
 example. Everything is done at user level: no sudo, no rpm-ostree layering.
 
-* One binary, `themes`: CLI, GTK 4 / libadwaita window, and a D-Bus service (written in Rust).
-* A quick-settings toggle ("Theme") added by a small GNOME Shell extension.
+* `themes`: CLI, GTK 4 / libadwaita window, and a D-Bus service (Rust).
+* `deskd`: a session daemon for desktop features both Windows 11 and macOS have, starting with
+  **clipboard history** (Win+V flyout in the Windows 11 theme, a Spotlight-like panel on
+  Shift+Super+V in the macOS theme, a menu in Fedora; pins, search, private mode, password-manager
+  aware). See [docs/features.md](docs/features.md).
+* One GNOME Shell extension, `desk-bridge@desktop-themes-rs` (TypeScript): the quick-settings
+  "Theme" toggle and the shell-side UI of deskd's features, skinned per theme.
 * Four modules per theme, each switchable on its own:
 
 | Module | id | What it contains |
@@ -63,9 +68,11 @@ upstream downloads.
 ## Repository layout
 
 ```
-Cargo.toml, src/        the Rust application (lib + CLI + GUI + D-Bus service)
+Cargo.toml, crates/     Rust workspace: themes-core (library), themes (CLI/GUI/service),
+                        desk-proto (shared D-Bus definitions), deskd (features daemon)
+bridge/                 the GNOME Shell bridge extension (TypeScript, npm)
 themes/                 the themes: only contract files (dconf fragments, theme.conf, extensions.txt, ...)
-extensions/             GNOME Shell extensions written for this project
+extensions/             other GNOME Shell extensions of this project (lockscreen-layout)
 patches/                unified diffs for a third-party extension (no vendored copy)
 tools/                  sound synthesizer, wallpaper generator, headless GNOME Shell test tools
 scripts/                bootstrap and installers (assets, extensions, generated files)
@@ -84,18 +91,25 @@ user's machine, not committed.
 * [docs/theme-contract.md](docs/theme-contract.md): files a theme may contain, path placeholders
 * [docs/module-system.md](docs/module-system.md): modules, managed keys, mixing rules
 * [docs/themes.md](docs/themes.md): notes on the bundled themes and their extensions
+* [docs/features.md](docs/features.md): desktop features (clipboard history), skins, privacy
 * [docs/README.uk.md](docs/README.uk.md): full user guide in Ukrainian
 
 ## Development
 
 ```sh
-toolbox run -c desktop-themes-build cargo test
+toolbox run -c desktop-themes-build cargo test                 # all crates
 toolbox run -c desktop-themes-build cargo build --release
+toolbox run -c desktop-themes-build sh -c 'cd bridge && npm ci && npm run typecheck && npm run lint && npm run build'
+tools/headless/clipboard-test.sh windows11 Super+v /tmp/shots  # isolated headless end-to-end test
 tools/integration-test.sh target/release/themes   # CAUTION: writes your real dconf; run in a VM/spare session
 ```
 
-`tools/headless/` starts a private headless GNOME Shell on its own D-Bus bus and Wayland display for
-screenshots and extension tests without touching the real session.
+`tools/headless/` starts a fully isolated headless GNOME Shell (own D-Bus bus, Wayland display,
+runtime dir, dconf database and data-dir overlay) for screenshots and extension tests without
+touching the real session; see `tools/headless/env.sh`.
+
+Coming from an older private build with other app/extension ids? Run
+`scripts/migrate-from-legacy.sh --dry-run`, then without `--dry-run`.
 
 ## Licence
 

@@ -1,0 +1,9 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- deskd itself: version and the engines it hosts. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk">
+    <property name="Version" type="s" access="read"/>
+    <!-- Engine ids, e.g. ["clipboard"]. -->
+    <property name="Features" type="as" access="read"/>
+  </interface>
+</node>

@@ -1,0 +1,7 @@
+# desk-bridge skin for the Windows 11 theme: Win+V clipboard flyout next to the text cursor
+# (the Windows 11 behavior module moves the notification list to Super+N).
+[io/github/OlehDzhumyk/Desk]
+skin='windows11'
+
+[io/github/OlehDzhumyk/Desk/clipboard]
+toggle-shortcut=['<Super>v']

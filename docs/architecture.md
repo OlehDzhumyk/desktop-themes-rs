@@ -3,21 +3,53 @@
 ## Components
 
 ```
-                  +-------------------------------------------+
-  themes CLI ---->|                                           |
-  themes gui ---->|   libthemes (src/lib.rs, pure Rust)       |----> dconf (via the `dconf` tool)
-  D-Bus service ->|   plan -> apply -> verify -> cleanup      |----> GNOME Shell (org.gnome.Shell.Extensions)
-                  +-------------------------------------------+----> ~/.config/gtk-{3,4}.0 (symlinks)
-                          ^                                    ----> flatpak overrides, notifications
-                          |
-   quick-settings extension (extensions/themes-quick@...) --- D-Bus ---> service
+  themes CLI ----+                                  +--> dconf (via the `dconf` tool)
+  themes gui ----+--> themes-core (library) --------+--> GNOME Shell (org.gnome.Shell.Extensions)
+  themes service-+    plan -> apply -> verify       +--> ~/.config/gtk-{3,4}.0, flatpak overrides
+  (D-Bus, on demand)
+        ^                                         deskd (session daemon, D-Bus activated)
+        | io.github.OlehDzhumyk.Themes            io.github.OlehDzhumyk.Desk[.Clipboard]
+        |                                               ^   history, pins, privacy, storage
+  +-----+-----------------------------------------------+------+
+  | desk-bridge@desktop-themes-rs (GNOME Shell, TypeScript)     |
+  |  quick settings «Тема» · clipboard capture (Meta.Selection) |
+  |  skinned panels (default / macos / windows11) · paste       |
+  +-------------------------------------------------------------+
+        GSettings io.github.OlehDzhumyk.Desk (skin, clipboard settings) — one place for all
 ```
 
-One binary (`themes`) contains the library, the CLI (`clap`), the GTK 4 / libadwaita window and the
-D-Bus service. `themes` with no arguments opens the window; `themes --dbus-service` is what the bus
-activates; `theme` and `themes-gui` are symlinks to the same binary.
+The repository is a Cargo workspace:
 
-| Source file | Role |
+| Crate | Kind | Role |
+|---|---|---|
+| `crates/themes-core` | library | the theme manager: theme contract (incl. inheritance), modules, plan/apply, dconf, doctor, crash detection |
+| `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
+| `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (now: clipboard history) |
+| `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` to ES modules (types from `@girs/gnome-shell` 51 / ts-for-gir) |
+
+`themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
+`theme` and `themes-gui` are symlinks to the same binary.
+
+**Where the theme service lives.** The theme D-Bus service stays in the `themes` binary for now: it
+shares the lock, `state.json` and the apply code with the CLI and the window, it runs only on demand
+and exits after 90 s idle, whereas deskd is a long-running session daemon that must stay small and
+never block on a theme switch (which can take seconds and talks to the shell). The bridge already
+speaks to both over D-Bus, so moving the service into deskd later changes no client.
+
+**Logic in deskd, UI in the shell.** GNOME's mutter has no `wlr-data-control`, so only the shell can
+watch the clipboard. The bridge listens to `Meta.Selection::owner-changed`, reads the content with
+`St.Clipboard` and hands it to deskd (`Push`); deskd decides what to keep (privacy rules, sizes,
+duplicates) and stores it. Panels ask deskd for items (`List`) and paste through `Activate` + a
+synthesized Shift+Insert. Everything the user configures is in GSettings and is read by deskd,
+the bridge and the window alike: there is no second settings dialog.
+
+**Settings schema.** `data/io.github.OlehDzhumyk.Desk.gschema.xml` is compiled into
+`~/.local/share/glib-2.0/schemas` (GLib searches the user data dir, so deskd, the window and
+`gsettings` find it without environment variables); the bridge ships a compiled copy in its own
+`schemas/` and prefers it, so the shell never depends on the user schema dir being current.
+
+| Source file (themes-core) | Role |
 |---|---|
 | `theme.rs`, `modules.rs` | read a theme directory, split it into the four modules, expand `~`/`$HOME`/`${HOME}` and the Ptyxis profile placeholder |
 | `plan.rs` | pure computation: managed keys per module, desired dconf values, extension set (unit tested) |
@@ -30,8 +62,9 @@ activates; `theme` and `themes-gui` are symlinks to the same binary.
 | `doctor.rs` | `themes doctor [--fix]`: broken extensions, journal errors, missing themes/icons/files, GNOME version change |
 | `snapshot.rs` | "save current look as a theme": lays the current settings out by module |
 | `state.rs`, `lock.rs` | `state.json` (what was applied) and the `.lock` file shared by CLI, GUI and service |
-| `service.rs` | D-Bus service `io.github.OlehDzhumyk.Themes` (exits after 90 s idle) |
-| `gui/` | the window: theme cards, the mix page, menus, dialogs |
+| `crash.rs` | GNOME's crash protection (`disable-user-extensions`), last real shell crashes, culprit theme/extensions |
+| `themes/src/service.rs` | D-Bus service `io.github.OlehDzhumyk.Themes` (exits after 90 s idle) |
+| `themes/src/gui/` | the window: theme cards, the mix page, «Функції» (feature settings, credits from CREDITS.md), crash banner |
 
 ## Files and directories
 
@@ -52,10 +85,20 @@ trash/              deleted themes
 `baseline/`, `state.json`, `apply.log`, `backups/` and `trash/` are personal and are never part of
 this repository (`.gitignore` excludes them).
 
-Installed by `data/install.sh`: `~/.local/bin/themes` (+ `theme`, `themes-gui`), the `.desktop` file,
-the D-Bus activation file `~/.local/share/dbus-1/services/io.github.OlehDzhumyk.Themes.service`, the
-systemd user unit `themes-doctor.service` (runs `themes doctor --fix` after login) and the
-extensions from `extensions/`.
+Installed by `data/install.sh`: `~/.local/bin/themes` (+ `theme`, `themes-gui`) and
+`~/.local/bin/deskd`, the `.desktop` file, the D-Bus activation files
+`~/.local/share/dbus-1/services/io.github.OlehDzhumyk.{Themes,Desk}.service`, the systemd user units
+`themes-doctor.service` (runs `themes doctor --fix` after login) and `deskd.service`, the GSettings
+schema of deskd, the extensions from `extensions/` and the built bridge
+(`bridge/build/desk-bridge@desktop-themes-rs`).
+
+deskd keeps the clipboard history in `~/.local/share/deskd/clipboard/` (`history.json`, `images/`,
+mode 0600/0700; text only unless «persist images» is on) and session-only images in
+`$XDG_RUNTIME_DIR/deskd/clipboard/`. These are personal and never part of the repository.
+
+Upgrading from an older private build with other ids (`io.github.<name>.Themes`,
+`themes-quick@<host>.local`, `lockscreen-layout@<host>.local`): `scripts/migrate-from-legacy.sh
+[--dry-run] [--reapply]` (idempotent; keeps state, baseline and backups; see the script header).
 
 ## Applying a theme
 
@@ -96,12 +139,48 @@ gdbus call --session -d io.github.OlehDzhumyk.Themes -o /io/github/OlehDzhumyk/T
 The window additionally exposes a small `...Themes.Window` interface (used to raise an existing
 window instead of starting a second one).
 
+### deskd
+
+Service `io.github.OlehDzhumyk.Desk` (activation file → systemd user unit `deskd.service`).
+Interface XML: `data/dbus/` (a unit test checks the zbus implementation against it; the bridge
+loads the same files at runtime).
+
+`/io/github/OlehDzhumyk/Desk`, interface `io.github.OlehDzhumyk.Desk`: properties `Version s`,
+`Features as`.
+
+`/io/github/OlehDzhumyk/Desk/Clipboard`, interface `io.github.OlehDzhumyk.Desk.Clipboard`:
+
+| Member | Description |
+|---|---|
+| `Push(s mime, ay data, as offered, s source_app) -> t id` | new clipboard content from the shell; 0 = not recorded |
+| `List(s query, u limit) -> a(tssssbxt)` | (id, kind, text, mime, image path, pinned, time, size), newest first |
+| `Get(t id) -> (s mime, ay data)` / `Activate(t id)` | content; `Activate` also makes it the newest |
+| `Pin(t id, b pinned)`, `Delete(t id)`, `Clear(b keep_pinned)` | |
+| property `Private b` (rw), `Enabled b`, `Count u`; signal `Changed()` | |
+
+```sh
+gdbus call --session -d io.github.OlehDzhumyk.Desk -o /io/github/OlehDzhumyk/Desk/Clipboard \
+  -m io.github.OlehDzhumyk.Desk.Clipboard.List "" 5
+```
+
+## Crash protection
+
+When GNOME Shell crashes soon after start (or within 60 s of enabling extensions), GNOME sets
+`org.gnome.shell disable-user-extensions=true`; `enabled-extensions` stays as it was but nothing
+runs. `themes apply` reports this instead of "applied live", `themes doctor` shows it as an error
+together with the last real (non-headless) shell crash from `coredumpctl`, the theme that was applied
+then and the extensions that theme had just added (from `apply.log`), and records the crash in
+`state.json` (`last_shell_crash`). The window shows a banner «GNOME вимкнув розширення після збою
+оболонки» whose button offers to switch to the safe theme first or to re-enable extensions; nothing
+re-enables them without the user's confirmation (`themes doctor --enable-extensions` on the CLI).
+
 ## Build environment
 
 Silverblue has no compilers on the host. `scripts/lib.sh` runs build steps inside a toolbox
 (`desktop-themes-build`, override with `DT_TOOLBOX`) that `scripts/bootstrap.sh` creates with these
 packages: `git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel
-libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow`.
+libadwaita-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm`
+(npm builds the TypeScript bridge; its dev dependencies are pinned in `bridge/package-lock.json`).
 The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.88 or newer is required
 (edition 2024, let chains); `bootstrap.sh --rustup` installs a toolchain with rustup if the
 distribution's is older.
@@ -112,6 +191,14 @@ distribution's is older.
 * `tools/integration-test.sh`: applies a temporary theme with all modules, mixes macos/windows11
   and checks dconf against the baseline after reset. **It writes the real dconf**; use a VM or a
   spare session.
-* `tools/headless/`: a private headless GNOME Shell (own `dbus-daemon`, own Wayland socket) with
-  `screenshot.py` (Mutter ScreenCast) and `click.py` (Mutter RemoteDesktop) so extension and theme
-  changes can be tried and photographed without touching the real session.
+* `bridge/`: `npm run typecheck` (tsc --noEmit against the GNOME Shell 51 types), `npm run lint`.
+* `tools/headless/`: a fully isolated headless GNOME Shell (see `env.sh`): own `dbus-daemon`, own
+  Wayland socket, own `XDG_RUNTIME_DIR` subdirectory (so the shell's crash-protection file never
+  lands in the real one), own `XDG_CONFIG_HOME`/dconf database, own `XDG_DATA_HOME` overlay (symlinks
+  to the real data plus the extension under test, the schema and a deskd-only service directory).
+  `start.sh --theme ID --ext DIR` loads a theme's dconf into the private database (never
+  `themes apply`); `input.py` sends keys/clicks (Mutter RemoteDesktop) and takes screenshots (Mutter
+  ScreenCast → PipeWire → gst); `stop.sh` kills only its own processes.
+  `clipboard-test.sh THEME SHORTCUT OUTDIR` is the end-to-end clipboard test (copy three samples
+  with wl-copy, open the panel, paste the 2nd into a GTK 4 text field, verify).
+  Never call `toolbox` from inside `run.sh`: podman would see a different runtime dir.

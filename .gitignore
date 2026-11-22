@@ -14,3 +14,6 @@ apply.log
 baseline*/
 backups/
 trash/
+# shell bridge build output and npm packages
+/bridge/node_modules/
+/bridge/build/

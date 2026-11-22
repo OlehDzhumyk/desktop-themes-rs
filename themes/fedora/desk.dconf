@@ -1,0 +1,7 @@
+# desk-bridge skin for stock Fedora: clipboard history as a plain menu (Shift+Super+V and the
+# «Буфер обміну» quick settings toggle).
+[io/github/OlehDzhumyk/Desk]
+skin='default'
+
+[io/github/OlehDzhumyk/Desk/clipboard]
+toggle-shortcut=['<Shift><Super>v']

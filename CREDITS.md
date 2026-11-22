@@ -40,12 +40,17 @@ Downloaded from extensions.gnome.org at the pinned version tags in `scripts/vers
 | [Logo Menu](https://github.com/Aryan20/Logomenu) | Aryan Kaushik | GPL-2.0-or-later |
 | [Compiz alike magic lamp effect](https://github.com/hermes83/compiz-alike-magic-lamp-effect) | hermes83 | GPL-3.0-or-later |
 | [Spotlight](https://github.com/itsnin/spotlight) | itsnin | GPL-3.0-or-later |
-| [Clipboard Indicator](https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator) | Tudmotu | MIT |
 | [Dash to Panel](https://github.com/home-sweet-gnome/dash-to-panel) | jderose9 et al. | GPL-2.0-or-later |
 | [ArcMenu](https://gitlab.com/arcmenu/ArcMenu) | ArcMenu team | GPL-2.0-or-later |
 | [Tiling Shell](https://github.com/domferr/tilingshell) | Domenico Ferraro | GPL-3.0-or-later |
 | [Desktop Icons NG (gtk4-ding)](https://gitlab.com/smedius/desktop-icons-ng) | Sergio Costas, Marco Trevisan, Sundeep Mediratta et al. | GPL-3.0-or-later |
 | [Liquid Glass](https://github.com/ryohsuke1231/liquid-glass) (commit `9ec82ed`, from the repository, not extensions.gnome.org) | ryohsuke1231 | MIT |
+
+## Code adapted into this repository
+
+| Project | Used for | Licence |
+|---|---|---|
+| [Clipboard Indicator](https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator) (Yotam Bar-On / Tudmotu and contributors) | clipboard capture, paste-on-select and image handling, ported to TypeScript in `bridge/src/clipboard/watcher.ts` and `paste.ts` (attribution in the file headers; see docs/features.md) | MIT |
 
 `patches/spotlight@nin/` contains two small unified diffs against Spotlight (GPL-3.0-or-later), kept
 under the same licence; see [patches/README.md](patches/README.md).
@@ -58,8 +63,18 @@ upstream repository is authoritative.
 [libadwaita](https://crates.io/crates/libadwaita) and [gtk4](https://crates.io/crates/gtk4)
 (gtk-rs, MIT), [clap](https://crates.io/crates/clap) (MIT OR Apache-2.0),
 [serde](https://crates.io/crates/serde) and [serde_json](https://crates.io/crates/serde_json)
-(MIT OR Apache-2.0), [zbus](https://crates.io/crates/zbus) (MIT) and their transitive dependencies,
-see `Cargo.lock` and `cargo tree`. GTK 4 and libadwaita themselves are LGPL-2.1-or-later.
+(MIT OR Apache-2.0), [zbus](https://crates.io/crates/zbus) (MIT), [gio](https://crates.io/crates/gio)
+(gtk-rs, MIT), [futures-util](https://crates.io/crates/futures-util) (MIT OR Apache-2.0) and their
+transitive dependencies, see `Cargo.lock` and `cargo tree`. GTK 4 and libadwaita themselves are
+LGPL-2.1-or-later.
+
+## Build tools of the shell bridge (npm, not shipped)
+
+| Project | Used for | Licence |
+|---|---|---|
+| [ts-for-gir / @girs](https://github.com/gjsify/ts-for-gir) (`@girs/gnome-shell` 51, `@girs/gjs`) | TypeScript types for GJS and GNOME Shell 51 | MIT |
+| [TypeScript](https://github.com/microsoft/TypeScript) | compiler (`tsc`) | Apache-2.0 |
+| [ESLint](https://github.com/eslint/eslint) and [typescript-eslint](https://github.com/typescript-eslint/typescript-eslint) | linting | MIT |
 
 ## Terminal palettes
 

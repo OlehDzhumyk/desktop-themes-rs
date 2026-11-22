@@ -1,0 +1,7 @@
+# desk-bridge skin for the macOS theme: Spotlight-like clipboard panel on Shift+Super+V
+# (Super+V stays the notification list, as in the macOS behavior module).
+[io/github/OlehDzhumyk/Desk]
+skin='macos'
+
+[io/github/OlehDzhumyk/Desk/clipboard]
+toggle-shortcut=['<Shift><Super>v']

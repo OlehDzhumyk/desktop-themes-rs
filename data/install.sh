@@ -1,53 +1,78 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# User-level install of the built binary and its desktop integration (no sudo).
+# User-level install of the built binaries and their desktop integration (no sudo):
+#   themes (CLI/GUI/theme service), deskd (desktop features daemon), their D-Bus activation files,
+#   systemd user units, the GSettings schema of deskd and the GNOME Shell extensions of this
+#   repository (desk-bridge is built from bridge/ with npm when bridge/build is missing).
 # Run on the host after `cargo build --release` (scripts/bootstrap.sh does all of it).
 #
-# Usage: data/install.sh [--dry-run] [--bin PATH]
-#   --bin PATH  install this binary instead of target/release/themes
+# Usage: data/install.sh [--dry-run] [--bin PATH] [--deskd PATH]
+#   --bin PATH    install this binary instead of target/release/themes
+#   --deskd PATH  install this binary instead of target/release/deskd
 set -euo pipefail
 SRC=$(cd "$(dirname "$0")/.." && pwd)
 BIN_SRC="$SRC/target/release/themes"
+DESKD_SRC="$SRC/target/release/deskd"
 DRY=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run|-n) DRY=1; shift ;;
     --bin) BIN_SRC=$2; shift 2 ;;
-    -h|--help) sed -n '2,8p' "$0"; exit 0 ;;
+    --deskd) DESKD_SRC=$2; shift 2 ;;
+    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done
 run() { if [ "$DRY" = 1 ]; then printf '    + '; printf '%q ' "$@"; printf '\n'; else "$@"; fi; }
 
 APP_ID=io.github.OlehDzhumyk.Themes
+DESK_ID=io.github.OlehDzhumyk.Desk
+BRIDGE=desk-bridge@desktop-themes-rs
 DATA=${XDG_DATA_HOME:-$HOME/.local/share}
 BIN="$HOME/.local/bin"
 ROOT="${DESKTOP_THEMES_ROOT:-$DATA/desktop-themes}"
 
 [ "$DRY" = 1 ] || [ -x "$BIN_SRC" ] || { echo "binary not found: $BIN_SRC (build it first: cargo build --release)" >&2; exit 1; }
-run mkdir -p "$BIN" "$DATA/dbus-1/services" "$HOME/.config/systemd/user" "$DATA/applications" "$DATA/gnome-shell/extensions"
+[ "$DRY" = 1 ] || [ -x "$DESKD_SRC" ] || { echo "binary not found: $DESKD_SRC (build it first: cargo build --release)" >&2; exit 1; }
+run mkdir -p "$BIN" "$DATA/dbus-1/services" "$HOME/.config/systemd/user" "$DATA/applications" \
+  "$DATA/gnome-shell/extensions" "$DATA/glib-2.0/schemas"
 
 run install -m 0755 "$BIN_SRC" "$BIN/themes.new"
 run mv -f "$BIN/themes.new" "$BIN/themes"
 run ln -sfn themes "$BIN/theme"          # short alias
 run ln -sfn themes "$BIN/themes-gui"     # launcher name
+run install -m 0755 "$DESKD_SRC" "$BIN/deskd.new"
+run mv -f "$BIN/deskd.new" "$BIN/deskd"
+
+# GSettings schema shared by deskd, the bridge and the window
+run install -m 0644 "$SRC/data/$DESK_ID.gschema.xml" "$DATA/glib-2.0/schemas/$DESK_ID.gschema.xml"
+if command -v glib-compile-schemas >/dev/null 2>&1; then run glib-compile-schemas "$DATA/glib-2.0/schemas"
+else run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" glib-compile-schemas "$DATA/glib-2.0/schemas"; fi
 
 if [ "$DRY" = 1 ]; then
   echo "    + sed @BIN@ -> $BIN: data/$APP_ID.{service,desktop} -> $DATA/{dbus-1/services,applications}"
 else
   sed "s|@BIN@|$BIN|g" "$SRC/data/$APP_ID.service" > "$DATA/dbus-1/services/$APP_ID.service"
   sed "s|@BIN@|$BIN|g" "$SRC/data/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
+  sed "s|@BIN@|$BIN|g" "$SRC/data/$DESK_ID.service" > "$DATA/dbus-1/services/$DESK_ID.service"
 fi
 run install -m 0644 "$SRC/data/themes-doctor.service" "$HOME/.config/systemd/user/themes-doctor.service"
+run install -m 0644 "$SRC/data/deskd.service" "$HOME/.config/systemd/user/deskd.service"
 
-# GNOME Shell extensions that belong to this repository
-for d in "$SRC"/extensions/*/; do
+# GNOME Shell extensions that belong to this repository (the TypeScript bridge is built first)
+if [ ! -f "$SRC/bridge/build/$BRIDGE/extension.js" ]; then
+  run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" sh -c "cd '$SRC/bridge' && npm ci --no-audit --no-fund && npm run build"
+fi
+for d in "$SRC"/extensions/*/ "$SRC/bridge/build/$BRIDGE/"; do
   uuid=$(basename "$d")
-  run rm -rf "$DATA/gnome-shell/extensions/$uuid"
+  [ "$DRY" = 1 ] || [ -d "$d" ] || continue
+  run rm -rf "${DATA:?}/gnome-shell/extensions/${uuid:?}"
   run cp -a "${d%/}" "$DATA/gnome-shell/extensions/$uuid"
 done
 
 run systemctl --user daemon-reload
 run systemctl --user enable themes-doctor.service
 if command -v update-desktop-database >/dev/null 2>&1; then run update-desktop-database "$DATA/applications"; fi
-echo "Installed: $BIN/themes (theme root: $ROOT)"
+# a running deskd (older build) is replaced; the next D-Bus call activates the new one
+run systemctl --user try-restart deskd.service
+echo "Installed: $BIN/themes, $BIN/deskd, $BRIDGE (theme root: $ROOT)"
