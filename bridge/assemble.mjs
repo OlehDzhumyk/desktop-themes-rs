@@ -58,7 +58,12 @@ for (const f of readdirSync(po).filter(n => n.endsWith('.po'))) {
     const lang = f.slice(0, -3);
     const dir = join(out, 'locale', lang, 'LC_MESSAGES');
     mkdirSync(dir, {recursive: true});
-    execFileSync('msgfmt', ['--check', '-o', join(dir, 'desktop-themes-rs.mo'), join(po, f)], {stdio: 'inherit'});
+    try {
+        execFileSync('msgfmt', ['--check', '-o', join(dir, 'desktop-themes-rs.mo'), join(po, f)], {stdio: 'inherit'});
+    } catch (e) {
+        // without gettext tools only the JSON catalogue is built (used when language = uk)
+        console.warn(`msgfmt unavailable, ${lang}.mo skipped: ${e.message}`);
+    }
     writeFileSync(join(out, 'locale', `${lang}.json`), JSON.stringify(parsePo(readFileSync(join(po, f), 'utf8'))));
 }
 console.log(`built ${out}`);

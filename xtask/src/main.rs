@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `cargo xtask <task>`:
 //!
-//! * `gen`        write the artefacts generated from the settings registry (GSettings schema,
-//!                typed accessors, docs/settings.md)
-//! * `check`      fail when a generated file is out of date (what the tests check, for scripts)
-//! * `pot`        extract translatable strings (Rust, TypeScript, .desktop, metainfo) into
-//!                po/desktop-themes-rs.pot and merge them into every po/*.po (needs gettext)
+//! * `gen`: write the artefacts generated from the settings registry (GSettings schema,
+//!   typed accessors, docs/settings.md)
+//! * `check`: fail when a generated file is out of date (what the tests check, for scripts)
+//! * `pot`: extract translatable strings (Rust, TypeScript, .desktop, metainfo) into
+//!   po/desktop-themes-rs.pot and merge them into every po/*.po (needs gettext)
 //!
 //! Compiling the catalogues is done by `data/install.sh` (msgfmt into ~/.local/share/locale, plus
 //! the translated .desktop and metainfo files) and by `bridge/assemble.mjs` (the extension's copy).

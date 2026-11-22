@@ -64,12 +64,10 @@ impl Ctx {
         c.sort();
         match c.into_iter().next() {
             Some(p) => Ok(p),
-            None => {
-                return Err(crate::Error(tr!(
-                    "no baseline-* found in {path}",
-                    path = self.root.display()
-                )));
-            }
+            None => Err(crate::Error(tr!(
+                "no baseline-* found in {path}",
+                path = self.root.display()
+            ))),
         }
     }
 

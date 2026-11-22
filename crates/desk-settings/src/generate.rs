@@ -97,7 +97,7 @@ fn snake(name: &str) -> String {
 }
 
 fn camel(s: &str) -> String {
-    s.split(|c: char| c == '-' || c == '_')
+    s.split(['-', '_'])
         .filter(|p| !p.is_empty())
         .map(|p| {
             let mut c = p.chars();
