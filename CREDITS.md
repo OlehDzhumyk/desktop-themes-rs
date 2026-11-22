@@ -52,6 +52,9 @@ Downloaded from extensions.gnome.org at the pinned version tags in `scripts/vers
 |---|---|---|
 | [Clipboard Indicator](https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator) (Yotam Bar-On / Tudmotu and contributors) | clipboard capture, paste-on-select and image handling, ported to TypeScript in `bridge/src/clipboard/watcher.ts` and `paste.ts` (attribution in the file headers; see docs/features.md) | MIT |
 
+| [ddterm](https://github.com/ddterm/gnome-shell-extension-ddterm) (Aleksandr Mezin and contributors) | end-to-end test harness: `tests/e2e/harness/logparser.py` and `github_annotations.py` copied unchanged with their SPDX headers (commit `dacfd3f`); the approach of `harness/shell.py` and `harness/hook.js` (shell in a systemd container, `--unsafe-mode` + Eval, helper module loaded into the shell) after `tests/fixtures.py`, `shelldbus.py`, `shellhook.js`; the CI job after `.github/workflows/ci.yml` (CC0-1.0) | GPL-3.0-or-later |
+| [ddterm/gnome-shell-image](https://github.com/ddterm/gnome-shell-image) (Aleksandr Mezin, Simon Schneegans) | base image of the end-to-end tests, `ghcr.io/ddterm/gnome-shell-image/fedora-45` pinned by digest in `tests/e2e/Containerfile` (pulled, not redistributed) | MIT |
+
 `patches/spotlight@nin/` contains two small unified diffs against Spotlight (GPL-3.0-or-later), kept
 under the same licence; see [patches/README.md](patches/README.md).
 

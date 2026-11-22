@@ -349,7 +349,7 @@ enable-animations=false
         return out
 
     def errors_from(self, fragments=(UUID,)):
-        """JS errors and criticals whose message or stack mentions one of `fragments`."""
+        """JS errors and critical messages whose text or stack mentions one of `fragments`."""
         bad = []
         for r in self.records():
             serious = 'JS ERROR' in r['message'] or r['levelname'] in ('ERROR', 'CRITICAL')
