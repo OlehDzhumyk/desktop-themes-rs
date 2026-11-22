@@ -49,7 +49,7 @@ for d in "${EXTS[@]+"${EXTS[@]}"}"; do
   OVERLAY+=("$u")
 done
 cp "$REPO/data/io.github.OlehDzhumyk.Desk.gschema.xml" "$D/glib-2.0/schemas/"
-toolbox run -c "$HS_TOOLBOX" glib-compile-schemas "$D/glib-2.0/schemas"
+tbx glib-compile-schemas "$D/glib-2.0/schemas"
 if [ -x "$DESKD" ]; then
   printf '[D-BUS Service]\nName=io.github.OlehDzhumyk.Desk\nExec=%s\n' "$DESKD" \
     > "$D/dbus-1/services/io.github.OlehDzhumyk.Desk.service"
@@ -60,7 +60,7 @@ fi
 sed "s|@SOCK@|$HS_BUS_SOCK|; s|@SERVICES@|$D/dbus-1/services|" "$H/bus.conf" > "$HS_STATE/bus.conf"
 rm -f -- "${HS_BUS_SOCK:?}"
 mapfile -t ENVV < <(hs_env)
-toolbox run -c "$HS_TOOLBOX" env "${ENVV[@]}" \
+tbx env "${ENVV[@]}" \
   dbus-daemon --config-file="$HS_STATE/bus.conf" --fork --print-pid > "$HS_STATE/bus.pid"
 for _ in $(seq 50); do [ -S "$HS_BUS_SOCK" ] && break; sleep 0.1; done
 echo "bus: $HS_BUS (pid $(cat "$HS_STATE/bus.pid"))"

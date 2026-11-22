@@ -1,0 +1,132 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Headless GNOME Shell jobs: the clipboard end-to-end test (tools/headless) and the performance
+# harness (tools/perf).
+#
+# Why this is not part of the required CI: it starts a real gnome-shell --headless (mutter with
+# the software "surfaceless" renderer, no GPU needed) on a private D-Bus, and drives it with
+# synthetic input. That works in a plain Fedora container (verified: no /dev/dri, no systemd, no
+# PipeWire, just tools/headless/ci-env.sh), but it depends on the distribution's gnome-shell
+# staying API-compatible with the pinned extension (shell 51), takes several minutes and its
+# timings on shared runners are noisy. So it runs on demand, weekly, and on changes to the paths it
+# exercises, and a failure is a signal to look, not a merge blocker.
+# Screenshots are not taken in CI (they need PipeWire); run tools/headless locally for those.
+name: Headless
+
+on:
+  workflow_dispatch:
+    inputs:
+      perf:
+        description: Also run the performance harness (release build, ~10 min)
+        type: boolean
+        default: false
+  schedule:
+    - cron: "17 4 * * 1"
+  pull_request:
+    paths:
+      - "bridge/**"
+      - "crates/deskd/**"
+      - "crates/desk-proto/**"
+      - "data/**"
+      - "themes/**"
+      - "tools/headless/**"
+      - "tools/perf/**"
+      - ".github/workflows/headless.yml"
+
+concurrency:
+  group: headless-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_HOME: ${{ github.workspace }}/.cargo-home
+  CARGO_INCREMENTAL: "0"
+  HS_TOOLBOX: none
+  HS_NO_SHOTS: "1"
+  XDG_RUNTIME_DIR: /run/user/0
+
+jobs:
+  clipboard-e2e:
+    name: clipboard end-to-end (${{ matrix.theme }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {theme: fedora, keys: "Shift+Super+v"}
+          - {theme: macos, keys: "Shift+Super+v"}
+          - {theme: windows11, keys: "Super+v"}
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo \
+            nodejs npm gnome-shell mutter gjs dbus-daemon dconf glib2 gtk4 wl-clipboard \
+            python3-gobject mesa-dri-drivers mesa-libEGL adwaita-icon-theme procps-ng
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .cargo-home/registry
+            .cargo-home/git
+            target
+          key: cargo-fedora45-headless-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-fedora45-headless-
+      - name: Build deskd and the bridge
+        run: |
+          cargo build --locked -p deskd
+          (cd bridge && npm ci --no-audit --no-fund && npm run build)
+      - name: Prepare the container
+        run: tools/headless/ci-env.sh
+      - name: Clipboard end-to-end test
+        run: tools/headless/clipboard-test.sh "${{ matrix.theme }}" "${{ matrix.keys }}" "$RUNNER_TEMP/shots"
+      - name: Shell log on failure
+        if: failure()
+        run: |
+          for f in "$XDG_RUNTIME_DIR"/headless-*/state/*.log; do echo "::group::$f"; tail -n 80 "$f"; echo "::endgroup::"; done
+
+  perf:
+    name: performance budgets (report only)
+    if: github.event_name == 'workflow_dispatch' && inputs.perf
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: registry.fedoraproject.org/fedora:45
+    steps:
+      - name: Install packages
+        run: |
+          dnf install -y --setopt=install_weak_deps=False \
+            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel rust cargo \
+            nodejs npm gnome-shell mutter gjs dbus-daemon dconf glib2 gtk4 wl-clipboard \
+            python3-gobject mesa-dri-drivers mesa-libEGL adwaita-icon-theme procps-ng
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .cargo-home/registry
+            .cargo-home/git
+            target
+          key: cargo-fedora45-perf-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-fedora45-perf-
+      - name: Build (release)
+        run: |
+          cargo build --locked --release -p deskd -p themes
+          (cd bridge && npm ci --no-audit --no-fund && npm run build)
+      - name: Prepare the container
+        run: tools/headless/ci-env.sh
+      - name: Run the harness
+        # Shared runners are noisy: the comparison is reported, never failed (--report-only).
+        run: tools/perf/run.sh --out "$RUNNER_TEMP/perf" --report-only --shell-runs 2
+      - name: Summary
+        if: always()
+        run: cat "$RUNNER_TEMP/perf/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: perf-results
+          path: ${{ runner.temp }}/perf
