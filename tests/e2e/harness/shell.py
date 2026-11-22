@@ -186,6 +186,7 @@ enable-animations=false
             if uuid == UUID:
                 self.wait_ext_state({1}, uuid)
         self._baseline()
+        self.hook('settle')
         return self
 
     def _baseline(self):

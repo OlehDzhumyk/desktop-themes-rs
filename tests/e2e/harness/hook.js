@@ -185,7 +185,9 @@ export function waitPanel(open, timeoutMs = 10000) {
         let id = 0;
         const timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeoutMs, () => {
             actor.disconnect(id);
-            reject(new Error(`panel did not become ${open ? 'visible' : 'hidden'}`));
+            reject(new Error(`panel did not become ${open ? 'visible' : 'hidden'} ` +
+                `(modal ${Main.modalCount}, overview ${Main.overview.visible}, ` +
+                `focus ${global.stage.key_focus}, action mode ${Main.actionMode})`));
             return GLib.SOURCE_REMOVE;
         });
         id = actor.connect('notify::visible', () => {
