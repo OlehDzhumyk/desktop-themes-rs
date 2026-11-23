@@ -78,8 +78,9 @@ pub struct State {
     /// Symlinks to files generated from tokens.toml, per module (link → target).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub token_links: BTreeMap<Module, BTreeMap<String, String>>,
-    /// GTK files generated from tokens.toml, COPIED into ~/.config/gtk-{4,3}.0 (Flatpak apps
-    /// cannot follow links into ~/.cache): destination → source and content hash.
+    /// GTK files COPIED into `~/.config/gtk-{4,3}.0` (both generated from `tokens.toml` and
+    /// hand-made themes, since Flatpak apps cannot follow symlinks outside `~/.config/gtk-4.0`):
+    /// destination → source and content hash.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub gtk_copies: BTreeMap<String, GtkCopy>,
     /// The live wallpaper palette in the generated gtk.css copy (see `overlay`, ADR 0010).

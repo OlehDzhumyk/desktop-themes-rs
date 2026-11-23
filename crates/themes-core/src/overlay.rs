@@ -120,6 +120,13 @@ fn install_locked(ctx: &Ctx, st: &mut State, seed: Rgba) -> Result<Outcome> {
     let Some(id) = st.source(Module::Look).map(str::to_string) else {
         return Ok(Outcome::accent_only(tr!("no theme is applied")));
     };
+    let theme = get_theme(ctx, &id)?;
+    if theme.handmade_gtk_dir("gtk4").is_some() || !crate::tokens::has_tokens(&theme) {
+        return Ok(Outcome::accent_only(tr!(
+            "the theme “{theme}” has no stylesheet generated from tokens; only the accent follows the wallpaper",
+            theme = id
+        )));
+    }
     let dkey = gtk_css(ctx);
     let Some(copy) = st.gtk_copies.get(&dkey).cloned() else {
         return Ok(Outcome::accent_only(tr!(
@@ -134,7 +141,6 @@ fn install_locked(ctx: &Ctx, st: &mut State, seed: Rgba) -> Result<Outcome> {
             path = dkey
         )));
     }
-    let theme = get_theme(ctx, &id)?;
     let mut layers = vec![(
         palette::OVERLAY_LAYER.to_string(),
         palette::overlay_toml(seed),
@@ -321,12 +327,10 @@ mod tests {
         install(&f.ctx, SEED).unwrap();
         // switching the look theme: the user's own file comes back, the overlay is forgotten
         applied(&f, "hand");
-        assert_eq!(
-            std::fs::read_link(f.ctx.gtk4.join("gtk.css")).unwrap(),
-            f.ctx.themes.join("hand/gtk4/gtk.css")
-        );
+        assert!(!f.ctx.gtk4.join("gtk.css").is_symlink());
+        assert_eq!(css(&f), "/* hand */\n");
         let st = State::load(&f.ctx);
-        assert!(st.wallpaper_overlay.is_none() && st.gtk_copies.is_empty());
+        assert!(st.wallpaper_overlay.is_none() && st.links.is_empty() && st.gtk_copies.len() == 1);
         assert!(!dir(&f.ctx).exists());
         // a hand-made stylesheet is never replaced (AC-WALL-07)
         let o = install(&f.ctx, SEED).unwrap();

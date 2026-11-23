@@ -3936,6 +3936,23 @@ msgstr ""
 "історія буфера обміну. Усе працює на рівні користувача, без прав "
 "адміністратора."
 
+msgid "replaced GTK symlinks with Flatpak-compatible copies"
+msgstr "симлінки GTK замінено на копії, сумісні з Flatpak"
+
+msgid ""
+"GTK files are symlinked instead of copied; Flatpak apps cannot read them "
+"(themes doctor --fix)"
+msgstr ""
+"файли GTK підключено симлінками замість копій; програми Flatpak не можуть їх "
+"прочитати (themes doctor --fix)"
+
+msgid ""
+"Flatpak apps do not have read access to ~/.config/gtk-4.0; run: flatpak "
+"override --user --filesystem=xdg-config/gtk-4.0:ro"
+msgstr ""
+"програми Flatpak не мають доступу на читання до ~/.config/gtk-4.0; виконайте: "
+"flatpak override --user --filesystem=xdg-config/gtk-4.0:ro"
+
 #~ msgid "About Themes"
 #~ msgstr "Про програму «Теми»"
 

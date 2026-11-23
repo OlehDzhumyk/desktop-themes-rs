@@ -702,6 +702,85 @@ fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
     }
 }
 
+fn has_flatpak_gtk4_access(global_override: &str) -> bool {
+    let mut in_context = false;
+    for line in global_override.lines() {
+        let s = line.trim();
+        if s.starts_with('[') && s.ends_with(']') {
+            in_context = s == "[Context]";
+        } else if in_context
+            && let Some(v) = s.strip_prefix("filesystems=")
+            && v.split(';')
+                .any(|p| matches!(p, "xdg-config/gtk-4.0" | "xdg-config/gtk-4.0:ro"))
+        {
+            return true;
+        }
+    }
+    false
+}
+
+/// Checks Flatpak compatibility of active GTK files:
+/// 1. Legacy symlinks in `st.links` cannot be followed by Flatpak apps (`--fix` replaces them
+///    with copies of the active Look theme's GTK files).
+/// 2. When GTK 4 files are active and `flatpak` is installed, warns if the global override lacks
+///    `xdg-config/gtk-4.0:ro`.
+fn check_gtk_flatpak(ctx: &Ctx, st: &mut State, fix: bool, rep: &mut DoctorReport) {
+    let has_gtk_links = st.links.keys().any(|k| {
+        let p = Path::new(k);
+        p.starts_with(&ctx.gtk4) || p.starts_with(&ctx.gtk3)
+    });
+    if has_gtk_links {
+        if fix && let Ok(_lock) = Lock::acquire(ctx) {
+            let mut s2 = State::load(ctx);
+            let mut w = Vec::new();
+            let ok = crate::gtklinks::unlink_all(ctx, &mut s2, &mut w).is_ok()
+                && match s2.source(Module::Look).map(str::to_string) {
+                    Some(look) => crate::theme::get_theme(ctx, &look)
+                        .and_then(|t| crate::gtklinks::link_theme(ctx, &mut s2, &t))
+                        .is_ok(),
+                    None => true,
+                };
+            if ok {
+                *st = State::load(ctx);
+                rep.fixed
+                    .push(tr!("replaced GTK symlinks with Flatpak-compatible copies"));
+            }
+            for m in w {
+                rep.push("warning", "gtk-symlinks", m, None, false);
+            }
+        } else {
+            rep.push(
+                "warning",
+                "gtk-symlinks",
+                tr!(
+                    "GTK files are symlinked instead of copied; Flatpak apps cannot read them (themes doctor --fix)"
+                ),
+                None,
+                true,
+            );
+        }
+    }
+    let has_gtk4 = st
+        .gtk_copies
+        .keys()
+        .any(|k| Path::new(k).starts_with(&ctx.gtk4));
+    if has_gtk4 && crate::util::which("flatpak") {
+        let text =
+            std::fs::read_to_string(ctx.flatpak_overrides.join("global")).unwrap_or_default();
+        if !has_flatpak_gtk4_access(&text) {
+            rep.push(
+                "warning",
+                "flatpak-gtk4",
+                tr!(
+                    "Flatpak apps do not have read access to ~/.config/gtk-4.0; run: flatpak override --user --filesystem=xdg-config/gtk-4.0:ro"
+                ),
+                None,
+                false,
+            );
+        }
+    }
+}
+
 /// deskd's live "accent from wallpaper" keeps its state in the cache while it is on
 /// (docs/spec/features/theme-from-wallpaper.md): say which accent it set and what "off" restores,
 /// and whether a token theme's libadwaita palette follows it. A palette left behind while the
@@ -1084,6 +1163,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_retired(ctx, &mut st, &enabled, opt.fix, &mut rep);
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
+    check_gtk_flatpak(ctx, &mut st, opt.fix, &mut rep);
     check_wallpaper_accent(ctx, &st, opt.fix, &mut rep);
     check_schemas(ctx, &enabled, opt.fix, &mut rep);
     check_values(&cur, &mut rep);
@@ -1543,5 +1623,48 @@ mod tests {
             vec!["clipboard-indicator@tudmotu.com".to_string()]
         );
         assert_eq!(rep.fixed.len(), 1, "{:?}", rep.fixed);
+    }
+
+    #[test]
+    fn gtk_flatpak_check_detects_override_and_migrates_symlinks() {
+        assert!(has_flatpak_gtk4_access(
+            "[Context]\nfilesystems=xdg-config/gtk-3.0:ro;xdg-config/gtk-4.0:ro;\n"
+        ));
+        assert!(has_flatpak_gtk4_access(
+            "[Context]\nfilesystems=xdg-config/gtk-4.0;\n"
+        ));
+        assert!(!has_flatpak_gtk4_access(
+            "[Context]\nfilesystems=xdg-data/themes:ro;\n"
+        ));
+        assert!(!has_flatpak_gtk4_access(""));
+
+        let r = tmp("gtk-flatpak");
+        let ctx = Ctx::new(r.join("home"), r.join("root"));
+        touch(&ctx.themes.join("win/theme.conf"), "NAME=Win\n");
+        touch(&ctx.themes.join("win/gtk4/gtk.css"), "/* fluent */\n");
+        std::fs::create_dir_all(&ctx.gtk4).unwrap();
+        let src = ctx.themes.join("win/gtk4/gtk.css");
+        let dst = ctx.gtk4.join("gtk.css");
+        std::os::unix::fs::symlink(&src, &dst).unwrap();
+        let mut st = State::default();
+        st.modules.insert(Module::Look, "win".into());
+        st.links
+            .insert(dst.to_string_lossy().into(), src.to_string_lossy().into());
+        st.save(&ctx).unwrap();
+
+        let mut rep = DoctorReport::default();
+        check_gtk_flatpak(&ctx, &mut st, false, &mut rep);
+        assert!(
+            rep.issues
+                .iter()
+                .any(|i| i.kind == "gtk-symlinks" && i.fixable)
+        );
+
+        let mut rep2 = DoctorReport::default();
+        check_gtk_flatpak(&ctx, &mut st, true, &mut rep2);
+        assert_eq!(rep2.fixed.len(), 1, "{:?}", rep2.fixed);
+        assert!(!dst.is_symlink());
+        assert_eq!(std::fs::read_to_string(&dst).unwrap(), "/* fluent */\n");
+        assert!(st.links.is_empty() && st.gtk_copies.len() == 1);
     }
 }
