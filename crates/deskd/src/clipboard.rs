@@ -1063,7 +1063,7 @@ mod tests {
             "550e8400-e29b-41d4-a716-446655440000",
             "https://example.org/a?b=C1",
             "/home/user/Docs/File1.txt",
-            "John.Doe1@Example.com",
+            "User.Name1@example.org",
             "aaaaaaaaaaaaA1",
             "Привіт, Світ",
         ] {
