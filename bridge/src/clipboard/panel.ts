@@ -432,11 +432,3 @@ export abstract class ClipboardPanel {
 export function logError(e: unknown): void {
     console.warn(`desk-bridge: ${errorText(e)}`);
 }
-
-/** Run `f` once the main loop is idle (after the current event is done). */
-export function idle(f: () => void): void {
-    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-        f();
-        return GLib.SOURCE_REMOVE;
-    });
-}

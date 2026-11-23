@@ -120,7 +120,7 @@ jobs:
         run: cargo deny check
 
   bridge:
-    name: desk-bridge (tsc, eslint, build)
+    name: desk-bridge (tsc, eslint, knip, build)
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
@@ -141,6 +141,8 @@ jobs:
         run: npm run typecheck
       - name: eslint
         run: npm run lint
+      - name: knip (unused files, exports, dependencies)
+        run: npm run knip
       - name: Build the extension
         run: npm run build
 

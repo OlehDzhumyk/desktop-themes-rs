@@ -14,7 +14,7 @@ import {EmojiClient, type EmojiItem} from './client.js';
 import {EmojiInserter} from './insert.js';
 import {EmojiPanel, type EmojiPickHost} from './panel.js';
 
-export const SHORTCUT_KEY = 'emoji-shortcut';
+const SHORTCUT_KEY = 'emoji-shortcut';
 
 export class EmojiFeature implements EmojiPickHost {
     readonly client: EmojiClient;

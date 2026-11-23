@@ -49,7 +49,7 @@ function tomorrowMorning(): number {
 }
 
 /** The state in words, as the CLI and the window say it (same gettext ids). */
-export function statusLine(st: FocusStatus | null): string {
+function statusLine(st: FocusStatus | null): string {
     if (!st)
         return _('Unavailable');
     if (st.mode) {

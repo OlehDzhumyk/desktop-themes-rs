@@ -9,7 +9,7 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-export interface FileId {
+interface FileId {
     dev: number;
     ino: number;
 }
@@ -40,7 +40,7 @@ export function untrustedReason(peer: Peer, policy: Policy): string | null {
 }
 
 /** Device and inode of the file `path` leads to (links followed); null if it cannot be read. */
-export function fileId(path: string): FileId | null {
+function fileId(path: string): FileId | null {
     try {
         const info = Gio.File.new_for_path(path).query_info('unix::device,unix::inode',
             Gio.FileQueryInfoFlags.NONE, null);
@@ -51,7 +51,7 @@ export function fileId(path: string): FileId | null {
 }
 
 /** The deskd executables the session is set up to start. */
-export function deskdPaths(busName: string): string[] {
+function deskdPaths(busName: string): string[] {
     const out: string[] = [];
     for (const dir of [GLib.get_user_data_dir(), ...GLib.get_system_data_dirs()]) {
         try {

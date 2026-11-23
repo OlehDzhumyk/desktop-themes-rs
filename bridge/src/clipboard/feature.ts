@@ -15,7 +15,7 @@ import {Paster} from './paste.js';
 import {ClipboardWatcher} from './watcher.js';
 import {type FlyoutTab, WinFlyout} from './winFlyout.js';
 
-export const SHORTCUT_KEY = 'toggle-shortcut';
+const SHORTCUT_KEY = 'toggle-shortcut';
 
 export class ClipboardFeature implements PanelHost {
     readonly client: ClipboardClient;

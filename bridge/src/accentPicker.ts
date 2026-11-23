@@ -17,12 +17,12 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {_} from './i18n.js';
 
 /** io.github.OlehDzhumyk.Desk.Appearance: deskd follows the wallpaper while it is true. */
-export const ACCENT_KEY = 'accent-from-wallpaper';
+const ACCENT_KEY = 'accent-from-wallpaper';
 const INTERFACE_SCHEMA = 'org.gnome.desktop.interface';
 const ACCENT_COLOR = 'accent-color';
 
 /** GNOME's named accents (`accent-color` without `default`), in GNOME Settings' order. */
-export const ACCENTS: [id: string, label: () => string][] = [
+const ACCENTS: [id: string, label: () => string][] = [
     ['blue', () => _('Blue')],
     ['teal', () => _('Teal')],
     ['green', () => _('Green')],
@@ -37,7 +37,7 @@ export const ACCENTS: [id: string, label: () => string][] = [
 export type Skin = 'default' | 'macos' | 'windows11';
 
 /** Which dot is selected: the wallpaper while it is followed, else the accent (`default` is blue). */
-export function selectedDot(fromWallpaper: boolean, accent: string): string {
+function selectedDot(fromWallpaper: boolean, accent: string): string {
     if (fromWallpaper)
         return 'wallpaper';
     return accent === 'default' || accent === '' ? 'blue' : accent;

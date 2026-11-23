@@ -24,12 +24,12 @@ export interface RowHost {
     outputs(): MixerDevice[];
 }
 
-export function percent(volume: number): number {
+function percent(volume: number): number {
     return Math.round(volume * 100);
 }
 
 /** An icon from a GIcon string (an icon name or a file); a generic one when there is none. */
-export function appIcon(icon: string): Gio.Icon {
+function appIcon(icon: string): Gio.Icon {
     if (icon) {
         try {
             return Gio.icon_new_for_string(icon);
@@ -41,7 +41,7 @@ export function appIcon(icon: string): Gio.Icon {
 }
 
 /** Symbolic icon for a device: what the server says, else by bus. */
-export function deviceIcon(d: MixerDevice, input: boolean): string {
+function deviceIcon(d: MixerDevice, input: boolean): string {
     if (d.icon)
         return d.icon.endsWith('-symbolic') ? d.icon : `${d.icon}-symbolic`;
     if (d.bus === 'bluetooth')
