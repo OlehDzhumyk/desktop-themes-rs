@@ -24,6 +24,8 @@ desk-proto.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
 # colour picker formats, CSS colour names and WCAG contrast (workspace crate, no new dependency)
 theme-tokens.workspace = true
+# setrlimit, prctl and unshare for the OCR child process (already a workspace dependency)
+libc.workspace = true
 signal-hook = { version = "0.4.6", default-features = false, features = ["iterator"] }
 pipewire = { version = "0.10.1", optional = true }
 
