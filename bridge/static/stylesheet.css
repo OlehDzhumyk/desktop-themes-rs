@@ -213,3 +213,26 @@
 
 /* ------------------------------------------------------------------ logo menu (macos top bar) */
 .desk-logo-menu-icon { icon-size: 16px; }
+
+/* ------------------------------------------------------------------ accent picker (quick settings «Theme») */
+/* macos: GNOME's named accent colours (libadwaita 1.6+ values) and a rainbow «From wallpaper» dot */
+.desk-accent-title { font-size: 9pt; font-weight: bold; }
+.desk-accent-dots { spacing: 8px; padding: 2px 0 6px 0; }
+.desk-accent-dot { width: 18px; height: 18px; border-radius: 99px; padding: 0; border: 2px solid transparent; }
+.desk-accent-dot:hover { border-color: rgba(255,255,255,0.35); }
+.desk-accent-dot:checked { border-color: rgba(255,255,255,0.9); box-shadow: 0 0 0 1px rgba(0,0,0,0.6); }
+.desk-accent-dot:focus { outline: 2px solid -st-accent-color; }
+.desk-accent-blue { background-color: #3584e4; }
+.desk-accent-teal { background-color: #2190a4; }
+.desk-accent-green { background-color: #3a944a; }
+.desk-accent-yellow { background-color: #c88800; }
+.desk-accent-orange { background-color: #ed5b00; }
+.desk-accent-red { background-color: #e62d42; }
+.desk-accent-pink { background-color: #d56199; }
+.desk-accent-purple { background-color: #9141ac; }
+.desk-accent-slate { background-color: #6f8396; }
+.desk-accent-wallpaper {
+    background-gradient-direction: horizontal;
+    background-gradient-start: #e62d42;
+    background-gradient-end: #3584e4;
+}
