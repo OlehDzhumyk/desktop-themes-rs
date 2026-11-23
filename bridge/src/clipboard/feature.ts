@@ -85,7 +85,10 @@ export class ClipboardFeature implements PanelHost {
     activate(item: ClipItem): void {
         const paste = this.settings.get_boolean('paste-on-select');
         this.client.activate(item.id)
-            .then(([mime, data]) => { this._paster.paste(mime, data, paste); })
+            .then(([mime, data]) => {
+                this._watcher.expectOwnContent();
+                this._paster.paste(mime, data, paste);
+            })
             .catch(logError);
     }
 

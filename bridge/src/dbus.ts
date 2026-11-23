@@ -6,9 +6,13 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
 import {errorText} from './shellTypes.js';
+import {dbusCall, ownerOf, peerOf, policyFor, untrustedReason} from './trust.js';
 
 export const DESK_BUS = 'io.github.OlehDzhumyk.Desk';
 export const CLIPBOARD_PATH = '/io/github/OlehDzhumyk/Desk/Clipboard';
+export const CLIPBOARD_IFACE = 'io.github.OlehDzhumyk.Desk.Clipboard';
+/** Offered with the content the bridge puts on the clipboard itself (desk_proto::INTERNAL_MIME). */
+export const INTERNAL_MIME = 'application/x-desk-internal';
 export const MIXER_PATH = '/io/github/OlehDzhumyk/Desk/Mixer';
 export const THEMES_BUS = 'io.github.OlehDzhumyk.Themes';
 export const THEMES_PATH = '/io/github/OlehDzhumyk/Themes';
@@ -62,21 +66,21 @@ export function proxyClass<T>(xml: string): ProxyConstructor<T> {
     return Gio.DBusProxy.makeProxyWrapper<T>(xml) as unknown as ProxyConstructor<T>;
 }
 
-/** Methods and properties of io.github.OlehDzhumyk.Desk.Clipboard (data/dbus/). */
+/** Properties of io.github.OlehDzhumyk.Desk.Clipboard (data/dbus/); methods go through _call. */
 interface ClipboardProxy extends Proxy {
     Private: boolean;
     readonly Enabled: boolean | null;
-    PushAsync(mime: string, data: Uint8Array, offered: string[], sourceApp: string): Promise<[number]>;
-    ListAsync(query: string, limit: number): Promise<[Tuple[]]>;
-    ActivateAsync(id: number): Promise<[string, Uint8Array | number[]]>;
-    PinAsync(id: number, pinned: boolean): Promise<unknown>;
-    DeleteAsync(id: number): Promise<unknown>;
-    ClearAsync(keepPinned: boolean): Promise<unknown>;
 }
 
-/** deskd's clipboard engine. Calls auto-start deskd through D-Bus activation. */
+/**
+ * deskd's clipboard engine. Calls auto-start deskd through D-Bus activation. Content goes only to
+ * (and comes only from) a verified deskd (trust.ts): each method is sent to the unique name that
+ * passed the check, so a process that takes the well-known name later never receives it.
+ */
 export class ClipboardClient {
     private _proxy: ClipboardProxy | null = null;
+    private _trusted: string | null = null;
+    private _refused: string | null = null;
     private _signalId = 0;
     private _propsId = 0;
     private _onChanged: () => void;
@@ -123,31 +127,62 @@ export class ClipboardClient {
         return this._proxy?.Enabled ?? true;
     }
 
+    /** The unique name of a deskd that passed the trust check; throws (logged once) otherwise. */
+    private async _owner(): Promise<string> {
+        const owner = this._p.g_name_owner ?? await ownerOf(DESK_BUS);
+        if (owner === this._trusted)
+            return owner;
+        const policy = policyFor(DESK_BUS);
+        const why = policy ? untrustedReason(await peerOf(owner), policy) : 'cannot read the shell\'s own process data';
+        if (why === null) {
+            this._trusted = owner;
+            return owner;
+        }
+        if (this._refused !== owner) {
+            this._refused = owner;
+            console.warn(`desk-bridge: ${DESK_BUS} is owned by ${owner}, which is not the installed deskd ` +
+                `(${why}); the clipboard sends nothing to it and pastes nothing from it`);
+        }
+        throw new Error(`${DESK_BUS} is not owned by the installed deskd`);
+    }
+
+    /** Whether the current owner passed the check (for tests and status). */
+    get trusted(): boolean {
+        return this._trusted !== null && this._trusted === this._proxy?.g_name_owner;
+    }
+
+    private async _call(method: string, params: GLib.Variant, replyType: string): Promise<GLib.Variant> {
+        const owner = await this._owner();
+        return dbusCall(owner, CLIPBOARD_PATH, CLIPBOARD_IFACE, method, params, replyType,
+            Gio.DBusCallFlags.NO_AUTO_START);
+    }
+
     async push(mime: string, data: Uint8Array, offered: string[], sourceApp: string): Promise<number> {
-        const [id] = await this._p.PushAsync(mime, data, offered, sourceApp);
-        return id;
+        const r = await this._call('Push', new GLib.Variant('(sayass)', [mime, data, offered, sourceApp]), '(t)');
+        return r.deepUnpack<[number]>()[0];
     }
 
     async list(query = '', limit = 0): Promise<ClipItem[]> {
-        const [items] = await this._p.ListAsync(query, limit);
-        return items.map(toItem);
+        const r = await this._call('List', new GLib.Variant('(su)', [query, limit]), '(a(tssssbxt))');
+        return r.deepUnpack<[Tuple[]]>()[0].map(toItem);
     }
 
     async activate(id: number): Promise<[string, Uint8Array]> {
-        const [mime, data] = await this._p.ActivateAsync(id);
+        const r = await this._call('Activate', new GLib.Variant('(t)', [id]), '(say)');
+        const [mime, data] = r.deepUnpack<[string, Uint8Array | number[]]>();
         return [mime, data instanceof Uint8Array ? data : new Uint8Array(data)];
     }
 
     async pin(id: number, pinned: boolean): Promise<void> {
-        await this._p.PinAsync(id, pinned);
+        await this._call('Pin', new GLib.Variant('(tb)', [id, pinned]), '()');
     }
 
     async remove(id: number): Promise<void> {
-        await this._p.DeleteAsync(id);
+        await this._call('Delete', new GLib.Variant('(t)', [id]), '()');
     }
 
     async clear(keepPinned: boolean): Promise<void> {
-        await this._p.ClearAsync(keepPinned);
+        await this._call('Clear', new GLib.Variant('(b)', [keepPinned]), '()');
     }
 
     destroy(): void {
