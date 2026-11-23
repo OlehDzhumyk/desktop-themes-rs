@@ -110,16 +110,29 @@ Skins:
 * **macos** and **default**: floating keyboard-first picker anchored near the text caret (pointer fallback); closes after insert by default.
 ## Colour picker
 
-Engine and settings only so far: the shell-side loupe and history panel come in a follow-up.
+An eyedropper with a magnifying loupe: deskd formats and remembers the colours, the bridge reads the pixels
+and draws the loupe, the history panel and the toast.
 
 | | |
 |---|---|
 | Open | Windows 11 theme: **Shift+Super+C**; macOS theme: **Ctrl+Shift+Super+C**; Fedora: **Shift+Super+C** (`color-picker-shortcut` in the theme's `desk.dconf`; override on «Keyboard shortcuts» or `themes shortcut set color-picker-toggle ...`) |
+| Picking | Crosshair cursor and a preview next to the pointer (loupe of a frame taken at open, live swatch and value, format and zoom); it flips near the monitor edges. Click, `Enter` or `Space` picks and copies (`copy-on-pick`) with a «Copied #A1B2C3» toast; `Esc` cancels and leaves the clipboard as it was; transparent or off-screen pixels are refused |
+| Keys | Arrows move the pointer 1 px (`Shift`: 10 px), `F` cycles the format (saved in `format`), `+`/`-` or the scroll wheel change the zoom 4x..16x (saved in `zoom`), `H` or a right click opens the history |
+| History panel | Swatches with the value and the nearest colour name (accessible name «value, name»), click or `Enter` copies, `Delete` removes, format buttons, «Clear», WCAG contrast ratio and level of the two newest picks |
 | Formats | HEX `#RRGGBB` (default), `rgb(r, g, b)`, `hsl(h, s%, l%)`, `hsv(h, s%, v%)`, CSS name when exact, GTK `@define-color` line, decimal `r,g,b` (`theme_tokens::picker`) |
 | History | Newest first, one entry per `#RRGGBB` (a repeat moves to the front), `history-size` picks (20 by default); the nearest CSS colour name for accessible swatch names; WCAG contrast ratio of the two newest picks |
 | Storage | `~/.local/share/deskd/colors.json` (0600) only while `history-size` is above 0; setting it to 0 clears the history and removes the file |
 | D-Bus | `io.github.OlehDzhumyk.Desk.ColorPicker` at `/io/github/OlehDzhumyk/Desk/ColorPicker`: `Record`, `List`, `Remove`, `Clear`, `Format`, `Contrast`, signal `Changed` |
 | Settings | GSettings `io.github.OlehDzhumyk.Desk.ColorPicker`: `enabled`, `format`, `zoom`, `history-size`, `copy-on-pick`, `color-picker-shortcut`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `color-picker-toggle` |
+
+Skins:
+
+* **windows11**: dark or light Fluent-style preview and toast; the history panel is a flyout above the bottom right corner.
+* **macos**: rounded translucent preview; the history panel is a popover at the pointer.
+* **default**: the history panel uses the shell theme's popup colours and accent; a popover at the pointer.
+
+All three follow the light/dark scheme, the GNOME accent colour and high contrast (outlines). The fades last 80 ms and
+do not run with reduced motion. The shortcut works only in the normal session mode, never on the lock screen.
 
 ## Automatic light/dark
 
