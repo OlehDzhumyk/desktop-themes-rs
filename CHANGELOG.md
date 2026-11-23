@@ -39,6 +39,13 @@ All notable changes to this project are documented in this file. The format is b
   selection overlay (pointer or keyboard, `Esc` cancels) per skin and shows a status toast.
   Settings `io.github.OlehDzhumyk.Desk.Ocr` (`enabled`, `languages`, `record-in-history`,
   `keep-line-breaks`, `max-megapixels`, `ocr-shortcut`) and a «Розпізнавання тексту» page.
+- Screenshot core (stage 3): the new pure-Rust crate `desk-capture` (no GTK, GLib or D-Bus, so any
+  Wayland desktop or a CLI can use it) checks PNG captures and refuses images over 100 megapixels
+  before decoding, removes `tEXt`, `zTXt`, `iTXt`, `tIME` and `eXIf` chunks (no user name, host
+  name or path in a saved file), saves atomically as `Screenshot YYYY-MM-DD HH-MM-SS.png` with
+  `-2`, `-3` for captures in the same second, and renders the editor's annotations (redact as solid
+  fill or pixelate, crop, rectangle, ellipse, line, arrow, highlighter, pen) from JSON. Redaction is
+  destructive: the saved file holds only the result.
 - Colour picker engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.ColorPicker` at
   `/io/github/OlehDzhumyk/Desk/ColorPicker` (`Record`, `List`, `Remove`, `Clear`, `Format`,
   `Contrast`, signal `Changed`), formatting with `theme_tokens::picker` and keeping the newest

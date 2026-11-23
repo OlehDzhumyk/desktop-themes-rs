@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "xtask"]
-default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings"]
+members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "crates/desk-capture", "xtask"]
+default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "crates/desk-capture"]
 
 [workspace.package]
 version = "0.3.0"
