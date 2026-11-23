@@ -14,5 +14,6 @@ ADR that supersedes the old one; do not rewrite history.
 | [0006](0006-experimental-themes-need-confirmation.md) | Experimental themes require explicit confirmation |
 | [0007](0007-e2e-in-containers.md) | End-to-end tests run GNOME Shell in a throw-away container, driven over Eval |
 | [0008](0008-deskd-serves-content-to-trusted-callers.md) | deskd serves content only to GNOME Shell and its own binaries; its bus name is not replaceable |
+| [0009](0009-live-wallpaper-palette-overlay.md) | The live wallpaper palette is a recorded overlay in the generated gtk.css copy |
 
 New ADR: copy `0000-template.md`, take the next number, add a row above.

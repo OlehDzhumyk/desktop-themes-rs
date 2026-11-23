@@ -30,6 +30,13 @@ All notable changes to this project are documented in this file. The format is b
   wallpaper» switch in the quick settings «Theme» menu, and a `themes doctor` line while it is on.
   `themes tokens from-image` now reads slideshow XML (first image), refuses images under 16×16,
   notes near-monochrome images, and with `--force` moves the old theme to `trash/`.
+- Theme from wallpaper, live palette and skin pickers: token themes with a generated libadwaita
+  stylesheet get the wallpaper seed's full light/dark palette while "accent from wallpaper" is on
+  (`themes tokens overlay SEED | --remove`, run by `deskd`; recorded in `state.json`, reverted on
+  off, theme switch, `themes reset` and `themes doctor --fix`; ADR 0009). D-Bus
+  `WallpaperAccent()` also returns the theme whose palette follows. The quick settings «Theme»
+  menu shows a dot grid with a rainbow «From wallpaper» dot (`macos`), an «Accent colour:
+  Automatic / Manual» drop-down (`windows11`) or the switch (`default`).
 - Automatic light/dark appearance (`auto-dark`): `deskd` now hosts the `appearance` engine
   (`io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance`) with a
   shared one-shot wake scheduler (`crates/deskd/src/schedule.rs`) that reacts to suspend/resume

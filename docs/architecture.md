@@ -225,7 +225,7 @@ nothing until asked; `model.rs` holds every rule and is tested with mocked graph
 | `Status() -> (s mode, s scheme, s next_transition, s location_label, b polar, b overridden)` | current mode, effective scheme (`light`/`dark`), next transition (`HH:MM` or empty), resolved location, polar day/night flag, manual override state |
 | `SetScheme(s scheme)` | manually switch `light`/`dark`/`default`, respecting `override-until-next` in auto modes |
 | `Recompute()` | force immediate schedule recomputation and timer re-arm |
-| `WallpaperAccent() -> (b enabled, s seed, s accent, b monochrome, s uri, s error)` | live "accent from wallpaper": on/off, last seed and named accent, near-monochrome flag, source wallpaper URI, last decoding error |
+| `WallpaperAccent() -> (b enabled, s seed, s accent, b monochrome, s uri, s error, s palette)` | live "accent from wallpaper": on/off, last seed and named accent, near-monochrome flag, source wallpaper URI, last decoding error, the token theme whose libadwaita palette follows (`""` = accent only) |
 | signal `Changed()` | emitted when mode, scheme, schedule, override or wallpaper-accent state changes |
 
 The engine (`crates/deskd/src/appearance/`) computes local sunrise/sunset offline using the NOAA
@@ -235,7 +235,9 @@ when the effective scheme changes. `appearance/wallpaper.rs` follows the wallpap
 `accent-from-wallpaper` is on (GSettings signals, one 500 ms debounce), runs
 `themes tokens seed --json` as a child process (an untrusted image never runs inside deskd), and
 writes `accent-color`; the accent to restore is kept in `~/.cache/desktop-themes/wallpaper-accent.json`,
-which is deleted when the setting is turned off.
+which is deleted when the setting is turned off. For token themes the seed's palette also goes into
+the copied `gtk.css` through `themes tokens overlay` children (one worker thread, in order); the
+overlay and its revert belong to themes-core (`overlay.rs`, [ADR 0009](adr/0009-live-wallpaper-palette-overlay.md)).
 
 ## Crash protection
 
