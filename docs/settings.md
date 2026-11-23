@@ -88,6 +88,8 @@ Path `/io/github/OlehDzhumyk/Desk/appearance/`.
 | `location` | string | `''` |  | Location | Used locally to compute sunrise and sunset (no network requests). Accepts a city name from the built-in table or decimal coordinates 'lat,lon'; empty falls back to the system timezone. | appearance | entry on `--page appearance` |
 | `twilight-offset` | integer | `0` | -60…60 (step 5) | Twilight offset (minutes) | Shift sunrise and sunset earlier (negative) or later (positive) | appearance | spin button on `--page appearance` |
 | `override-until-next` | boolean | `true` |  | Keep manual changes until next transition | If you switch light or dark manually, wait until the next sunrise or sunset before switching back | appearance | switch on `--page appearance` |
+| `accent-from-wallpaper` | boolean | `false` |  | Accent from wallpaper | When on, deskd watches org.gnome.desktop.background picture-uri and picture-uri-dark and sets org.gnome.desktop.interface accent-color to the GNOME named accent nearest the wallpaper's seed colour. The image is decoded by a `themes tokens seed` child process. Turning it off restores the accent that was in force before. | appearance | switch on `--page appearance` |
+| `accent-source` | choice | `'active'` | `active`, `light`, `dark` | Wallpaper source | 'active' uses picture-uri-dark when color-scheme is 'prefer-dark' and picture-uri otherwise; 'light' always uses picture-uri; 'dark' always uses picture-uri-dark. | appearance | drop-down on `--page appearance` |
 
 ## `io.github.OlehDzhumyk.Desk.LogoMenu`
 
@@ -139,7 +141,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
 | `mixer` | Volume mixer | Mixer, How to open |
-| `appearance` | Appearance | Mode, Solar schedule, Fixed schedule |
+| `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |
 | `logo-menu` | Logo menu | Top bar |
 | `lockscreen` | Lock screen | Layout, Time and date, Background |
 | `shortcuts` | Keyboard shortcuts | Features |

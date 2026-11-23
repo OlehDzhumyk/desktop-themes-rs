@@ -5,7 +5,7 @@
 //! Об'єкти `gio::Settings` живуть лише в головному потоці (там крутиться цикл GLib); з потоків
 //! zbus зміни надсилаються через `glib::MainContext::invoke`.
 
-use desk_settings::accessors::{AppearanceSettings, ClipboardSettings, Mode};
+use desk_settings::accessors::{AccentSource, AppearanceSettings, ClipboardSettings, Mode};
 use gio::glib;
 use gio::prelude::*;
 
@@ -81,6 +81,19 @@ pub fn read_appearance(s: &AppearanceSettings) -> crate::appearance::Config {
         location: s.location(),
         twilight_offset: s.twilight_offset(),
         override_until_next: s.override_until_next(),
+    }
+}
+
+/// Read the live "accent from wallpaper" configuration from GSettings.
+pub fn read_wallpaper(s: &AppearanceSettings) -> crate::appearance::wallpaper::Config {
+    use crate::appearance::wallpaper::{Config, Source};
+    Config {
+        enabled: s.accent_from_wallpaper(),
+        source: match s.accent_source() {
+            AccentSource::Active => Source::Active,
+            AccentSource::Light => Source::Light,
+            AccentSource::Dark => Source::Dark,
+        },
     }
 }
 

@@ -177,6 +177,8 @@ pub mod appearance {
         fn status(&self) -> zbus::Result<(String, String, String, String, bool, bool)>;
         fn set_scheme(&self, scheme: &str) -> zbus::Result<()>;
         fn recompute(&self) -> zbus::Result<()>;
+        /// Live "accent from wallpaper": (enabled, seed, accent, monochrome, uri, error).
+        fn wallpaper_accent(&self) -> zbus::Result<(bool, String, String, bool, String, String)>;
         #[zbus(signal)]
         fn changed(&self) -> zbus::Result<()>;
     }

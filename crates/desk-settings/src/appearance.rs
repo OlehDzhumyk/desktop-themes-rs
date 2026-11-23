@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Settings for automatic light/dark appearance (stage 2, docs/spec/features/auto-dark.md):
-//! schema `io.github.OlehDzhumyk.Desk.Appearance` and its preference page.
+//! Settings for automatic light/dark appearance (stage 2, docs/spec/features/auto-dark.md) and
+//! the accent from the wallpaper (docs/spec/features/theme-from-wallpaper.md): schema `io.github.OlehDzhumyk.Desk.Appearance` and its preference page.
 
 use crate::model::*;
 
@@ -126,6 +126,52 @@ pub static APPEARANCE_OVERRIDE_UNTIL_NEXT: Key = Key {
     sensitive_if: None,
 };
 
+pub static APPEARANCE_ACCENT_FROM_WALLPAPER: Key = Key {
+    schema: APPEARANCE_SCHEMA,
+    name: "accent-from-wallpaper",
+    kind: Kind::Bool { default: false },
+    label: n_("Accent from wallpaper"),
+    description: n_("The desktop accent colour follows the current wallpaper"),
+    summary: "The desktop accent colour follows the current wallpaper",
+    doc: "When on, deskd watches org.gnome.desktop.background picture-uri and picture-uri-dark \
+          and sets org.gnome.desktop.interface accent-color to the GNOME named accent nearest the \
+          wallpaper's seed colour. The image is decoded by a `themes tokens seed` child process. \
+          Turning it off restores the accent that was in force before.",
+    feature: "appearance",
+    widget: Widget::Edit,
+    sensitive_if: None,
+};
+
+pub static APPEARANCE_ACCENT_SOURCE: Key = Key {
+    schema: APPEARANCE_SCHEMA,
+    name: "accent-source",
+    kind: Kind::Choice {
+        default: "active",
+        choices: &[
+            Choice {
+                value: "active",
+                label: n_("Active wallpaper"),
+            },
+            Choice {
+                value: "light",
+                label: n_("Light wallpaper"),
+            },
+            Choice {
+                value: "dark",
+                label: n_("Dark wallpaper"),
+            },
+        ],
+    },
+    label: n_("Wallpaper source"),
+    description: n_("Which wallpaper variant gives the accent colour"),
+    summary: "Which wallpaper variant gives the accent colour",
+    doc: "'active' uses picture-uri-dark when color-scheme is 'prefer-dark' and picture-uri \
+          otherwise; 'light' always uses picture-uri; 'dark' always uses picture-uri-dark.",
+    feature: "appearance",
+    widget: Widget::Edit,
+    sensitive_if: Some("accent-from-wallpaper"),
+};
+
 pub static APPEARANCE: Schema = Schema {
     id: APPEARANCE_SCHEMA,
     path: "/io/github/OlehDzhumyk/Desk/appearance/",
@@ -137,6 +183,8 @@ pub static APPEARANCE: Schema = Schema {
         &APPEARANCE_LOCATION,
         &APPEARANCE_TWILIGHT_OFFSET,
         &APPEARANCE_OVERRIDE_UNTIL_NEXT,
+        &APPEARANCE_ACCENT_FROM_WALLPAPER,
+        &APPEARANCE_ACCENT_SOURCE,
     ],
     children: &[],
 };
@@ -144,10 +192,11 @@ pub static APPEARANCE: Schema = Schema {
 pub static PAGE_APPEARANCE: Page = Page {
     id: "appearance",
     title: n_("Appearance"),
-    subtitle: n_("Automatic light and dark mode by sunset or schedule"),
+    subtitle: n_("Automatic light and dark mode, accent from the wallpaper"),
     description: n_(
         "Switch between light and dark appearance automatically at local sunrise and sunset or \
-         at fixed times. Sunrise and sunset are computed locally with no network requests.",
+         at fixed times, and take the accent colour from the wallpaper. Everything is computed \
+         locally with no network requests.",
     ),
     icon: "weather-clear-night-symbolic",
     section: Section::Features,
@@ -176,6 +225,23 @@ pub static PAGE_APPEARANCE: Page = Page {
             items: &[
                 Item::Key(&APPEARANCE_DARK_FROM),
                 Item::Key(&APPEARANCE_LIGHT_FROM),
+            ],
+        },
+        Group {
+            title: n_("Wallpaper"),
+            description: "",
+            items: &[
+                Item::Key(&APPEARANCE_ACCENT_FROM_WALLPAPER),
+                Item::Key(&APPEARANCE_ACCENT_SOURCE),
+                Item::Status {
+                    id: "wallpaper-accent",
+                    label: n_("Accent now"),
+                },
+                Item::Action {
+                    id: "create-theme-from-wallpaper",
+                    label: n_("Create theme from wallpaper…"),
+                    destructive: false,
+                },
             ],
         },
     ],
