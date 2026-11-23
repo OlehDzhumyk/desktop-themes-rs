@@ -1,0 +1,31 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Automatic light/dark appearance engine of deskd: switches org.gnome.desktop.interface
+     color-scheme at local sunrise/sunset (NOAA solar calculation) or fixed times, while
+     respecting manual overrides until the next scheduled transition.
+
+     Access (ADR 0008): methods are served to the owner of org.gnome.Shell and desktop-themes-rs
+     binaries only (same user, outside any sandbox). -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Appearance">
+    <!-- Current appearance state: mode, effective scheme ("light"|"dark"), next scheduled
+         transition ("HH:MM" or ""), resolved location label, polar day/night flag, and whether
+         a manual override is currently active. -->
+    <method name="Status">
+      <arg name="mode" type="s" direction="out"/>
+      <arg name="scheme" type="s" direction="out"/>
+      <arg name="next_transition" type="s" direction="out"/>
+      <arg name="location_label" type="s" direction="out"/>
+      <arg name="polar" type="b" direction="out"/>
+      <arg name="overridden" type="b" direction="out"/>
+    </method>
+    <!-- Switch light/dark manually ("light", "dark", or "default"). In auto modes, keeps the
+         override until the next transition when override-until-next is enabled. -->
+    <method name="SetScheme">
+      <arg name="scheme" type="s" direction="in"/>
+    </method>
+    <!-- Force immediate schedule recomputation and re-arm the timer. -->
+    <method name="Recompute"/>
+    <!-- Emitted whenever mode, scheme, schedule or override state changes. -->
+    <signal name="Changed"/>
+  </interface>
+</node>

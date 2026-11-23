@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 15:06+0000\n"
+"POT-Creation-Date: 2026-11-23 15:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,109 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: crates/desk-settings/src/appearance.rs:11
+#: crates/desk-settings/src/appearance.rs:146
+#: crates/themes/src/gui/window.rs:398
+msgid "Appearance"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:12
+msgid "From macOS, adapted for Windows 11 style"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:23
+msgid "Manual"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:27
+msgid "Light"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:31
+msgid "Dark"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:35
+msgid "Automatic (sunset to sunrise)"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:39
+msgid "Automatic (scheduled times)"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:43
+msgid "Colour scheme mode"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:44
+msgid "Switch between light and dark automatically by sunset or fixed times"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:58
+msgid "Dark from"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:59
+msgid "Time to switch to dark mode (HH:MM, 24-hour)"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:71
+msgid "Light from"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:72
+msgid "Time to switch to light mode (HH:MM, 24-hour)"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:84
+msgid "Location"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:85
+msgid "City name or coordinates (lat,lon); empty uses the system timezone"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:104
+msgid "Twilight offset (minutes)"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:105
+msgid "Shift sunrise and sunset earlier (negative) or later (positive)"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:117
+msgid "Keep manual changes until next transition"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:119
+msgid ""
+"If you switch light or dark manually, wait until the next sunrise or sunset "
+"before switching back"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:147
+msgid "Automatic light and dark mode by sunset or schedule"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:149
+msgid ""
+"Switch between light and dark appearance automatically at local sunrise and "
+"sunset or at fixed times. Sunrise and sunset are computed locally with no "
+"network requests."
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:158
+msgid "Mode"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:166
+msgid "Solar schedule"
+msgstr ""
+
+#: crates/desk-settings/src/appearance.rs:174
+msgid "Fixed schedule"
+msgstr ""
 
 #: crates/desk-settings/src/lockscreen.rs:19
 #: crates/desk-settings/src/lockscreen.rs:368
@@ -337,7 +440,7 @@ msgid "Applications never listed in the mixer (app id or program name)"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:139
-#: crates/desk-settings/src/registry.rs:260
+#: crates/desk-settings/src/registry.rs:262
 msgid "Keyboard shortcut"
 msgstr ""
 
@@ -362,224 +465,224 @@ msgid "Mixer"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:215
-#: crates/desk-settings/src/registry.rs:424
+#: crates/desk-settings/src/registry.rs:427
 msgid "How to open"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:216
-#: crates/desk-settings/src/registry.rs:425
+#: crates/desk-settings/src/registry.rs:428
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:388
+#: crates/desk-settings/src/registry.rs:391
 msgid "Clipboard"
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:380
+#: crates/desk-settings/src/registry.rs:383
 msgid "Application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:56
+#: crates/desk-settings/src/registry.rs:57
 msgid "simple menu (and a toggle in quick settings)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:60
+#: crates/desk-settings/src/registry.rs:61
 msgid "macOS-style panel (centred, with search)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:64
+#: crates/desk-settings/src/registry.rs:65
 msgid "Windows 11-style Win+V panel (next to the cursor)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:68
+#: crates/desk-settings/src/registry.rs:69
 msgid "Panel style"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:86
+#: crates/desk-settings/src/registry.rs:87
 msgid "System default"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:99
-#: crates/desk-settings/src/registry.rs:456
+#: crates/desk-settings/src/registry.rs:100
+#: crates/desk-settings/src/registry.rs:459
 msgid "Language"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:100
+#: crates/desk-settings/src/registry.rs:101
 msgid "Language of the window, the command line and the shell panels"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:148
+#: crates/desk-settings/src/registry.rs:150
 msgid "Record history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:149
+#: crates/desk-settings/src/registry.rs:151
 msgid "Turn off to disable the feature completely"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:162
+#: crates/desk-settings/src/registry.rs:164
 msgid "History size"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:163
+#: crates/desk-settings/src/registry.rs:165
 msgid "How many unpinned items to keep"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:174
+#: crates/desk-settings/src/registry.rs:176
 msgid "Images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:175
+#: crates/desk-settings/src/registry.rs:177
 msgid "Also record copied images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:188
+#: crates/desk-settings/src/registry.rs:190
 msgid "Largest image, KiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:189
+#: crates/desk-settings/src/registry.rs:191
 msgid "Bigger images are not recorded"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:206
+#: crates/desk-settings/src/registry.rs:208
 msgid "Image budget, MiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:207
+#: crates/desk-settings/src/registry.rs:209
 msgid "When images take more space, the oldest are dropped"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:220
+#: crates/desk-settings/src/registry.rs:222
 msgid "Keep between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:221
+#: crates/desk-settings/src/registry.rs:223
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:232
+#: crates/desk-settings/src/registry.rs:234
 msgid "Keep images between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:233
+#: crates/desk-settings/src/registry.rs:235
 msgid "Otherwise images live only until you log out"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:241
+#: crates/desk-settings/src/registry.rs:243
 msgid "Private mode"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:242
+#: crates/desk-settings/src/registry.rs:244
 msgid "Temporarily record nothing"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:249
+#: crates/desk-settings/src/registry.rs:251
 msgid "Paste the chosen item"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:250
+#: crates/desk-settings/src/registry.rs:252
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:295
+#: crates/desk-settings/src/registry.rs:297
 msgid "Excluded applications"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:330
-#: crates/desk-settings/src/registry.rs:342
+#: crates/desk-settings/src/registry.rs:332
+#: crates/desk-settings/src/registry.rs:344
 msgid "Open the clipboard panel"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:372
+#: crates/desk-settings/src/registry.rs:375
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:379
-#: crates/desk-settings/src/registry.rs:475
+#: crates/desk-settings/src/registry.rs:382
+#: crates/desk-settings/src/registry.rs:478
 msgid "Features"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:381
+#: crates/desk-settings/src/registry.rs:384
 msgid "About the project"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:389
+#: crates/desk-settings/src/registry.rs:392
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:391
+#: crates/desk-settings/src/registry.rs:394
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
 "theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:400
+#: crates/desk-settings/src/registry.rs:403
 msgid "History"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:412
+#: crates/desk-settings/src/registry.rs:415
 msgid "Privacy"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:414
+#: crates/desk-settings/src/registry.rs:417
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:430
+#: crates/desk-settings/src/registry.rs:433
 msgid "deskd service"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:439
+#: crates/desk-settings/src/registry.rs:442
 msgid "Clear history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:448
+#: crates/desk-settings/src/registry.rs:451
 msgid "General"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:449
+#: crates/desk-settings/src/registry.rs:452
 msgid "Language of the application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:450
+#: crates/desk-settings/src/registry.rs:453
 msgid "Settings of the Themes application itself."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:457
+#: crates/desk-settings/src/registry.rs:460
 msgid "The change takes effect after the window is restarted."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:464
+#: crates/desk-settings/src/registry.rs:467
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:465
+#: crates/desk-settings/src/registry.rs:468
 msgid "All shortcuts of the features in one place"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:467
+#: crates/desk-settings/src/registry.rs:470
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
 "refused."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:486
+#: crates/desk-settings/src/registry.rs:489
 msgid "Credits"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:487
+#: crates/desk-settings/src/registry.rs:490
 msgid "Projects the themes and features are based on, and their licences"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:489
+#: crates/desk-settings/src/registry.rs:492
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "
@@ -596,7 +699,7 @@ msgstr ""
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/main.rs:33
+#: crates/deskd/src/main.rs:37
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -607,14 +710,14 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:120
+#: crates/deskd/src/main.rs:124
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:243 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -2152,10 +2255,6 @@ msgstr ""
 
 #: crates/themes/src/gui/window.rs:354
 msgid "Try a different search term"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:398
-msgid "Appearance"
 msgstr ""
 
 #: crates/themes/src/gui/window.rs:483
