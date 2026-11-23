@@ -12,6 +12,7 @@ mod emoji;
 mod engine;
 mod focus;
 mod mixer;
+mod ocr;
 mod panic_policy;
 mod persist;
 mod schedule;
