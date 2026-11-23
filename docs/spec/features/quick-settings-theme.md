@@ -100,14 +100,16 @@ tile.
 
 ## Gaps found
 
-* **G-QS-1** The tile applies `macos-glass` (Experimental, crashed GNOME Shell 51.1) with one click and no
+* **G-QS-1** *(resolved)* An experimental theme now needs a confirmation dialog, and the tile fails
+  closed when the service cannot say whether a theme is experimental (`_apply`,
+  [ADR 0006](../../adr/0006-experimental-themes-need-confirmation.md)). Original report: the tile applied `macos-glass` (Experimental, crashed GNOME Shell 51.1) with one click and no
   warning (`bridge/src/quickSettings.ts` `_apply`). Intended: Experimental themes are listed with a
   warning suffix and need a confirmation (see [liquid-glass](liquid-glass.md)).
 * **G-QS-2** For the default skin, the clipboard tile is inserted with the private `qs.menu.addItem`
   (cast to `any`) because items added after `addExternalIndicator()` are not placed automatically; this
   can break on a Shell update. Doctor should cover it (journal) and a headless test should pin it.
-* **G-QS-3** All strings are hard-coded Ukrainian in `bridge/src/quickSettings.ts`; i18n is stage 1.5
-  (settings agent).
+* **G-QS-3** *(resolved)* Strings are English gettext ids (`_()`), Ukrainian in `po/uk.po`
+  ([i18n](../../i18n.md)).
 
 ## Acceptance criteria
 
@@ -125,7 +127,7 @@ tile.
   message is shown.
 * AC-QS-07: Given `fedora` is the look, Then the tile is unchecked.
 * AC-QS-08: Given an Experimental theme row is activated, Then a confirmation is shown first and
-  nothing is applied on «Скасувати» (target behaviour, G-QS-1).
+  nothing is applied on «Скасувати».
 * AC-QS-09: Given `desk-bridge` is disabled, Then the tile disappears and no theme-service client
   remains connected.
 

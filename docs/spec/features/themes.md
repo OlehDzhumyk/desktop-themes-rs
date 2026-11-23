@@ -163,7 +163,8 @@ modules. Switching never relies on colour alone ("активна" badge text).
 * **G-THEMES-1** *(resolved)* `SNAPSHOT_PREFIXES` now has the skin and the clipboard shortcut
   (`/io/github/OlehDzhumyk/Desk/skin`, `.../clipboard/toggle-shortcut`); the user's shortcut overrides
   (`Desk/shortcuts/`) and other preferences are deliberately not theme data.
-* **G-THEMES-2** There is no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
+* **G-THEMES-2** *(resolved)* `EXPERIMENTAL=true` and `WARNING` in `theme.conf`; the CLI needs
+  `--yes`, the window, quick settings and D-Bus `Apply` ask first (ADR 0006). Original report: there was no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
   description, and the CLI, the window and quick settings apply it with one click. Intended: mandatory
   confirmation, see [liquid-glass](liquid-glass.md).
 * **G-THEMES-3** *(resolved)* `themes/macos/spotlight.dconf` had a stale comment about `behavior.dconf`.
@@ -196,8 +197,7 @@ modules. Switching never relies on colour alone ("активна" badge text).
 * AC-THEMES-09: Given `fedora`, When `themes delete fedora` runs, Then it fails with an error and
   nothing moves.
 * AC-THEMES-10: Given a snapshot `mine` taken while the Windows 11 skin is active, When `mine` is
-  applied later, Then the skin is `windows11` and the clipboard shortcut is `Super+V` (fails today,
-  G-THEMES-1).
+  applied later, Then the skin is `windows11` and the clipboard shortcut is `Super+V`.
 * AC-THEMES-11: Given a theme file with `$HOME` in `picture-uri`, When it is applied, Then the stored
   value contains the percent-encoded real home directory and no `$HOME`.
 * AC-THEMES-12: Given `themes list --json`, When parsed, Then every object has the fields listed above

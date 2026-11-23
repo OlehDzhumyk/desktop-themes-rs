@@ -100,10 +100,10 @@ laptop in the overview or in menu open (not measured today).
 
 ## Gaps found
 
-* **G-GLASS-1** No `EXPERIMENTAL` marker exists in the code: `theme.conf` has only prose in
+* **G-GLASS-1** *(resolved: `EXPERIMENTAL=true`, ADR 0006)* No `EXPERIMENTAL` marker exists in the code: `theme.conf` has only prose in
   `DESCRIPTION`; nothing in `crates/themes/src/cli.rs`, `gui/card.rs` or `bridge/src/quickSettings.ts`
   distinguishes it (grep for "експериментальна" finds only the theme file).
-* **G-GLASS-2** There is no confirmation in any front end ([quick-settings-theme](quick-settings-theme.md)
+* **G-GLASS-2** *(resolved: every front end asks first)* There is no confirmation in any front end ([quick-settings-theme](quick-settings-theme.md)
   G-QS-1).
 * **G-GLASS-3** Crash detection is reactive (after GNOME disables extensions); there is no proactive
   "crashed within 60 s of applying X" auto-switch to `fedora`.
