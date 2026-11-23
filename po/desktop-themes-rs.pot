@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 22:37+0000\n"
+"POT-Creation-Date: 2026-11-23 22:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3440,7 +3440,7 @@ msgstr ""
 msgid "Clipboard settings"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:134
+#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:160
 #: bridge/src/clipboard/winFlyout.ts:79
 msgid "Clipboard history"
 msgstr ""
@@ -3533,6 +3533,72 @@ msgstr ""
 
 #: bridge/src/clipboard/winFlyout.ts:252
 msgid "More"
+msgstr ""
+
+#: bridge/src/colorPicker/feature.ts:109
+msgid "Picked {value}"
+msgstr ""
+
+#: bridge/src/colorPicker/feature.ts:117
+msgid "Copied {value}"
+msgstr ""
+
+#: bridge/src/colorPicker/overlay.ts:123
+msgid "Enter picks · F format · H history · Esc cancels"
+msgstr ""
+
+#: bridge/src/colorPicker/overlay.ts:329 bridge/src/colorPicker/overlay.ts:341
+#: bridge/src/colorPicker/overlay.ts:461 bridge/src/colorPicker/overlay.ts:482
+msgid "No colour here"
+msgstr ""
+
+#: bridge/src/colorPicker/overlay.ts:344 bridge/src/colorPicker/overlay.ts:477
+msgid "Could not read the colour"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:46
+msgid "passes AAA"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:48
+msgid "passes AA"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:50
+msgid "passes AA for large text only"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:51
+msgid "fails AA"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:79 bridge/src/colorPicker/panel.ts:82
+#: bridge/src/colorPicker/panel.ts:109
+msgid "Picked colours"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:254 bridge/src/quickSettings.ts:325
+msgid "deskd is unavailable"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:256
+msgid "The history is off: history size is 0"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:258
+msgid "No colours picked yet"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:261
+msgid "Contrast of the last two picks: {ratio}:1, {level}"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:267
+msgid "{value}, {name}"
+msgstr ""
+
+#: bridge/src/colorPicker/panel.ts:277
+msgid "Remove {value}"
 msgstr ""
 
 #: bridge/src/emoji/panel.ts:28
@@ -3797,10 +3863,6 @@ msgstr ""
 
 #: bridge/src/quickSettings.ts:304
 msgid "private mode"
-msgstr ""
-
-#: bridge/src/quickSettings.ts:325
-msgid "deskd is unavailable"
 msgstr ""
 
 #: bridge/src/quickSettings.ts:331
