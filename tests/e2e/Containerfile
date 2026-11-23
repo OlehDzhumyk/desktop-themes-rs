@@ -4,7 +4,7 @@
 # CREDITS.md), plus what the tests need. Our binaries and the bridge are NOT baked in: the runner
 # mounts the repository read-only and the tests install the freshly built files at start.
 # Bump the base by tag and digest together (`podman pull` prints the digest).
-FROM ghcr.io/ddterm/gnome-shell-image/fedora-45:2026.11.12.0@sha256:aa3d052f75bc2fc2aee44350ade19c104dff1e79f00f7a9b17fc5d9c9549a694
+FROM ghcr.io/ddterm/gnome-shell-image/fedora-45:2026.11.23.0@sha256:48f42c04c9e1286595a9bf1b56f468b6f8d639dbde764081dcd2ffd8126f6e58
 
 RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
         python3-pytest python3-gobject gtk4 libadwaita dconf glib2 wl-clipboard \
