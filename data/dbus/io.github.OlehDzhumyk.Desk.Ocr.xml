@@ -35,7 +35,7 @@
       <arg name="preview" type="s" direction="out"/>
       <arg name="missing_langs" type="as" direction="out"/>
     </method>
-    <!-- The language codes with installed Tesseract data (`tesseract --list-langs` without osd);
+    <!-- The language codes with installed Tesseract data (listed by tesseract without osd);
          empty when tesseract is not installed. -->
     <method name="AvailableLanguages">
       <arg name="languages" type="as" direction="out"/>
