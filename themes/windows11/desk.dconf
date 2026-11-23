@@ -13,3 +13,7 @@ mixer-shortcut=['<Control><Super>v']
 # Emoji and symbol picker: Win+. and Win+;, opening the Emoji tab of the unified flyout.
 [io/github/OlehDzhumyk/Desk/emoji]
 emoji-shortcut=['<Super>period', '<Super>semicolon']
+
+# Colour picker: Win+Shift+C, as PowerToys Color Picker.
+[io/github/OlehDzhumyk/Desk/color-picker]
+color-picker-shortcut=['<Shift><Super>c']

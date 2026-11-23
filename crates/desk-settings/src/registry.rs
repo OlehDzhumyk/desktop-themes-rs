@@ -38,6 +38,7 @@ pub static FEATURE_APP: Feature = Feature {
 pub static FEATURES: &[&Feature] = &[
     &FEATURE_CLIPBOARD,
     &crate::emoji::FEATURE_EMOJI,
+    &crate::color_picker::FEATURE_COLOR_PICKER,
     &crate::mixer::FEATURE_MIXER,
     &crate::appearance::FEATURE_APPEARANCE,
     &crate::focus::FEATURE_FOCUS,
@@ -117,6 +118,7 @@ pub static DESK: Schema = Schema {
     children: &[
         ("clipboard", CLIPBOARD_SCHEMA),
         ("emoji", crate::emoji::EMOJI_SCHEMA),
+        ("color-picker", crate::color_picker::COLOR_PICKER_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
         ("appearance", crate::appearance::APPEARANCE_SCHEMA),
@@ -359,6 +361,7 @@ pub static SHORTCUT_KEYS: Schema = Schema {
         &SC_CLIPBOARD_TOGGLE,
         &crate::emoji::SC_EMOJI_TOGGLE,
         &crate::mixer::SC_MIXER_OPEN,
+        &crate::color_picker::SC_COLOR_PICKER_TOGGLE,
     ],
     children: &[],
 };
@@ -368,6 +371,7 @@ pub static SHORTCUTS: &[&Shortcut] = &[
     &SHORTCUT_CLIPBOARD,
     &crate::emoji::SHORTCUT_EMOJI,
     &crate::mixer::SHORTCUT_MIXER,
+    &crate::color_picker::SHORTCUT_COLOR_PICKER,
 ];
 
 /// All schemas, parents first (the order of the generated XML).
@@ -375,6 +379,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &DESK,
     &CLIPBOARD,
     &crate::emoji::EMOJI,
+    &crate::color_picker::COLOR_PICKER,
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
     &crate::appearance::APPEARANCE,
@@ -495,6 +500,7 @@ pub static PAGE_SHORTCUTS: Page = Page {
             Item::Shortcut(&SHORTCUT_CLIPBOARD),
             Item::Shortcut(&crate::emoji::SHORTCUT_EMOJI),
             Item::Shortcut(&crate::mixer::SHORTCUT_MIXER),
+            Item::Shortcut(&crate::color_picker::SHORTCUT_COLOR_PICKER),
         ],
     }],
 };
@@ -519,6 +525,7 @@ pub static PAGE_CREDITS: Page = Page {
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
     &crate::emoji::PAGE_EMOJI,
+    &crate::color_picker::PAGE_COLOR_PICKER,
     &crate::mixer::PAGE_MIXER,
     &crate::appearance::PAGE_APPEARANCE,
     &crate::focus::PAGE_FOCUS,

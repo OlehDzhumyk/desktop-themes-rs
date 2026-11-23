@@ -9,3 +9,7 @@ toggle-shortcut=['<Shift><Super>v']
 # Emoji and symbol picker: Ctrl+Super+Space (macOS Character Viewer convention).
 [io/github/OlehDzhumyk/Desk/emoji]
 emoji-shortcut=['<Control><Super>space']
+
+# Colour picker: Ctrl+Shift+Super+C (Digital Color Meter copies with Cmd+Shift+C).
+[io/github/OlehDzhumyk/Desk/color-picker]
+color-picker-shortcut=['<Control><Shift><Super>c']

@@ -27,6 +27,7 @@
     </key>
     <child name="clipboard" schema="io.github.OlehDzhumyk.Desk.Clipboard"/>
     <child name="emoji" schema="io.github.OlehDzhumyk.Desk.Emoji"/>
+    <child name="color-picker" schema="io.github.OlehDzhumyk.Desk.ColorPicker"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="appearance" schema="io.github.OlehDzhumyk.Desk.Appearance"/>
@@ -135,6 +136,50 @@
     </key>
   </schema>
 
+  <schema id="io.github.OlehDzhumyk.Desk.ColorPicker" path="/io/github/OlehDzhumyk/Desk/color-picker/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable the colour picker</summary>
+      <description>Pick the colour of any pixel on the screen with a magnifying loupe</description>
+    </key>
+    <key name="format" type="s">
+      <choices>
+        <choice value="hex"/>
+        <choice value="rgb"/>
+        <choice value="hsl"/>
+        <choice value="hsv"/>
+        <choice value="name"/>
+        <choice value="gtk"/>
+        <choice value="decimal"/>
+      </choices>
+      <default>'hex'</default>
+      <summary>Text format of picked colours</summary>
+      <description>deskd formats picks and the history in this format (theme_tokens::picker).</description>
+    </key>
+    <key name="zoom" type="u">
+      <range min="4" max="16"/>
+      <default>10</default>
+      <summary>Magnification of the loupe (4x to 16x)</summary>
+      <description>The scroll wheel and the + and - keys change it while picking</description>
+    </key>
+    <key name="history-size" type="u">
+      <range min="0" max="50"/>
+      <default>20</default>
+      <summary>Number of picked colours kept in the history (0 = none)</summary>
+      <description>Stored in ~/.local/share/deskd/colors.json (mode 0600), newest first. 0 keeps no history: the list is cleared and the file is deleted.</description>
+    </key>
+    <key name="copy-on-pick" type="b">
+      <default>true</default>
+      <summary>Copy the picked colour to the clipboard</summary>
+      <description>Put the picked colour on the clipboard in the chosen format</description>
+    </key>
+    <key name="color-picker-shortcut" type="as">
+      <default>['&lt;Shift&gt;&lt;Super&gt;c']</default>
+      <summary>Shortcut that starts the colour picker (in force)</summary>
+      <description>The accelerators the bridge binds. Themes write their default here from desk.dconf (Shift+Super+C for Windows 11 and Fedora, Ctrl+Shift+Super+C for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts color-picker-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global.</description>
+    </key>
+  </schema>
+
   <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
     <key name="clipboard-toggle" type="as">
       <default>[]</default>
@@ -149,6 +194,11 @@
     <key name="mixer-open" type="as">
       <default>[]</default>
       <summary>Your shortcut for the volume mixer (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="color-picker-toggle" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for the colour picker (override)</summary>
       <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
   </schema>
