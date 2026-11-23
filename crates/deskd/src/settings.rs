@@ -125,3 +125,71 @@ pub fn set_color_scheme_async(scheme: Scheme) {
         }
     });
 }
+
+const NOTIFICATIONS_SCHEMA: &str = "org.gnome.desktop.notifications";
+const SOUND_SCHEMA: &str = "org.gnome.desktop.sound";
+pub const SHOW_BANNERS_KEY: &str = "show-banners";
+pub const EVENT_SOUNDS_KEY: &str = "event-sounds";
+
+/// GSettings `io.github.OlehDzhumyk.Desk.Focus` (None while the schema is not installed).
+pub fn focus_settings() -> Option<desk_settings::accessors::FocusSettings> {
+    desk_settings::accessors::FocusSettings::new()
+}
+
+/// Read the focus engine configuration from GSettings.
+pub fn read_focus(s: &desk_settings::accessors::FocusSettings) -> crate::focus::Config {
+    crate::focus::Config {
+        enabled: s.enabled(),
+        session_length: s.session_length(),
+        session_break: s.session_break(),
+    }
+}
+
+/// GSettings `org.gnome.desktop.notifications` (None when unavailable).
+pub fn notifications_settings() -> Option<gio::Settings> {
+    desk_settings::schema_installed(NOTIFICATIONS_SCHEMA)
+        .then(|| gio::Settings::new(NOTIFICATIONS_SCHEMA))
+}
+
+/// GSettings `org.gnome.desktop.sound` (None when unavailable).
+pub fn sound_settings() -> Option<gio::Settings> {
+    desk_settings::schema_installed(SOUND_SCHEMA).then(|| gio::Settings::new(SOUND_SCHEMA))
+}
+
+/// Writes of the focus engine: GSettings from the GLib main loop, the state file directly.
+pub struct FocusEffects {
+    pub store_path: std::path::PathBuf,
+}
+
+impl crate::focus::Effects for FocusEffects {
+    fn set_show_banners(&mut self, on: bool) {
+        glib::MainContext::default().invoke(move || {
+            if let Some(s) = notifications_settings() {
+                let _ = s.set_boolean(SHOW_BANNERS_KEY, on);
+            }
+        });
+    }
+
+    fn set_event_sounds(&mut self, on: bool) {
+        glib::MainContext::default().invoke(move || {
+            if let Some(s) = sound_settings() {
+                let _ = s.set_boolean(EVENT_SOUNDS_KEY, on);
+            }
+        });
+    }
+
+    fn set_active_mode(&mut self, id: &str) {
+        let id = id.to_string();
+        glib::MainContext::default().invoke(move || {
+            if let Some(s) = focus_settings() {
+                let _ = s.set_active_mode(id);
+            }
+        });
+    }
+
+    fn persist(&mut self, store: &crate::focus::model::Store) {
+        if let Err(e) = crate::focus::save_store(&self.store_path, store) {
+            eprintln!("deskd: cannot save the focus state: {e}");
+        }
+    }
+}

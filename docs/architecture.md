@@ -26,7 +26,7 @@ The repository is a Cargo workspace:
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
-| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, emoji and symbol picker, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, emoji and symbol picker, focus modes, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
@@ -246,6 +246,21 @@ when the effective scheme changes. `appearance/wallpaper.rs` follows the wallpap
 `themes tokens seed --json` as a child process (an untrusted image never runs inside deskd), and
 writes `accent-color`; the accent to restore is kept in `~/.cache/desktop-themes/wallpaper-accent.json`,
 which is deleted when the setting is turned off.
+
+`/io/github/OlehDzhumyk/Desk/Focus`, interface `io.github.OlehDzhumyk.Desk.Focus`:
+
+| Member | Description |
+|---|---|
+| `Status() -> (s mode, s name, s icon, s source, x until, x break_until, s next_mode, x next_start, as allowed_apps)` | active mode (empty: none), `manual`/`schedule`/`session`, end in Unix seconds (0: until turned off), session break end, next scheduled start, the active mode's allowed apps |
+| `ListModes() -> s` | the modes as a JSON array (stored fields plus translated `label` and `builtin`) |
+| `Start(s mode, x until)`, `StartSession(u minutes)`, `Stop()` | start by hand (0: until turned off), start a focus session (0: `session-length`), end |
+| `SaveMode(s json)`, `DeleteMode(s id)` | add or replace a mode; delete a custom one |
+| `Recompute()`; signals `Changed()`, `SessionEnded()` | re-evaluate schedules now |
+
+The engine (`crates/deskd/src/focus/`) is a pure state machine with an injected clock and effects:
+it stores the value of `show-banners`/`event-sounds` it overrides before writing, restores it only
+while the key still holds deskd's value, and reconciles at start-up
+([ADR 0009](adr/0009-deskd-writes-do-not-disturb-keys.md)).
 
 ## Crash protection
 

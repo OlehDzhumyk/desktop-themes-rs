@@ -23,6 +23,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Emoji and symbols (`emoji`) | In Windows 11 and macOS |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
+| Focus (`focus`) | Available in Windows 11 and macOS |
 | Logo menu (`logo-menu`) | From macOS |
 | Lock screen (`lockscreen`) | Available in Windows 11 and macOS |
 | Application (`app`) | — |
@@ -105,6 +106,18 @@ Path `/io/github/OlehDzhumyk/Desk/appearance/`.
 | `accent-from-wallpaper` | boolean | `false` |  | Accent from wallpaper | When on, deskd watches org.gnome.desktop.background picture-uri and picture-uri-dark and sets org.gnome.desktop.interface accent-color to the GNOME named accent nearest the wallpaper's seed colour. The image is decoded by a `themes tokens seed` child process. Turning it off restores the accent that was in force before. | appearance | switch on `--page appearance` |
 | `accent-source` | choice | `'active'` | `active`, `light`, `dark` | Wallpaper source | 'active' uses picture-uri-dark when color-scheme is 'prefer-dark' and picture-uri otherwise; 'light' always uses picture-uri; 'dark' always uses picture-uri-dark. | appearance | drop-down on `--page appearance` |
 
+## `io.github.OlehDzhumyk.Desk.Focus`
+
+Path `/io/github/OlehDzhumyk/Desk/focus/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Focus modes | Off: deskd ends the active mode (restoring what it changed) and arms no schedule. | focus | switch on `--page focus` |
+| `active-mode` | string | `''` |  | Active mode | A mirror of deskd's state for display and recovery: if the state file is lost while this is set, deskd restores the notification banners at start-up. Start and end modes with `themes focus`, the window or the quick settings tile, not by writing this key. | focus | — (gsettings only) |
+| `summary-on-end` | boolean | `true` |  | Summary when a mode ends | Tell how many notifications arrived while the mode was on | focus | switch on `--page focus` |
+| `session-length` | unsigned | `25` | 5…120 (step 5) | Focus session, minutes | Length of a focus session (Windows 11 style) | focus | spin button on `--page focus` |
+| `session-break` | unsigned | `5` | 0…30 (step 1) | Break after a session, minutes | 0: no break | focus | spin button on `--page focus` |
+
 ## `io.github.OlehDzhumyk.Desk.LogoMenu`
 
 Path `/io/github/OlehDzhumyk/Desk/logo-menu/`.
@@ -158,6 +171,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `emoji` | Emoji and symbols | Picker, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |
+| `focus` | Focus | State, Options, Focus sessions |
 | `logo-menu` | Logo menu | Top bar |
 | `lockscreen` | Lock screen | Layout, Time and date, Background |
 | `shortcuts` | Keyboard shortcuts | Features |

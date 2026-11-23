@@ -40,6 +40,7 @@ pub static FEATURES: &[&Feature] = &[
     &crate::emoji::FEATURE_EMOJI,
     &crate::mixer::FEATURE_MIXER,
     &crate::appearance::FEATURE_APPEARANCE,
+    &crate::focus::FEATURE_FOCUS,
     &crate::logo_menu::FEATURE_LOGO_MENU,
     &crate::lockscreen::FEATURE_LOCKSCREEN,
     &FEATURE_APP,
@@ -119,6 +120,7 @@ pub static DESK: Schema = Schema {
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
         ("appearance", crate::appearance::APPEARANCE_SCHEMA),
+        ("focus", crate::focus::FOCUS_SCHEMA),
         ("logo-menu", crate::logo_menu::LOGO_MENU_SCHEMA),
     ],
 };
@@ -376,6 +378,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
     &crate::appearance::APPEARANCE,
+    &crate::focus::FOCUS,
     &crate::logo_menu::LOGO_MENU,
 ];
 
@@ -518,6 +521,7 @@ pub static PAGES: &[&Page] = &[
     &crate::emoji::PAGE_EMOJI,
     &crate::mixer::PAGE_MIXER,
     &crate::appearance::PAGE_APPEARANCE,
+    &crate::focus::PAGE_FOCUS,
     &crate::logo_menu::PAGE_LOGO_MENU,
     &crate::lockscreen::PAGE_LOCKSCREEN,
     &PAGE_SHORTCUTS,
