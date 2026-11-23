@@ -5,6 +5,7 @@
 //! the gettext helpers shared by all Rust crates ([`i18n`], [`tr!`], [`trn!`]).
 
 pub mod appearance;
+pub mod color_picker;
 pub mod emoji;
 pub mod focus;
 pub mod generate;
@@ -23,6 +24,7 @@ pub mod validate;
 pub mod accessors;
 
 pub use appearance::*;
+pub use color_picker::*;
 pub use emoji::*;
 pub use focus::*;
 pub use lockscreen::*;

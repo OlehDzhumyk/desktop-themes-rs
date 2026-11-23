@@ -49,6 +49,21 @@ pub fn read_emoji(s: &desk_settings::accessors::EmojiSettings) -> (bool, String)
     (s.remember_recents(), s.skin_tone().as_str().to_string())
 }
 
+/// GSettings `io.github.OlehDzhumyk.Desk.ColorPicker` (None while the schema is not installed).
+pub fn color_picker_settings() -> Option<desk_settings::accessors::ColorPickerSettings> {
+    desk_settings::accessors::ColorPickerSettings::new()
+}
+
+/// The colour picker engine's part of its settings: the format and the history size.
+pub fn read_color_picker(
+    s: &desk_settings::accessors::ColorPickerSettings,
+) -> crate::color_picker::Config {
+    crate::color_picker::Config {
+        format: theme_tokens::picker::Format::parse(s.format().as_str()).unwrap_or_default(),
+        history_size: s.history_size() as usize,
+    }
+}
+
 /// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
 pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
     desk_settings::accessors::MixerSettings::new()

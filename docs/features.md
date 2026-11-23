@@ -108,6 +108,19 @@ Skins:
 
 * **windows11**: live «Емодзі» and «Символи» tabs inside the unified Win+V / Win+. flyout; stays open after insert by default.
 * **macos** and **default**: floating keyboard-first picker anchored near the text caret (pointer fallback); closes after insert by default.
+## Colour picker
+
+Engine and settings only so far: the shell-side loupe and history panel come in a follow-up.
+
+| | |
+|---|---|
+| Open | Windows 11 theme: **Shift+Super+C**; macOS theme: **Ctrl+Shift+Super+C**; Fedora: **Shift+Super+C** (`color-picker-shortcut` in the theme's `desk.dconf`; override on «Keyboard shortcuts» or `themes shortcut set color-picker-toggle ...`) |
+| Formats | HEX `#RRGGBB` (default), `rgb(r, g, b)`, `hsl(h, s%, l%)`, `hsv(h, s%, v%)`, CSS name when exact, GTK `@define-color` line, decimal `r,g,b` (`theme_tokens::picker`) |
+| History | Newest first, one entry per `#RRGGBB` (a repeat moves to the front), `history-size` picks (20 by default); the nearest CSS colour name for accessible swatch names; WCAG contrast ratio of the two newest picks |
+| Storage | `~/.local/share/deskd/colors.json` (0600) only while `history-size` is above 0; setting it to 0 clears the history and removes the file |
+| D-Bus | `io.github.OlehDzhumyk.Desk.ColorPicker` at `/io/github/OlehDzhumyk/Desk/ColorPicker`: `Record`, `List`, `Remove`, `Clear`, `Format`, `Contrast`, signal `Changed` |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.ColorPicker`: `enabled`, `format`, `zoom`, `history-size`, `copy-on-pick`, `color-picker-shortcut`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `color-picker-toggle` |
+
 ## Automatic light/dark
 
 | | |

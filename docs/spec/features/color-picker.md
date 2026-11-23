@@ -50,7 +50,9 @@ The loupe follows the pointer without easing. Fade of the overlay <= 80 ms, none
 ## Settings (proposed, `io.github.OlehDzhumyk.Desk.ColorPicker`)
 
 `enabled` (true), `format` (choice `hex,rgb,hsl,hsv,name,gtk,decimal`, `hex`), `zoom` (uint 4..16, 10), `history-size` (uint
-0..50, 20; 0 = remember nothing), `copy-on-pick` (true), `toggle-shortcut` (per theme).
+0..50, 20; 0 = remember nothing), `copy-on-pick` (true), `color-picker-shortcut` (per theme; your override is
+`io.github.OlehDzhumyk.Desk.Shortcuts color-picker-toggle`). The key is not called `toggle-shortcut`: shell keybinding
+names are global, and the clipboard already binds that name.
 
 ## Privacy & security
 

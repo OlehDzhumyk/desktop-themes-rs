@@ -7,6 +7,7 @@
 
 mod appearance;
 mod clipboard;
+mod color_picker;
 mod emoji;
 mod engine;
 mod focus;
@@ -28,6 +29,7 @@ use signal_hook::iterator::Signals;
 
 use engine::appearance::AppearanceFeature;
 use engine::clipboard::ClipboardFeature;
+use engine::color_picker::ColorPickerFeature;
 use engine::emoji::EmojiFeature;
 use engine::focus::FocusFeature;
 use engine::mixer::MixerFeature;
@@ -51,6 +53,7 @@ fn features() -> Vec<String> {
         "clipboard".to_string(),
         "appearance".to_string(),
         "emoji".to_string(),
+        "color-picker".to_string(),
     ];
     f.push("focus".into());
     if cfg!(feature = "pipewire") {
@@ -65,6 +68,7 @@ fn engines(setup: &Setup) -> Engines {
     Engines::new(vec![
         Box::new(MixerFeature::new(setup)),
         Box::new(EmojiFeature::new(setup)),
+        Box::new(ColorPickerFeature::new(setup)),
         Box::new(ClipboardFeature::new(setup)),
         Box::new(FocusFeature::new(setup)),
         Box::new(AppearanceFeature::new(setup)),

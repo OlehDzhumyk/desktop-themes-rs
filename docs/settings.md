@@ -21,6 +21,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 |---|---|
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
 | Emoji and symbols (`emoji`) | In Windows 11 and macOS |
+| Colour picker (`color-picker`) | In Windows 11 (PowerToys) and macOS (Digital Color Meter) |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
 | Focus (`focus`) | Available in Windows 11 and macOS |
@@ -67,6 +68,19 @@ Path `/io/github/OlehDzhumyk/Desk/emoji/`.
 | `remember-recents` | boolean | `true` |  | Remember recent picks | Stored in ~/.local/share/deskd/emoji.json (mode 0600, last 36 picked). Turning it off clears the list and deletes the file. | emoji | switch on `--page emoji` |
 | `close-after-insert` | choice | `'skin'` | `skin`, `always`, `never` | After inserting an item | 'skin': windows11 stays open while macos and default close; 'always': close in every skin; 'never': keep open until dismissed. | emoji | drop-down on `--page emoji` |
 
+## `io.github.OlehDzhumyk.Desk.ColorPicker`
+
+Path `/io/github/OlehDzhumyk/Desk/color-picker/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Colour picker | Pick the colour of any pixel on the screen with a magnifying loupe | color-picker | switch on `--page color-picker` |
+| `format` | choice | `'hex'` | `hex`, `rgb`, `hsl`, `hsv`, `name`, `gtk`, `decimal` | Format | deskd formats picks and the history in this format (theme_tokens::picker). | color-picker | drop-down on `--page color-picker` |
+| `zoom` | unsigned | `10` | 4…16 (step 1) | Loupe magnification | The scroll wheel and the + and - keys change it while picking | color-picker | spin button on `--page color-picker` |
+| `history-size` | unsigned | `20` | 0…50 (step 1) | History size | Stored in ~/.local/share/deskd/colors.json (mode 0600), newest first. 0 keeps no history: the list is cleared and the file is deleted. | color-picker | spin button on `--page color-picker` |
+| `copy-on-pick` | boolean | `true` |  | Copy on pick | Put the picked colour on the clipboard in the chosen format | color-picker | switch on `--page color-picker` |
+| `color-picker-shortcut` | shortcut list | `['<Shift><Super>c']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Shift+Super+C for Windows 11 and Fedora, Ctrl+Shift+Super+C for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts color-picker-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | color-picker | shortcut row on `--page shortcuts` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -76,6 +90,7 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `clipboard-toggle` | shortcut list | `[]` |  | Open the clipboard panel | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | clipboard | shortcut row on `--page shortcuts` |
 | `emoji-toggle` | shortcut list | `[]` |  | Open the emoji and symbol picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | emoji | shortcut row on `--page shortcuts` |
 | `mixer-open` | shortcut list | `[]` |  | Open the volume mixer | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | mixer | shortcut row on `--page shortcuts` |
+| `color-picker-toggle` | shortcut list | `[]` |  | Pick a colour from the screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | color-picker | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
 
@@ -162,6 +177,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `clipboard-toggle` | Open the clipboard panel | clipboard | `/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle` |
 | `emoji-toggle` | Open the emoji and symbol picker | emoji | `/io/github/OlehDzhumyk/Desk/emoji/emoji-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/emoji-toggle` |
 | `mixer-open` | Open the volume mixer | mixer | `/io/github/OlehDzhumyk/Desk/mixer/mixer-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/mixer-open` |
+| `color-picker-toggle` | Pick a colour from the screen | color-picker | `/io/github/OlehDzhumyk/Desk/color-picker/color-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/color-picker-toggle` |
 
 ## Pages of the window
 
@@ -169,6 +185,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
 | `emoji` | Emoji and symbols | Picker, How to open |
+| `color-picker` | Colour picker | Picker, History, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |
 | `focus` | Focus | State, Options, Focus sessions |

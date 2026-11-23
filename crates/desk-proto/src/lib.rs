@@ -23,6 +23,8 @@ pub const APPEARANCE_PATH: &str = "/io/github/OlehDzhumyk/Desk/Appearance";
 pub const APPEARANCE_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 pub const FOCUS_PATH: &str = "/io/github/OlehDzhumyk/Desk/Focus";
 pub const FOCUS_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Focus";
+pub const COLOR_PICKER_PATH: &str = "/io/github/OlehDzhumyk/Desk/ColorPicker";
+pub const COLOR_PICKER_IFACE: &str = "io.github.OlehDzhumyk.Desk.ColorPicker";
 
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
@@ -31,6 +33,7 @@ pub const EMOJI_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Emoji";
 pub const MIXER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 pub const APPEARANCE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 pub const FOCUS_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Focus";
+pub const COLOR_PICKER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.ColorPicker";
 pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.Desk.gschema.xml");
 
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
@@ -41,6 +44,8 @@ pub const MIXER_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhum
 pub const APPEARANCE_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Appearance.xml");
 pub const FOCUS_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Focus.xml");
+pub const COLOR_PICKER_XML: &str =
+    include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.ColorPicker.xml");
 
 /// Offered by the bridge with the clipboard content it set itself (paste from the history), so
 /// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
@@ -264,6 +269,43 @@ pub mod focus {
     }
 }
 
+/// Colour picker: history item type and client proxy (its own module so its `Changed` signal does
+/// not clash).
+pub mod color_picker {
+    use serde::{Deserialize, Serialize};
+
+    /// One remembered pick, newest first in `List` (`(sssx)`).
+    #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, zbus::Type)]
+    pub struct ColorPick {
+        /// `#RRGGBB`, upper case: the identity of the pick (`Remove` takes it).
+        pub hex: String,
+        /// The colour in the `format` setting in force.
+        pub formatted: String,
+        /// Nearest CSS colour name, for accessible swatch names.
+        pub name: String,
+        /// When it was last picked (unix, seconds).
+        pub picked_at: i64,
+    }
+
+    /// Client proxy of the colour picker engine.
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.ColorPicker",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/ColorPicker"
+    )]
+    pub trait ColorPicker {
+        /// `(formatted, hex, nearest_name)`.
+        fn record(&self, r: u8, g: u8, b: u8) -> zbus::Result<(String, String, String)>;
+        fn list(&self) -> zbus::Result<Vec<ColorPick>>;
+        fn remove(&self, hex: &str) -> zbus::Result<bool>;
+        fn clear(&self) -> zbus::Result<()>;
+        fn format(&self, r: u8, g: u8, b: u8, format: &str) -> zbus::Result<String>;
+        fn contrast(&self) -> zbus::Result<f64>;
+        #[zbus(signal)]
+        fn changed(&self) -> zbus::Result<()>;
+    }
+}
+
 /// Клієнтський проксі самої служби (версія, список функцій).
 #[zbus::proxy(
     interface = "io.github.OlehDzhumyk.Desk",
@@ -346,6 +388,13 @@ mod tests {
         for name in ["Search", "Category", "Recents", "Pick", "ClearRecents"] {
             assert!(m.contains(&("method".into(), name.into())), "{name}");
         }
+    }
+
+    #[test]
+    fn color_picker_signature_matches_xml() {
+        assert_eq!(color_picker::ColorPick::SIGNATURE.to_string(), "(sssx)");
+        assert!(COLOR_PICKER_XML.contains("type=\"a(sssx)\""));
+        assert!(COLOR_PICKER_XML.contains(&format!("name=\"{COLOR_PICKER_IFACE}\"")));
     }
 
     #[test]

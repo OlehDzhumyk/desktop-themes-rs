@@ -375,6 +375,130 @@ impl EmojiSettings {
     }
 }
 
+/// Values of `io.github.OlehDzhumyk.Desk.ColorPicker` `format`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Format {
+    #[default]
+    Hex,
+    Rgb,
+    Hsl,
+    Hsv,
+    Name,
+    Gtk,
+    Decimal,
+}
+
+impl Format {
+    pub const ALL: [Format; 7] = [
+        Format::Hex,
+        Format::Rgb,
+        Format::Hsl,
+        Format::Hsv,
+        Format::Name,
+        Format::Gtk,
+        Format::Decimal,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Format::Hex => "hex",
+            Format::Rgb => "rgb",
+            Format::Hsl => "hsl",
+            Format::Hsv => "hsv",
+            Format::Name => "name",
+            Format::Gtk => "gtk",
+            Format::Decimal => "decimal",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "hex" => Format::Hex,
+            "rgb" => Format::Rgb,
+            "hsl" => Format::Hsl,
+            "hsv" => Format::Hsv,
+            "name" => Format::Name,
+            "gtk" => Format::Gtk,
+            "decimal" => Format::Decimal,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.ColorPicker` at `/io/github/OlehDzhumyk/Desk/color-picker/`.
+#[derive(Clone, Debug)]
+pub struct ColorPickerSettings(pub gio::Settings);
+
+impl ColorPickerSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.ColorPicker";
+    pub const ENABLED: &'static str = "enabled";
+    pub const FORMAT: &'static str = "format";
+    pub const ZOOM: &'static str = "zoom";
+    pub const HISTORY_SIZE: &'static str = "history-size";
+    pub const COPY_ON_PICK: &'static str = "copy-on-pick";
+    pub const COLOR_PICKER_SHORTCUT: &'static str = "color-picker-shortcut";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable the colour picker
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Text format of picked colours
+    pub fn format(&self) -> Format {
+        Format::parse(&self.0.string(Self::FORMAT))
+    }
+
+    pub fn set_format(&self, v: Format) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::FORMAT, v.as_str())
+    }
+
+    /// Magnification of the loupe (4x to 16x)
+    pub fn zoom(&self) -> u32 {
+        self.0.uint(Self::ZOOM)
+    }
+
+    pub fn set_zoom(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::ZOOM, v)
+    }
+
+    /// Number of picked colours kept in the history (0 = none)
+    pub fn history_size(&self) -> u32 {
+        self.0.uint(Self::HISTORY_SIZE)
+    }
+
+    pub fn set_history_size(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::HISTORY_SIZE, v)
+    }
+
+    /// Copy the picked colour to the clipboard
+    pub fn copy_on_pick(&self) -> bool {
+        self.0.boolean(Self::COPY_ON_PICK)
+    }
+
+    pub fn set_copy_on_pick(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::COPY_ON_PICK, v)
+    }
+
+    /// Shortcut that starts the colour picker (in force)
+    pub fn color_picker_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::COLOR_PICKER_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_color_picker_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::COLOR_PICKER_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -384,6 +508,7 @@ impl ShortcutSettings {
     pub const CLIPBOARD_TOGGLE: &'static str = "clipboard-toggle";
     pub const EMOJI_TOGGLE: &'static str = "emoji-toggle";
     pub const MIXER_OPEN: &'static str = "mixer-open";
+    pub const COLOR_PICKER_TOGGLE: &'static str = "color-picker-toggle";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -415,6 +540,15 @@ impl ShortcutSettings {
 
     pub fn set_mixer_open(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::MIXER_OPEN, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the colour picker (override)
+    pub fn color_picker_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::COLOR_PICKER_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_color_picker_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::COLOR_PICKER_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
 

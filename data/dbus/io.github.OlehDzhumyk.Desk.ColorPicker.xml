@@ -1,0 +1,51 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Colour picker engine of deskd (docs/spec/features/color-picker.md). The bridge reads the
+     pixel (org.gnome.Shell.Screenshot PickColor) and draws the loupe; deskd formats the colour
+     and keeps the history of picks in ~/.local/share/deskd/colors.json (mode 0600) while the
+     history-size setting is above 0.
+     Access (ADR 0008): every method answers AccessDenied unless the caller is the owner of
+     org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any sandbox. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.ColorPicker">
+    <!-- Record a picked sRGB colour: format it in the `format` setting in force and put it first
+         in the history (an earlier pick of the same #RRGGBB moves to the front; the history keeps
+         `history-size` picks). With history-size 0 nothing is recorded and no file is written.
+         Returns the text to copy, the #RRGGBB value and the nearest CSS colour name. -->
+    <method name="Record">
+      <arg name="r" type="y" direction="in"/>
+      <arg name="g" type="y" direction="in"/>
+      <arg name="b" type="y" direction="in"/>
+      <arg name="formatted" type="s" direction="out"/>
+      <arg name="hex" type="s" direction="out"/>
+      <arg name="name" type="s" direction="out"/>
+    </method>
+    <!-- The history, newest first. Item: (hex, formatted, name, picked_at): #RRGGBB, the colour
+         in the format in force, the nearest CSS colour name, unix seconds of the last pick. -->
+    <method name="List">
+      <arg name="items" type="a(sssx)" direction="out"/>
+    </method>
+    <!-- Forget one pick by its #RRGGBB value (case-insensitive, '#' optional). False when it is
+         not in the history. -->
+    <method name="Remove">
+      <arg name="hex" type="s" direction="in"/>
+      <arg name="removed" type="b" direction="out"/>
+    </method>
+    <!-- Forget all picks and delete the history file. -->
+    <method name="Clear"/>
+    <!-- Format a colour without recording it (the loupe preview and the F key). format: "hex" |
+         "rgb" | "hsl" | "hsv" | "name" | "gtk" | "decimal", or "" for the setting in force. -->
+    <method name="Format">
+      <arg name="r" type="y" direction="in"/>
+      <arg name="g" type="y" direction="in"/>
+      <arg name="b" type="y" direction="in"/>
+      <arg name="format" type="s" direction="in"/>
+      <arg name="text" type="s" direction="out"/>
+    </method>
+    <!-- WCAG 2.x contrast ratio (1..21) between the two newest picks; 0 with fewer than two. -->
+    <method name="Contrast">
+      <arg name="ratio" type="d" direction="out"/>
+    </method>
+    <!-- The history changed, or the format or history-size setting changed: call List again. -->
+    <signal name="Changed"/>
+  </interface>
+</node>

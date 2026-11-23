@@ -9,3 +9,7 @@ toggle-shortcut=['<Shift><Super>v']
 # Emoji and symbol picker: Super+.
 [io/github/OlehDzhumyk/Desk/emoji]
 emoji-shortcut=['<Super>period']
+
+# Colour picker: Shift+Super+C.
+[io/github/OlehDzhumyk/Desk/color-picker]
+color-picker-shortcut=['<Shift><Super>c']
