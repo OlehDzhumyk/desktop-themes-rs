@@ -2,7 +2,7 @@
 # Development image matching CI (Fedora 45). Use it as a toolbox:
 #   podman build -t desktop-themes-dev -f Containerfile .
 #   toolbox create --image localhost/desktop-themes-dev themes-dev
-FROM registry.fedoraproject.org/fedora-toolbox:45
+FROM registry.fedoraproject.org/fedora-toolbox:45@sha256:1f553be9e743dba0fb6eeb8a14e6c8ed809596a361555f1bc93c6bf33b412ff3
 
 RUN dnf install -y --setopt=install_weak_deps=False \
         git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel \

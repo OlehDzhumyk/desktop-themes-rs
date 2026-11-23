@@ -71,7 +71,7 @@ ast-grep:
 # workflow lint: actionlint (and zizmor when installed)
 workflows:
     actionlint
-    if command -v zizmor >/dev/null; then zizmor .github/workflows; fi
+    if command -v zizmor >/dev/null; then zizmor --persona pedantic .github/workflows; fi
 
 # optional hygiene tools, skipped when not installed
 hygiene:

@@ -5,7 +5,7 @@
 # accepts growth also updates the file (run `just context-budget`). Idea adapted from T3 Code (MIT).
 name: Agent context budget
 
-on:
+on: # zizmor: ignore[concurrency-limits] label events come in bursts, see the note below
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 

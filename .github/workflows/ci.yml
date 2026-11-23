@@ -27,7 +27,7 @@ jobs:
     name: rustfmt + clippy
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: |
@@ -74,7 +74,7 @@ jobs:
     name: cargo test
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: |
@@ -106,7 +106,7 @@ jobs:
     name: cargo deny (licences, advisories)
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: dnf install -y --setopt=install_weak_deps=False git cargo cargo-deny
@@ -120,7 +120,7 @@ jobs:
     name: desk-bridge (tsc, eslint, build)
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     defaults:
       run:
         working-directory: bridge
@@ -145,7 +145,7 @@ jobs:
     name: shellcheck, schemas, desktop file, D-Bus XML
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: |
@@ -221,7 +221,7 @@ jobs:
         with:
           persist-credentials: false
       - name: actionlint
-        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
 
   docs:
     name: docs links (offline)
