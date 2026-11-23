@@ -21,6 +21,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Colour picker engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.ColorPicker` at
+  `/io/github/OlehDzhumyk/Desk/ColorPicker` (`Record`, `List`, `Remove`, `Clear`, `Format`,
+  `Contrast`, signal `Changed`), formatting with `theme_tokens::picker` and keeping the newest
+  `history-size` picks in `~/.local/share/deskd/colors.json` (0600; nothing is written with
+  `history-size=0`). Settings `io.github.OlehDzhumyk.Desk.ColorPicker` (`enabled`, `format`, `zoom`,
+  `history-size`, `copy-on-pick`, `color-picker-shortcut`), shortcut `color-picker-toggle`
+  (Shift+Super+C; Ctrl+Shift+Super+C in the macOS theme) and a «Піпетка» page in the window. The
+  shell-side loupe and history panel follow in a later change.
 - Flatpak-compatible GTK copies: `themes apply` now copies all theme `gtk4/` and `gtk3/` files
   (including `assets/` subdirectories for `macos` and `windows11`) into `~/.config/gtk-{4,3}.0`
   instead of symlinking them, so Flatpak apps with `xdg-config/gtk-4.0:ro` can read them.
