@@ -113,6 +113,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- Stage 1.5 (foundations) is done: the spec tree marks `lavender` Implemented (every generated
+  output is pinned by snapshot tests), the Stage 2 features by their own specs, and records the
+  follow-ups (report-only performance job, no automated AT-SPI audit, `dconf` tool still used).
+  Stale spec gaps fixed by the bridge i18n, the accessibility work, ADR 0006 and the settings hub
+  are marked resolved, and `macos-glass` is no longer described as bundled.
 - Release builds unwind on panic (`panic = "unwind"`, about 0.5 MB more per binary) so that `deskd`
   survives a panic in one handler or thread; `deskd.service` limits restarts to 5 in 60 seconds.
 - The minimum Rust version is 1.100 (it was 1.89 on paper but 1.92 in fact): `rust-version` equals

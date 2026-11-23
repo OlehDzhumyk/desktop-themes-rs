@@ -73,7 +73,7 @@ switch it off.
 **Reduced motion.** The user preference `enable-animations=false` (and toolkit equivalents): every
 transition becomes instant.
 
-**Registry (settings).** The single declaration of every setting (stage 1.5) from which the GSettings
+**Registry (settings).** The single declaration of every setting (`crates/desk-settings`) from which the GSettings
 schema, the typed accessors, `docs/settings.md` and the window pages are generated.
 
 **Safe theme.** `fedora`, the built-in theme that cannot be deleted; switching to it returns every
@@ -98,4 +98,4 @@ started on demand, exits after 90 s idle.
 
 **Tokens (design tokens).** The declarative description of a theme's colours, fonts and shapes
 (`tokens.toml`) from which libadwaita and shell CSS, terminal palettes and so on are generated
-(design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)). Planned in stage 1.5.
+([design tokens](../design-tokens.md)).

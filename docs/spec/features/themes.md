@@ -29,7 +29,9 @@ taskbar, icons, cursors, fonts, sounds, keyboard conventions) in a GNOME session
 * Bundled: `fedora` (built-in, stock look, cannot be deleted, is the **safe theme**), `macos`,
   `windows11`, `lavender`. The experimental `macos-glass` was removed; `themes doctor --fix` moves
   its modules to `macos` (see [liquid-glass](liquid-glass.md)).
-  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)); **Partial** until its generated output is complete (stage 1.5, PR in review). Further themes are the user's own (snapshots, hand-made).
+  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see [design tokens](../../design-tokens.md)): libadwaita CSS, the shell layer, the Ptyxis palette,
+  the wallpaper and the dconf keys are all generated, and snapshot tests pin them
+  (`crates/theme-tokens/tests/snapshots/lavender`). Further themes are the user's own (snapshots, hand-made).
 * `themes list` shows id, name, modules the theme provides, which of its modules are active, and the
   description; `*` marks the theme that provides the **look** module. `--json` gives
   `id, name, description, preview, preview_dark, active, active_modules, modules, builtin, extensions, path`.

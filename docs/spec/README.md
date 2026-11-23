@@ -57,13 +57,13 @@ UI strings are quoted in English; the shipped texts are Ukrainian and English (s
 |---|---|---|
 | 0 | theme manager (CLI, window, service), modules, inheritance, doctor | done |
 | 1 | `deskd` + `desk-bridge`, skins, clipboard history | done |
-| 1.5 | foundations: design tokens, settings registry, i18n and accessibility, CI and performance budgets, these specs | in progress |
-| 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | proposed |
+| 1.5 | foundations: design tokens, settings registry, i18n and accessibility, CI and performance budgets, these specs | done (follow-ups: see below) |
+| 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | implemented; theme from wallpaper is Partial |
 | 3 | capture family: screenshots, annotation, recording, OCR, colour picker | proposed |
 | 4 | own search engine, Quick Look, shortcut guide, window layouts | proposed |
 | 5 | phone integration | proposed |
 
-The order of stages 2 to 5 is a proposal (see the open questions in each spec).
+The order of stages 3 to 5 is a proposal (see the open questions in each spec).
 
 ## Origin badges
 
@@ -80,7 +80,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Feature | Status | Stage | Origin badge | Spec |
 |---|---|---|---|---|
 | Theme switching, modules, mixing, inheritance, reset | Implemented | 0 | Original | [themes](features/themes.md) |
-| Token-only showcase theme `lavender` | Partial | 1.5 | Original | [themes](features/themes.md) |
+| Token-only showcase theme `lavender` | Implemented | 1.5 | Original | [themes](features/themes.md) |
 | Doctor and crash protection | Implemented | 0 | Original | [doctor](features/doctor.md) |
 | Quick settings theme menu | Implemented | 1 | Original | [quick-settings-theme](features/quick-settings-theme.md) |
 | Per-theme behaviour and keybindings | Implemented | 0 | In Windows 11 and macOS (each theme follows its system) | [behavior](features/behavior.md) |
@@ -110,7 +110,11 @@ what is intended.
 
 * A change of behaviour edits the spec in the same pull request.
 * Acceptance criteria are numbered and never renumbered; a removed one is marked *(withdrawn)*.
-* Other stage 1.5 work this tree refers to: design tokens (design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request),
-  [theme-contract](../theme-contract.md)), the settings registry (settings (`docs/settings.md`, lands with its stage 1.5 pull request),
-  [architecture](../architecture.md)), performance budgets (`tools/perf/budgets.toml`). Until those
-  land, references in the specs name their intended content.
+* Stage 1.5 documents this tree refers to: [design tokens](../design-tokens.md) and the
+  [theme contract](../theme-contract.md); the settings registry ([settings](../settings.md), generated
+  by `just gen`); [translations](../i18n.md); [testing](../testing.md); performance budgets
+  ([`tools/perf/budgets.toml`](../../tools/perf/budgets.toml), [harness](../../tools/perf/README.md)).
+* Stage 1.5 follow-ups, not blocking: the headless performance job is manual and reports only
+  (shared CI runners are too noisy to gate on); accessible names are set by hand, with no automated
+  AT-SPI audit yet; dconf is still read and written through the `dconf` tool (see
+  [architecture](../architecture.md)).
