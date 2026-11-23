@@ -12,6 +12,10 @@ in `St` about 20 seconds after applying, again at the next start, and then GNOME
 extension. The theme is still useful to some users, so removing it is not the answer
 ([docs/themes.md](../themes.md)).
 
+> **Update:** `macos-glass` and the `liquid-glass` extension were later removed from the bundled
+> themes, while the `EXPERIMENTAL=true` confirmation mechanism remains in place for any future
+> or user-added experimental theme.
+
 ## Decision
 
 * A theme marks itself experimental in `theme.conf` with `EXPERIMENTAL=true` and an optional

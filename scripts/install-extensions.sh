@@ -4,7 +4,6 @@
 #   * 10 extensions from extensions.gnome.org, pinned by version tag and verified by SHA-256
 #     (tested with GNOME Shell 51; versions.sh)
 #   * spotlight@nin gets the unified diffs from patches/spotlight@nin applied (see patches/README.md)
-#   * Liquid Glass from its upstream repository at a pinned commit (it is not on extensions.gnome.org)
 #   * this repository's own extensions: desk-bridge (built from bridge/ with npm), lockscreen-layout
 # Newly installed extensions appear in GNOME Shell only after you log out and in again.
 #
@@ -16,7 +15,7 @@ set -euo pipefail
 parse_common_flags "$@"
 for a in "${DT_ARGS[@]+"${DT_ARGS[@]}"}"; do
   case "$a" in
-    -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
     *) die "unknown option: $a" ;;
   esac
 done
@@ -34,8 +33,13 @@ compile_schemas() { # DIR
   local d=$1
   if [ "$DRY_RUN" = 1 ]; then note "+ glib-compile-schemas $d/schemas"; return 0; fi
   if [ -d "$d/schemas" ] && ls "$d"/schemas/*.gschema.xml >/dev/null 2>&1; then
-    if have glib-compile-schemas; then glib-compile-schemas "$d/schemas"
-    else tb glib-compile-schemas "$d/schemas"; fi
+    if have glib-compile-schemas; then
+      glib-compile-schemas "$d/schemas"
+    elif ! in_container && have toolbox && toolbox run -c "$DT_TOOLBOX" command -v glib-compile-schemas >/dev/null 2>&1; then
+      tb glib-compile-schemas "$d/schemas"
+    else
+      die "glib-compile-schemas not found (install glib2-devel on the host or in toolbox '$DT_TOOLBOX')"
+    fi
   fi
 }
 
@@ -60,6 +64,7 @@ install_ego() { # uuid tag label sha256
       else warn "patch $(basename "$p") does not apply to this build of $uuid (already fixed upstream?), skipped"; fi
     done
   fi
+  [ "$DRY_RUN" = 1 ] || find "$EXT_DIR/$uuid" -name '*.orig' -delete
   compile_schemas "$EXT_DIR/$uuid"
 }
 
@@ -67,16 +72,6 @@ for e in "${EGO_EXTENSIONS[@]}"; do
   # shellcheck disable=SC2086
   install_ego $e
 done
-
-say "$LIQUID_GLASS_UUID (upstream repository, ${LIQUID_GLASS_SHA:0:8}, MIT)"
-fetch_git liquid-glass "$LIQUID_GLASS_URL" "$LIQUID_GLASS_SHA"
-if [ "$DRY_RUN" = 1 ]; then
-  note "+ copy $SRC/$LIQUID_GLASS_UUID -> $EXT_DIR/$LIQUID_GLASS_UUID"
-else
-  rm -rf "${EXT_DIR:?}/$LIQUID_GLASS_UUID"
-  cp -a "$SRC/$LIQUID_GLASS_UUID" "$EXT_DIR/$LIQUID_GLASS_UUID"
-fi
-compile_schemas "$EXT_DIR/$LIQUID_GLASS_UUID"
 
 BRIDGE_DIR="$REPO/bridge/build/desk-bridge@desktop-themes-rs"
 if [ ! -f "$BRIDGE_DIR/extension.js" ]; then
