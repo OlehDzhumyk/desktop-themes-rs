@@ -102,7 +102,8 @@ impl Service {
             .map_err(|e| zbus::fdo::Error::InvalidArgs(e.0))?;
         let ctx = self.ctx.clone();
         self.act.busy.store(true, Ordering::SeqCst);
-        let res = off_thread(move || themes_core::apply::apply(&ctx, &theme, &mods, false));
+        let res =
+            off_thread(move || themes_core::apply::apply(&ctx, &theme, &mods, &Default::default()));
         self.act.busy.store(false, Ordering::SeqCst);
         self.act.touch();
         let res = res.map_err(|e| zbus::fdo::Error::Failed(e.0))?;

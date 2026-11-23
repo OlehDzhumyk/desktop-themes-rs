@@ -219,7 +219,14 @@ mod tests {
             "[ \"$THEME_ID\" = h ] && [ \"$PREV_THEME_ID\" = old ] || exit 1",
         );
         assert_eq!(
-            run_hook_with(&ctx, &t, "apply", Some("old"), None, Duration::from_secs(600)),
+            run_hook_with(
+                &ctx,
+                &t,
+                "apply",
+                Some("old"),
+                None,
+                Duration::from_secs(600)
+            ),
             Some(Ok(()))
         );
         assert_eq!(run_hook(&ctx, &t, "revert", None, None), None);

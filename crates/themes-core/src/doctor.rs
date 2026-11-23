@@ -716,6 +716,23 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     rep.gnome_version = version.clone();
 
     let mut st = State::load(ctx);
+    // an apply that was interrupted (crash, kill, power loss): --fix completes or rolls it back
+    if let Some(p) = st.pending.clone() {
+        rep.push(
+            "error",
+            "interrupted-apply",
+            crate::txn::describe(&p),
+            None,
+            true,
+        );
+        if opt.fix
+            && let Some(r) = crate::txn::recover(ctx)?
+        {
+            rep.fixed.push(r.message());
+            rep.fixed.extend(r.warnings);
+            st = State::load(ctx);
+        }
+    }
     rep.previous_gnome_version = st.gnome_version.clone();
     if let (Some(prev), Some(cur)) = (&st.gnome_version, &version)
         && prev != cur

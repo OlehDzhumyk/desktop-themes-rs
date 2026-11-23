@@ -87,11 +87,149 @@ pub fn fmt_strv(list: &[String]) -> String {
     format!("[{}]", items.join(", "))
 }
 
+/// Where `apply` reads and writes dconf. Production code always uses the `dconf` utility; unit
+/// tests use an in-memory database with failure injection, so they never reach the live session.
+#[derive(Clone, Debug, Default)]
+pub enum Backend {
+    #[default]
+    Cli,
+    #[cfg(test)]
+    Memory(std::sync::Arc<std::sync::Mutex<mem::Db>>),
+}
+
+impl Backend {
+    /// A live session: the shell may be asked over D-Bus (never for the in-memory database).
+    pub fn live(&self) -> bool {
+        matches!(self, Backend::Cli)
+    }
+
+    pub fn dump(&self) -> Result<Settings> {
+        match self {
+            Backend::Cli => dump(),
+            #[cfg(test)]
+            Backend::Memory(m) => Ok(m.lock().unwrap().data.clone()),
+        }
+    }
+
+    pub fn load(&self, d: &Settings) -> Result<()> {
+        match self {
+            Backend::Cli => load(d),
+            #[cfg(test)]
+            Backend::Memory(m) => m.lock().unwrap().load(d),
+        }
+    }
+
+    pub fn write(&self, key: &str, val: &str) -> Result<()> {
+        match self {
+            Backend::Cli => write(key, val),
+            #[cfg(test)]
+            Backend::Memory(m) => m
+                .lock()
+                .unwrap()
+                .load(&Settings::from([(key.to_string(), val.to_string())])),
+        }
+    }
+
+    pub fn reset(&self, keys: &[String]) {
+        match self {
+            Backend::Cli => reset(keys),
+            #[cfg(test)]
+            Backend::Memory(m) => {
+                let mut db = m.lock().unwrap();
+                for k in keys {
+                    db.data.remove(k);
+                }
+            }
+        }
+    }
+
+    /// `dconf reset -f DIR/`.
+    pub fn reset_dir(&self, dir: &str) {
+        match self {
+            Backend::Cli => {
+                let _ = run("dconf", &["reset", "-f", dir], None);
+            }
+            #[cfg(test)]
+            Backend::Memory(m) => m.lock().unwrap().data.retain(|k, _| !k.starts_with(dir)),
+        }
+    }
+
+    /// Restores keys to the values they had (`Some` written, `None` reset). Only keys whose value
+    /// differs now are touched; when the batch write fails, keys are written one by one so one
+    /// bad key does not keep the others from coming back. Errors name the keys left over.
+    pub fn restore(&self, before: &BTreeMap<String, Option<String>>) -> Result<()> {
+        let now = self.dump()?;
+        let changed = before.iter().filter(|(k, v)| now.get(*k) != v.as_ref());
+        let mut writes = Settings::new();
+        let mut resets = Vec::new();
+        for (k, v) in changed {
+            match v {
+                Some(v) => {
+                    writes.insert(k.clone(), v.clone());
+                }
+                None => resets.push(k.clone()),
+            }
+        }
+        self.reset(&resets);
+        if self.load(&writes).is_ok() {
+            return Ok(());
+        }
+        let failed: Vec<String> = writes
+            .iter()
+            .filter(|(k, v)| self.write(k, v).is_err())
+            .map(|(k, _)| k.clone())
+            .collect();
+        if failed.is_empty() {
+            Ok(())
+        } else {
+            Err(crate::Error(desk_settings::tr!(
+                "could not restore {keys}",
+                keys = failed.join(", ")
+            )))
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod mem {
+    use super::Settings;
+
+    /// In-memory dconf for unit tests, with failure injection.
+    #[derive(Debug, Default)]
+    pub struct Db {
+        pub data: Settings,
+        /// Writes touching this key fail (as a failing `dconf load`/`write` would).
+        pub fail_key: Option<String>,
+        /// Panic when the apply journal begins this step: a simulated crash.
+        pub crash_at: Option<crate::txn::Step>,
+    }
+
+    impl Db {
+        pub fn load(&mut self, d: &Settings) -> crate::Result<()> {
+            if let Some(k) = &self.fail_key
+                && d.contains_key(k)
+            {
+                return Err(crate::Error(format!("injected dconf failure at {k}")));
+            }
+            self.data.extend(d.clone());
+            Ok(())
+        }
+    }
+}
+
+/// Unit tests must never write the live dconf (the in-memory [`Backend`] is for them).
+fn not_in_tests() {
+    if cfg!(test) {
+        panic!("a unit test reached the live dconf; use Backend::Memory");
+    }
+}
+
 pub fn dump() -> Result<Settings> {
     Ok(parse(&run_check("dconf", &["dump", "/"], None)?))
 }
 
 pub fn load(d: &Settings) -> Result<()> {
+    not_in_tests();
     if d.is_empty() {
         return Ok(());
     }
@@ -102,6 +240,7 @@ pub fn load(d: &Settings) -> Result<()> {
 /// Resets keys. Many keys go to the dconf writer as one change (one D-Bus call instead of a
 /// `dconf reset` process per key); if that is not possible, key by key.
 pub fn reset(keys: &[String]) {
+    not_in_tests();
     if keys.len() > 1 && reset_batch(keys).is_ok() {
         return;
     }
@@ -154,7 +293,11 @@ fn user_db_name() -> Option<String> {
         .unwrap_or_else(|| "/usr/local/share:/usr/share".into());
     let find = |name: &str| -> Option<std::path::PathBuf> {
         std::iter::once(std::path::PathBuf::from("/etc/dconf/profile"))
-            .chain(data_dirs.split(':').map(|d| Path::new(d).join("dconf/profile")))
+            .chain(
+                data_dirs
+                    .split(':')
+                    .map(|d| Path::new(d).join("dconf/profile")),
+            )
             .map(|d| d.join(name))
             .find(|p| p.is_file())
     };
@@ -186,6 +329,7 @@ fn db_from_profile(text: &str) -> Option<String> {
 }
 
 pub fn write(key: &str, val: &str) -> Result<()> {
+    not_in_tests();
     run_check("dconf", &["write", key, val], None)?;
     Ok(())
 }
@@ -273,8 +417,14 @@ mod tests {
 
     #[test]
     fn profile_user_db() {
-        assert_eq!(db_from_profile("user-db:user\nsystem-db:local\n").as_deref(), Some("user"));
-        assert_eq!(db_from_profile("# c\n\n  user-db:e2e_1\n").as_deref(), Some("e2e_1"));
+        assert_eq!(
+            db_from_profile("user-db:user\nsystem-db:local\n").as_deref(),
+            Some("user")
+        );
+        assert_eq!(
+            db_from_profile("# c\n\n  user-db:e2e_1\n").as_deref(),
+            Some("e2e_1")
+        );
         assert_eq!(db_from_profile("service-db:x\nuser-db:user\n"), None);
         assert_eq!(db_from_profile("user-db:../x\n"), None);
         assert_eq!(db_from_profile(""), None);

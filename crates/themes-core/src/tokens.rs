@@ -386,7 +386,7 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
         std::fs::write(root.join(".cache/tk/gtk4/gtk.css"), "/* v2 */").unwrap();
         assert_eq!(crate::gtklinks::refresh_copies(&mut st, &mut w).len(), 1);
         assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* v2 */");
-        crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
+        crate::gtklinks::unlink_all(&ctx, &mut st, &mut w).unwrap();
         assert_eq!(
             std::fs::read_to_string(&css).unwrap(),
             "/* mine */",
@@ -398,7 +398,7 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
         std::fs::remove_file(&css).unwrap();
         crate::gtklinks::link_theme(&ctx, &mut st, &th).unwrap();
         std::fs::write(&css, "/* edited */").unwrap();
-        crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
+        crate::gtklinks::unlink_all(&ctx, &mut st, &mut w).unwrap();
         assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* edited */");
         assert!(w.iter().any(|m| m.contains("by hand")), "{w:?}");
 

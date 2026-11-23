@@ -26,21 +26,31 @@ fn file_hash(p: &Path) -> Option<String> {
         .map(|b| format!("{:016x}", theme_tokens::cache::fnv1a64(&b)))
 }
 
-fn restore_backup(st: &mut State, dest: &str, warnings: &mut Vec<String>) -> Result<()> {
-    if let Some(b) = st.backups.remove(dest) {
-        let bp = Path::new(&b);
-        if lexists(bp) {
-            if !lexists(Path::new(dest)) {
-                move_path(bp, Path::new(dest))?;
-            } else {
-                warnings.push(tr!(
-                    "backup {path} not restored (the place is taken)",
-                    path = b
-                ));
-            }
+/// Moves the backup of `dest` back when the place is free; the record goes in any case (a
+/// missing backup file means the move never happened). Saved after the change.
+fn restore_backup(ctx: &Ctx, st: &mut State, dest: &str, warnings: &mut Vec<String>) -> Result<()> {
+    let Some(b) = st.backups.get(dest).cloned() else {
+        return Ok(());
+    };
+    let bp = Path::new(&b);
+    if lexists(bp) {
+        if lexists(Path::new(dest)) {
+            warnings.push(tr!(
+                "backup {path} not restored (the place is taken)",
+                path = b
+            ));
+        } else {
+            move_path(bp, Path::new(dest))?;
         }
     }
-    Ok(())
+    st.backups.remove(dest);
+    st.save(ctx)
+}
+
+/// Temporary name of a copy being written (renamed into place when complete).
+fn tmp_name(dest: &Path) -> PathBuf {
+    let name = dest.file_name().unwrap_or_default().to_string_lossy();
+    dest.with_file_name(format!(".{name}.themes-tmp"))
 }
 
 /// Rewrites generated copies whose source changed (new cache generation); copies the user
@@ -67,10 +77,17 @@ pub fn refresh_copies(st: &mut State, warnings: &mut Vec<String>) -> Vec<String>
     done
 }
 
-pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
-    let copies: Vec<(String, GtkCopy)> = std::mem::take(&mut st.gtk_copies).into_iter().collect();
+/// Removes the links and copies the manager made and puts the user's files back. Every change
+/// is saved at once, so an interruption leaves a state this function can finish later.
+pub fn unlink_all(ctx: &Ctx, st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
+    let copies: Vec<(String, GtkCopy)> = st
+        .gtk_copies
+        .iter()
+        .map(|(a, b)| (a.clone(), b.clone()))
+        .collect();
     for (dest, c) in copies {
         let d = Path::new(&dest);
+        let _ = std::fs::remove_file(tmp_name(d));
         if lexists(d) {
             if !d.is_symlink() && file_hash(d).as_deref() == Some(c.hash.as_str()) {
                 std::fs::remove_file(d)?;
@@ -81,7 +98,9 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
                 ));
             }
         }
-        restore_backup(st, &dest, warnings)?;
+        st.gtk_copies.remove(&dest);
+        st.save(ctx)?;
+        restore_backup(ctx, st, &dest, warnings)?;
     }
     let links: Vec<(String, String)> = st
         .links
@@ -99,32 +118,18 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
             _ => {}
         }
         st.links.remove(&dest);
-        if let Some(b) = st.backups.remove(&dest) {
-            let bp = Path::new(&b);
-            if lexists(bp) {
-                if !lexists(d) {
-                    move_path(bp, d)?;
-                } else {
-                    warnings.push(tr!(
-                        "backup {path} not restored (the place is taken)",
-                        path = b
-                    ));
-                }
-            }
-        }
+        st.save(ctx)?;
+        restore_backup(ctx, st, &dest, warnings)?;
     }
     // осиротілі резервні копії
-    let backups: Vec<(String, String)> = st
-        .backups
-        .iter()
-        .map(|(a, b)| (a.clone(), b.clone()))
-        .collect();
-    for (dest, b) in backups {
-        if lexists(Path::new(&b)) && !lexists(Path::new(&dest)) {
-            move_path(Path::new(&b), Path::new(&dest))?;
-            st.backups.remove(&dest);
+    let backups: Vec<String> = st.backups.keys().cloned().collect();
+    for dest in backups {
+        let b = st.backups[&dest].clone();
+        if !lexists(Path::new(&b)) || !lexists(Path::new(&dest)) {
+            restore_backup(ctx, st, &dest, warnings)?;
         }
     }
+    let before = st.created_dirs.len();
     st.created_dirs.retain(|d| {
         let p = Path::new(d);
         if p.is_dir()
@@ -136,9 +141,15 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
         }
         p.exists()
     });
+    if st.created_dirs.len() != before {
+        st.save(ctx)?;
+    }
     Ok(())
 }
 
+/// Links (hand-made GTK files) or copies (generated ones) the theme's GTK files. The user's
+/// file in the way is recorded as a backup BEFORE it is moved, and every new link or copy is
+/// recorded before it is made, so `unlink_all` can always undo what exists.
 pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String>> {
     let mut made = Vec::new();
     for kind in GTK_KINDS {
@@ -149,15 +160,17 @@ pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String
         };
         let tdir = target_dir(ctx, kind);
         if !tdir.is_dir() {
-            std::fs::create_dir_all(&tdir)?;
             let s = tdir.to_string_lossy().into_owned();
             if !st.created_dirs.contains(&s) {
                 st.created_dirs.push(s);
+                st.save(ctx)?;
             }
+            std::fs::create_dir_all(&tdir)?;
         }
         for e in entries {
             let src = src_dir.join(&e);
             let dest = tdir.join(&e);
+            let dkey: String = dest.to_string_lossy().into();
             if lexists(&dest) {
                 let bdir = ctx.backups.join(tdir.file_name().unwrap_or_default());
                 std::fs::create_dir_all(&bdir)?;
@@ -165,26 +178,33 @@ pub fn link_theme(ctx: &Ctx, st: &mut State, theme: &Theme) -> Result<Vec<String
                 if lexists(&b) {
                     b = bdir.join(format!("{e}.{}", now("%Y%m%d-%H%M%S")));
                 }
+                st.backups.insert(dkey.clone(), b.to_string_lossy().into());
+                st.save(ctx)?;
                 move_path(&dest, &b)?;
-                st.backups
-                    .insert(dest.to_string_lossy().into(), b.to_string_lossy().into());
             }
             if generated {
-                std::fs::copy(&src, &dest)?;
-                let hash = file_hash(&dest).unwrap_or_default();
+                // written beside the destination and renamed: never half a file in place
+                let tmp = tmp_name(&dest);
+                std::fs::copy(&src, &tmp)?;
+                let hash = file_hash(&tmp).unwrap_or_default();
                 st.gtk_copies.insert(
-                    dest.to_string_lossy().into(),
+                    dkey.clone(),
                     GtkCopy {
                         src: src.to_string_lossy().into(),
                         hash,
                     },
                 );
+                st.save(ctx)?;
+                if let Err(e) = std::fs::rename(&tmp, &dest) {
+                    let _ = std::fs::remove_file(&tmp);
+                    return Err(e.into());
+                }
             } else {
+                st.links.insert(dkey.clone(), src.to_string_lossy().into());
+                st.save(ctx)?;
                 std::os::unix::fs::symlink(&src, &dest)?;
-                st.links
-                    .insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
             }
-            made.push(dest.to_string_lossy().into_owned());
+            made.push(dkey);
         }
     }
     Ok(made)

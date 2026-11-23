@@ -614,7 +614,7 @@ impl ThemesWindow {
     pub fn apply(self: &Rc<Self>, id: String, modules: Vec<Module>) {
         let info = self.themes.borrow().iter().find(|t| t.id == id).cloned();
         let Some(info) = info.filter(|i| i.experimental) else {
-            self.apply_now(id, modules);
+            self.apply_now(id, modules, false);
             return;
         };
         let dlg = adw::AlertDialog::builder()
@@ -632,7 +632,7 @@ impl ThemesWindow {
         let t = self.clone();
         dlg.connect_response(None, move |_, r| {
             if r == "apply" {
-                t.apply_now(id.clone(), modules.clone());
+                t.apply_now(id.clone(), modules.clone(), true);
             } else {
                 // повернути вибір у «Змішати» до поточного стану
                 let t = t.clone();
@@ -642,7 +642,9 @@ impl ThemesWindow {
         dlg.present(Some(&self.win));
     }
 
-    fn apply_now(self: &Rc<Self>, id: String, modules: Vec<Module>) {
+    /// `confirmed`: the user said yes in the experimental-theme dialog (the library refuses an
+    /// experimental theme without it).
+    fn apply_now(self: &Rc<Self>, id: String, modules: Vec<Module>, confirmed: bool) {
         if self.busy.get() {
             return;
         }
@@ -652,8 +654,12 @@ impl ThemesWindow {
             let ctx = t.ctx.clone();
             let id2 = id.clone();
             let mods = modules.clone();
+            let opts = themes_core::apply::Options {
+                confirmed,
+                ..Default::default()
+            };
             let res =
-                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, false))
+                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, &opts))
                     .await;
             t.set_busy(None);
             let res = match res {

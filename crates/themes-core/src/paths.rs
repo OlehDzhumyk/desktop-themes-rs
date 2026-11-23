@@ -19,6 +19,8 @@ pub struct Ctx {
     pub gtk4: PathBuf,
     pub gtk3: PathBuf,
     pub flatpak_overrides: PathBuf,
+    /// dconf of `apply` (the `dconf` utility; an in-memory database in unit tests).
+    pub dconf: crate::dconf::Backend,
 }
 
 impl Ctx {
@@ -44,6 +46,7 @@ impl Ctx {
             gtk4: home.join(".config/gtk-4.0"),
             gtk3: home.join(".config/gtk-3.0"),
             flatpak_overrides: home.join(".local/share/flatpak/overrides"),
+            dconf: Default::default(),
             home,
             root,
         }
@@ -88,6 +91,15 @@ impl Ctx {
             .into_iter()
             .map(|d| d.join(uuid))
             .find(|p| p.join("metadata.json").is_file())
+    }
+
+    /// GNOME Shell of the session, when it runs (never for the in-memory test dconf).
+    pub fn shell(&self) -> Option<crate::shell::Shell> {
+        if self.dconf.live() {
+            crate::shell::Shell::connect()
+        } else {
+            None
+        }
     }
 
     pub fn exe_path() -> PathBuf {
