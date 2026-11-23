@@ -64,7 +64,7 @@ impl Notifier {
         emit: impl Fn(u8) + Send + 'static,
     ) -> Notifier {
         let (tx, rx) = mpsc::channel::<u8>();
-        std::thread::Builder::new()
+        let spawned = std::thread::Builder::new()
             .name("deskd-mixer-notify".into())
             .spawn(move || {
                 let mut c = Coalesce::new(QUIET, MAX_WAIT);
@@ -88,8 +88,12 @@ impl Notifier {
                         }
                     }
                 }
-            })
-            .expect("spawn the mixer notification thread");
+            });
+        // No thread (the system is out of threads): the mixer works, only its change signals stop.
+        // `touch` ignores the closed channel. Never panic here: deskd would take the clipboard down.
+        if let Err(e) = spawned {
+            eprintln!("deskd: mixer: cannot start the notification thread: {e}");
+        }
         Notifier { tx }
     }
 

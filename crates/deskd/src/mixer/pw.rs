@@ -73,7 +73,7 @@ impl PwBackend {
         let (tx, rx) = pw::channel::channel::<Cmd>();
         let alive = Arc::new(AtomicBool::new(true));
         let alive2 = alive.clone();
-        let thread = std::thread::Builder::new()
+        let spawned = std::thread::Builder::new()
             .name("deskd-pipewire".into())
             .spawn(move || {
                 let lost = match run(&graph, &notifier, rx) {
@@ -96,13 +96,18 @@ impl PwBackend {
                 if lost {
                     on_lost();
                 }
-            })
-            .expect("spawn the PipeWire thread");
-        PwBackend {
-            tx,
-            thread: Some(thread),
-            alive,
-        }
+            });
+        // No thread: report a backend that is not alive (the mixer shows "no server") instead of
+        // panicking, which would end the whole daemon.
+        let thread = match spawned {
+            Ok(t) => Some(t),
+            Err(e) => {
+                eprintln!("deskd: mixer: cannot start the PipeWire thread: {e}");
+                alive.store(false, Ordering::Release);
+                None
+            }
+        };
+        PwBackend { tx, thread, alive }
     }
 }
 
