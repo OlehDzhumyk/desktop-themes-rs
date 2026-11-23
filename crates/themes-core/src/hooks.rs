@@ -24,6 +24,7 @@ pub fn run_hook(
         .unwrap_or_else(|| theme.dir.clone());
     let mut c = Command::new(&path);
     desk_settings::i18n::restore_child_env(&mut c);
+    crate::util::child_bus_env(&mut c);
     c.current_dir(&dir)
         .env("THEME_ID", &theme.id)
         .env("THEME_DIR", &dir)

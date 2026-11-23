@@ -276,8 +276,13 @@ impl Shell {
 }
 
 pub(crate) fn session() -> Option<Connection> {
-    crate::util::ensure_bus();
-    zbus::block_on(Connection::session()).ok()
+    zbus::block_on(async {
+        match crate::util::fallback_bus_address() {
+            Some(a) => zbus::connection::Builder::address(a.as_str()).build().await,
+            None => Connection::session().await,
+        }
+    })
+    .ok()
 }
 
 /// Перезавантажити тему оболонки: user-theme стежить за своїм ключем `name` і перечитує

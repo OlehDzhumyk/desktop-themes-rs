@@ -210,7 +210,6 @@ fn state_mtime(ctx: &Ctx) -> Option<SystemTime> {
 }
 
 pub fn run() -> i32 {
-    themes_core::util::ensure_bus();
     let ctx = Ctx::from_env();
     let act = Activity {
         last: Arc::new(AtomicU64::new(now_s())),

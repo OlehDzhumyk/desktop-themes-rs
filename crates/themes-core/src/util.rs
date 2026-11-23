@@ -112,6 +112,7 @@ pub struct Out {
 pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
     let mut c = Command::new(cmd);
     desk_settings::i18n::restore_child_env(&mut c);
+    child_bus_env(&mut c);
     c.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
     c.stdin(if input.is_some() {
         Stdio::piped()
@@ -155,15 +156,35 @@ pub fn which(cmd: &str) -> bool {
         .unwrap_or(false)
 }
 
-/// Якщо змінна DBUS_SESSION_BUS_ADDRESS не задана (наприклад, з SSH), беремо /run/user/UID/bus.
-pub fn ensure_bus() {
-    if std::env::var_os("DBUS_SESSION_BUS_ADDRESS").is_none() {
-        let uid = unsafe_getuid();
-        let p = format!("/run/user/{uid}/bus");
-        if Path::new(&p).exists() {
-            // SAFETY: викликається на початку main, до створення потоків.
-            unsafe { std::env::set_var("DBUS_SESSION_BUS_ADDRESS", format!("unix:path={p}")) };
-        }
+/// The session bus address to use when `DBUS_SESSION_BUS_ADDRESS` is not set (e.g. over SSH):
+/// `unix:path=/run/user/UID/bus` if that socket exists. `None` when the variable is set (then
+/// everything already finds the bus) or there is no socket.
+pub fn fallback_bus_address() -> Option<String> {
+    if std::env::var_os("DBUS_SESSION_BUS_ADDRESS").is_some() {
+        return None;
+    }
+    let p = format!("/run/user/{}/bus", unsafe_getuid());
+    Path::new(&p).exists().then(|| format!("unix:path={p}"))
+}
+
+/// Gives child processes the session bus when `DBUS_SESSION_BUS_ADDRESS` is not set. The library
+/// never changes its own environment (that is not thread-safe); it passes the address explicitly.
+pub fn child_bus_env(c: &mut Command) {
+    if let Some(a) = fallback_bus_address() {
+        c.env("DBUS_SESSION_BUS_ADDRESS", a);
+    }
+}
+
+/// Sets `DBUS_SESSION_BUS_ADDRESS` from [`fallback_bus_address`] for this process, so GIO
+/// (GSettings, the dconf backend) and zbus find the bus.
+///
+/// # Safety
+/// Call it only at the start of `main`, before any thread exists (GIO, GTK and zbus start
+/// threads): `set_var` races with every `getenv` of other threads.
+pub unsafe fn init_bus_env() {
+    if let Some(a) = fallback_bus_address() {
+        // SAFETY: the caller guarantees that no other thread runs yet.
+        unsafe { std::env::set_var("DBUS_SESSION_BUS_ADDRESS", a) };
     }
 }
 

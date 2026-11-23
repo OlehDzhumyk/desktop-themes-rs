@@ -211,7 +211,6 @@ pub fn run(args: Vec<String>) -> i32 {
             return if e.use_stderr() { 2 } else { 0 };
         }
     };
-    themes_core::util::ensure_bus();
     let ctx = Ctx::from_env();
     match exec(&ctx, cli.cmd, cli.json) {
         Ok(code) => code,

@@ -6,6 +6,8 @@ mod shortcut_cli;
 mod tokens_cli;
 
 fn main() {
+    // SAFETY: first statement of main, before GIO, GTK or zbus start any thread.
+    unsafe { themes_core::util::init_bus_env() };
     // мова: налаштування `language` (або DESKTOP_THEMES_LANGUAGE), інакше як у сеансі
     desk_settings::i18n::init(desk_settings::i18n::language_from_gsettings);
     let args: Vec<String> = std::env::args().collect();

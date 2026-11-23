@@ -105,7 +105,6 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
     if id == crate::BUILTIN_THEME {
         return Err(crate::Error(tr!("the id “fedora” is reserved")));
     }
-    crate::util::ensure_bus();
     let _lock = Lock::acquire(ctx)?;
     let tdir = ctx.themes.join(id);
     if tdir.exists() {

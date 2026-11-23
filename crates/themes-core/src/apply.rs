@@ -123,7 +123,6 @@ pub fn apply_opts(
     } else {
         modules.to_vec()
     };
-    crate::util::ensure_bus();
     let _lock = Lock::acquire(ctx)?;
     let baseline = dconf::parse_file(&ctx.baseline_dir()?.join("full.dconf"))?;
     let mut st = State::load(ctx);

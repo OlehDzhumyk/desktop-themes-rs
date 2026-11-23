@@ -692,7 +692,6 @@ pub struct DoctorOptions {
 }
 
 pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
-    crate::util::ensure_bus();
     let mut rep = DoctorReport::default();
     let shell = if opt.wait_shell.is_zero() {
         Shell::connect()

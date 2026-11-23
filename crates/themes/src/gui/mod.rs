@@ -77,7 +77,6 @@ impl WindowIface {
 }
 
 fn claim_single_instance() -> Result<Option<zbus::Connection>, ()> {
-    themes_core::util::ensure_bus();
     let conn = match zbus::block_on(zbus::Connection::session()) {
         Ok(c) => c,
         Err(_) => return Ok(None), // без шини — просто працюємо
