@@ -25,6 +25,8 @@ pub const FOCUS_PATH: &str = "/io/github/OlehDzhumyk/Desk/Focus";
 pub const FOCUS_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Focus";
 pub const COLOR_PICKER_PATH: &str = "/io/github/OlehDzhumyk/Desk/ColorPicker";
 pub const COLOR_PICKER_IFACE: &str = "io.github.OlehDzhumyk.Desk.ColorPicker";
+pub const OCR_PATH: &str = "/io/github/OlehDzhumyk/Desk/Ocr";
+pub const OCR_IFACE: &str = "io.github.OlehDzhumyk.Desk.Ocr";
 
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
@@ -34,6 +36,7 @@ pub const MIXER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 pub const APPEARANCE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 pub const FOCUS_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Focus";
 pub const COLOR_PICKER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.ColorPicker";
+pub const OCR_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Ocr";
 pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.Desk.gschema.xml");
 
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
@@ -46,6 +49,7 @@ pub const APPEARANCE_XML: &str =
 pub const FOCUS_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Focus.xml");
 pub const COLOR_PICKER_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.ColorPicker.xml");
+pub const OCR_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Ocr.xml");
 
 /// Offered by the bridge with the clipboard content it set itself (paste from the history), so
 /// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
@@ -306,6 +310,32 @@ pub mod color_picker {
     }
 }
 
+/// OCR text extractor: error names and client proxy (its own module, like the other engines).
+pub mod ocr {
+    /// Prefix of the D-Bus error names of `Recognize` (`<prefix>.TooLarge`, ...).
+    pub const ERROR_PREFIX: &str = "io.github.OlehDzhumyk.Desk.Ocr.Error";
+    /// Length of the `preview` that `Recognize` returns, in characters (plus `…` when cut).
+    pub const PREVIEW_CHARS: usize = 60;
+
+    /// Client proxy of the OCR engine.
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.Ocr",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/Ocr"
+    )]
+    pub trait Ocr {
+        /// `(text, preview, missing_langs)`.
+        fn recognize(
+            &self,
+            png: &[u8],
+            width: u32,
+            height: u32,
+        ) -> zbus::Result<(String, String, Vec<String>)>;
+        fn available_languages(&self) -> zbus::Result<Vec<String>>;
+        fn is_available(&self) -> zbus::Result<bool>;
+    }
+}
+
 /// Клієнтський проксі самої служби (версія, список функцій).
 #[zbus::proxy(
     interface = "io.github.OlehDzhumyk.Desk",
@@ -395,6 +425,30 @@ mod tests {
         assert_eq!(color_picker::ColorPick::SIGNATURE.to_string(), "(sssx)");
         assert!(COLOR_PICKER_XML.contains("type=\"a(sssx)\""));
         assert!(COLOR_PICKER_XML.contains(&format!("name=\"{COLOR_PICKER_IFACE}\"")));
+    }
+
+    #[test]
+    fn ocr_xml_declares_the_interface_and_errors() {
+        assert!(OCR_XML.contains(&format!("name=\"{OCR_IFACE}\"")));
+        let m = xml_members(OCR_XML);
+        for name in ["Recognize", "AvailableLanguages", "IsAvailable"] {
+            assert!(m.contains(&("method".into(), name.into())), "{name}");
+        }
+        for e in [
+            "Disabled",
+            "InvalidImage",
+            "TooLarge",
+            "Busy",
+            "MissingEngine",
+            "NoLanguages",
+            "Timeout",
+            "Failed",
+        ] {
+            assert!(
+                OCR_XML.contains(&format!("{}.{e}", ocr::ERROR_PREFIX)),
+                "{e}"
+            );
+        }
     }
 
     #[test]

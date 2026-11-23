@@ -1,0 +1,49 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- OCR text extractor engine of deskd (docs/spec/features/ocr.md). The bridge draws the region
+     selection and captures the pixels; deskd runs Tesseract locally as a child process (no
+     network namespace where the kernel allows it, RLIMIT_AS of 1 GiB, killed after 20 s) on a
+     0600 file in $XDG_RUNTIME_DIR/deskd/ocr/ that is deleted when the call ends.
+     The bridge puts the text on the clipboard; whether the clipboard history records it follows
+     the record-in-history setting, which the bridge reads.
+     Access (ADR 0008): every method answers AccessDenied unless the caller is the owner of
+     org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any sandbox.
+
+     Errors of Recognize, besides the org.freedesktop.DBus ones (AccessDenied):
+       io.github.OlehDzhumyk.Desk.Ocr.Error.Disabled       the enabled setting is off
+       io.github.OlehDzhumyk.Desk.Ocr.Error.InvalidImage   not a PNG, or width/height differ from it
+       io.github.OlehDzhumyk.Desk.Ocr.Error.TooLarge       width × height above max-megapixels × 10^6
+       io.github.OlehDzhumyk.Desk.Ocr.Error.Busy           another recognition is running
+       io.github.OlehDzhumyk.Desk.Ocr.Error.MissingEngine  tesseract is not installed
+       io.github.OlehDzhumyk.Desk.Ocr.Error.NoLanguages    no language data at all (the message
+                                                           names the missing codes)
+       io.github.OlehDzhumyk.Desk.Ocr.Error.Timeout        tesseract ran past 20 s and was killed
+       io.github.OlehDzhumyk.Desk.Ocr.Error.Failed         tesseract or a file operation failed -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Ocr">
+    <!-- Recognise the text in a PNG image of width × height pixels (physical pixels of the
+         selected region). Runs with the languages of the `languages` setting that have data
+         installed; when none of them has, with eng if that is installed. Returns the cleaned text
+         (paragraphs kept, hyphenated line ends joined, lines joined unless keep-line-breaks), its
+         first non-empty line cut to 60 characters with "…", and the requested language codes that
+         have no data. An empty text means no text was found. One call at a time: a second call
+         while one runs gets Busy. -->
+    <method name="Recognize">
+      <arg name="png" type="ay" direction="in"/>
+      <arg name="width" type="u" direction="in"/>
+      <arg name="height" type="u" direction="in"/>
+      <arg name="text" type="s" direction="out"/>
+      <arg name="preview" type="s" direction="out"/>
+      <arg name="missing_langs" type="as" direction="out"/>
+    </method>
+    <!-- The language codes with installed Tesseract data (`tesseract --list-langs` without osd);
+         empty when tesseract is not installed. -->
+    <method name="AvailableLanguages">
+      <arg name="languages" type="as" direction="out"/>
+    </method>
+    <!-- True when the tesseract binary can be started. The bridge asks before it opens the
+         selection overlay. -->
+    <method name="IsAvailable">
+      <arg name="available" type="b" direction="out"/>
+    </method>
+  </interface>
+</node>
