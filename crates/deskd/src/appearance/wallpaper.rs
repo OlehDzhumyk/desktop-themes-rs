@@ -168,10 +168,18 @@ impl WallpaperEngine {
         self
     }
 
-    /// Whether an overlay may be installed: its cache directory exists (the record itself is
-    /// themes-core's; `--remove` sorts out the rest).
+    fn recorded_palette(&self) -> String {
+        self.manager_state
+            .as_ref()
+            .and_then(|p| std::fs::read_to_string(p).ok())
+            .map_or_default(|t| overlay_theme(&t))
+    }
+
+    /// Whether an overlay may be installed: either its cache directory exists or the manager's
+    /// `state.json` still records one (the record itself is themes-core's; `--remove` sorts out
+    /// the rest, including after an externally cleared cache).
     pub fn overlay_left(&self) -> bool {
-        self.state_path.with_file_name(OVERLAY_DIR).exists()
+        self.state_path.with_file_name(OVERLAY_DIR).exists() || !self.recorded_palette().is_empty()
     }
 
     pub fn config(&self) -> &Config {
@@ -191,11 +199,7 @@ impl WallpaperEngine {
             monochrome: s.monochrome,
             uri: s.uri,
             error: self.error.clone(),
-            palette: self
-                .manager_state
-                .as_ref()
-                .and_then(|p| std::fs::read_to_string(p).ok())
-                .map_or_default(|t| overlay_theme(&t)),
+            palette: self.recorded_palette(),
         }
     }
 
@@ -295,14 +299,31 @@ pub fn manager_state_path() -> PathBuf {
         .join("state.json")
 }
 
-/// `$XDG_CACHE_HOME/desktop-themes/wallpaper-accent.json` (the cache root of themes-core).
+fn cache_dir_from(
+    cache_env: Option<PathBuf>,
+    root_env: Option<PathBuf>,
+    default_root: &Path,
+    user_cache: &Path,
+) -> PathBuf {
+    if let Some(p) = cache_env.filter(|p| !p.as_os_str().is_empty()) {
+        return p;
+    }
+    if let Some(root) = root_env.filter(|p| !p.as_os_str().is_empty() && p != default_root) {
+        return root.join(".cache");
+    }
+    user_cache.join("desktop-themes")
+}
+
+/// Cache root of themes-core (`DESKTOP_THEMES_CACHE`, custom `DESKTOP_THEMES_ROOT/.cache`, else
+/// `$XDG_CACHE_HOME/desktop-themes`) + `wallpaper-accent.json`.
 pub fn state_path() -> PathBuf {
-    std::env::var_os("DESKTOP_THEMES_CACHE")
-        .map_or_else(
-            || glib::user_cache_dir().join("desktop-themes"),
-            PathBuf::from,
-        )
-        .join("wallpaper-accent.json")
+    cache_dir_from(
+        std::env::var_os("DESKTOP_THEMES_CACHE").map(PathBuf::from),
+        std::env::var_os("DESKTOP_THEMES_ROOT").map(PathBuf::from),
+        &glib::home_dir().join(".local/share/desktop-themes"),
+        &glib::user_cache_dir(),
+    )
+    .join("wallpaper-accent.json")
 }
 
 // ------------------------------------------------------------------ GSettings and the child
@@ -426,9 +447,18 @@ impl Watch {
             iface.connect_changed(Some("color-scheme"), move |_, _| k());
         }
         {
-            let (eng, notify) = (w.eng.clone(), w.notify.clone());
+            let (eng, notify, jobs) = (w.eng.clone(), w.notify.clone(), w.jobs.clone());
             iface.connect_changed(Some(ACCENT_KEY), move |s, _| {
-                if lock(&eng).on_external_accent(&s.string(ACCENT_KEY)) {
+                let (changed, remove) = {
+                    let mut e = lock(&eng);
+                    let changed = e.on_external_accent(&s.string(ACCENT_KEY));
+                    let remove = changed && e.overlay_left();
+                    (changed, remove)
+                };
+                if remove {
+                    let _ = jobs.send(Job::Remove);
+                }
+                if changed {
                     notify();
                 }
             });
@@ -525,7 +555,7 @@ fn evaluate(eng: &Shared, notify: &Arc<dyn Fn() + Send + Sync>, jobs: &Jobs) {
                         // token themes: the libadwaita palette follows too (idempotent)
                         let _ = jobs.send(Job::Install(hex));
                     }
-                    true
+                    accepted
                 }
                 Err(msg) => e.on_error(&uri, wanted.as_deref(), msg),
             };
@@ -681,10 +711,48 @@ mod tests {
         std::fs::create_dir_all(&dir).unwrap();
         let st = path.with_file_name("state.json");
         std::fs::write(&st, r#"{"wallpaper_overlay":{"theme":"lavender"}}"#).unwrap();
-        let e = e.with_manager_state(st);
+        let mut e = e.with_manager_state(st);
         assert!(e.overlay_left(), "a left-over cache asks for --remove");
         assert_eq!(e.status().palette, "lavender");
+        // even after the cache directory is cleaned externally, state.json still triggers removal
+        std::fs::remove_dir_all(path.with_file_name(OVERLAY_DIR)).unwrap();
+        assert!(e.overlay_left());
+        // an external accent change on an active wallpaper overlay also marks it for removal
+        let u = "file:///a.png";
+        assert_eq!(
+            e.on_seed(u, Some(u), seed("teal"), "blue").as_deref(),
+            Some("teal")
+        );
+        assert!(e.on_external_accent("purple"));
+        assert!(e.overlay_left());
         let _ = std::fs::remove_dir_all(path.parent().unwrap());
+    }
+
+    #[test]
+    fn cache_dir_matches_themes_core_rules() {
+        let def = PathBuf::from("/home/user/.local/share/desktop-themes");
+        let xdg = PathBuf::from("/home/user/.cache");
+        assert_eq!(
+            cache_dir_from(
+                Some(PathBuf::from("/tmp/override")),
+                Some(PathBuf::from("/tmp/root")),
+                &def,
+                &xdg,
+            ),
+            PathBuf::from("/tmp/override")
+        );
+        assert_eq!(
+            cache_dir_from(None, Some(PathBuf::from("/tmp/root")), &def, &xdg),
+            PathBuf::from("/tmp/root/.cache")
+        );
+        assert_eq!(
+            cache_dir_from(None, Some(def.clone()), &def, &xdg),
+            PathBuf::from("/home/user/.cache/desktop-themes")
+        );
+        assert_eq!(
+            cache_dir_from(None, None, &def, &xdg),
+            PathBuf::from("/home/user/.cache/desktop-themes")
+        );
     }
 
     #[test]
