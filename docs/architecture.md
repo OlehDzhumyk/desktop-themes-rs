@@ -189,6 +189,12 @@ Service `io.github.OlehDzhumyk.Desk` (activation file → systemd user unit `des
 Interface XML: `data/dbus/` (a unit test checks the zbus implementation against it; the bridge
 loads the same files at runtime).
 
+Each feature is an engine (`crates/deskd/src/engine/`): it is made before the bus exists, adds its
+interfaces to the connection builder (`register`), connects its watchers once the name is owned
+(`start`), and writes its pending state when the main loop stops (`shutdown`, in reverse start
+order). Engines with wall-clock schedules add a callback to one shared watcher of resume and time
+zone changes. `main.rs` only owns the bus name, the main loop and the process signals.
+
 `/io/github/OlehDzhumyk/Desk`, interface `io.github.OlehDzhumyk.Desk`: properties `Version s`,
 `Features as`.
 
