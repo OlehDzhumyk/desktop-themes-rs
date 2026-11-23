@@ -63,6 +63,9 @@ All notable changes to this project are documented in this file. The format is b
 - `docs/maintainer.md`: releases, CI, build environment, pinned versions, known workarounds.
 - CI: a check that no `.rs` file is outside every crate's module tree
   (`tools/check-orphan-rs.sh`), `tools/update-image-digests.sh`, `tools/ego-pin.sh`.
+- CI / local check: `tools/check-theme-dconf-schemas.py` (`just theme-schemas`, part of `just check`
+  and CI `static-checks`) verifies theme `.dconf` keys against installed and bundled GSettings
+  schemas.
 
 ### Changed
 
@@ -106,6 +109,17 @@ All notable changes to this project are documented in this file. The format is b
   cancelled on disable.
 - `data/install.sh` compiles the GSettings schemas of repository extensions after copying them
   (`lockscreen-layout` failed to load with a missing `gschemas.compiled` after a reinstall).
+- `scripts/install-extensions.sh` fails loudly if `glib-compile-schemas` is missing and cleans up
+  stray `*.orig` files after patching; `scripts/install-assets.sh` installs Cascadia Code's
+  `OFL.txt` alongside the font files; third-party licence notes in `CREDITS.md` and feature specs
+  corrected (`blur-my-shell`, `tilingshell`, `arcmenu`, `logomenu`).
+
+### Removed
+
+- Removed the experimental `macos-glass` bundled theme and the `liquid-glass` extension
+  (`scripts/versions.sh`, `scripts/install-extensions.sh`). `themes doctor` warns when `macos-glass`
+  or a retired extension (`liquid-glass`, `clipboard-indicator`) is active or still installed, and
+  `--fix` migrates `macos-glass` modules to `macos` and disables retired extensions.
 
 ## [0.3.0] - 2026-11-22
 

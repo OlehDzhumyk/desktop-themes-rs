@@ -1,6 +1,6 @@
 # Bundled themes
 
-Five themes ship in `themes/`. Third-party assets they refer to are installed by
+Four themes ship in `themes/`. Third-party assets they refer to are installed by
 `scripts/install-assets.sh` and `scripts/install-extensions.sh`; versions are pinned in
 `scripts/versions.sh`, licences are in [../CREDITS.md](../CREDITS.md).
 
@@ -38,23 +38,6 @@ a lock-screen layout.
 Compatibility notes: the WhiteSur installer knows GNOME up to 48; on Shell 51 / libadwaita 1.10 expect
 small cosmetic differences. Upstream WhiteSur issue 1440 reports stutter on GNOME 51 Wayland with any
 user shell theme; if the shell lags after applying, clear `user-theme` `name`.
-
-## macos-glass (experimental)
-
-> **Experimental.** On GNOME Shell 51.1 on real hardware the shell crashed (SIGSEGV in
-> `st_theme_node_reduce_border_radius` ← `st_theme_node_paint_borders`) about 20 s after applying
-> this theme, and again at the next start; GNOME then sets `org.gnome.shell disable-user-extensions`
-> and no extension runs. `themes doctor` and the window detect this state and name the likely
-> culprit (here `liquid-glass@...`); see docs/architecture.md, "Crash protection".
-
-The macOS theme plus the **Liquid Glass** extension (refraction, highlights and glass edges on the
-panel, dock, menus, quick settings, notifications, OSD). It inherits everything from `macos`
-(`INHERITS=macos` in `theme.conf`) and owns only `theme.conf`, `glass.dconf` and an
-`extensions.txt` with one line, `+liquid-glass@thinkingcoding1231.gmail.com`.
-
-The refraction shader redraws the background under each glass element and costs noticeably more GPU
-time than plain blur; prefer `macos` on battery. Liquid Glass is not on extensions.gnome.org and is
-installed from its repository at a pinned commit.
 
 ## windows11
 

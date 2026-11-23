@@ -1,2 +1,0 @@
-# macOS Liquid Glass = macos + the Liquid Glass extension (everything else is inherited, see theme.conf INHERITS)
-+liquid-glass@thinkingcoding1231.gmail.com

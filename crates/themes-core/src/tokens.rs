@@ -462,10 +462,10 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
                 assert!(l.warnings.is_empty(), "{}: {:?}", t.id, l.warnings);
             }
         }
-        // macos-glass inherits the macos tokens
-        let g = Theme::new(&ctx, "macos-glass");
+        // macos tokens supply the sound theme
+        let m = Theme::new(&ctx, "macos");
         assert_eq!(
-            g.settings(Module::Sounds)["/org/gnome/desktop/sound/theme-name"],
+            m.settings(Module::Sounds)["/org/gnome/desktop/sound/theme-name"],
             "'macos-like'"
         );
         // windows11 keeps the builtin Ptyxis palette and its hand-made cursor shape

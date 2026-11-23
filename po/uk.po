@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 10:40+0000\n"
+"POT-Creation-Date: 2026-11-23 14:34+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -1006,7 +1006,7 @@ msgid "To turn them on again: themes doctor --enable-extensions"
 msgstr "Увімкнути знову: themes doctor --enable-extensions"
 
 #: crates/themes-core/src/doctor.rs:181 crates/themes-core/src/doctor.rs:206
-#: crates/themes-core/src/doctor.rs:217 crates/themes-core/src/tokens.rs:143
+#: crates/themes-core/src/doctor.rs:217 crates/themes-core/src/tokens.rs:142
 #, rust-format
 msgid "theme “{theme}”: {error}"
 msgstr "тема «{theme}»: {error}"
@@ -1145,41 +1145,72 @@ msgstr ""
 msgid "updated {path}"
 msgstr "оновлено {path}"
 
-#: crates/themes-core/src/doctor.rs:696
+#: crates/themes-core/src/doctor.rs:686
+#, rust-format
+msgid ""
+"theme “{theme}” has been removed; switch to “{replacement}” (themes doctor --"
+"fix)"
+msgstr "тему «{theme}» прибрано; перемкніться на «{replacement}» (themes doctor --fix)"
+
+#: crates/themes-core/src/doctor.rs:695
+#, rust-format
+msgid "switched retired theme “{theme}” to “{replacement}”"
+msgstr "застарілу тему «{theme}» перемкнено на «{replacement}»"
+
+#: crates/themes-core/src/doctor.rs:710
+#, rust-format
+msgid ""
+"extension {uuid} is no longer used by any bundled theme (themes doctor --fix "
+"turns it off)"
+msgstr "розширення {uuid} більше не використовується жодною вбудованою темою (themes doctor --fix вимкне його)"
+
+#: crates/themes-core/src/doctor.rs:715
+#, rust-format
+msgid ""
+"extension {uuid} is still installed but no longer used by any bundled theme; "
+"you may remove it"
+msgstr "розширення {uuid} досі встановлено, але більше не використовується жодною вбудованою темою; його можна видалити"
+
+#: crates/themes-core/src/doctor.rs:728
+#, rust-format
+msgid "turned off retired extension {uuid}"
+msgstr "вимкнено застаріле розширення {uuid}"
+
+#: crates/themes-core/src/doctor.rs:799
 #, rust-format
 msgid "journal: {line}"
 msgstr "журнал: {line}"
 
-#: crates/themes-core/src/doctor.rs:766
+#: crates/themes-core/src/doctor.rs:869
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr "версія GNOME Shell змінилася: {old} → {new} (після оновлення системи)"
 
-#: crates/themes-core/src/doctor.rs:795
+#: crates/themes-core/src/doctor.rs:898
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr "застаріле (OUT_OF_DATE) для цієї версії GNOME"
 
-#: crates/themes-core/src/doctor.rs:797
+#: crates/themes-core/src/doctor.rs:900
 msgid "error (ERROR)"
 msgstr "помилка (ERROR)"
 
-#: crates/themes-core/src/doctor.rs:819
+#: crates/themes-core/src/doctor.rs:922
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr "{uuid}: увімкнене, але не встановлене"
 
-#: crates/themes-core/src/doctor.rs:827
+#: crates/themes-core/src/doctor.rs:930
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 "{uuid}: встановлене, але оболонка його ще не завантажила (потрібен перевхід)"
 
-#: crates/themes-core/src/doctor.rs:839
+#: crates/themes-core/src/doctor.rs:942
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr "{uuid}: metadata.json не підтримує GNOME {version}"
 
-#: crates/themes-core/src/doctor.rs:856
+#: crates/themes-core/src/doctor.rs:959
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
@@ -1188,27 +1219,27 @@ msgstr ""
 "розширення {uuid} (міст робочого столу: «Тема» у швидких налаштуваннях, "
 "буфер обміну) не встановлене"
 
-#: crates/themes-core/src/doctor.rs:864
+#: crates/themes-core/src/doctor.rs:967
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr "розширення {uuid} вимкнене"
 
-#: crates/themes-core/src/doctor.rs:883
+#: crates/themes-core/src/doctor.rs:987
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr "{uuid} вимкнено {since} ({reason})"
 
-#: crates/themes-core/src/doctor.rs:924
+#: crates/themes-core/src/doctor.rs:1028
 #, rust-format
 msgid "turned off {uuid}"
 msgstr "вимкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:982
+#: crates/themes-core/src/doctor.rs:1086
 #, rust-format
 msgid "turned on {uuid}"
 msgstr "увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1016
+#: crates/themes-core/src/doctor.rs:1120
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
@@ -1216,18 +1247,18 @@ msgstr ""
 "GNOME вимкнув розширення після збою оболонки. Відкрийте «Теми», щоб "
 "увімкнути їх знову."
 
-#: crates/themes-core/src/doctor.rs:1021
+#: crates/themes-core/src/doctor.rs:1125
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr "GNOME оновлено: {old} → {new}"
 
-#: crates/themes-core/src/doctor.rs:1030 crates/themes/src/cli.rs:479
+#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:479
 #: crates/themes/src/gui/window.rs:951
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr "знову увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1033
+#: crates/themes-core/src/doctor.rs:1137
 msgid "Themes: system check"
 msgstr "Теми: перевірка системи"
 
@@ -1295,19 +1326,19 @@ msgid "{path} was changed by hand; not updated"
 msgstr "{path} змінено вручну — не оновлено"
 
 #: crates/themes-core/src/gtklinks.rs:96 crates/themes-core/src/gtklinks.rs:115
-#: crates/themes-core/src/tokens.rs:226
+#: crates/themes-core/src/tokens.rs:225
 #, rust-format
 msgid "{path} was changed by hand; left as it is"
 msgstr "{path} змінено вручну — залишено як є"
 
-#: crates/themes-core/src/hooks.rs:80
+#: crates/themes-core/src/hooks.rs:84
 #, rust-format
 msgid ""
 "hook {hook} of the theme {theme} did not finish in {seconds} s and was "
 "stopped"
 msgstr "хук {hook} теми {theme} не завершився за {seconds} с і його зупинено"
 
-#: crates/themes-core/src/hooks.rs:87
+#: crates/themes-core/src/hooks.rs:91
 #, rust-format
 msgid "hook {hook} of the theme {theme} exited with code {code}: {error}"
 msgstr "хук {hook} теми {theme} завершився з кодом {code}: {error}"
@@ -1361,7 +1392,7 @@ msgstr "невідомий модуль «{module}» (доступні: look, be
 msgid "no baseline-* found in {path}"
 msgstr "не знайдено baseline-* у {path}"
 
-#: crates/themes-core/src/shell.rs:456 crates/themes/src/gui/window.rs:101
+#: crates/themes-core/src/shell.rs:485 crates/themes/src/gui/window.rs:101
 #: crates/themes/src/gui/window.rs:162 crates/themes/src/gui/window.rs:174
 #: crates/themes/src/gui/window.rs:271
 msgid "Themes"
@@ -1460,7 +1491,7 @@ msgstr "некоректний id теми: {id}"
 msgid "theme “{theme}” not found in {path}"
 msgstr "тему «{theme}» не знайдено у {path}"
 
-#: crates/themes-core/src/tokens.rs:249
+#: crates/themes-core/src/tokens.rs:247
 #, rust-format
 msgid ""
 "{path} already exists and is not a link of the manager; the generated file "
@@ -2273,7 +2304,7 @@ msgstr "Усе одно застосувати"
 msgid "Allow “{name}” to run commands?"
 msgstr "Дозволити темі «{name}» запускати команди?"
 
-#: crates/themes/src/gui/window.rs:689 crates/themes/src/service.rs:136
+#: crates/themes/src/gui/window.rs:689 crates/themes/src/service.rs:137
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"

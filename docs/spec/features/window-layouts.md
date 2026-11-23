@@ -10,7 +10,7 @@ shortcut, by dragging to a screen edge, or by choosing a layout from a picker; a
 
 **Planned** (stage 4) as our own implementation. Today only the stock edge tiling of GNOME is on (`windows11`
 behaviour sets `edge-tiling=true`) and the `windows11` theme enables the third-party extension **Tiling Shell**
-(`tilingshell@ferrarodomenico.com`; licence to be verified, believed GPL-2.0-or-later) for snap layouts: status of that
+(`tilingshell@ferrarodomenico.com`; GPL-3.0-or-later) for snap layouts: status of that
 path **Partial**. Origin badge: *In Windows 11 and macOS* (tiling); always-on-top *from Windows (PowerToys)*.
 
 ## Reference behaviour

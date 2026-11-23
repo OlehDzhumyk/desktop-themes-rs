@@ -47,10 +47,6 @@ EGO_EXTENSIONS=(
   "tilingshell@ferrarodomenico.com 76684 v77 17ab42f990d9b55f66009f50089ca172c62d206b03d0534ac5d9b63cf44e1cd1"
   "gtk4-ding@smedius.gitlab.com 78597 v148 c695a52a8719209daa2c9e83e510e36618dbe201c357a58d8b2d6d5a5aadfd22"
 )
-# Not on extensions.gnome.org: installed from the upstream repository (subdirectory of the repo).
-LIQUID_GLASS_URL=https://github.com/ryohsuke1231/liquid-glass.git
-LIQUID_GLASS_SHA=9ec82ed088104ef8d2a3a2a5d9101272a68e84b1
-LIQUID_GLASS_UUID=liquid-glass@thinkingcoding1231.gmail.com
 
 # --- rustup (only for `scripts/bootstrap.sh --rustup`): the rustup-init binary, verified by SHA-256 ---
 RUSTUP_INIT_URL=https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init
