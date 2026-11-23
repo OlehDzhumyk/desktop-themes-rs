@@ -1,7 +1,8 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Automatic light/dark appearance engine of deskd: switches org.gnome.desktop.interface
      color-scheme at local sunrise/sunset (NOAA solar calculation) or fixed times, while
-     respecting manual overrides until the next scheduled transition.
+     respecting manual overrides until the next scheduled transition; and the live accent from
+     the wallpaper (accent-color follows org.gnome.desktop.background).
 
      Access (ADR 0008): methods are served to the owner of org.gnome.Shell and desktop-themes-rs
      binaries only (same user, outside any sandbox). -->
@@ -25,7 +26,18 @@
     </method>
     <!-- Force immediate schedule recomputation and re-arm the timer. -->
     <method name="Recompute"/>
-    <!-- Emitted whenever mode, scheme, schedule or override state changes. -->
+    <!-- Live "accent from wallpaper" (setting accent-from-wallpaper): whether it is on, the seed
+         colour ("#rrggbb") and named accent last derived, whether the image is almost
+         monochrome, the wallpaper URI it came from, and the last decoding error ("" if none). -->
+    <method name="WallpaperAccent">
+      <arg name="enabled" type="b" direction="out"/>
+      <arg name="seed" type="s" direction="out"/>
+      <arg name="accent" type="s" direction="out"/>
+      <arg name="monochrome" type="b" direction="out"/>
+      <arg name="uri" type="s" direction="out"/>
+      <arg name="error" type="s" direction="out"/>
+    </method>
+    <!-- Emitted whenever mode, scheme, schedule, override or wallpaper-accent state changes. -->
     <signal name="Changed"/>
   </interface>
 </node>

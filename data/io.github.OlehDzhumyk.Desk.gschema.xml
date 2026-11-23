@@ -234,6 +234,21 @@
       <summary>Keep manual light/dark changes until the next scheduled transition</summary>
       <description>If you switch light or dark manually, wait until the next sunrise or sunset before switching back</description>
     </key>
+    <key name="accent-from-wallpaper" type="b">
+      <default>false</default>
+      <summary>The desktop accent colour follows the current wallpaper</summary>
+      <description>When on, deskd watches org.gnome.desktop.background picture-uri and picture-uri-dark and sets org.gnome.desktop.interface accent-color to the GNOME named accent nearest the wallpaper's seed colour. The image is decoded by a `themes tokens seed` child process. Turning it off restores the accent that was in force before.</description>
+    </key>
+    <key name="accent-source" type="s">
+      <choices>
+        <choice value="active"/>
+        <choice value="light"/>
+        <choice value="dark"/>
+      </choices>
+      <default>'active'</default>
+      <summary>Which wallpaper variant gives the accent colour</summary>
+      <description>'active' uses picture-uri-dark when color-scheme is 'prefer-dark' and picture-uri otherwise; 'light' always uses picture-uri; 'dark' always uses picture-uri-dark.</description>
+    </key>
   </schema>
 
   <schema id="io.github.OlehDzhumyk.Desk.LogoMenu" path="/io/github/OlehDzhumyk/Desk/logo-menu/">

@@ -121,8 +121,11 @@ pub fn clusters(rgb: &[u8], k: usize) -> Vec<Cluster> {
     out
 }
 
-/// The seed: a populous, colourful cluster that is neither near-black nor near-white.
-pub fn seed(cs: &[Cluster]) -> Oklch {
+/// OKLCH chroma threshold below which the winning cluster is treated as near-monochrome.
+pub const MONOCHROME_CHROMA: f64 = 0.04;
+
+/// Raw winning cluster in OKLCH before any monochrome chroma boost.
+fn raw_seed(cs: &[Cluster]) -> Oklch {
     let score = |c: &Cluster| {
         let lch = c.lab.to_lch();
         let light_ok = if (0.25..=0.9).contains(&lch.l) {
@@ -132,11 +135,30 @@ pub fn seed(cs: &[Cluster]) -> Oklch {
         };
         c.share.sqrt() * (lch.c + 0.01) * light_ok
     };
-    let best = cs
-        .iter()
+    cs.iter()
         .max_by(|a, b| score(a).total_cmp(&score(b)))
-        .map_or(Oklch::new(0.55, 0.12, 260.0), |c| c.lab.to_lch());
-    if best.c < 0.04 {
+        .map_or(Oklch::new(0.55, 0.12, 260.0), |c| c.lab.to_lch())
+}
+
+/// Whether the image's winning cluster has near-zero chroma (monochrome / greyscale).
+pub fn is_monochrome(cs: &[Cluster]) -> bool {
+    raw_seed(cs).c < MONOCHROME_CHROMA
+}
+
+/// The GNOME named accent (`org.gnome.desktop.interface accent-color`) that matches the image:
+/// `slate` for a near-monochrome image, else the accent nearest the seed hue.
+pub fn named_accent(cs: &[Cluster]) -> &'static str {
+    if is_monochrome(cs) {
+        "slate"
+    } else {
+        crate::accent::nearest(seed(cs).to_rgb_mapped())
+    }
+}
+
+/// The seed: a populous, colourful cluster that is neither near-black nor near-white.
+pub fn seed(cs: &[Cluster]) -> Oklch {
+    let best = raw_seed(cs);
+    if best.c < MONOCHROME_CHROMA {
         // greyscale image: keep its hue family but give the accent some colour
         Oklch::new(best.l, 0.06, if best.c < 0.005 { 250.0 } else { best.h })
     } else {
@@ -416,11 +438,16 @@ mod tests {
         let p = |s| Rgba::parse(s).unwrap();
         // mostly grey with a green accent area
         let img = image(&[(p("#777777"), 8000), (p("#16a34a"), 2000)]);
-        let s = seed(&clusters(&img, 8));
+        let cs = clusters(&img, 8);
+        let s = seed(&cs);
         assert!((130.0..160.0).contains(&s.h), "{s:?}");
-        // pure grey image still yields a usable accent
-        let s = seed(&clusters(&image(&[(p("#808080"), 100)]), 8));
-        assert!(s.c >= 0.04);
+        assert!(!is_monochrome(&cs));
+        assert_eq!(named_accent(&cs), "green");
+        // pure grey image still yields a usable (muted) accent, flagged as monochrome
+        let cs = clusters(&image(&[(p("#808080"), 100)]), 8);
+        assert!(seed(&cs).c >= 0.04);
+        assert!(is_monochrome(&cs));
+        assert_eq!(named_accent(&cs), "slate");
     }
 
     #[test]

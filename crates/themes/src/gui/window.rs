@@ -810,6 +810,15 @@ impl ThemesWindow {
             }),
         );
         add(
+            "apply-theme",
+            Some(glib::VariantTy::STRING),
+            Box::new(|t, p| {
+                if let Some(id) = p.and_then(|v| v.str()) {
+                    t.apply(id.to_string(), vec![]);
+                }
+            }),
+        );
+        add(
             "apply-module",
             Some(glib::VariantTy::new("(ss)").unwrap()),
             Box::new(|t, p| {

@@ -8,6 +8,7 @@ mod features;
 mod preview;
 mod search;
 mod system;
+mod wallpaper;
 mod window;
 
 use std::sync::atomic::{AtomicBool, Ordering};

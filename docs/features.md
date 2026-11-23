@@ -116,5 +116,20 @@ Skins:
 | Location | city name from the built-in offline table, decimal coordinates `lat,lon`, or empty (falls back to the system timezone; zero network requests) |
 | Manual override | switching light/dark manually (GNOME Quick Settings or D-Bus `SetScheme`) while in an auto mode holds the manual choice until the next scheduled transition when `override-until-next` is enabled |
 | Scheduling | one-shot wake timer in `deskd` (zero idle wakeups in `manual`/`light`/`dark`), re-armed automatically on resume from suspend (`org.freedesktop.login1.Manager.PrepareForSleep`) and timezone changes (`org.freedesktop.timedate1`) |
-| D-Bus | `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance` (`Status`, `SetScheme`, `Recompute`, signal `Changed`) |
-| Settings | GSettings `io.github.OlehDzhumyk.Desk.Appearance`: `mode`, `dark-from`, `light-from`, `location`, `twilight-offset`, `override-until-next` |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance` (`Status`, `SetScheme`, `Recompute`, `WallpaperAccent`, signal `Changed`) |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Appearance`: `mode`, `dark-from`, `light-from`, `location`, `twilight-offset`, `override-until-next`, `accent-from-wallpaper`, `accent-source` |
+
+## Theme from wallpaper
+
+| | |
+|---|---|
+| Create a theme | `themes tokens from-image PATH --name ID` (CLI), or «Create theme from wallpaper…» on the «Appearance» page: file chooser, seed colour, light/dark preview with contrast numbers, name, then «Apply» in the toast. `--force` moves the old theme to `trash/` first |
+| Inspect an image | `themes tokens seed PATH [--json]`: seed colour, nearest GNOME accent, «almost no colour» note, light/dark core colours and their contrast; writes nothing |
+| Accent from wallpaper | setting `accent-from-wallpaper` (off by default): `deskd` follows `org.gnome.desktop.background picture-uri`/`picture-uri-dark` (GSettings signals, 500 ms debounce, no polling) and sets `org.gnome.desktop.interface accent-color` to the named accent nearest the seed. `accent-source` picks the variant (`active` follows `color-scheme`). The image is decoded in a `themes tokens seed` child process. Turning it off restores the accent in force before (unless a theme or the user changed it since); `themes doctor` shows the state |
+| Images | every gdk-pixbuf format; animated images use the first frame; slideshow XML uses its first image; images under 16×16 or fully transparent are refused |
+| Entry points | CLI (`themes tokens from-image`, `themes tokens seed`), window («Appearance» page: switch, source, current accent, create button), quick settings («Theme» menu: «Accent from wallpaper» switch, all skins), D-Bus `WallpaperAccent()` |
+
+Skins: the quick settings switch is the same in `macos`, `windows11` and `default`; the skin-specific
+pickers of the spec (macOS dot grid, Windows 11 «Automatic» drop-down) are not built yet. Token
+themes and hand-made themes (`macos`, `windows11`) both get only the GNOME `accent-color` change in
+the live mode; a full token-palette overlay is not built yet.

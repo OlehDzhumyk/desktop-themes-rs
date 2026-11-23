@@ -656,6 +656,29 @@ fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
     }
 }
 
+/// deskd's live "accent from wallpaper" keeps its state in the cache while it is on
+/// (docs/spec/features/theme-from-wallpaper.md): say which accent it set and what "off" restores.
+fn check_wallpaper_accent(ctx: &Ctx, rep: &mut DoctorReport) {
+    let p = crate::tokens::cache_root(ctx).join("wallpaper-accent.json");
+    let Ok(text) = std::fs::read_to_string(&p) else {
+        return;
+    };
+    let v: serde_json::Value = serde_json::from_str(&text).unwrap_or_default();
+    let s = |k: &str| v[k].as_str().unwrap_or("?").to_string();
+    rep.push(
+        "info",
+        "wallpaper-accent",
+        tr!(
+            "the accent follows the wallpaper (deskd): {accent} from the seed colour {colour}; turning “Accent from wallpaper” off restores {original}",
+            accent = s("written"),
+            colour = s("seed"),
+            original = s("original")
+        ),
+        None,
+        false,
+    );
+}
+
 const RETIRED_THEME: &str = "macos-glass";
 const RETIRED_THEME_REPLACEMENT: &str = "macos";
 const RETIRED_WARN_EXTENSIONS: &[&str] = &[
@@ -975,6 +998,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_retired(ctx, &mut st, &enabled, opt.fix, &mut rep);
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
+    check_wallpaper_accent(ctx, &mut rep);
     check_schemas(ctx, &enabled, opt.fix, &mut rep);
     check_values(&cur, &mut rep);
     check_deskd(&mut rep);

@@ -575,6 +575,41 @@ impl Mode {
     }
 }
 
+/// Values of `io.github.OlehDzhumyk.Desk.Appearance` `accent-source`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum AccentSource {
+    #[default]
+    Active,
+    Light,
+    Dark,
+}
+
+impl AccentSource {
+    pub const ALL: [AccentSource; 3] = [
+        AccentSource::Active,
+        AccentSource::Light,
+        AccentSource::Dark,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            AccentSource::Active => "active",
+            AccentSource::Light => "light",
+            AccentSource::Dark => "dark",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "active" => AccentSource::Active,
+            "light" => AccentSource::Light,
+            "dark" => AccentSource::Dark,
+            _ => Self::default(),
+        }
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/appearance/`.
 #[derive(Clone, Debug)]
 pub struct AppearanceSettings(pub gio::Settings);
@@ -587,6 +622,8 @@ impl AppearanceSettings {
     pub const LOCATION: &'static str = "location";
     pub const TWILIGHT_OFFSET: &'static str = "twilight-offset";
     pub const OVERRIDE_UNTIL_NEXT: &'static str = "override-until-next";
+    pub const ACCENT_FROM_WALLPAPER: &'static str = "accent-from-wallpaper";
+    pub const ACCENT_SOURCE: &'static str = "accent-source";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -645,6 +682,24 @@ impl AppearanceSettings {
 
     pub fn set_override_until_next(&self, v: bool) -> Result<(), gio::glib::BoolError> {
         self.0.set_boolean(Self::OVERRIDE_UNTIL_NEXT, v)
+    }
+
+    /// The desktop accent colour follows the current wallpaper
+    pub fn accent_from_wallpaper(&self) -> bool {
+        self.0.boolean(Self::ACCENT_FROM_WALLPAPER)
+    }
+
+    pub fn set_accent_from_wallpaper(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ACCENT_FROM_WALLPAPER, v)
+    }
+
+    /// Which wallpaper variant gives the accent colour
+    pub fn accent_source(&self) -> AccentSource {
+        AccentSource::parse(&self.0.string(Self::ACCENT_SOURCE))
+    }
+
+    pub fn set_accent_source(&self, v: AccentSource) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::ACCENT_SOURCE, v.as_str())
     }
 }
 

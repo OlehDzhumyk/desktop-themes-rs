@@ -17,6 +17,7 @@ import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
+const APPEARANCE_SCHEMA = 'io.github.OlehDzhumyk.Desk.Appearance';
 const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
 const EMOJI_SCHEMA = 'io.github.OlehDzhumyk.Desk.Emoji';
 const LOGO_MENU_SCHEMA = 'io.github.OlehDzhumyk.Desk.LogoMenu';
@@ -32,6 +33,7 @@ export default class DeskBridge extends Extension {
     private _mixerSettings: Gio.Settings | null = null;
     private _logoMenu: LogoMenuFeature | null = null;
     private _logoMenuSettings: Gio.Settings | null = null;
+    private _appearanceSettings: Gio.Settings | null = null;
     private _skinId = 0;
     private _langId = 0;
 
@@ -55,6 +57,7 @@ export default class DeskBridge extends Extension {
         this._emojiSettings = this._schema(EMOJI_SCHEMA);
         this._mixerSettings = this._schema(MIXER_SCHEMA);
         this._logoMenuSettings = this._schema(LOGO_MENU_SCHEMA);
+        this._appearanceSettings = this._schema(APPEARANCE_SCHEMA);
         initI18n(this, settings.get_string('language'));
         this._build(clipSettings);
         this._skinId = settings.connect('changed::skin', () => { this._applySkin(); });
@@ -71,7 +74,7 @@ export default class DeskBridge extends Extension {
         if (!quickSettings)
             throw new Error('desk-bridge: the quick settings panel is not available');
         this._indicator = new DeskIndicator();
-        this._indicator.attach(this.path);
+        this._indicator.attach(this.path, this._appearanceSettings);
         quickSettings.addExternalIndicator(this._indicator);
         this._clipboard = new ClipboardFeature(this.path, clipSettings, this._skin(),
             () => { launchGui('clipboard'); });
@@ -141,5 +144,6 @@ export default class DeskBridge extends Extension {
         this._emojiSettings = null;
         this._mixerSettings = null;
         this._logoMenuSettings = null;
+        this._appearanceSettings = null;
     }
 }

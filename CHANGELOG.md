@@ -21,6 +21,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Theme from wallpaper (stage 2): live "accent from wallpaper" in `deskd` (settings
+  `accent-from-wallpaper`, `accent-source`; follows `org.gnome.desktop.background` with a 500 ms
+  debounce and sets `accent-color` to the nearest GNOME named accent, decoding the image in a
+  `themes tokens seed` child process; turning it off restores the previous accent), D-Bus
+  `Appearance.WallpaperAccent()`, `themes tokens seed PATH`, «Create theme from wallpaper…» in the
+  window (seed and light/dark preview with contrast numbers, name, «Apply»), an «Accent from
+  wallpaper» switch in the quick settings «Theme» menu, and a `themes doctor` line while it is on.
+  `themes tokens from-image` now reads slideshow XML (first image), refuses images under 16×16,
+  notes near-monochrome images, and with `--force` moves the old theme to `trash/`.
 - Emoji and symbol picker (`docs/spec/features/emoji.md`): offline `deskd` engine
   (`io.github.OlehDzhumyk.Desk.Emoji`, `crates/deskd/data/emoji.tsv`) with 300+ emoji, Unicode
   symbols and text faces searchable in English and Ukrainian, Fitzpatrick skin-tone modifiers, and

@@ -237,9 +237,17 @@ fn main() {
             delay
         }
     });
+    let wallpaper_eng: appearance::wallpaper::Shared =
+        Arc::new(Mutex::new(appearance::wallpaper::WallpaperEngine::new(
+            appearance_settings
+                .as_ref()
+                .map_or_else(Default::default, settings::read_wallpaper),
+            appearance::wallpaper::state_path(),
+        )));
     let appearance_iface = appearance::service::AppearanceIface {
         eng: appearance_eng.clone(),
         scheduler: appearance_scheduler.clone(),
+        wallpaper: wallpaper_eng.clone(),
         gate,
     };
 
@@ -383,12 +391,30 @@ fn main() {
         let sched = appearance_scheduler.clone();
         schedule::watch_system_events(move || sched.trigger());
     }
+    // live accent from the wallpaper: GSettings signals, a 500 ms debounce, a decoding child
+    let wallpaper_watch = {
+        let conn = conn.clone();
+        appearance::wallpaper::Watch::start(wallpaper_eng.clone(), move || {
+            let conn = conn.clone();
+            std::thread::spawn(move || {
+                zbus::block_on(appearance::service::emit_changed(&conn));
+            });
+        })
+        .map(std::rc::Rc::new)
+    };
     if let Some(s) = &appearance_settings {
         let eng = appearance_eng.clone();
         let sched = appearance_scheduler.clone();
         let conn = conn.clone();
         let typed = s.clone();
-        s.0.connect_changed(None, move |_, _| {
+        let watch = wallpaper_watch.clone();
+        s.0.connect_changed(None, move |_, key| {
+            if matches!(key, "accent-from-wallpaper" | "accent-source") {
+                if let Some(w) = &watch {
+                    w.settings_changed(settings::read_wallpaper(&typed));
+                }
+                return;
+            }
             let cfg = settings::read_appearance(&typed);
             appearance::lock(&eng).set_config(cfg);
             sched.trigger();
@@ -436,4 +462,5 @@ fn main() {
     drop(mixer_settings);
     drop(appearance_settings);
     drop(interface_settings);
+    drop(wallpaper_watch);
 }

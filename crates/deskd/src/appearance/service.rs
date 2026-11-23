@@ -7,13 +7,15 @@ use zbus::message::Header;
 use zbus::object_server::SignalEmitter;
 
 use super::solar::Scheme;
-use super::{Shared, lock};
+use super::{Shared, lock, wallpaper};
 use crate::schedule::Scheduler;
 use crate::trust::Gate;
 
 pub struct AppearanceIface {
     pub eng: Shared,
     pub scheduler: Scheduler,
+    /// The live "accent from wallpaper" mode.
+    pub wallpaper: wallpaper::Shared,
     /// Only GNOME Shell and desktop-themes-rs binaries may read or change appearance state (ADR 0008).
     pub gate: Gate,
 }
@@ -81,6 +83,24 @@ impl AppearanceIface {
         Ok(())
     }
 
+    #[zbus(out_args("enabled", "seed", "accent", "monochrome", "uri", "error"))]
+    async fn wallpaper_accent(
+        &self,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<(bool, String, String, bool, String, String)> {
+        self.gate.check(conn, Some(&hdr)).await?;
+        let st = wallpaper::lock(&self.wallpaper).status();
+        Ok((
+            st.enabled,
+            st.seed,
+            st.accent,
+            st.monochrome,
+            st.uri,
+            st.error,
+        ))
+    }
+
     #[zbus(signal)]
     pub async fn changed(em: &SignalEmitter<'_>) -> zbus::Result<()>;
 }
@@ -108,6 +128,17 @@ mod tests {
     use super::super::solar::{AppearanceMode, LocalNow};
     use super::super::{AppearanceEngine, Config};
     use super::*;
+
+    fn test_wallpaper() -> wallpaper::Shared {
+        let path = std::env::temp_dir().join(format!(
+            "deskd-appearance-iface-{}/wallpaper-accent.json",
+            std::process::id()
+        ));
+        Arc::new(Mutex::new(wallpaper::WallpaperEngine::new(
+            wallpaper::Config::default(),
+            path,
+        )))
+    }
 
     fn test_engine() -> Shared {
         let eng = AppearanceEngine::new(
@@ -141,6 +172,7 @@ mod tests {
         AppearanceIface {
             eng: test_engine(),
             scheduler: Scheduler::inert(),
+            wallpaper: test_wallpaper(),
             gate: Gate::open(),
         }
         .introspect_to_writer(&mut xml, 0);
@@ -162,6 +194,7 @@ mod tests {
                     AppearanceIface {
                         eng: eng.clone(),
                         scheduler: Scheduler::inert(),
+                        wallpaper: test_wallpaper(),
                         gate: Gate::open(),
                     },
                 )
@@ -197,6 +230,10 @@ mod tests {
             assert!(err.to_string().contains("InvalidArgs"), "{err}");
 
             p.recompute().await.unwrap();
+
+            let (enabled, _, accent, _, _, error) = p.wallpaper_accent().await.unwrap();
+            assert!(!enabled);
+            assert_eq!((accent.as_str(), error.as_str()), ("", ""));
         });
     }
 }

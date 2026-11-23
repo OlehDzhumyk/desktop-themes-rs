@@ -461,6 +461,7 @@ fn action_row(
             });
             dlg.present(Some(row));
         }
+        "create-theme-from-wallpaper" => super::wallpaper::create_theme(row.upcast_ref(), &toasts),
         other => eprintln!("themes: unknown settings action {other}"),
     });
     row
@@ -471,6 +472,10 @@ fn status_row(id: &'static str, label: &str) -> adw::ActionRow {
         .title(t(label))
         .subtitle(tr!("checking…"))
         .build();
+    if id == "wallpaper-accent" {
+        super::wallpaper::refresh_status(&row);
+        return row;
+    }
     if id != "deskd" {
         return row;
     }
