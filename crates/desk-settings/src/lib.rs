@@ -7,6 +7,7 @@
 pub mod generate;
 pub mod i18n;
 pub mod lockscreen;
+pub mod logo_menu;
 pub mod mixer;
 pub mod model;
 pub mod registry;
@@ -19,6 +20,7 @@ pub mod validate;
 pub mod accessors;
 
 pub use lockscreen::*;
+pub use logo_menu::*;
 pub use mixer::*;
 pub use model::*;
 pub use registry::*;

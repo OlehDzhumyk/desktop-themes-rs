@@ -134,6 +134,63 @@ export function bridgeState() {
     };
 }
 
+/** State of the macOS logo menu in the top bar. */
+export function logoMenuState() {
+    const btn = Main.panel.statusArea['desk-logo-menu'] ?? null;
+    const activities = Main.panel.statusArea.activities ?? null;
+    const items = [];
+    if (btn?.menu?._getMenuItems) {
+        for (const item of btn.menu._getMenuItems()) {
+            const text = item?.label?.text;
+            if (typeof text === 'string' && text.length > 0)
+                items.push(text);
+        }
+    }
+    return {
+        present: btn !== null,
+        visible: Boolean(btn?.visible),
+        activitiesVisible: Boolean(activities?.visible),
+        items,
+    };
+}
+
+/** Resolve once logoMenuState()[field] equals value (event-driven on Desk and LogoMenu settings). */
+export function waitLogoMenu(field, value, timeoutMs = 10000) {
+    const b = bridge();
+    const objs = [b?._settings, b?._logoMenuSettings].filter(o => o);
+    return new Promise((resolve, reject) => {
+        const ids = [];
+        let timer = 0;
+        const finish = ok => {
+            ids.forEach(([o, id]) => o.disconnect(id));
+            if (timer)
+                GLib.source_remove(timer);
+            if (ok)
+                settle().then(resolve, reject);
+            else
+                reject(new Error(`logoMenu ${field} is ${JSON.stringify(logoMenuState()[field])}, not ${JSON.stringify(value)}`));
+        };
+        const check = () => {
+            if (logoMenuState()[field] === value)
+                finish(true);
+        };
+        for (const o of objs) {
+            ids.push([o, o.connect('changed', () => {
+                GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                    check();
+                    return GLib.SOURCE_REMOVE;
+                });
+            })]);
+        }
+        timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeoutMs, () => {
+            timer = 0;
+            finish(false);
+            return GLib.SOURCE_REMOVE;
+        });
+        check();
+    });
+}
+
 /**
  * Resolve once bridgeState()[field] equals value. Checked again after every change of the
  * bridge's settings (one idle later, so the bridge's own handler of the same change ran first).
@@ -311,7 +368,11 @@ export function startTracking(fragment = UUID) {
     };
     const record = name => function (signal, ...rest) {
         const id = _orig[name].call(this, signal, ...rest);
-        const where = fromFragment();
+        // count handlers added by the extension itself (directly or via GObject connectObject /
+        // signalTracker.js), not internal shell handlers such as Panel.addToStatusArea
+        const frames = (new Error().stack ?? '').split('\n').slice(1);
+        const caller = frames.find(l => !l.includes('signalTracker.js')) ?? '';
+        const where = caller.includes(_fragment) ? fromFragment() : null;
         if (where)
             _records.push({obj: this, id, signal, where, type: typeName(this)});
         return id;

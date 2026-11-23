@@ -21,6 +21,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Logo menu in `desk-bridge` for the `macos` skin (replaces the third-party `logomenu@aryan_k`
+  extension): system menu on the left of the top bar with About This System, System Settings,
+  Applications, Force Quit (with confirmation dialog), Sleep, Restart, Shut Down, Lock Screen and
+  Log Out, plus settings `io.github.OlehDzhumyk.Desk.LogoMenu` (`enabled`, `hide-activities`) and a
+  «Logo menu» page in the window. `logomenu@aryan_k` is retired during apply and migration.
 - Volume mixer: one slider (and mute, «Play on…») per application that plays sound, output and input
   device switching, in the quick settings sound menu, skinned for Windows 11 («Мікшер гучності»,
   Ctrl+Super+V), macOS (Control Center «Звук» page with a collapsed «Програми» disclosure) and Fedora

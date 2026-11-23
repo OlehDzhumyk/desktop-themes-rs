@@ -38,6 +38,7 @@ pub static FEATURE_APP: Feature = Feature {
 pub static FEATURES: &[&Feature] = &[
     &FEATURE_CLIPBOARD,
     &crate::mixer::FEATURE_MIXER,
+    &crate::logo_menu::FEATURE_LOGO_MENU,
     &crate::lockscreen::FEATURE_LOCKSCREEN,
     &FEATURE_APP,
 ];
@@ -114,6 +115,7 @@ pub static DESK: Schema = Schema {
         ("clipboard", CLIPBOARD_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
+        ("logo-menu", crate::logo_menu::LOGO_MENU_SCHEMA),
     ],
 };
 
@@ -355,7 +357,13 @@ pub static SHORTCUT_KEYS: Schema = Schema {
 pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD, &crate::mixer::SHORTCUT_MIXER];
 
 /// All schemas, parents first (the order of the generated XML).
-pub static SCHEMAS: &[&Schema] = &[&DESK, &CLIPBOARD, &SHORTCUT_KEYS, &crate::mixer::MIXER];
+pub static SCHEMAS: &[&Schema] = &[
+    &DESK,
+    &CLIPBOARD,
+    &SHORTCUT_KEYS,
+    &crate::mixer::MIXER,
+    &crate::logo_menu::LOGO_MENU,
+];
 
 // ------------------------------------------------------------------ pages of the window
 
@@ -493,6 +501,7 @@ pub static PAGE_CREDITS: Page = Page {
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
     &crate::mixer::PAGE_MIXER,
+    &crate::logo_menu::PAGE_LOGO_MENU,
     &crate::lockscreen::PAGE_LOCKSCREEN,
     &PAGE_SHORTCUTS,
     &PAGE_GENERAL,

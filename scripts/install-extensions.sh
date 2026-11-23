@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Install the GNOME Shell extensions the themes use, at user level.
-#   * 11 extensions from extensions.gnome.org, pinned by version tag and verified by SHA-256
+#   * 10 extensions from extensions.gnome.org, pinned by version tag and verified by SHA-256
 #     (tested with GNOME Shell 51; versions.sh)
 #   * spotlight@nin gets the unified diffs from patches/spotlight@nin applied (see patches/README.md)
 #   * Liquid Glass from its upstream repository at a pinned commit (it is not on extensions.gnome.org)

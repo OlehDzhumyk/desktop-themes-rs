@@ -37,7 +37,6 @@ Downloaded from extensions.gnome.org at the pinned version tags in `scripts/vers
 | [AppIndicator and KStatusNotifierItem Support](https://github.com/ubuntu/gnome-shell-extension-appindicator) | Ubuntu / rgcjonas | GPL-2.0-or-later |
 | [Blur my Shell](https://github.com/aunetx/blur-my-shell) | aunetx | GPL-3.0 |
 | [Dash to Dock](https://github.com/micheleg/dash-to-dock) | Michele Gaio et al. | GPL-2.0-or-later |
-| [Logo Menu](https://github.com/Aryan20/Logomenu) | Aryan Kaushik | GPL-2.0-or-later |
 | [Compiz alike magic lamp effect](https://github.com/hermes83/compiz-alike-magic-lamp-effect) | hermes83 | GPL-3.0-or-later |
 | [Spotlight](https://github.com/itsnin/spotlight) | itsnin | GPL-3.0-or-later |
 | [Dash to Panel](https://github.com/home-sweet-gnome/dash-to-panel) | jderose9 et al. | GPL-2.0-or-later |

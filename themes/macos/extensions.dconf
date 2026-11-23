@@ -59,14 +59,6 @@ style-dash-to-dock=3
 [org/gnome/shell/extensions/blur-my-shell/applications]
 blur=false
 
-[org/gnome/shell/extensions/Logo-menu]
-menu-button-icon-image=1
-symbolic-icon=true
-use-custom-icon=false
-menu-button-icon-size=20
-show-activities-button=false
-hide-softwarecentre=false
-
 [org/gnome/shell/extensions/appindicator]
 legacy-tray-enabled=true
 icon-size=18
