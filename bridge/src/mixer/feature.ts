@@ -25,13 +25,13 @@ import {errorText, outputSlider} from '../shellTypes.js';
 import {MixerClient, type MixerApp, type MixerDevice} from './client.js';
 import {AppRow, type RowHost, deviceItem, heading, note} from './rows.js';
 
-export const SHORTCUT_KEY = 'mixer-shortcut';
+const SHORTCUT_KEY = 'mixer-shortcut';
 const SOUND_SCHEMA = 'org.gnome.desktop.sound';
 
 type Skin = 'default' | 'macos' | 'windows11';
 
 /** Device names as Apple would show them: without the technical profile suffix. */
-export function plainName(description: string): string {
+function plainName(description: string): string {
     return description
         .replace(/\s+(Analog|Digital)\s+(Stereo|Mono|Surround\s+[\d.]+)(\s+\(.*\))?$/i, '')
         .replace(/\s+(Stereo|Mono)$/i, '')

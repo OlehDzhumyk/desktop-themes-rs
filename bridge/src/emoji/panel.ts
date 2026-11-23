@@ -45,7 +45,7 @@ export const SYMBOL_CATEGORIES: readonly CategoryDef[] = [
     {id: 'text-faces', glyph: 'ツ', label: () => _('Text faces')},
 ];
 
-export const ALL_CATEGORIES: readonly CategoryDef[] = [
+const ALL_CATEGORIES: readonly CategoryDef[] = [
     ...EMOJI_CATEGORIES,
     ...SYMBOL_CATEGORIES,
 ];

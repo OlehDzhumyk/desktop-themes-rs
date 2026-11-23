@@ -6,7 +6,7 @@ import Gio from 'gi://Gio';
 import {DESK_BUS, type Proxy, proxyClass, readXml} from '../dbus.js';
 import {errorText} from '../shellTypes.js';
 
-export const FOCUS_PATH = '/io/github/OlehDzhumyk/Desk/Focus';
+const FOCUS_PATH = '/io/github/OlehDzhumyk/Desk/Focus';
 
 /** Status() → (ssssxxsxas). */
 export interface FocusStatus {

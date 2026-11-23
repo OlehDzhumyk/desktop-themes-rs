@@ -35,9 +35,9 @@ clippy:
 bridge-lint:
     cd bridge && npm run lint
 
-# bridge typecheck + lint
+# bridge typecheck + lint + unused code/exports (knip)
 bridge:
-    cd bridge && npm run typecheck && npm run lint
+    cd bridge && npm run typecheck && npm run lint && npm run knip
 
 shellcheck:
     git ls-files -z | xargs -0 grep -IlE '^#!.*(ba)?sh' | xargs shellcheck --severity=warning

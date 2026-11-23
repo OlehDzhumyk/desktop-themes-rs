@@ -7,7 +7,7 @@ import {DESK_BUS, MIXER_PATH, type Proxy, proxyClass, readXml} from '../dbus.js'
 import {errorText} from '../shellTypes.js';
 
 /** Interface version this bridge speaks (the Version property of deskd). */
-export const MIXER_VERSION = 1;
+const MIXER_VERSION = 1;
 
 /** An output or input device: ListDevices → (ussssdbb). */
 export interface MixerDevice {
