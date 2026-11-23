@@ -127,11 +127,7 @@ pub fn unlink_all(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
     }
     st.created_dirs.retain(|d| {
         let p = Path::new(d);
-        if p.is_dir()
-            && std::fs::read_dir(p)
-                .map(|mut r| r.next().is_none())
-                .unwrap_or(false)
-        {
+        if p.is_dir() && std::fs::read_dir(p).is_ok_and(|mut r| r.next().is_none()) {
             let _ = std::fs::remove_dir(p);
         }
         p.exists()

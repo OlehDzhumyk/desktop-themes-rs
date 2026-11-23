@@ -70,19 +70,15 @@ pub struct ApplyResult {
 /// Чинний список розширень: значення з dconf або типове схеми.
 pub fn ext_lists(cur: &Settings) -> (Vec<String>, Vec<String>, Vec<String>, Vec<String>) {
     let default_en = dconf::schema_default("org.gnome.shell", "enabled-extensions")
-        .map(|s| dconf::parse_strv(&s))
-        .unwrap_or_default();
+        .map_or_default(|s| dconf::parse_strv(&s));
     let default_dis = dconf::schema_default("org.gnome.shell", "disabled-extensions")
-        .map(|s| dconf::parse_strv(&s))
-        .unwrap_or_default();
+        .map_or_default(|s| dconf::parse_strv(&s));
     let cur_en = cur
         .get(EXT_KEY)
-        .map(|s| dconf::parse_strv(s))
-        .unwrap_or_else(|| default_en.clone());
+        .map_or_else(|| default_en.clone(), |s| dconf::parse_strv(s));
     let cur_dis = cur
         .get(DIS_KEY)
-        .map(|s| dconf::parse_strv(s))
-        .unwrap_or_else(|| default_dis.clone());
+        .map_or_else(|| default_dis.clone(), |s| dconf::parse_strv(s));
     (cur_en, cur_dis, default_en, default_dis)
 }
 
@@ -110,6 +106,10 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], dry_run: bool) -> Result<A
 
 /// `purge_ext_state`: при повному скиданні (fedora для всіх модулів) прибрати власні
 /// налаштування розширень тем, яких немає в baseline.
+#[allow(
+    clippy::too_many_lines,
+    reason = "the apply transaction as one function; the transactional-apply rework (R-1, R-2) restructures it"
+)]
 pub fn apply_opts(
     ctx: &Ctx,
     id: &str,
@@ -216,15 +216,11 @@ pub fn apply_opts(
 
     // розширення (лише «вигляд» задає extensions.txt; постійні й «зламані» враховуються завжди)
     let look_theme = sel.get(&Module::Look).and_then(|s| theme_of(s));
-    let target_exts = look_theme
-        .as_ref()
-        .map(Theme::extensions)
-        .unwrap_or_default();
+    let target_exts = look_theme.as_ref().map_or_default(Theme::extensions);
     let (cur_en, cur_dis, default_en, default_dis) = ext_lists(&cur);
     let base_en = baseline
         .get(EXT_KEY)
-        .map(|s| dconf::parse_strv(s))
-        .unwrap_or_else(|| default_en.clone());
+        .map_or_else(|| default_en.clone(), |s| dconf::parse_strv(s));
     let mut theme_exts: BTreeSet<String> = st.applied_extensions.iter().cloned().collect();
     for t in &themes {
         theme_exts.extend(t.extensions());
@@ -434,8 +430,7 @@ pub fn apply_opts(
             *m,
             targets
                 .get(m)
-                .map(|t| t.keys().cloned().collect())
-                .unwrap_or_default(),
+                .map_or_default(|t| t.keys().cloned().collect()),
         );
     }
     st.modules = sel.clone();
@@ -702,8 +697,7 @@ pub fn ext_stamp(ctx: &Ctx, uuid: &str) -> String {
         .and_then(|m| m.modified())
         .ok()
         .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
+        .map_or(0, |d| d.as_secs());
     let ver = std::fs::read_to_string(&meta)
         .ok()
         .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())

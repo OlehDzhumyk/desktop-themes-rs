@@ -10,9 +10,7 @@ use super::model::Remembered;
 use crate::clipboard::{ensure_private_dir, write_private};
 
 pub fn default_path() -> PathBuf {
-    let home = std::env::var_os("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| "/tmp".into());
+    let home = std::env::var_os("HOME").map_or_else(|| "/tmp".into(), PathBuf::from);
     std::env::var_os("XDG_DATA_HOME")
         .map(PathBuf::from)
         .filter(|p| p.is_absolute())

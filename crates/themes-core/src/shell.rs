@@ -61,6 +61,10 @@ pub enum ExtState {
 }
 
 impl ExtState {
+    #[allow(
+        clippy::cast_possible_truncation,
+        reason = "a small state number from D-Bus; the float to int cast saturates"
+    )]
     pub fn from_f64(v: f64) -> ExtState {
         match v as i32 {
             1 => ExtState::Active,
@@ -193,8 +197,7 @@ impl Shell {
         let state = m
             .get("state")
             .and_then(|v| f64::try_from(v).ok())
-            .map(ExtState::from_f64)
-            .unwrap_or(ExtState::Unknown(-1));
+            .map_or(ExtState::Unknown(-1), ExtState::from_f64);
         let version = m
             .get("version")
             .and_then(|v| f64::try_from(v).ok().map(|f| format!("{f}")))

@@ -10,6 +10,9 @@ repository.workspace = true
 [lib]
 name = "theme_tokens"
 
+[lints]
+workspace = true
+
 [dependencies]
 desk-settings.workspace = true
 serde.workspace = true

@@ -3,6 +3,16 @@
 
 use std::fmt;
 
+/// A channel value: rounded, and held in 0..=255 (so the cast cannot lose anything).
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "clamped to 0..=255 right before the cast"
+)]
+fn to_u8(x: f64) -> u8 {
+    x.round().clamp(0.0, 255.0) as u8
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Rgba {
     pub r: u8,
@@ -99,7 +109,7 @@ impl Rgba {
 
     pub fn with_alpha(&self, a: f64) -> Rgba {
         Rgba {
-            a: (a.clamp(0.0, 1.0) * 255.0).round() as u8,
+            a: to_u8(a.clamp(0.0, 1.0) * 255.0),
             ..*self
         }
     }
@@ -112,26 +122,18 @@ impl Rgba {
         if oa <= 0.0 {
             return Rgba::rgba(0, 0, 0, 0);
         }
-        let ch = |f: u8, b: u8| -> u8 {
-            ((f as f64 * fa + b as f64 * ba * (1.0 - fa)) / oa)
-                .round()
-                .clamp(0.0, 255.0) as u8
-        };
+        let ch = |f: u8, b: u8| -> u8 { to_u8((f as f64 * fa + b as f64 * ba * (1.0 - fa)) / oa) };
         Rgba {
             r: ch(self.r, bg.r),
             g: ch(self.g, bg.g),
             b: ch(self.b, bg.b),
-            a: (oa * 255.0).round() as u8,
+            a: to_u8(oa * 255.0),
         }
     }
 
     /// Linear interpolation in sRGB (t = 0 → self, 1 → other).
     pub fn mix(&self, other: Rgba, t: f64) -> Rgba {
-        let l = |a: u8, b: u8| {
-            (a as f64 + (b as f64 - a as f64) * t)
-                .round()
-                .clamp(0.0, 255.0) as u8
-        };
+        let l = |a: u8, b: u8| to_u8(a as f64 + (b as f64 - a as f64) * t);
         Rgba {
             r: l(self.r, other.r),
             g: l(self.g, other.g),
@@ -255,7 +257,7 @@ impl Oklab {
             } else {
                 1.055 * c.powf(1.0 / 2.4) - 0.055
             };
-            (v * 255.0).round().clamp(0.0, 255.0) as u8
+            to_u8(v * 255.0)
         };
         Rgba::rgb(f(r), f(g), f(b))
     }

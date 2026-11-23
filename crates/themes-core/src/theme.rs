@@ -87,7 +87,7 @@ pub fn read_conf(path: &Path) -> BTreeMap<String, String> {
     };
     for line in text.lines() {
         let l = line.trim_start();
-        let l = l.strip_prefix("export ").map(str::trim_start).unwrap_or(l);
+        let l = l.strip_prefix("export ").map_or(l, str::trim_start);
         let Some((k, v)) = l.split_once('=') else {
             continue;
         };
@@ -240,8 +240,7 @@ impl Theme {
     fn preview_key(&self, key: &str) -> String {
         self.conf
             .get(key)
-            .map(|v| util::expand_home(v, &self.home))
-            .unwrap_or_default()
+            .map_or_default(|v| util::expand_home(v, &self.home))
     }
     pub fn builtin(&self) -> bool {
         self.id == crate::BUILTIN_THEME
@@ -313,11 +312,7 @@ impl Theme {
     /// A generated shell theme needs the user-theme extension, so it is added when the tokens
     /// produce one.
     pub fn extensions(&self) -> Vec<String> {
-        let base = self
-            .parent
-            .as_deref()
-            .map(|p| p.extensions())
-            .unwrap_or_default();
+        let base = self.parent.as_deref().map_or_default(|p| p.extensions());
         let mut v = match std::fs::read_to_string(self.dir.join("extensions.txt")) {
             Ok(text) => merge_extension_lines(&base, &text),
             Err(_) => base,

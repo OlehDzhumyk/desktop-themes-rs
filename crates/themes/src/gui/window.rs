@@ -147,6 +147,10 @@ fn find_toasts(w: &adw::ApplicationWindow) -> Option<adw::ToastOverlay> {
 }
 
 impl ThemesWindow {
+    #[allow(
+        clippy::too_many_lines,
+        reason = "builds the main window, one widget tree"
+    )]
     pub fn build(
         app: &adw::Application,
         opts: GuiOptions,
@@ -334,7 +338,9 @@ impl ThemesWindow {
             this.flow.connect_child_activated(move |_, child| {
                 let Some(t) = w.upgrade() else { return };
                 let idx = child.index();
-                let card = t.cards.borrow().get(idx as usize).cloned();
+                let card = usize::try_from(idx)
+                    .ok()
+                    .and_then(|i| t.cards.borrow().get(i).cloned());
                 if let Some(c) = card {
                     t.apply(c.info.id.clone(), vec![]);
                 }
@@ -467,8 +473,7 @@ impl ThemesWindow {
                 let Some(t) = w.upgrade() else { return };
                 let n = f
                     .basename()
-                    .map(|b| b.to_string_lossy().into_owned())
-                    .unwrap_or_default();
+                    .map_or_default(|b| b.to_string_lossy().into_owned());
                 if only_state && n != "current" && n != "state.json" {
                     return;
                 }
@@ -534,7 +539,7 @@ impl ThemesWindow {
                         format!(
                             "{} — {}",
                             m.label().to_lowercase(),
-                            st.source(*m).map(name_of).unwrap_or("—".into())
+                            st.source(*m).map_or("—".into(), name_of)
                         )
                     })
                     .collect();
@@ -579,7 +584,10 @@ impl ThemesWindow {
             let cur = st
                 .source(m)
                 .and_then(|s| infos.iter().position(|t| t.id == s));
-            row.set_selected(cur.map(|i| i as u32).unwrap_or(gtk::INVALID_LIST_POSITION));
+            row.set_selected(
+                cur.and_then(|i| u32::try_from(i).ok())
+                    .unwrap_or(gtk::INVALID_LIST_POSITION),
+            );
             let w = Rc::downgrade(self);
             row.connect_selected_notify(move |r| {
                 let Some(t) = w.upgrade() else { return };

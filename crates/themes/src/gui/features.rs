@@ -125,8 +125,7 @@ fn choice_label(k: &Key, value: &str) -> String {
         Kind::Choice { choices, .. } => choices
             .iter()
             .find(|c| c.value == value)
-            .map(|c| t(c.label))
-            .unwrap_or_else(|| value.to_string()),
+            .map_or_else(|| value.to_string(), |c| t(c.label)),
         _ => value.to_string(),
     }
 }
@@ -267,7 +266,11 @@ fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
             s.bind(k.name, &r, "selected")
                 .mapping(move |v, _| {
                     let cur: String = v.get()?;
-                    Some((values.iter().position(|x| *x == cur).unwrap_or(0) as u32).to_value())
+                    Some(
+                        u32::try_from(values.iter().position(|x| *x == cur).unwrap_or(0))
+                            .unwrap_or(0)
+                            .to_value(),
+                    )
                 })
                 .set_mapping(move |v, _| {
                     let i: u32 = v.get().ok()?;

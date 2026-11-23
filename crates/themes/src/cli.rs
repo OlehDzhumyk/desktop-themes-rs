@@ -235,6 +235,10 @@ fn modules_arg(only: Option<&str>, module: &[String]) -> Result<Vec<Module>, Err
     Module::parse_list(&s)
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "the command dispatcher: one match arm per subcommand"
+)]
 fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     match cmd {
         Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),

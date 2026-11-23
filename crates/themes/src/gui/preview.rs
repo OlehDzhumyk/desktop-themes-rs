@@ -32,6 +32,10 @@ fn purge_old_thumbs() {
 }
 
 /// Готує мініатюру у фоні; повертає шлях до PNG.
+#[allow(
+    clippy::cast_possible_truncation,
+    reason = "thumbnail pixel sizes, far inside i32; the float to int cast saturates"
+)]
 fn make_thumb(path: &Path, width: i32) -> Option<PathBuf> {
     let meta = std::fs::metadata(path).ok()?;
     let mtime = meta

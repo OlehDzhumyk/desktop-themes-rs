@@ -15,8 +15,7 @@ pub type Shared = Arc<Mutex<Engine>>;
 pub fn now() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs() as i64)
-        .unwrap_or(0)
+        .map_or(0, |d| d.as_secs() as i64)
 }
 
 pub(crate) fn lock(e: &Shared) -> MutexGuard<'_, Engine> {
@@ -170,7 +169,7 @@ impl ClipboardIface {
 
     #[zbus(property)]
     fn count(&self) -> u32 {
-        lock(&self.eng).len() as u32
+        u32::try_from(lock(&self.eng).len()).unwrap_or(u32::MAX)
     }
 
     #[zbus(signal)]

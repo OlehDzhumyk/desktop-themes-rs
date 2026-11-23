@@ -199,9 +199,7 @@ impl Engine {
     /// Типові теки: `$XDG_DATA_HOME/deskd/clipboard` і `$XDG_RUNTIME_DIR/deskd/clipboard`
     /// (або `$DESKD_RUNTIME_DIR/clipboard`).
     pub fn default_dirs() -> (PathBuf, PathBuf) {
-        let home = std::env::var_os("HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| "/tmp".into());
+        let home = std::env::var_os("HOME").map_or_else(|| "/tmp".into(), PathBuf::from);
         let data = std::env::var_os("XDG_DATA_HOME")
             .map(PathBuf::from)
             .filter(|p| p.is_absolute())
@@ -411,8 +409,7 @@ impl Engine {
             mime: e.mime.clone(),
             image: self
                 .image_path(e)
-                .map(|p| p.to_string_lossy().into_owned())
-                .unwrap_or_default(),
+                .map_or_default(|p| p.to_string_lossy().into_owned()),
             pinned: e.pinned,
             time: e.time,
             size: e.size,

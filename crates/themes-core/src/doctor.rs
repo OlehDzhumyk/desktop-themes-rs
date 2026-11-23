@@ -168,6 +168,10 @@ fn check_crashes(ctx: &Ctx, rep: &mut DoctorReport) {
     }
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "a list of independent per-theme checks, each one pushes its own issues"
+)]
 fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
     for t in crate::theme::all_themes(ctx) {
         if let Some(e) = &t.inherit_error {
@@ -548,8 +552,7 @@ fn check_schemas_in(
         };
         let uuid = ext
             .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_default();
+            .map_or_default(|n| n.to_string_lossy().into_owned());
         let severity = if enabled.contains(&uuid) {
             "error"
         } else {
@@ -705,6 +708,10 @@ pub struct DoctorOptions {
     pub notify: bool,
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "a list of independent checks, each one pushes its own issues"
+)]
 pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     crate::util::ensure_bus();
     let mut rep = DoctorReport::default();

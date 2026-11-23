@@ -108,8 +108,7 @@ pub fn materialize(l: &Loaded, tg: &Target, force: bool) -> io::Result<Materiali
     std::fs::create_dir_all(parent)?;
     let name = dir
         .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_default();
+        .map_or_default(|n| n.to_string_lossy().into_owned());
     let tmp = parent.join(format!(".{name}.tmp-{}", std::process::id()));
     if tmp.exists() {
         std::fs::remove_dir_all(&tmp)?;

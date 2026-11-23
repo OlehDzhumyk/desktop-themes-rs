@@ -20,8 +20,7 @@ pub fn run_hook(
     let dir = path
         .ancestors()
         .nth(3)
-        .map(|p| p.to_path_buf())
-        .unwrap_or_else(|| theme.dir.clone());
+        .map_or_else(|| theme.dir.clone(), |p| p.to_path_buf());
     let mut c = Command::new(&path);
     desk_settings::i18n::restore_child_env(&mut c);
     c.current_dir(&dir)

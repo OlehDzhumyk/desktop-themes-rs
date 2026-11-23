@@ -70,8 +70,7 @@ pub fn clusters(rgb: &[u8], k: usize) -> Vec<Cluster> {
                 .iter()
                 .enumerate()
                 .min_by(|a, b| p.dist2(*a.1).total_cmp(&p.dist2(*b.1)))
-                .map(|(j, _)| j)
-                .unwrap_or(0);
+                .map_or(0, |(j, _)| j);
             if assign[i] != best {
                 assign[i] = best;
                 moved = true;
@@ -136,8 +135,7 @@ pub fn seed(cs: &[Cluster]) -> Oklch {
     let best = cs
         .iter()
         .max_by(|a, b| score(a).total_cmp(&score(b)))
-        .map(|c| c.lab.to_lch())
-        .unwrap_or(Oklch::new(0.55, 0.12, 260.0));
+        .map_or(Oklch::new(0.55, 0.12, 260.0), |c| c.lab.to_lch());
     if best.c < 0.04 {
         // greyscale image: keep its hue family but give the accent some colour
         Oklch::new(best.l, 0.06, if best.c < 0.005 { 250.0 } else { best.h })

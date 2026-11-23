@@ -135,7 +135,7 @@ fn kf_write(path: &Path, kf: &KeyFile) -> Result<()> {
 fn target_file(ctx: &Ctx, args: &[String]) -> std::path::PathBuf {
     let pos: Vec<&String> = args.iter().filter(|a| !a.starts_with('-')).collect();
     ctx.flatpak_overrides
-        .join(pos.last().map(|s| s.as_str()).unwrap_or("global"))
+        .join(pos.last().map_or("global", |s| s.as_str()))
 }
 
 pub fn remove(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {

@@ -272,6 +272,10 @@ fn check_term(r: &mut Report, path: &str, t: &TermColors) {
     }
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "one validation pass over all token groups"
+)]
 pub fn validate(t: &Tokens) -> Report {
     let mut r = Report::default();
     check_colors(&mut r, &t.colors.light, Scheme::Light);
