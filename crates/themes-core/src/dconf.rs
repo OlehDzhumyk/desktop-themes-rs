@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Формат `dconf dump` і робота з dconf через утиліту `dconf` (як у попередній версії).
 
+use desk_settings::tr;
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -184,7 +185,7 @@ impl Backend {
         if failed.is_empty() {
             Ok(())
         } else {
-            Err(crate::Error(desk_settings::tr!(
+            Err(crate::Error(tr!(
                 "could not restore {keys}",
                 keys = failed.join(", ")
             )))
