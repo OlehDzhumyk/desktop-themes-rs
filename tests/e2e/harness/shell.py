@@ -63,12 +63,13 @@ def wait_for(cond_setup, timeout_s, what):
 class Session:
     """A private bus + gnome-shell --headless with a virtual monitor."""
 
-    def __init__(self, workdir, artifacts, name, *, extensions=(UUID,), dconf=''):
+    def __init__(self, workdir, artifacts, name, *, extensions=(UUID,), dconf='', before_shell=None):
         self.work = pathlib.Path(workdir)
         self.artifacts = pathlib.Path(artifacts)
         self.name = name
         self.extensions = list(extensions)
         self.dconf_init = dconf
+        self.before_shell = before_shell
         self.home = self.work / 'home'
         self.runtime = self.work / 'run'
         self.data = self.home / '.local/share'
@@ -159,6 +160,8 @@ class Session:
         self.env['DBUS_SESSION_BUS_ADDRESS'] = address
         self.bus = Gio.DBusConnection.new_for_address_sync(
             address, Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT | Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION)
+        if self.before_shell:
+            self.before_shell(self)
         exts = ', '.join(f"'{e}'" for e in self.extensions) or '@as '
         exts = exts if exts != '@as ' else None
         self.dconf_load(f"""[org/gnome/shell]
@@ -232,8 +235,26 @@ enable-animations=false
         return json.loads(out) if out else None
 
     def hook(self, fn, *args, timeout_ms=30000):
+        return self.eval_js(self._hook_code(fn, args), timeout_ms)
+
+    @staticmethod
+    def _hook_code(fn, args):
         a = ', '.join(json.dumps(x) for x in args)
-        return self.eval_js(f'import({json.dumps(HOOK.as_uri())}).then(m => m.{fn}({a}))', timeout_ms)
+        return f'import({json.dumps(HOOK.as_uri())}).then(m => m.{fn}({a}))'
+
+    def hook_async(self, fn, *args, timeout_s=30):
+        """Like hook(), but this process keeps serving its own bus objects (its GLib main loop
+        runs) while the shell works on the call."""
+        def setup(done):
+            def finished(bus, res):
+                done(bus.call_finish(res).unpack())
+            self.bus.call('org.gnome.Shell', '/org/gnome/Shell', 'org.gnome.Shell', 'Eval',
+                          GLib.Variant('(s)', (self._hook_code(fn, args),)), GLib.VariantType('(bs)'),
+                          Gio.DBusCallFlags.NONE, timeout_s * 1000, None, finished)
+        ok, out = wait_for(setup, timeout_s + 5, f'hook {fn}')
+        if not ok:
+            raise ShellError(f'Eval failed: {out}')
+        return json.loads(out) if out else None
 
     def ext_info(self, uuid=UUID):
         (info,) = self.call('org.gnome.Shell', '/org/gnome/Shell', 'org.gnome.Shell.Extensions',

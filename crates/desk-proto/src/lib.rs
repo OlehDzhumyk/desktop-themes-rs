@@ -28,6 +28,10 @@ pub const CLIPBOARD_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Clipboard.xml");
 pub const MIXER_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Mixer.xml");
 
+/// Offered by the bridge with the clipboard content it set itself (paste from the history), so
+/// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
+pub const INTERNAL_MIME: &str = "application/x-desk-internal";
+
 /// UUID розширення-моста в GNOME Shell.
 pub const BRIDGE_UUID: &str = "desk-bridge@desktop-themes-rs";
 

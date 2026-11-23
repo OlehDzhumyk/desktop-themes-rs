@@ -4,6 +4,9 @@
      an audio connection itself. Volumes are on the cubic scale of volume sliders (0.0 .. 1.5,
      1.0 = 100 %; the server stores volume^3), as wpctl and GNOME show them.
 
+     Access (ADR 0008): the methods are served to the owner of org.gnome.Shell and desktop-themes-rs
+     binaries only (same user, outside any sandbox); the properties and Changed are open.
+
      Versioning: the property Version (now 1). Adding members keeps it; changing or removing a member
      increments it, and clients check it before calling. -->
 <node>

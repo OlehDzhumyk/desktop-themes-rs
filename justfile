@@ -78,12 +78,6 @@ hygiene:
 context-budget:
     @tools/agent-context-bytes.sh
 
-# end-to-end clipboard test in the ISOLATED headless shell (needs HS_TOOLBOX, see CONTRIBUTING.md)
-headless theme="windows11" keys="Super+v" out="target/headless-shots":
-    cargo build -p deskd
-    cd bridge && npm ci && npm run build
-    tools/headless/clipboard-test.sh {{theme}} {{keys}} {{out}}
-
 # GNOME Shell end-to-end tests in a podman container (tests/e2e, ADR 0007): just e2e -k clipboard
 [positional-arguments]
 e2e *args:

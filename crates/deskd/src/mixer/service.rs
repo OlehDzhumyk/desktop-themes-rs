@@ -8,13 +8,18 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use desk_proto::{MIXER_PATH, MIXER_VERSION, MixerApp, MixerDevice, MixerStream};
+use zbus::message::Header;
 use zbus::object_server::SignalEmitter;
 
 use super::model::{Class, MixError, dirty};
 use super::{Mixer, lock};
+use crate::trust::Gate;
 
 pub struct MixerIface {
     pub mixer: Arc<Mixer>,
+    /// Lists (application and media names) and changes (unmuting the microphone, moving audio)
+    /// only for the shell and our binaries (ADR 0008); the properties stay open.
+    pub gate: Gate,
 }
 
 fn err(e: MixError) -> zbus::fdo::Error {
@@ -35,45 +40,111 @@ impl MixerIface {
 
 #[zbus::interface(name = "io.github.OlehDzhumyk.Desk.Mixer")]
 impl MixerIface {
-    fn list_devices(&self, kind: String) -> zbus::fdo::Result<Vec<MixerDevice>> {
+    async fn list_devices(
+        &self,
+        kind: String,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<Vec<MixerDevice>> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.mixer.wanted();
         lock(&self.mixer.graph).devices(&kind).map_err(err)
     }
 
-    fn list_streams(&self) -> Vec<MixerStream> {
-        lock(&self.mixer.graph).streams()
+    async fn list_streams(
+        &self,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<Vec<MixerStream>> {
+        self.gate.check(conn, Some(&hdr)).await?;
+        Ok(lock(&self.mixer.graph).streams())
     }
 
-    fn list_apps(&self, include_silent: bool) -> Vec<MixerApp> {
+    async fn list_apps(
+        &self,
+        include_silent: bool,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<Vec<MixerApp>> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.mixer.wanted();
-        lock(&self.mixer.graph).apps(Instant::now(), include_silent)
+        Ok(lock(&self.mixer.graph).apps(Instant::now(), include_silent))
     }
 
-    fn set_volume(&self, id: u32, volume: f64) -> zbus::fdo::Result<()> {
+    async fn set_volume(
+        &self,
+        id: u32,
+        volume: f64,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| g.set_volume(id, volume))
     }
 
-    fn set_mute(&self, id: u32, mute: bool) -> zbus::fdo::Result<()> {
+    async fn set_mute(
+        &self,
+        id: u32,
+        mute: bool,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| g.set_mute(id, mute))
     }
 
-    fn set_app_volume(&self, app: String, volume: f64) -> zbus::fdo::Result<()> {
+    async fn set_app_volume(
+        &self,
+        app: String,
+        volume: f64,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| g.set_app_volume(&app, volume))
     }
 
-    fn set_app_mute(&self, app: String, mute: bool) -> zbus::fdo::Result<()> {
+    async fn set_app_mute(
+        &self,
+        app: String,
+        mute: bool,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| g.set_app_mute(&app, mute))
     }
 
-    fn set_default(&self, kind: String, id: u32) -> zbus::fdo::Result<()> {
+    async fn set_default(
+        &self,
+        kind: String,
+        id: u32,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| Ok((g.set_default(&kind, id)?, false)))
     }
 
-    fn move_stream(&self, stream: u32, device: u32) -> zbus::fdo::Result<()> {
+    async fn move_stream(
+        &self,
+        stream: u32,
+        device: u32,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| Ok((g.move_stream(stream, device)?, false)))
     }
 
-    fn move_app(&self, app: String, device: u32) -> zbus::fdo::Result<()> {
+    async fn move_app(
+        &self,
+        app: String,
+        device: u32,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         self.run(|g| Ok((g.move_app(&app, device)?, false)))
     }
 
@@ -187,7 +258,11 @@ mod tests {
     fn introspection_matches_xml() {
         let (m, _) = mixer();
         let mut xml = String::new();
-        MixerIface { mixer: m }.introspect_to_writer(&mut xml, 0);
+        MixerIface {
+            mixer: m,
+            gate: Gate::open(),
+        }
+        .introspect_to_writer(&mut xml, 0);
         assert_eq!(xml_members(&xml), xml_members(MIXER_XML), "{xml}");
         for sig in ["a(ussssdbb)", "a(ussssdbbu)", "a(ssssdbbuau)"] {
             assert!(xml.contains(sig), "{sig}");
@@ -205,7 +280,13 @@ mod tests {
             let server = zbus::connection::Builder::unix_stream(a)
                 .server(guid)
                 .p2p()
-                .serve_at(MIXER_PATH, MixerIface { mixer: m.clone() })
+                .serve_at(
+                    MIXER_PATH,
+                    MixerIface {
+                        mixer: m.clone(),
+                        gate: Gate::open(),
+                    },
+                )
                 .build();
             let client = zbus::connection::Builder::unix_stream(b).p2p().build();
             let (server, client) = futures_util::future::try_join(server, client)

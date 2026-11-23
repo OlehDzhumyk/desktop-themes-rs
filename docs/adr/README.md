@@ -13,5 +13,6 @@ ADR that supersedes the old one; do not rewrite history.
 | [0005](0005-headless-testing-is-isolated.md) | Headless testing must be fully isolated from the live session |
 | [0006](0006-experimental-themes-need-confirmation.md) | Experimental themes require explicit confirmation |
 | [0007](0007-e2e-in-containers.md) | End-to-end tests run GNOME Shell in a throw-away container, driven over Eval |
+| [0008](0008-deskd-serves-content-to-trusted-callers.md) | deskd serves content only to GNOME Shell and its own binaries; its bus name is not replaceable |
 
 New ADR: copy `0000-template.md`, take the next number, add a row above.

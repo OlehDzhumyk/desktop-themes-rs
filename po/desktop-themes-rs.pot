@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-22 21:24+0000\n"
+"POT-Creation-Date: 2026-11-23 10:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -535,34 +535,35 @@ msgid ""
 "LICENSE file in their repositories)."
 msgstr ""
 
-#: crates/deskd/src/clipboard.rs:149
+#: crates/deskd/src/clipboard.rs:246
 #, rust-format
 msgid "{format} image {width}×{height}"
 msgstr ""
 
-#: crates/deskd/src/clipboard.rs:154
+#: crates/deskd/src/clipboard.rs:251
 #, rust-format
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/main.rs:31
+#: crates/deskd/src/main.rs:32
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
 "\n"
 "Usage: deskd [--replace]\n"
-"  --replace   take the bus name over from a running deskd\n"
+"  --replace   development: take the bus name over from a deskd started with "
+"--replace, and let the next one take it\n"
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:114
+#: crates/deskd/src/main.rs:115
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:203 crates/themes/src/service.rs:234
+#: crates/deskd/src/main.rs:198 crates/themes/src/service.rs:234
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -2130,7 +2131,7 @@ msgstr ""
 msgid "Clipboard settings"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:131
+#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:134
 #: bridge/src/clipboard/winFlyout.ts:61
 msgid "Clipboard history"
 msgstr ""
@@ -2293,53 +2294,53 @@ msgstr ""
 msgid "Desktop"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:55 bridge/src/quickSettings.ts:56
-#: bridge/src/quickSettings.ts:93 bridge/src/quickSettings.ts:129
-#: bridge/src/quickSettings.ts:131 bridge/src/quickSettings.ts:133
+#: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
+#: bridge/src/quickSettings.ts:120 bridge/src/quickSettings.ts:158
+#: bridge/src/quickSettings.ts:160 bridge/src/quickSettings.ts:162
 msgid "Theme"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:60
+#: bridge/src/quickSettings.ts:73
 msgid "Open “Desktop”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:80
+#: bridge/src/quickSettings.ts:107
 msgid "service unavailable"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:92
+#: bridge/src/quickSettings.ts:119
 msgid "{name} (mixed)"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:102
+#: bridge/src/quickSettings.ts:129
 msgid "{count} of {total} modules active"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:104
+#: bridge/src/quickSettings.ts:131
 msgid "{name}: modules {modules}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:125
+#: bridge/src/quickSettings.ts:154
 msgid "applying “{name}”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:133
+#: bridge/src/quickSettings.ts:162
 msgid "Could not apply “{name}”: {error}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:172
+#: bridge/src/quickSettings.ts:207
 msgid "Clipboard settings…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:199
+#: bridge/src/quickSettings.ts:234
 msgid "private mode"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:213
+#: bridge/src/quickSettings.ts:255
 msgid "deskd is unavailable"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:217
+#: bridge/src/quickSettings.ts:261
 msgid "The history is empty"
 msgstr ""
 
