@@ -90,11 +90,14 @@ function patchPolicy(): (() => void) | null {
         Object.defineProperty(proto, 'showBanners', {
             configurable: true,
             get(this: MessageTray.NotificationApplicationPolicy): boolean {
-                if (allowed.size > 0 && allowed.has(canonical(this.id)))
-                    return this._settings.get_boolean('show-banners');
-                // GNOME's own rule: the global switch and the per-app switch
-                return this._masterSettings.get_boolean('show-banners') &&
-                    this._settings.get_boolean('show-banners');
+                if (allowed.size > 0 && allowed.has(canonical(this.id))) {
+                    try {
+                        return this._settings.get_boolean('show-banners');
+                    } catch {
+                        // Fall through to GNOME's original policy getter if shell internals change.
+                    }
+                }
+                return desc.get ? Boolean(desc.get.call(this)) : true;
             },
         });
         return () => { Object.defineProperty(proto, 'showBanners', desc); };
@@ -160,6 +163,7 @@ export class FocusFeature {
     private _missedBase: number | null = null;
     private _tick = 0;
     private _serial = 0;
+    private _enabledId = 0;
     private _destroyed = false;
     private _unpatch: (() => void) | null;
 
@@ -167,6 +171,8 @@ export class FocusFeature {
         this._settings = settings;
         this._skin = toSkin(skin);
         this._unpatch = patchPolicy();
+        if (this._settings)
+            this._enabledId = this._settings.connect('changed::enabled', () => { this._render(); });
         this._indicator = new FocusIndicator();
         const toggle = this._indicator.toggle;
         toggle.connect('clicked', () => { this._toggle(); });
@@ -211,8 +217,10 @@ export class FocusFeature {
                 Main.notify(_('Focus'), fmt(_('Missed notifications: {count}'), {count: missed}));
         }
         allowed.clear();
-        for (const a of st?.allowedApps ?? [])
-            allowed.add(canonical(a));
+        if (this._enabled()) {
+            for (const a of st?.allowedApps ?? [])
+                allowed.add(canonical(a));
+        }
         this._status = st;
         this._render();
         this._armCountdown();
@@ -246,13 +254,21 @@ export class FocusFeature {
         return '';
     }
 
+    private _enabled(): boolean {
+        return this._settings?.get_boolean('enabled') ?? true;
+    }
+
     private _render(): void {
         if (this._destroyed)
             return;
+        const enabled = this._enabled();
         const st = this._status;
-        const active = Boolean(st?.mode);
+        const active = enabled && Boolean(st?.mode);
+        if (!enabled)
+            allowed.clear();
         const iconName = this._skin === 'windows11' ? BELL_OFF : MOON;
         const toggle = this._indicator.toggle;
+        toggle.visible = enabled;
         toggle.checked = active;
         toggle.iconName = iconName;
         toggle.subtitle = this._subtitle(st);
@@ -271,6 +287,8 @@ export class FocusFeature {
     }
 
     private _toggle(): void {
+        if (!this._enabled())
+            return;
         if (!this._status) {
             void this._refresh();
             return;
@@ -337,6 +355,9 @@ export class FocusFeature {
 
     destroy(): void {
         this._destroyed = true;
+        if (this._enabledId && this._settings)
+            this._settings.disconnect(this._enabledId);
+        this._enabledId = 0;
         if (this._tick)
             GLib.source_remove(this._tick);
         this._tick = 0;
