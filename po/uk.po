@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 22:37+0000\n"
+"POT-Creation-Date: 2026-11-23 22:54+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -78,7 +78,7 @@ msgstr "Пошук у буфері обміну"
 msgid "Clipboard settings"
 msgstr "Налаштування буфера обміну"
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:134
+#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:160
 #: bridge/src/clipboard/winFlyout.ts:79
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
@@ -174,6 +174,72 @@ msgstr "Відкріпити"
 #: bridge/src/clipboard/winFlyout.ts:252
 msgid "More"
 msgstr "Більше"
+
+#: bridge/src/colorPicker/feature.ts:109
+msgid "Picked {value}"
+msgstr "Вибрано {value}"
+
+#: bridge/src/colorPicker/feature.ts:117
+msgid "Copied {value}"
+msgstr "Скопійовано {value}"
+
+#: bridge/src/colorPicker/overlay.ts:123
+msgid "Enter picks · F format · H history · Esc cancels"
+msgstr "Enter — взяти · F — формат · H — історія · Esc — скасувати"
+
+#: bridge/src/colorPicker/overlay.ts:329 bridge/src/colorPicker/overlay.ts:341
+#: bridge/src/colorPicker/overlay.ts:461 bridge/src/colorPicker/overlay.ts:482
+msgid "No colour here"
+msgstr "Тут немає кольору"
+
+#: bridge/src/colorPicker/overlay.ts:344 bridge/src/colorPicker/overlay.ts:477
+msgid "Could not read the colour"
+msgstr "Не вдалося визначити колір"
+
+#: bridge/src/colorPicker/panel.ts:46
+msgid "passes AAA"
+msgstr "відповідає AAA"
+
+#: bridge/src/colorPicker/panel.ts:48
+msgid "passes AA"
+msgstr "відповідає AA"
+
+#: bridge/src/colorPicker/panel.ts:50
+msgid "passes AA for large text only"
+msgstr "відповідає AA лише для великого тексту"
+
+#: bridge/src/colorPicker/panel.ts:51
+msgid "fails AA"
+msgstr "не відповідає AA"
+
+#: bridge/src/colorPicker/panel.ts:79 bridge/src/colorPicker/panel.ts:82
+#: bridge/src/colorPicker/panel.ts:109
+msgid "Picked colours"
+msgstr "Вибрані кольори"
+
+#: bridge/src/colorPicker/panel.ts:254 bridge/src/quickSettings.ts:325
+msgid "deskd is unavailable"
+msgstr "deskd недоступний"
+
+#: bridge/src/colorPicker/panel.ts:256
+msgid "The history is off: history size is 0"
+msgstr "Історію вимкнено: розмір історії 0"
+
+#: bridge/src/colorPicker/panel.ts:258
+msgid "No colours picked yet"
+msgstr "Ще не вибрано жодного кольору"
+
+#: bridge/src/colorPicker/panel.ts:261
+msgid "Contrast of the last two picks: {ratio}:1, {level}"
+msgstr "Контраст двох останніх кольорів: {ratio}:1, {level}"
+
+#: bridge/src/colorPicker/panel.ts:267
+msgid "{value}, {name}"
+msgstr "{value}, {name}"
+
+#: bridge/src/colorPicker/panel.ts:277
+msgid "Remove {value}"
+msgstr "Вилучити {value}"
 
 #: bridge/src/emoji/panel.ts:28
 msgid "Recents"
@@ -439,10 +505,6 @@ msgstr "Налаштування буфера обміну…"
 msgid "private mode"
 msgstr "приватний режим"
 
-#: bridge/src/quickSettings.ts:325
-msgid "deskd is unavailable"
-msgstr "deskd недоступний"
-
 #: bridge/src/quickSettings.ts:331
 msgid "The history is empty"
 msgstr "Історія порожня"
@@ -648,7 +710,9 @@ msgstr "Формат"
 
 #: crates/desk-settings/src/color_picker.rs:69
 msgid "How a picked colour is copied and shown; F cycles it while picking"
-msgstr "Як вибраний колір копіюється й показується; клавіша F перемикає формат під час вибору"
+msgstr ""
+"Як вибраний колір копіюється й показується; клавіша F перемикає формат під "
+"час вибору"
 
 #: crates/desk-settings/src/color_picker.rs:86
 msgid "Loupe magnification"

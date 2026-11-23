@@ -7,8 +7,27 @@ and remembers it in a short history. Useful for designers, developers and anyone
 
 ## Status
 
-**Planned** (stage 3). Origin badge: *In Windows 11 (PowerToys) and macOS (Digital Color Meter)*. Implementation uses
-GNOME Shell's own `org.gnome.Shell.Screenshot` `PickColor` and area screenshot for the loupe; no external code.
+**Implemented** (stage 3). Origin badge: *In Windows 11 (PowerToys) and macOS (Digital Color Meter)*. deskd hosts
+the engine (`io.github.OlehDzhumyk.Desk.ColorPicker`: formats, history, contrast); the bridge
+(`bridge/src/colorPicker/`) binds the shortcut, reads pixels with GNOME Shell's own `Shell.Screenshot.pick_color()`
+(the call behind `org.gnome.Shell.Screenshot` `PickColor`) and draws the loupe, the history panel and the toast. No
+external code.
+
+Gaps:
+
+* **Gap (loupe):** the loupe magnifies a frame of the stage taken when the picker opens
+  (`Shell.Screenshot.screenshot_stage_to_content()`, kept on the GPU, never written to disk); the swatch and the value
+  are read live under the pointer. Video or animation under the pointer can differ between the loupe and the value.
+  The loupe is a 120 px square with rounded corners, not a circle: St cannot clip to a circle
+  (`bridge/src/colorPicker/overlay.ts`).
+* **Gap (history panel):** one modal panel for all skins, styled per skin: `windows11` opens it as a flyout above the
+  bottom right corner (not inside the Win+V flyout), `macos` and `default` as a popover at the pointer. It opens with
+  `H` or a right click while picking; the `macos` «same shortcut with `Shift`» is not bound, and there is no
+  quick-settings entry (`bridge/src/colorPicker/panel.ts`).
+* **Gap (tooltip):** the note on night light and colour profiles is in this spec and the settings page, not in the
+  preview (`bridge/src/colorPicker/overlay.ts`).
+* **Gap (tests):** deskd tests cover the formatting of AC-COLOR-01 and 02, and AC-COLOR-03 and 05. The shell side
+  (the pixel read of 01 and 02, and 04, 06, 07, 08) has no GNOME Shell end-to-end test yet (`just e2e`).
 
 ## Reference behaviour
 

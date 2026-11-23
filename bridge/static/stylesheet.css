@@ -315,3 +315,115 @@
 .desk-accent-pink   .desk-emoji-cat.active, .desk-accent-pink   .desk-emoji-cell:selected { border-color: #d56199; }
 .desk-accent-purple .desk-emoji-cat.active, .desk-accent-purple .desk-emoji-cell:selected { border-color: #9141ac; }
 .desk-accent-slate  .desk-emoji-cat.active, .desk-accent-slate  .desk-emoji-cell:selected { border-color: #6f8396; }
+
+/* ------------------------------------------------------------------ colour picker */
+/* The eyedropper pill next to the pointer, the history panel and the «Copied …» toast. default:
+   shell theme colours (popup-menu-content); macos and windows11: the skins' palettes, light and
+   dark; .desk-hc adds outlines so nothing depends on colour alone. */
+.desk-color-backdrop { background-color: transparent; }
+.desk-color-pill {
+  padding: 8px;
+  spacing: 6px;
+  border-radius: 12px;
+  font-size: 10pt;
+  color: #f2f2f2;
+  background-color: rgba(30,30,32,0.94);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.desk-color-pill.desk-skin-macos { border-radius: 16px; font-family: Inter, Cantarell, sans-serif; }
+.desk-color-pill.desk-skin-windows11 { border-radius: 8px; background-color: #2b2b2b; font-family: "Noto Sans", Cantarell, sans-serif; }
+.desk-light.desk-color-pill { color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14); box-shadow: 0 8px 24px rgba(0,0,0,0.22); }
+.desk-light.desk-color-pill.desk-skin-windows11 { background-color: #f3f3f3; }
+.desk-color-loupe { border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background-color: #000; }
+.desk-light .desk-color-loupe { border-color: rgba(0,0,0,0.3); }
+.desk-color-loupe-center { border: 1px solid #fff; box-shadow: 0 0 0 1px #000; }
+.desk-color-pill-row { spacing: 8px; }
+.desk-color-swatch {
+  width: 1.6em; height: 1.6em; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.35);
+}
+.desk-light .desk-color-swatch { border-color: rgba(0,0,0,0.3); }
+.desk-color-value { font-family: "JetBrains Mono", monospace; font-weight: 600; }
+.desk-color-pill-meta { spacing: 6px; }
+.desk-color-chip { font-size: 8.5pt; padding: 1px 6px; border-radius: 5px; background-color: rgba(255,255,255,0.12); }
+.desk-light .desk-color-chip { background-color: rgba(0,0,0,0.08); }
+.desk-color-hint { font-size: 8.5pt; color: rgba(255,255,255,0.6); }
+.desk-light .desk-color-hint { color: rgba(0,0,0,0.6); }
+.desk-hc.desk-color-pill, .desk-hc .desk-color-swatch { border: 2px solid currentColor; }
+.desk-hc .desk-color-loupe-center { border-width: 2px; }
+
+.desk-color-panel { width: 24em; max-height: 30em; padding: 10px; spacing: 8px; font-size: 10pt; }
+.desk-color-panel.desk-skin-macos {
+  border-radius: 16px; color: #f2f2f2;
+  background-color: rgba(38,38,42,0.94);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.48);
+  font-family: Inter, Cantarell, sans-serif;
+}
+.desk-color-panel.desk-skin-windows11 {
+  border-radius: 8px; color: #f2f2f2;
+  background-color: #2b2b2b;
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  font-family: "Noto Sans", Cantarell, sans-serif;
+}
+.desk-light.desk-color-panel.desk-skin-macos { color: #1f1f1f; background-color: rgba(246,246,248,0.96); border-color: rgba(0,0,0,0.12); box-shadow: 0 14px 40px rgba(0,0,0,0.22); }
+.desk-light.desk-color-panel.desk-skin-windows11 { color: #1f1f1f; background-color: #f3f3f3; border-color: rgba(0,0,0,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.22); }
+.desk-color-header { spacing: 6px; }
+.desk-color-title { font-weight: 600; }
+.desk-color-flat-button { border-radius: 6px; padding: 5px; }
+.desk-color-flat-button:hover, .desk-color-flat-button:focus { background-color: rgba(255,255,255,0.1); }
+.desk-light .desk-color-flat-button:hover, .desk-light .desk-color-flat-button:focus { background-color: rgba(0,0,0,0.07); }
+.desk-color-formats { spacing: 2px; }
+.desk-color-format { font-size: 8.5pt; padding: 3px 7px; border-radius: 5px; border: 1px solid transparent; }
+.desk-color-format:hover, .desk-color-format:focus { background-color: rgba(255,255,255,0.08); }
+.desk-light .desk-color-format:hover, .desk-light .desk-color-format:focus { background-color: rgba(0,0,0,0.06); }
+.desk-color-format:checked { background-color: rgba(96,205,255,0.22); border-color: #60cdff; font-weight: 600; }
+.desk-skin-default .desk-color-format:checked { color: -st-accent-fg-color; background-color: -st-accent-color; border-color: -st-accent-color; }
+.desk-color-scroll { max-height: 19em; }
+.desk-color-list { spacing: 2px; }
+.desk-color-row { padding: 6px 8px; border-radius: 6px; border: 1px solid transparent; }
+.desk-color-row-box { spacing: 10px; }
+.desk-color-row:hover { background-color: rgba(255,255,255,0.06); }
+.desk-light .desk-color-row:hover { background-color: rgba(0,0,0,0.05); }
+.desk-color-row:selected { background-color: rgba(96,205,255,0.16); border-color: #60cdff; }
+.desk-skin-default .desk-color-row:selected { background-color: -st-accent-color; color: -st-accent-fg-color; border-color: -st-accent-color; }
+.desk-color-row-value { font-family: "JetBrains Mono", monospace; }
+.desk-color-row-name { font-size: 9pt; color: rgba(255,255,255,0.6); padding-left: 6px; }
+.desk-light .desk-color-row-name { color: rgba(0,0,0,0.6); }
+.desk-skin-default .desk-color-row-name { color: inherit; }
+.desk-color-empty { padding: 1.6em 1em; text-align: center; color: rgba(255,255,255,0.6); }
+.desk-light .desk-color-empty { color: rgba(0,0,0,0.6); }
+.desk-skin-default .desk-color-empty { color: inherit; }
+.desk-color-footer { spacing: 8px; padding-top: 4px; }
+.desk-color-contrast { font-size: 9pt; }
+.desk-color-clear { padding: 4px 10px; border-radius: 5px; color: #60cdff; }
+.desk-color-clear:hover, .desk-color-clear:focus { background-color: rgba(255,255,255,0.08); }
+.desk-light .desk-color-clear { color: #005fb8; }
+.desk-light .desk-color-clear:hover, .desk-light .desk-color-clear:focus { background-color: rgba(0,0,0,0.06); }
+.desk-skin-default .desk-color-clear { color: inherit; text-decoration: underline; }
+.desk-color-clear:insensitive { color: rgba(127,127,127,0.7); }
+.desk-hc .desk-color-row:selected, .desk-hc .desk-color-format:checked,
+.desk-hc .desk-color-format:focus, .desk-hc .desk-color-clear:focus,
+.desk-hc .desk-color-flat-button:focus { border: 2px solid currentColor; }
+.desk-hc .desk-color-format:checked { text-decoration: underline; }
+.desk-accent-blue   .desk-color-row:selected, .desk-accent-blue   .desk-color-format:checked { border-color: #3584e4; }
+.desk-accent-teal   .desk-color-row:selected, .desk-accent-teal   .desk-color-format:checked { border-color: #2190a4; }
+.desk-accent-green  .desk-color-row:selected, .desk-accent-green  .desk-color-format:checked { border-color: #3a944a; }
+.desk-accent-yellow .desk-color-row:selected, .desk-accent-yellow .desk-color-format:checked { border-color: #c88800; }
+.desk-accent-orange .desk-color-row:selected, .desk-accent-orange .desk-color-format:checked { border-color: #ed5b00; }
+.desk-accent-red    .desk-color-row:selected, .desk-accent-red    .desk-color-format:checked { border-color: #e62d42; }
+.desk-accent-pink   .desk-color-row:selected, .desk-accent-pink   .desk-color-format:checked { border-color: #d56199; }
+.desk-accent-purple .desk-color-row:selected, .desk-accent-purple .desk-color-format:checked { border-color: #9141ac; }
+.desk-accent-slate  .desk-color-row:selected, .desk-accent-slate  .desk-color-format:checked { border-color: #6f8396; }
+
+.desk-color-toast {
+  padding: 8px 16px; border-radius: 99px; font-size: 10.5pt; font-weight: 600;
+  color: #f2f2f2; background-color: rgba(30,30,32,0.94);
+  border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+.desk-color-toast.desk-skin-windows11 { border-radius: 8px; background-color: #2b2b2b; }
+.desk-light.desk-color-toast { color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14); }
+.desk-light.desk-color-toast.desk-skin-windows11 { background-color: #f3f3f3; }
+.desk-hc.desk-color-toast { border: 2px solid currentColor; }

@@ -27,8 +27,13 @@ All notable changes to this project are documented in this file. The format is b
   `history-size` picks in `~/.local/share/deskd/colors.json` (0600; nothing is written with
   `history-size=0`). Settings `io.github.OlehDzhumyk.Desk.ColorPicker` (`enabled`, `format`, `zoom`,
   `history-size`, `copy-on-pick`, `color-picker-shortcut`), shortcut `color-picker-toggle`
-  (Shift+Super+C; Ctrl+Shift+Super+C in the macOS theme) and a «Піпетка» page in the window. The
-  shell-side loupe and history panel follow in a later change.
+  (Shift+Super+C; Ctrl+Shift+Super+C in the macOS theme) and a «Піпетка» page in the window.
+- Colour picker in the shell (stage 3): the bridge binds `color-picker-shortcut` (normal mode only, so
+  not on the lock screen) and opens an eyedropper with a crosshair, a loupe, a live swatch and the
+  value in the chosen format; click or `Enter` copies it with a «Copied …» toast, `Esc` cancels,
+  arrows move the pointer by 1 px (`Shift`: 10 px), `F` cycles the format, `+`/`-` or scroll change
+  the zoom. `H` or a right click opens the history panel (copy, `Delete`, format buttons, «Clear»,
+  WCAG contrast of the two newest picks), styled for the `windows11`, `macos` and `default` skins.
 - Flatpak-compatible GTK copies: `themes apply` now copies all theme `gtk4/` and `gtk3/` files
   (including `assets/` subdirectories for `macos` and `windows11`) into `~/.config/gtk-{4,3}.0`
   instead of symlinking them, so Flatpak apps with `xdg-config/gtk-4.0:ro` can read them.
