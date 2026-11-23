@@ -68,6 +68,11 @@ the bridge and the window alike: there is no second settings dialog.
 | `themes/src/service.rs` | D-Bus service `io.github.OlehDzhumyk.Themes` (blocking work on a thread pool; exits after 90 s idle or when the bus closes) |
 | `themes/src/gui/` | the window: theme cards, the mix page, «Функції» (feature settings, credits from CREDITS.md), crash banner |
 
+**Long-term direction.** The layers above are meant to stay DE-agnostic in the core, with desktop
+specifics behind a backend boundary and thin compositor adapters (GNOME Shell today, a native Rust
+`wlr-layer-shell` client on KDE and wlroots later). The target design, and what it does not change
+yet, is in [ADR 0011](adr/0011-wayland-agnostic-rust-core.md).
+
 ## Files and directories
 
 Everything lives under the **theme root**, `~/.local/share/desktop-themes` (override with
