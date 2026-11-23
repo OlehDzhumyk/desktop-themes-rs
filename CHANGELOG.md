@@ -125,6 +125,9 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- `deskd` start-up is split into one engine per feature behind an `Engine` trait (register, start,
+  shutdown in reverse order); the shared resume and time zone watcher wakes every engine that asks.
+  No behavior changes: the same D-Bus paths, `Features`, bus name handling and shutdown writes.
 - Stage 1.5 (foundations) is done: the spec tree marks `lavender` Implemented (every generated
   output is pinned by snapshot tests), the Stage 2 features by their own specs, and records the
   follow-ups (report-only performance job, no automated AT-SPI audit, `dconf` tool still used).
