@@ -12,7 +12,6 @@
 //!   `~/.local/share/themes/desktop-themes-<id>` (look module) and the Ptyxis palette as
 //!   `~/.local/share/org.gnome.Ptyxis/palettes/desktop-themes-<id>.palette` (apps module).
 
-use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
@@ -240,7 +239,6 @@ pub fn link_module(
     warnings: &mut Vec<String>,
 ) -> Result<Vec<String>> {
     let mut made = Vec::new();
-    let mut rec: BTreeMap<String, String> = BTreeMap::new();
     for (dest, src) in links_for(ctx, theme, module) {
         if lexists(&dest) {
             let ours = std::fs::read_link(&dest).is_ok_and(|t| t == src);
@@ -257,11 +255,12 @@ pub fn link_module(
             std::fs::create_dir_all(p)?;
         }
         std::os::unix::fs::symlink(&src, &dest)?;
-        rec.insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
+        st.token_links
+            .entry(module)
+            .or_default()
+            .insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
+        st.save(ctx)?;
         made.push(dest.to_string_lossy().into_owned());
-    }
-    if !rec.is_empty() {
-        st.token_links.insert(module, rec);
     }
     Ok(made)
 }

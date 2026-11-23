@@ -18,16 +18,20 @@ use crate::theme::Theme;
 
 /// Default time limit of a hook.
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
+/// Upper bound on `DESKTOP_THEMES_HOOK_TIMEOUT` (prevents `Instant` overflow).
+const MAX_TIMEOUT_SECS: u64 = 3600;
 /// Bytes of stdout and of stderr kept from a hook.
 pub const OUTPUT_LIMIT: usize = 64 * 1024;
 
-/// `DESKTOP_THEMES_HOOK_TIMEOUT` (whole seconds, more than 0), else [`DEFAULT_TIMEOUT`].
+/// `DESKTOP_THEMES_HOOK_TIMEOUT` (whole seconds, 1..=3600), else [`DEFAULT_TIMEOUT`].
 pub fn hook_timeout() -> Duration {
     std::env::var("DESKTOP_THEMES_HOOK_TIMEOUT")
         .ok()
         .and_then(|s| s.trim().parse::<u64>().ok())
         .filter(|s| *s > 0)
-        .map_or(DEFAULT_TIMEOUT, Duration::from_secs)
+        .map_or(DEFAULT_TIMEOUT, |s| {
+            Duration::from_secs(s.min(MAX_TIMEOUT_SECS))
+        })
 }
 
 /// Запускає хук. Повертає Err з текстом помилки.
@@ -135,7 +139,10 @@ fn run_bounded(mut c: Command, timeout: Duration) -> std::io::Result<Bounded> {
     std::thread::spawn(move || {
         let _ = tx.send(Event::Exit(child.wait()));
     });
-    let deadline = Instant::now() + timeout;
+    let now = Instant::now();
+    let deadline = now
+        .checked_add(timeout)
+        .unwrap_or_else(|| now + Duration::from_secs(MAX_TIMEOUT_SECS));
     let (mut out_done, mut stderr, mut status) = (false, None, None);
     while !(out_done && stderr.is_some() && status.is_some()) {
         let left = deadline.saturating_duration_since(Instant::now());
@@ -146,14 +153,19 @@ fn run_bounded(mut c: Command, timeout: Duration) -> std::io::Result<Bounded> {
             Err(mpsc::RecvTimeoutError::Timeout) => {
                 // the group id is the hook's pid (process_group(0)); it is a process we spawned
                 // and have not reaped yet (the waiter still waits on it), so the id is still ours
-                if status.is_none()
-                    && let Ok(pgid) = libc::pid_t::try_from(pid)
-                {
-                    // SAFETY: plain syscall on a process group we created.
-                    unsafe { libc::killpg(pgid, libc::SIGKILL) };
+                if status.is_none() {
+                    if let Ok(pgid) = libc::pid_t::try_from(pid) {
+                        // SAFETY: plain syscall on a process group we created.
+                        unsafe { libc::killpg(pgid, libc::SIGKILL) };
+                    }
+                    return Ok(Bounded {
+                        status: None,
+                        stderr: stderr.unwrap_or_default(),
+                    });
                 }
+                // the hook itself already exited, only a background child kept a pipe open
                 return Ok(Bounded {
-                    status: None,
+                    status,
                     stderr: stderr.unwrap_or_default(),
                 });
             }

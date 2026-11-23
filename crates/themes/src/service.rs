@@ -124,22 +124,22 @@ impl Service {
                 dry_run: true,
                 ..Default::default()
             };
-            if let Ok(plan) = themes_core::apply::apply(&ctx, &theme, &mods, &dry) {
-                let pending = themes_core::commands::pending(&ctx, &plan.writes);
-                if !pending.is_empty() {
-                    if !confirmed {
-                        let list: Vec<String> = pending
-                            .iter()
-                            .map(|c| format!("{} = {}", c.key, c.value))
-                            .collect();
-                        return Err(zbus::fdo::Error::AccessDenied(tr!(
-                            "This theme sets keys that make the desktop run programs:\n\n{list}",
-                            list = list.join("\n")
-                        )));
-                    }
-                    themes_core::commands::approve(&ctx, &pending)
-                        .map_err(|e| zbus::fdo::Error::Failed(e.0))?;
+            let plan = themes_core::apply::apply(&ctx, &theme, &mods, &dry)
+                .map_err(|e| zbus::fdo::Error::Failed(e.0))?;
+            let pending = themes_core::commands::pending(&ctx, &plan.writes);
+            if !pending.is_empty() {
+                if !confirmed {
+                    let list: Vec<String> = pending
+                        .iter()
+                        .map(|c| format!("{} = {}", c.key, c.value))
+                        .collect();
+                    return Err(zbus::fdo::Error::AccessDenied(tr!(
+                        "This theme sets keys that make the desktop run programs:\n\n{list}",
+                        list = list.join("\n")
+                    )));
                 }
+                themes_core::commands::approve(&ctx, &pending)
+                    .map_err(|e| zbus::fdo::Error::Failed(e.0))?;
             }
             let opts = themes_core::apply::Options {
                 confirmed,
@@ -378,6 +378,7 @@ pub fn run() -> i32 {
         });
     }
     // applies by the CLI or the window change state.json: announce them
+    let _ = std::fs::create_dir_all(&ctx.root);
     let monitor = gio::File::for_path(&ctx.state)
         .monitor_file(gio::FileMonitorFlags::WATCH_MOVES, gio::Cancellable::NONE);
     if let Ok(m) = &monitor {

@@ -199,6 +199,7 @@ pub fn apply(
             continue;
         }
         let after = kf_read(&path);
+        let prev_len = st.flatpak.len();
         for (sec, kvs) in &after.0 {
             for (k, v) in kvs {
                 let old = kf_get(&before, sec, k).map(String::from);
@@ -212,6 +213,9 @@ pub fn apply(
                     });
                 }
             }
+        }
+        if st.flatpak.len() != prev_len {
+            st.save(ctx)?;
         }
     }
     Ok(lines.len())

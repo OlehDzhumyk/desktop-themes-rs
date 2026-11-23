@@ -37,7 +37,9 @@ are the one way a theme can run code outside the documented hooks, so:
 
 * `themes apply <id> --dry-run` lists them under "Keys that run commands".
 * The first apply asks for a yes: `--yes` on the command line (scripts have no other way), a dialog
-  that lists the commands in the window. Nothing is applied without it.
+  that lists the commands in the window or quick settings. The D-Bus `Themes` service refuses
+  unapproved command keys on `Apply` (`AccessDenied`), exposes `PendingCommands`, and approves them
+  on `ApplyConfirmed`. Nothing is applied without it.
 * The yes is remembered for that key and that exact command in
   `~/.local/share/desktop-themes/approved-commands.json`; a theme that changes the command asks
   again. Empty values (`''`, `[]`) run nothing and do not ask.
@@ -45,9 +47,6 @@ are the one way a theme can run code outside the documented hooks, so:
   first apply asks once.
 
 The check works on the planned writes, so it covers every theme module and mixed selections.
-
-Known gap: the D-Bus `Themes` service (quick settings in the shell) applies a theme without asking;
-it does not call this check yet. Use the CLI or the window for themes you do not trust.
 
 ## Portable paths
 

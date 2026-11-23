@@ -371,6 +371,20 @@ pub(crate) struct Alarm {
 struct AlarmInner {
     fired: std::sync::atomic::AtomicBool,
     waker: std::sync::Mutex<Option<std::task::Waker>>,
+    cancelled: std::sync::Mutex<bool>,
+    cv: std::sync::Condvar,
+}
+
+impl Drop for Alarm {
+    fn drop(&mut self) {
+        let mut g = self
+            .inner
+            .cancelled
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        *g = true;
+        self.inner.cv.notify_one();
+    }
 }
 
 impl Alarm {
@@ -379,11 +393,26 @@ impl Alarm {
         let inner = std::sync::Arc::new(AlarmInner {
             fired: std::sync::atomic::AtomicBool::new(false),
             waker: std::sync::Mutex::new(None),
+            cancelled: std::sync::Mutex::new(false),
+            cv: std::sync::Condvar::new(),
         });
-        let left = deadline.saturating_duration_since(Instant::now());
         let i = inner.clone();
         std::thread::spawn(move || {
-            std::thread::sleep(left);
+            let mut g = i.cancelled.lock().unwrap_or_else(|p| p.into_inner());
+            while !*g {
+                let left = deadline.saturating_duration_since(Instant::now());
+                if left.is_zero() {
+                    break;
+                }
+                g =
+                    i.cv.wait_timeout(g, left)
+                        .unwrap_or_else(|p| p.into_inner())
+                        .0;
+            }
+            if *g {
+                return;
+            }
+            drop(g);
             i.fired.store(true, Ordering::SeqCst);
             if let Some(w) = i.waker.lock().unwrap_or_else(|p| p.into_inner()).take() {
                 w.wake();
