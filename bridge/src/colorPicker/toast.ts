@@ -22,7 +22,7 @@ export class Toast {
         this._label = new St.Label({style_class: 'desk-color-toast', visible: false, reactive: false});
         this._label.accessible_role = Atk.Role.NOTIFICATION;
         this._label.connect('destroy', () => { this._gone = true; });
-        Main.layoutManager.addTopChrome(this._label, {affectsInputRegion: false});
+        Main.layoutManager.addTopChrome(this._label);
     }
 
     show(text: string, skin: string): void {
