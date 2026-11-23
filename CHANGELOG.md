@@ -40,6 +40,25 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- `themes apply` is transactional: an intent journal in `state.json` (`pending`) is saved before
+  every step with side effects. A failing step rolls back the steps done so far (dconf values,
+  extension list, GTK links and copies, flatpak overrides, token links) and keeps the old
+  selection; GTK backups are recorded before the user's file is moved, so `themes reset` always
+  gets it back. After a crash the next apply or `themes doctor --fix` completes or rolls back the
+  interrupted apply, and `themes doctor` reports it.
+- Experimental themes need confirmation in the library and the D-Bus service too: `Apply` refuses
+  them (`AccessDenied`), the new `ApplyConfirmed` applies them after the user said yes; the
+  quick-settings toggle applies nothing when it cannot ask the service whether a theme is
+  experimental (ADR 0006).
+- Theme hooks have a time limit (30 s, `DESKTOP_THEMES_HOOK_TIMEOUT`) and bounded output.
+- The Themes D-Bus service no longer blocks its executor during an apply, exits when the bus
+  connection closes, counts running operations, and watches `state.json` instead of polling it.
+- The fixed delays around extension toggles (the GNOME Shell 51.1 crash workaround) are replaced by
+  waits on the dconf change notification and `ExtensionStateChanged`, with an upper bound.
+- Many dconf keys are reset with one change instead of one `dconf reset` process per key; a
+  command's input is written from its own thread, so a child that fills its output first cannot
+  deadlock.
+
 - Bridge: disabling it left the menus of its quick settings toggles (theme, clipboard), their items
   and a GSettings handler on the stage (GNOME Shell 51 does not destroy an item's menu with the
   item); switching the skin or language added another set each time.

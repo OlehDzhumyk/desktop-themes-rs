@@ -40,6 +40,7 @@ Exit codes: 0 all clear (only `info` issues, or after `--fix` every issue was fi
 
 | Kind | Severity | Condition | Fixable |
 |---|---|---|---|
+| `interrupted-apply` | error | `state.json` holds the journal (`pending`) of an apply that did not finish (crash, kill, power loss) | yes: completed when its hooks had run, else rolled back |
 | `extension` | error | enabled extension in state `ERROR` or `OUT_OF_DATE` (with the shell's error text; without a shell: `metadata.json` does not list the GNOME major version) | yes: disabled and recorded in `state.json` |
 | `extension` | warning | enabled but not installed | no |
 | `extension` | info | installed but the shell has not loaded it yet (needs a re-login) | no |

@@ -62,7 +62,10 @@ module still applies.
 
 `apps/hooks/apply` runs when the apps module switches to this theme, `apps/hooks/revert` when it
 switches away. Environment: `THEME_ID`, `THEME_DIR`, `PREV_THEME_ID` (for `revert` also
-`NEXT_THEME_ID`). Hooks must be executable.
+`NEXT_THEME_ID`). Hooks must be executable. A hook runs in its own process group with a time limit
+of 30 seconds (`DESKTOP_THEMES_HOOK_TIMEOUT` changes it); a hook that runs longer is killed with
+everything it started. Only the first 64 KiB of its output are kept. A failing hook gives a
+warning; the rest of the apply stays.
 
 ## Skin (shell bridge UI variant)
 

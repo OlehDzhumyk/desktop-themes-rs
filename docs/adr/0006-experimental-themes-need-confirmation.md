@@ -1,7 +1,8 @@
 # 0006. Experimental themes require explicit confirmation
 
 * Status: accepted, implemented (CLI `--yes`/`-y` with a y/N prompt, window and quick-settings
-  dialogs; `.claude/hooks/guard.sh` for agents)
+  dialogs; enforced in `themes_core::apply` and the D-Bus service; `.claude/hooks/guard.sh` for
+  agents)
 * Date: 2026-11-22
 
 ## Context
@@ -20,12 +21,21 @@ extension. The theme is still useful to some users, so removing it is not the an
   initiative.
 * Agents apply an experimental theme only after the user said yes in the conversation, only in the
   isolated harness, and pass `--yes` explicitly (`.claude/hooks/guard.sh` blocks it otherwise).
+* The rule is enforced below the front ends: `themes_core::apply::apply` refuses an experimental
+  theme unless `Options::confirmed` is set (a dry run is allowed). The CLI sets it after `--yes`
+  or the prompt, the window after its dialog. The D-Bus method `Apply` never sets it and answers
+  `AccessDenied`; `ApplyConfirmed` sets it and is called by the quick-settings toggle only after its
+  dialog. A front end that cannot tell whether a theme is experimental (for example `Experimental()`
+  fails) applies nothing: fail closed.
 * Every apply keeps its rollback; `themes doctor` names the culprit after a crash.
 
 ## Consequences
 
 * Good: risky themes stay available without surprising anyone.
-* Bad: one more flag and three dialogs (CLI, window, quick settings) to keep in sync.
+* Good: a script or an agent that calls the library or `gdbus` directly cannot skip the
+  confirmation by accident: it has to choose the confirmed variant.
+* Bad: one more flag, one more D-Bus method and three dialogs (CLI, window, quick settings) to keep
+  in sync.
 
 ## Alternatives considered
 

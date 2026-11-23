@@ -54,17 +54,18 @@ the bridge and the window alike: there is no second settings dialog.
 |---|---|
 | `theme.rs`, `modules.rs` | read a theme directory, split it into the four modules, expand `~`/`$HOME`/`${HOME}` and the Ptyxis profile placeholder |
 | `plan.rs` | pure computation: managed keys per module, desired dconf values, extension set (unit tested) |
-| `apply.rs` | execute a plan: write dconf, link GTK files, flatpak overrides, hooks, toggle extensions live, post-apply cleanup, auto-rollback |
-| `dconf.rs` | `dconf dump` text format parser/writer and thin wrappers around the `dconf` tool |
-| `gtklinks.rs` | symlinks into `~/.config/gtk-4.0` / `gtk-3.0`, backups of displaced user files |
+| `apply.rs` | execute a plan: write dconf, link GTK files, flatpak overrides, hooks, toggle extensions live, post-apply cleanup, auto-rollback; refuses an experimental theme without `Options::confirmed` |
+| `txn.rs` | intent journal of `apply` (`state.json` `pending`): rollback on error, recovery after a crash |
+| `dconf.rs` | `dconf dump` text format parser/writer, wrappers around the `dconf` tool, batched resets through the dconf writer; `Backend` (the tool, or an in-memory database in unit tests) |
+| `gtklinks.rs` | symlinks of hand-made GTK files into `~/.config/gtk-4.0` / `gtk-3.0`; generated `gtk.css` is copied instead (Flatpak apps cannot follow links into `~/.cache`); backups of displaced user files |
 | `flatpak.rs` | records exactly which `flatpak override --user` arguments a theme added, removes only those |
-| `hooks.rs` | `apps/hooks/apply` and `revert` executables |
+| `hooks.rs` | `apps/hooks/apply` and `revert` executables (time limit, bounded output) |
 | `shell.rs` | D-Bus talk to GNOME Shell (extension states, enable/disable), notifications |
 | `doctor.rs` | `themes doctor [--fix]`: broken extensions, journal errors, missing themes/icons/files, GNOME version change, GSettings schemas not compiled |
 | `snapshot.rs` | "save current look as a theme": lays the current settings out by module |
 | `state.rs`, `lock.rs` | `state.json` (what was applied) and the `.lock` file shared by CLI, GUI and service |
 | `crash.rs` | GNOME's crash protection (`disable-user-extensions`), last real shell crashes, culprit theme/extensions |
-| `themes/src/service.rs` | D-Bus service `io.github.OlehDzhumyk.Themes` (exits after 90 s idle) |
+| `themes/src/service.rs` | D-Bus service `io.github.OlehDzhumyk.Themes` (blocking work on a thread pool; exits after 90 s idle or when the bus closes) |
 | `themes/src/gui/` | the window: theme cards, the mix page, «Функції» (feature settings, credits from CREDITS.md), crash banner |
 
 ## Files and directories
@@ -75,10 +76,11 @@ Everything lives under the **theme root**, `~/.local/share/desktop-themes` (over
 ```
 themes/<id>/        the themes (copied from this repository's themes/, plus your own snapshots)
 baseline -> baseline-<timestamp>/full.dconf   `dconf dump /` taken before any theme was applied
-state.json          which theme each module comes from, keys written, broken extensions, GNOME version
+state.json          which theme each module comes from, keys written, broken extensions, GNOME version,
+                    and while an apply runs its journal (`pending`)
 current             the theme that provides the "look" module
 apply.log           journal
-backups/            files of yours that a theme's GTK symlinks displaced
+backups/            files of yours that a theme's GTK links or copies displaced
 trash/              deleted themes
 .lock               flock shared by all front ends
 ```
@@ -105,21 +107,50 @@ Upgrading from an older private build with other ids (`io.github.<name>.Themes`,
 ## Applying a theme
 
 1. Read the baseline, the current dconf dump, the saved state and the selected source for every
-   module.
+   module. An experimental theme is refused unless the caller passes the user's confirmation
+   (ADR 0006). An earlier apply that was interrupted is finished first (see below).
 2. Compute a plan (`plan.rs`): for each affected module the **managed keys** (keys any theme sets in
    that module plus keys written last time), their desired values (the selected theme's value, else
    the baseline value, else the schema default), and the extension list.
-3. Write the dconf keys first; GTK files are linked, flatpak overrides and hooks run.
-4. About a second later, change `enabled-extensions` (GNOME Shell watches it and loads/unloads
-   extensions live). Changing `org.gnome.desktop.interface` keys at the same moment as an extension
-   being disabled was observed to crash GNOME Shell 51.1, hence the delay.
-5. After ~5 s verify the extensions; any in `ERROR` state is disabled and recorded as broken, with a
+3. Record the intent in `state.json` (`pending`: the selection to commit, the value of every key
+   that may change, the steps begun) and save it before each step: token links, dconf keys,
+   extension list, GTK files, flatpak overrides, hooks. A GTK backup is recorded before the user's
+   file is moved, and every link or copy before it is made.
+4. Write the dconf keys first. Then wait until GNOME Shell has processed them, and only then
+   change `enabled-extensions` (the shell loads and unloads extensions live). See "GNOME Shell 51.1
+   workaround" below.
+5. GTK files are linked or copied, flatpak overrides added, hooks run. Then the new selection, its
+   managed keys and the theme's extensions are committed with one save and `pending` is removed.
+6. After ~5 s verify the extensions; any in `ERROR` state is disabled and recorded as broken, with a
    notification (`--no-verify` skips this).
-6. Cleanup: restore managed keys that disabled extensions rewrote while shutting down, reset keys
+7. Cleanup: restore managed keys that disabled extensions rewrote while shutting down, reset keys
    that are outside the baseline and equal to their default.
 
 A full `themes reset` additionally removes the settings of theme extensions that are now disabled
 (`--keep-extension-settings` keeps them).
+
+**Errors and crashes.** When a step fails, the steps begun so far are undone in reverse order
+(flatpak overrides, GTK files with the previous look relinked, dconf values, token links) and the
+old selection stays; the error says what could not be undone. When the process dies half way,
+`pending` stays in `state.json`: the next `apply` and `themes doctor --fix` (which runs after
+login) finish it, and `themes doctor` reports it. Steps before the hooks are rolled back; once the
+hooks began, the apply is completed instead, because a hook's effects cannot be undone.
+
+**Hooks** get a time limit (`DESKTOP_THEMES_HOOK_TIMEOUT` seconds, 30 by default; then their
+process group is killed) and only the first 64 KiB of their output is kept. A failing hook is a
+warning, not an error.
+
+**GNOME Shell 51.1 workaround.** GNOME Shell 51.1 crashed (SIGSEGV in gnome-desktop's
+`update_clock`) when a change notification of `org.gnome.desktop.interface` arrived while an
+extension with a clock was being disabled. So the apply subscribes to the dconf writer's `Notify`
+signal before it writes, waits for the notification that covers its keys (the bus has then queued
+it for the shell as well), and makes one call that the shell answers from its main loop, after
+that notification. Only then is the extension list changed. The wait has an upper bound of 3 s;
+`apply.log` records `shell-settle=ok` or `shell-settle=timeout`. Extension states are then read on
+`ExtensionStateChanged` (no polling), and before the cleanup a shell call plus an empty change to
+the dconf writer make sure the writes of extensions that shut down have reached dconf. No upstream
+report is linked yet. The wait can be removed when the oldest supported GNOME Shell no longer
+crashes without it: drop it and run `just e2e -k many_times` repeatedly on that shell.
 
 ## D-Bus API
 
@@ -128,10 +159,15 @@ Service `io.github.OlehDzhumyk.Themes`, object `/io/github/OlehDzhumyk/Themes`:
 | Member | Description |
 |---|---|
 | `List() -> a(sssas)` | id, name, description, modules |
+| `Experimental() -> a{ss}` | experimental themes: id -> warning text |
 | `Current() -> a{ss}` | module -> theme id |
-| `Apply(s theme, as modules) -> (b relogin, s message, as warnings)` | empty list = all modules |
+| `Apply(s theme, as modules) -> (b relogin, s message, as warnings)` | empty list = all modules; an experimental theme is refused (`AccessDenied`) |
+| `ApplyConfirmed(s theme, as modules) -> (b relogin, s message, as warnings)` | the same after the user confirmed an experimental theme (ADR 0006) |
 | `Doctor(b fix) -> (b ok, as messages, s json)` | system check |
-| signal `Changed(a{ss})` | the selection changed (also after CLI or GUI changes) |
+| signal `Changed(a{ss})` | the selection changed (also after CLI or GUI changes, seen by a file monitor on `state.json`) |
+
+Interface XML: `data/dbus/io.github.OlehDzhumyk.Themes.xml` (a unit test checks the service against
+it; the bridge loads the same file).
 
 ```sh
 gdbus call --session -d io.github.OlehDzhumyk.Themes -o /io/github/OlehDzhumyk/Themes \
