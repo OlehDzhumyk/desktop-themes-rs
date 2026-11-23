@@ -119,6 +119,28 @@ impl Service {
                     themes_core::apply::experimental_refusal(&t),
                 ));
             }
+            // S-5: theme keys that run commands need explicit confirmation the first time
+            let dry = themes_core::apply::Options {
+                dry_run: true,
+                ..Default::default()
+            };
+            if let Ok(plan) = themes_core::apply::apply(&ctx, &theme, &mods, &dry) {
+                let pending = themes_core::commands::pending(&ctx, &plan.writes);
+                if !pending.is_empty() {
+                    if !confirmed {
+                        let list: Vec<String> = pending
+                            .iter()
+                            .map(|c| format!("{} = {}", c.key, c.value))
+                            .collect();
+                        return Err(zbus::fdo::Error::AccessDenied(tr!(
+                            "This theme sets keys that make the desktop run programs:\n\n{list}",
+                            list = list.join("\n")
+                        )));
+                    }
+                    themes_core::commands::approve(&ctx, &pending)
+                        .map_err(|e| zbus::fdo::Error::Failed(e.0))?;
+                }
+            }
             let opts = themes_core::apply::Options {
                 confirmed,
                 ..Default::default()
@@ -208,6 +230,31 @@ impl Service {
                 .collect()
         })
         .await
+    }
+
+    /// Ключі теми, що запускають команди й ще не схвалені користувачем (S-5): (ключ, значення).
+    async fn pending_commands(
+        &self,
+        theme: String,
+        modules: Vec<String>,
+    ) -> zbus::fdo::Result<Vec<(String, String)>> {
+        self.act.touch();
+        let mods = Module::parse_list(&modules.join(","))
+            .map_err(|e| zbus::fdo::Error::InvalidArgs(e.0))?;
+        let ctx = self.ctx.clone();
+        blocking(move || {
+            let dry = themes_core::apply::Options {
+                dry_run: true,
+                ..Default::default()
+            };
+            let plan = themes_core::apply::apply(&ctx, &theme, &mods, &dry)
+                .map_err(|e| zbus::fdo::Error::Failed(e.0))?;
+            Ok(themes_core::commands::pending(&ctx, &plan.writes)
+                .into_iter()
+                .map(|c| (c.key, c.value))
+                .collect())
+        })
+        .await?
     }
 
     /// модуль → id теми

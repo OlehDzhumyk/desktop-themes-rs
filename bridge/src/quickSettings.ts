@@ -148,11 +148,14 @@ class ThemesToggle extends QuickMenuToggle {
         if (this._busy || !client)
             return;
         this._busy = true;
-        // fail closed: when the service cannot say whether the theme is experimental, nothing
-        // is applied (ADR 0006)
+        // fail closed: when the service cannot say whether the theme is experimental or sets
+        // unapproved command keys, nothing is applied (ADR 0006, S-5)
         let warning: string | undefined;
+        let pending: [string, string][];
         try {
-            warning = (await client.experimental())[id];
+            const [exp, cmds] = await Promise.all([client.experimental(), client.pendingCommands(id)]);
+            warning = exp[id];
+            pending = cmds;
         } catch (e) {
             this._busy = false;
             if (!this._gone())
@@ -170,9 +173,22 @@ class ThemesToggle extends QuickMenuToggle {
                 return;
             }
         }
+        if (pending.length > 0) {
+            Main.panel.closeQuickSettings();
+            const list = pending.map(([k, v]) => `${k} = ${v}`).join('\n');
+            const ok = await confirm(
+                fmt(_('Allow “{name}” to run commands?'), {name}),
+                fmt(_('This theme sets keys that make the desktop run programs:\n\n{list}'), {list}),
+                _('Allow and apply'),
+            );
+            if (!ok || this._gone()) {
+                this._busy = false;
+                return;
+            }
+        }
         this.subtitle = fmt(_('applying “{name}”…'), {name});
         try {
-            const [relogin, message, warnings] = await client.apply(id, warning !== undefined);
+            const [relogin, message, warnings] = await client.apply(id, warning !== undefined || pending.length > 0);
             if (relogin)
                 Main.notify(_('Theme'), message);
             else if (warnings.length)

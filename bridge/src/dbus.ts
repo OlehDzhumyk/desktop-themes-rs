@@ -204,6 +204,7 @@ interface ThemesProxy extends Proxy {
     ListAsync(): Promise<[ThemeRow[]]>;
     CurrentAsync(): Promise<[Record<string, string>]>;
     ExperimentalAsync(): Promise<[Record<string, string>]>;
+    PendingCommandsAsync(id: string, modules: string[]): Promise<[[string, string][]]>;
     ApplyAsync(id: string, modules: string[]): Promise<[boolean, string, string[]]>;
     ApplyConfirmedAsync(id: string, modules: string[]): Promise<[boolean, string, string[]]>;
 }
@@ -234,8 +235,17 @@ export class ThemesClient {
         return map;
     }
 
-    /** Apply; `confirmed`: the user said yes to the experimental warning (ApplyConfirmed).
-     * Without it the service refuses an experimental theme. */
+    /**
+     * Unapproved command keys for `id` (S-5): [key, value] pairs. Fails closed: an error is
+     * thrown on, never taken for "no pending commands".
+     */
+    async pendingCommands(id: string): Promise<[string, string][]> {
+        const [cmds] = await this._proxy.PendingCommandsAsync(id, []);
+        return cmds;
+    }
+
+    /** Apply; `confirmed`: the user said yes to the experimental warning and/or command keys
+     * (ApplyConfirmed). Without it the service refuses both. */
     async apply(id: string, confirmed: boolean): Promise<[boolean, string, string[]]> {
         const [relogin, message, warnings] = confirmed
             ? await this._proxy.ApplyConfirmedAsync(id, [])

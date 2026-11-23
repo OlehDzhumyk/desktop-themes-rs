@@ -12,11 +12,17 @@
     <method name="Experimental">
       <arg type="a{ss}" direction="out"/>
     </method>
+    <!-- Unapproved dconf keys that run commands (S-5): (key, value). -->
+    <method name="PendingCommands">
+      <arg name="theme" type="s" direction="in"/>
+      <arg name="modules" type="as" direction="in"/>
+      <arg name="commands" type="a(ss)" direction="out"/>
+    </method>
     <!-- Module to theme id. -->
     <method name="Current">
       <arg type="a{ss}" direction="out"/>
     </method>
-    <!-- Apply a theme (no modules: all). Refuses an experimental theme (AccessDenied). -->
+    <!-- Apply a theme (no modules: all). Refuses experimental themes and unapproved command keys (AccessDenied). -->
     <method name="Apply">
       <arg name="theme" type="s" direction="in"/>
       <arg name="modules" type="as" direction="in"/>
@@ -24,7 +30,7 @@
       <arg name="message" type="s" direction="out"/>
       <arg name="warnings" type="as" direction="out"/>
     </method>
-    <!-- Apply after the user explicitly confirmed an experimental theme. -->
+    <!-- Apply after the user explicitly confirmed an experimental theme and/or command keys. -->
     <method name="ApplyConfirmed">
       <arg name="theme" type="s" direction="in"/>
       <arg name="modules" type="as" direction="in"/>

@@ -59,7 +59,7 @@ All notable changes to this project are documented in this file. The format is b
   `themes doctor`. Dconf keys that run commands (custom shortcut `command`, terminal `exec`,
   autostart) are listed in `apply --dry-run` and need `--yes` or a dialog in the window the first
   time; the yes is remembered per key and command. The bundled windows11 shortcut asks once.
-  The D-Bus service (quick settings) does not ask yet. See `docs/theme-contract.md`.
+  The D-Bus service refuses unapproved command keys on `Apply` (`AccessDenied`), exposes `PendingCommands`, and the quick-settings toggle asks before calling `ApplyConfirmed`. See `docs/theme-contract.md`.
 - `docs/maintainer.md`: releases, CI, build environment, pinned versions, known workarounds.
 - CI: a check that no `.rs` file is outside every crate's module tree
   (`tools/check-orphan-rs.sh`), `tools/update-image-digests.sh`, `tools/ego-pin.sh`.

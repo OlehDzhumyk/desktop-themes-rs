@@ -66,7 +66,7 @@ def test_apply_live_many_times_no_shell_crash(make_shell):
     shell = make_shell(skin='default')
     pid = shell.shell_proc.pid
     for theme in ['macos', 'windows11', 'fedora', 'windows11', 'macos', 'fedora']:
-        rc, res, err = themes(shell, 'apply', theme)
+        rc, res, err = themes(shell, 'apply', theme, '--yes')
         assert res.get('rolled_back', []) == [], (theme, res.get('warnings'))
         assert rc == 0, (theme, res, err)
         assert res['live'] and not res['relogin'], (theme, res)
@@ -94,9 +94,22 @@ def test_dbus_apply_needs_confirmation(make_shell):
     assert shell.dconf_read('/org/gnome/shell/enabled-extensions') == before
     (exp,) = shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Experimental', None, '(a{ss})').unpack()
     assert 'macos-glass' in exp, exp
+    # S-5: unapproved command keys are also refused on Apply and reported by PendingCommands
+    (pending,) = shell.call(
+        THEMES_BUS, THEMES_PATH, THEMES_BUS, 'PendingCommands',
+        GLib.Variant('(sas)', ('windows11', ['behavior'])), '(a(ss))').unpack()
+    assert pending, pending
+    with pytest.raises(GLib.Error) as e2:
+        shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Apply',
+                   GLib.Variant('(sas)', ('windows11', ['behavior'])), '(bsas)', timeout_ms=120000)
+    assert 'AccessDenied' in str(e2.value), e2.value
     relogin, _msg, _warn = shell.call(
         THEMES_BUS, THEMES_PATH, THEMES_BUS, 'ApplyConfirmed',
         GLib.Variant('(sas)', ('windows11', ['behavior'])), '(bsas)', timeout_ms=120000).unpack()
     assert not relogin
     (cur,) = shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Current', None, '(a{ss})').unpack()
     assert cur['behavior'] == 'windows11' and 'macos-glass' not in cur.values(), cur
+    (pending_after,) = shell.call(
+        THEMES_BUS, THEMES_PATH, THEMES_BUS, 'PendingCommands',
+        GLib.Variant('(sas)', ('windows11', ['behavior'])), '(a(ss))').unpack()
+    assert pending_after == [], pending_after

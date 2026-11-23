@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 10:28+0000\n"
+"POT-Creation-Date: 2026-11-23 10:40+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -194,9 +194,9 @@ msgid "Desktop"
 msgstr "Робочий стіл"
 
 #: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
-#: bridge/src/quickSettings.ts:128 bridge/src/quickSettings.ts:159
-#: bridge/src/quickSettings.ts:177 bridge/src/quickSettings.ts:179
-#: bridge/src/quickSettings.ts:181
+#: bridge/src/quickSettings.ts:128 bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:193 bridge/src/quickSettings.ts:195
+#: bridge/src/quickSettings.ts:197
 msgid "Theme"
 msgstr "Тема"
 
@@ -220,27 +220,27 @@ msgstr "активних модулів: {count} з {total}"
 msgid "{name}: modules {modules}"
 msgstr "{name}: модулі {modules}"
 
-#: bridge/src/quickSettings.ts:159 bridge/src/quickSettings.ts:181
+#: bridge/src/quickSettings.ts:162 bridge/src/quickSettings.ts:197
 msgid "Could not apply “{name}”: {error}"
 msgstr "Не вдалося застосувати «{name}»: {error}"
 
-#: bridge/src/quickSettings.ts:173
+#: bridge/src/quickSettings.ts:189
 msgid "applying “{name}”…"
 msgstr "застосування «{name}»…"
 
-#: bridge/src/quickSettings.ts:226
+#: bridge/src/quickSettings.ts:242
 msgid "Clipboard settings…"
 msgstr "Налаштування буфера обміну…"
 
-#: bridge/src/quickSettings.ts:253
+#: bridge/src/quickSettings.ts:269
 msgid "private mode"
 msgstr "приватний режим"
 
-#: bridge/src/quickSettings.ts:274
+#: bridge/src/quickSettings.ts:290
 msgid "deskd is unavailable"
 msgstr "deskd недоступний"
 
-#: bridge/src/quickSettings.ts:280
+#: bridge/src/quickSettings.ts:296
 msgid "The history is empty"
 msgstr "Історія порожня"
 
@@ -830,7 +830,7 @@ msgstr ""
 "схему {schema} не встановлено (data/install.sh), працюю з типовими "
 "налаштуваннями"
 
-#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:318
+#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
@@ -840,7 +840,9 @@ msgstr "не вдалося зайняти {name}: {error}"
 msgid ""
 "“{name}” is an experimental theme and is applied only after an explicit "
 "confirmation: {warning}"
-msgstr "«{name}» — експериментальна тема, її застосовують лише після явного підтвердження: {warning}"
+msgstr ""
+"«{name}» — експериментальна тема, її застосовують лише після явного "
+"підтвердження: {warning}"
 
 #: crates/themes-core/src/apply.rs:192
 #, rust-format
@@ -881,7 +883,9 @@ msgstr "розширення {uuid} вимкнено як несправне (д
 msgid ""
 "applying “{theme}” hit an error after its hooks ran, so it was completed: "
 "{error}"
-msgstr "під час застосування «{theme}» сталася помилка вже після хуків, тому застосування завершено: {error}"
+msgstr ""
+"під час застосування «{theme}» сталася помилка вже після хуків, тому "
+"застосування завершено: {error}"
 
 #: crates/themes-core/src/apply.rs:554
 #, rust-format
@@ -1481,7 +1485,9 @@ msgstr "перерване застосування «{theme}» ({modules}, {sta
 msgid ""
 "an apply of “{theme}” started {started} was interrupted at the step {step}; "
 "“themes doctor --fix” finishes it"
-msgstr "застосування «{theme}», розпочате {started}, перервано на кроці {step}; «themes doctor --fix» його завершить"
+msgstr ""
+"застосування «{theme}», розпочате {started}, перервано на кроці {step}; "
+"«themes doctor --fix» його завершить"
 
 #: crates/themes-core/src/util.rs:31
 msgid "unclosed single quote"
@@ -2267,7 +2273,7 @@ msgstr "Усе одно застосувати"
 msgid "Allow “{name}” to run commands?"
 msgstr "Дозволити темі «{name}» запускати команди?"
 
-#: crates/themes/src/gui/window.rs:689
+#: crates/themes/src/gui/window.rs:689 crates/themes/src/service.rs:136
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"
@@ -2286,7 +2292,7 @@ msgstr "Дозволити й застосувати"
 msgid "Error: the apply thread crashed"
 msgstr "Помилка: потік застосування впав"
 
-#: crates/themes/src/gui/window.rs:747 crates/themes/src/service.rs:164
+#: crates/themes/src/gui/window.rs:747 crates/themes/src/service.rs:186
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr "Тему «{name}» застосовано"
@@ -2442,11 +2448,11 @@ msgstr "Не вдалося: {error}"
 msgid "internal error of the theme service"
 msgstr "внутрішня помилка служби тем"
 
-#: crates/themes/src/service.rs:152
+#: crates/themes/src/service.rs:174
 msgid "Themes: extensions turned off"
 msgstr "Теми: розширення вимкнено"
 
-#: crates/themes/src/service.rs:154
+#: crates/themes/src/service.rs:176
 #, rust-format
 msgid ""
 "After the theme was applied these extensions went into an error state and "
@@ -2455,7 +2461,7 @@ msgstr ""
 "Після застосування теми розширення перейшли в стан помилки й були вимкнені: "
 "{list}"
 
-#: crates/themes/src/service.rs:168
+#: crates/themes/src/service.rs:190
 #, rust-format
 msgid "You need to log in again: {reasons}"
 msgstr "Потрібен перевхід: {reasons}"

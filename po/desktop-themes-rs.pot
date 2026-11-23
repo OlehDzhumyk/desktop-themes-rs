@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 10:28+0000\n"
+"POT-Creation-Date: 2026-11-23 10:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -571,7 +571,7 @@ msgid ""
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:318
+#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -1932,7 +1932,7 @@ msgstr ""
 msgid "Allow “{name}” to run commands?"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:689
+#: crates/themes/src/gui/window.rs:689 crates/themes/src/service.rs:136
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"
@@ -1948,7 +1948,7 @@ msgstr ""
 msgid "Error: the apply thread crashed"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:747 crates/themes/src/service.rs:164
+#: crates/themes/src/gui/window.rs:747 crates/themes/src/service.rs:186
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr ""
@@ -2096,18 +2096,18 @@ msgstr ""
 msgid "internal error of the theme service"
 msgstr ""
 
-#: crates/themes/src/service.rs:152
+#: crates/themes/src/service.rs:174
 msgid "Themes: extensions turned off"
 msgstr ""
 
-#: crates/themes/src/service.rs:154
+#: crates/themes/src/service.rs:176
 #, rust-format
 msgid ""
 "After the theme was applied these extensions went into an error state and "
 "were turned off: {list}"
 msgstr ""
 
-#: crates/themes/src/service.rs:168
+#: crates/themes/src/service.rs:190
 #, rust-format
 msgid "You need to log in again: {reasons}"
 msgstr ""
@@ -2450,9 +2450,9 @@ msgid "Desktop"
 msgstr ""
 
 #: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
-#: bridge/src/quickSettings.ts:128 bridge/src/quickSettings.ts:159
-#: bridge/src/quickSettings.ts:177 bridge/src/quickSettings.ts:179
-#: bridge/src/quickSettings.ts:181
+#: bridge/src/quickSettings.ts:128 bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:193 bridge/src/quickSettings.ts:195
+#: bridge/src/quickSettings.ts:197
 msgid "Theme"
 msgstr ""
 
@@ -2476,27 +2476,27 @@ msgstr ""
 msgid "{name}: modules {modules}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:159 bridge/src/quickSettings.ts:181
+#: bridge/src/quickSettings.ts:162 bridge/src/quickSettings.ts:197
 msgid "Could not apply “{name}”: {error}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:173
+#: bridge/src/quickSettings.ts:189
 msgid "applying “{name}”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:226
+#: bridge/src/quickSettings.ts:242
 msgid "Clipboard settings…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:253
+#: bridge/src/quickSettings.ts:269
 msgid "private mode"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:274
+#: bridge/src/quickSettings.ts:290
 msgid "deskd is unavailable"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:280
+#: bridge/src/quickSettings.ts:296
 msgid "The history is empty"
 msgstr ""
 

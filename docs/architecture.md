@@ -160,9 +160,10 @@ Service `io.github.OlehDzhumyk.Themes`, object `/io/github/OlehDzhumyk/Themes`:
 |---|---|
 | `List() -> a(sssas)` | id, name, description, modules |
 | `Experimental() -> a{ss}` | experimental themes: id -> warning text |
+| `PendingCommands(s theme, as modules) -> a(ss)` | unapproved dconf keys that run commands (S-5): `(key, value)` |
 | `Current() -> a{ss}` | module -> theme id |
-| `Apply(s theme, as modules) -> (b relogin, s message, as warnings)` | empty list = all modules; an experimental theme is refused (`AccessDenied`) |
-| `ApplyConfirmed(s theme, as modules) -> (b relogin, s message, as warnings)` | the same after the user confirmed an experimental theme (ADR 0006) |
+| `Apply(s theme, as modules) -> (b relogin, s message, as warnings)` | empty list = all modules; experimental themes and unapproved command keys are refused (`AccessDenied`) |
+| `ApplyConfirmed(s theme, as modules) -> (b relogin, s message, as warnings)` | the same after the user confirmed an experimental theme (ADR 0006) and/or command keys (S-5) |
 | `Doctor(b fix) -> (b ok, as messages, s json)` | system check |
 | signal `Changed(a{ss})` | the selection changed (also after CLI or GUI changes, seen by a file monitor on `state.json`) |
 
