@@ -17,8 +17,8 @@ region and copies the text (`bridge/src/ocr/`). Gaps:
 
 * **Gap:** no "Text" mode in the screenshots toolbar and no "Copy text" in the macOS thumbnail: the
   [screenshots](screenshots.md) feature does not exist yet; only the shortcut starts OCR.
-* **Gap:** the region overlay is the text extractor's own (`bridge/src/ocr/overlay.ts`), not the
-  screenshot overlay; it covers all monitors and offers pointer drag and arrow keys.
+* **Gap:** the region overlay is the shared region selector (`bridge/src/ui/regionOverlay.ts`), not a
+  screenshots toolbar; it covers all monitors and offers pointer drag and arrow keys.
 * **Gap:** low-contrast text is not upscaled or inverted before recognition (`crates/deskd/src/ocr/mod.rs`
   passes the capture as is).
 * **Gap:** the `languages` setting is a free list of codes; the window does not offer only the installed

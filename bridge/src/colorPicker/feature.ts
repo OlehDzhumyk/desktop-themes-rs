@@ -11,10 +11,10 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {_, fmt} from '../i18n.js';
 import {errorText} from '../shellTypes.js';
+import {DeskToast} from '../ui/toast.js';
 import {ColorPickerClient, asFormat} from './client.js';
 import {PickerOverlay, type PickerHost, toHex} from './overlay.js';
 import {HistoryPanel, type HistoryHost} from './panel.js';
-import {Toast} from './toast.js';
 
 const SHORTCUT_KEY = 'color-picker-shortcut';
 
@@ -23,7 +23,7 @@ export class ColorPickerFeature implements PickerHost, HistoryHost {
     readonly settings: Gio.Settings;
     private _overlay: PickerOverlay;
     private _panel: HistoryPanel | null = null;
-    private _toast: Toast;
+    private _toast: DeskToast;
     private _skin = '';
     private _bound = false;
     private _settingsIds: number[] = [];
@@ -36,7 +36,7 @@ export class ColorPickerFeature implements PickerHost, HistoryHost {
                 void this._panel.refresh();
         });
         this._overlay = new PickerOverlay(this);
-        this._toast = new Toast();
+        this._toast = new DeskToast({variant: 'desk-toast-pill', fade: true, bottom: 0.82});
         this._settingsIds.push(settings.connect(`changed::${SHORTCUT_KEY}`, () => { this._bind(); }));
         this._settingsIds.push(settings.connect('changed::enabled', () => {
             this._bind();

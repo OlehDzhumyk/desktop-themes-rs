@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Region selection of the text extractor (docs/spec/features/ocr.md): a modal, dimmed layer over
-// all monitors with a crosshair cursor. Drag with the pointer, or use the keyboard: an arrow key
+// The shared region selector (text extractor, docs/spec/features/ocr.md; screenshots): a modal,
+// dimmed layer over all monitors with a crosshair cursor. Drag with the pointer, or use the keyboard: an arrow key
 // shows a rectangle in the middle of the current monitor, arrows move it, Shift+arrows resize it
 // (Ctrl: 1 px steps), Enter confirms. Esc or a right click cancels and nothing runs (AC-OCR-07).
-// Regions smaller than 8 px on a side are ignored.
+// Regions smaller than 8 px on a side are ignored. `captureRegion` takes the PNG of the selection.
 import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {_} from '../i18n.js';
 import {pushModal} from '../shellTypes.js';
 
 /** A region in stage coordinates (logical pixels). */
@@ -20,6 +20,38 @@ export interface Region {
     y: number;
     width: number;
     height: number;
+}
+
+/** What the caller says to the user: the layer's accessible name and the visible hint. */
+export interface RegionOverlayText {
+    accessibleName: string;
+    hint: string;
+}
+
+/** Width and height from the IHDR chunk of a PNG (deskd checks them against the image). */
+export function pngSize(png: Uint8Array): [number, number] | null {
+    if (png.length < 24)
+        return null;
+    const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
+    return [view.getUint32(16), view.getUint32(20)];
+}
+
+/** The PNG of a region of the stage, at physical pixels (two monitors with different scaling). */
+export function captureRegion(region: Region): Promise<Uint8Array> {
+    const stream = Gio.MemoryOutputStream.new_resizable();
+    const shooter = new Shell.Screenshot();
+    return new Promise((resolve, reject) => {
+        shooter.screenshot_area(region.x, region.y, region.width, region.height, stream,
+            (_s: Shell.Screenshot | null, res: Gio.AsyncResult) => {
+                try {
+                    shooter.screenshot_area_finish(res);
+                    stream.close(null);
+                    resolve(stream.steal_as_bytes().toArray());
+                } catch (e) {
+                    reject(e instanceof Error ? e : new Error(String(e)));
+                }
+            });
+    });
 }
 
 /** Smaller selections are taken as a click and ignored. */
@@ -39,10 +71,10 @@ export class RegionOverlay {
     private _destroyed = false;
 
     /** `onDone` runs once: with the region, or with null when the selection was cancelled. */
-    constructor(skin: string, onDone: (region: Region | null) => void) {
+    constructor(skin: string, text: RegionOverlayText, onDone: (region: Region | null) => void) {
         this._onDone = onDone;
         this._actor = new St.Widget({
-            style_class: `desk-ocr-overlay desk-skin-${skin}${St.Settings.get().high_contrast ? ' desk-hc' : ''}`,
+            style_class: `desk-region-overlay desk-skin-${skin}${St.Settings.get().high_contrast ? ' desk-hc' : ''}`,
             reactive: true,
             can_focus: true,
             x: 0, y: 0,
@@ -50,16 +82,16 @@ export class RegionOverlay {
             height: global.stage.height,
             cursor_type: Clutter.CursorType.CROSSHAIR,
             accessible_role: Atk.Role.WINDOW,
-            accessible_name: _('Select the text to copy'),
+            accessible_name: text.accessibleName,
         });
-        this._dims = [0, 1, 2, 3].map(() => new St.Widget({style_class: 'desk-ocr-dim'}));
+        this._dims = [0, 1, 2, 3].map(() => new St.Widget({style_class: 'desk-region-dim'}));
         for (const d of this._dims)
             this._actor.add_child(d);
-        this._frame = new St.Widget({style_class: 'desk-ocr-selection', visible: false});
+        this._frame = new St.Widget({style_class: 'desk-region-selection', visible: false});
         this._actor.add_child(this._frame);
         this._hint = new St.Label({
-            style_class: 'desk-ocr-hint',
-            text: _('Drag over the text to copy it. Arrow keys and Enter select with the keyboard; Esc cancels.'),
+            style_class: 'desk-region-hint',
+            text: text.hint,
         });
         this._actor.add_child(this._hint);
         this._actor.connect('button-press-event', (_a: Clutter.Actor, ev: Clutter.Event) => this._press(ev));
