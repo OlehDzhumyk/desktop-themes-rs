@@ -11,12 +11,22 @@ use theme_tokens::generate::{self, Target};
 use theme_tokens::load_chain;
 
 fn render(id: &str, name: &str) -> Vec<generate::File> {
+    render_over(id, name, None)
+}
+
+/// `over`: a layer above the theme (the live wallpaper palette).
+fn render_over(id: &str, name: &str, over: Option<String>) -> Vec<generate::File> {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../themes")
         .join(id)
         .join("tokens.toml");
     let text = std::fs::read_to_string(&path).unwrap();
-    let loaded = load_chain(&[(format!("themes/{id}/tokens.toml"), text)]).unwrap();
+    let mut layers: Vec<(String, String)> = over
+        .map(|o| (theme_tokens::palette::OVERLAY_LAYER.to_string(), o))
+        .into_iter()
+        .collect();
+    layers.push((format!("themes/{id}/tokens.toml"), text));
+    let loaded = load_chain(&layers).unwrap();
     let target = Target {
         theme_id: id.into(),
         theme_name: name.into(),
@@ -64,4 +74,21 @@ fn lavender_ptyxis_palette() {
 #[test]
 fn macos_libadwaita_css() {
     snap!("macos_gtk_css", file(&render("macos", "macOS"), "gtk.css"));
+}
+
+/// AC-WALL-07/08: the live wallpaper palette over a token theme (only colours change).
+#[test]
+fn lavender_wallpaper_overlay_css() {
+    let seed = theme_tokens::color::Rgba::parse("#2a7f62").unwrap();
+    snap!(
+        "lavender_wallpaper_overlay_gtk_css",
+        file(
+            &render_over(
+                "lavender",
+                "Lavender",
+                Some(theme_tokens::palette::overlay_toml(seed))
+            ),
+            "gtk.css"
+        )
+    );
 }

@@ -14,6 +14,7 @@ pub mod gtklinks;
 pub mod hooks;
 pub mod lock;
 pub mod modules;
+pub mod overlay;
 pub mod paths;
 pub mod plan;
 pub mod shell;
