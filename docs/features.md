@@ -171,6 +171,24 @@ Skins:
 * **macos**: lighter dim, thin white frame and a pill toast.
 * **default**: frame in the GNOME accent colour. High contrast gives every skin opaque surfaces and a thick frame.
 
+## Screenshots (core)
+
+The deskd side of screenshots: the bridge takes the pixels and hands deskd a PNG; deskd checks, cleans and
+saves it, and draws the editor's annotations. The toolbar, preview and editor come in later changes.
+
+| | |
+|---|---|
+| Shortcuts | Windows 11 theme: **Shift+Super+S** region, **Super+Print** screen, **Print** toolbar, **Shift+Super+R** record; macOS theme: **Shift+Super+4**, **Shift+Super+3**, **Shift+Super+5** (record from the toolbar); Fedora: none, GNOME's own keys stay (`capture-*-shortcut` in the theme's `desk.dconf`; overrides `capture-region`, `capture-screen`, `capture-toolbar`, `capture-record`) |
+| Saving | `Screenshot YYYY-MM-DD HH-MM-SS.png` in local time in `save-folder` (empty: `Screenshots` in the pictures folder); `-2`, `-3` for the same second; atomic, never replaces a file |
+| Checks | PNG structure and CRCs; more than 100 megapixels is refused from the header, before any decode |
+| Privacy | `tEXt`, `zTXt`, `iTXt`, `tIME` and `eXIf` chunks are removed (no user name, host name or path in the file); redaction (solid or pixelate) replaces the pixels, and the annotated file has one layer and no metadata |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Capture` at `/io/github/OlehDzhumyk/Desk/Capture`: `SaveScreenshot(ay) → s`, `ApplyAnnotations(s path, s json) → s` |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Capture`: `enabled`, `save-folder`, `copy-to-clipboard`, `show-preview`, `delay`, `include-pointer`, `record-format`, `record-audio`, `annotate-after-capture`, `capture-region-shortcut`, `capture-screen-shortcut`, `capture-toolbar-shortcut`, `capture-record-shortcut` |
+| Core | crate `desk-capture`: pure Rust, no GTK, GLib or D-Bus, so other desktops and a CLI can reuse it (ADR 0011) |
+
+Skins: none yet. The `windows11`, `macos` and `default` toolbar, preview and editor are drawn by the bridge in a
+later change.
+
 ## Automatic light/dark
 
 | | |

@@ -1,0 +1,34 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Screenshot engine of deskd (docs/spec/features/screenshots.md). The bridge takes the pixels
+     (GNOME Shell's screenshot machinery) and hands deskd the PNG; deskd checks it, removes its
+     text and time metadata and writes the file. The logic is the pure-Rust crate desk-capture,
+     so other desktops can use the same calls (ADR 0011). deskd keeps no image between calls.
+     Access (ADR 0008): every method answers AccessDenied unless the caller is the owner of
+     org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any sandbox.
+     Errors: NotSupported while the `enabled` setting is off; InvalidArgs for data that is not a
+     PNG, a damaged PNG, an image over 100 megapixels, a bad path or bad annotations; IOError when
+     the folder or file cannot be written (the caller keeps the image on the clipboard then). -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Capture">
+    <!-- Save a capture in the `save-folder` setting (empty: Screenshots in the pictures folder)
+         as "Screenshot YYYY-MM-DD HH-MM-SS.png" in local time, with -2, -3, ... for captures in
+         the same second. The write is atomic and never replaces a file. Returns the full path. -->
+    <method name="SaveScreenshot">
+      <arg name="png_bytes" type="ay" direction="in"/>
+      <arg name="path" type="s" direction="out"/>
+    </method>
+    <!-- Draw annotations into the PNG file at `path` (absolute, a regular .png file, not a link)
+         and replace it atomically. annotations_json is a JSON list of objects with a "kind":
+         "redact" (x, y, width, height, style {"solid": [r,g,b,a]} or {"pixelate": block 4..256}),
+         "crop" (x, y, width, height), "rect" and "ellipse" (x, y, width, height, color [r,g,b,a],
+         stroke, fill), "line" and "arrow" (from [x,y], to [x,y], color, width), "highlighter" and
+         "pen" (points [[x,y], ...], color, width); coordinates in pixels of the image. Redaction
+         is destructive: the saved file holds only the result, with no layer and no metadata.
+         Returns the path of the saved file. -->
+    <method name="ApplyAnnotations">
+      <arg name="path" type="s" direction="in"/>
+      <arg name="annotations_json" type="s" direction="in"/>
+      <arg name="saved_path" type="s" direction="out"/>
+    </method>
+  </interface>
+</node>

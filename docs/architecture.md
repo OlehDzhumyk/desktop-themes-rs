@@ -27,7 +27,7 @@ The repository is a Cargo workspace:
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
 | `crates/desk-capture` | library | the screenshot core, pure Rust with no desktop dependency (ADR 0011): PNG checks with a 100 MP cap, removal of text/time metadata, collision-safe atomic saving, and destructive redaction, crop and annotations rendered into RGBA |
-| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, emoji and symbol picker, focus modes, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, emoji and symbol picker, screenshots, focus modes, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;

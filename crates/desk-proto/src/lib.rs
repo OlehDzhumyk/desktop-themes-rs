@@ -27,6 +27,8 @@ pub const COLOR_PICKER_PATH: &str = "/io/github/OlehDzhumyk/Desk/ColorPicker";
 pub const COLOR_PICKER_IFACE: &str = "io.github.OlehDzhumyk.Desk.ColorPicker";
 pub const OCR_PATH: &str = "/io/github/OlehDzhumyk/Desk/Ocr";
 pub const OCR_IFACE: &str = "io.github.OlehDzhumyk.Desk.Ocr";
+pub const CAPTURE_PATH: &str = "/io/github/OlehDzhumyk/Desk/Capture";
+pub const CAPTURE_IFACE: &str = "io.github.OlehDzhumyk.Desk.Capture";
 
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
@@ -37,6 +39,7 @@ pub const APPEARANCE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 pub const FOCUS_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Focus";
 pub const COLOR_PICKER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.ColorPicker";
 pub const OCR_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Ocr";
+pub const CAPTURE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Capture";
 pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.Desk.gschema.xml");
 
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
@@ -50,6 +53,8 @@ pub const FOCUS_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhum
 pub const COLOR_PICKER_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.ColorPicker.xml");
 pub const OCR_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Ocr.xml");
+pub const CAPTURE_XML: &str =
+    include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Capture.xml");
 
 /// Offered by the bridge with the clipboard content it set itself (paste from the history), so
 /// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
@@ -336,6 +341,22 @@ pub mod ocr {
     }
 }
 
+/// Screenshots: client proxy of the capture engine.
+pub mod capture {
+    /// Client proxy of the capture engine (`data/dbus/io.github.OlehDzhumyk.Desk.Capture.xml`).
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.Capture",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/Capture"
+    )]
+    pub trait Capture {
+        /// Save a PNG capture; returns the new file's path.
+        fn save_screenshot(&self, png_bytes: &[u8]) -> zbus::Result<String>;
+        /// Draw annotations (JSON) into a PNG file and replace it; returns the saved path.
+        fn apply_annotations(&self, path: &str, annotations_json: &str) -> zbus::Result<String>;
+    }
+}
+
 /// Клієнтський проксі самої служби (версія, список функцій).
 #[zbus::proxy(
     interface = "io.github.OlehDzhumyk.Desk",
@@ -449,6 +470,19 @@ mod tests {
                 "{e}"
             );
         }
+    }
+
+    #[test]
+    fn capture_xml_names_the_interface_and_methods() {
+        assert!(CAPTURE_XML.contains(&format!("name=\"{CAPTURE_IFACE}\"")));
+        let m = xml_members(CAPTURE_XML);
+        assert_eq!(
+            m,
+            [
+                ("method".to_string(), "ApplyAnnotations".to_string()),
+                ("method".to_string(), "SaveScreenshot".to_string())
+            ]
+        );
     }
 
     #[test]

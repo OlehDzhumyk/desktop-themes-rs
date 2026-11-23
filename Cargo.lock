@@ -298,6 +298,7 @@ dependencies = [
 name = "deskd"
 version = "0.3.0"
 dependencies = [
+ "desk-capture",
  "desk-proto",
  "desk-settings",
  "futures-util",

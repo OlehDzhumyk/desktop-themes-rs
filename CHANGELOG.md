@@ -54,6 +54,10 @@ All notable changes to this project are documented in this file. The format is b
   `capture-screen`, `capture-toolbar`, `capture-record`). Windows 11 theme: Shift+Super+S,
   Super+Print, Print, Shift+Super+R; macOS theme: Shift+Super+4, Shift+Super+3, Shift+Super+5;
   Fedora keeps GNOME's own screenshot keys.
+- Screenshot engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.Capture` at
+  `/io/github/OlehDzhumyk/Desk/Capture` (`SaveScreenshot`, `ApplyAnnotations`) for trusted
+  callers only (ADR 0008), built on `desk-capture`. It follows `enabled` and `save-folder` live and
+  holds no image between calls.
 - Colour picker engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.ColorPicker` at
   `/io/github/OlehDzhumyk/Desk/ColorPicker` (`Record`, `List`, `Remove`, `Clear`, `Format`,
   `Contrast`, signal `Changed`), formatting with `theme_tokens::picker` and keeping the newest
