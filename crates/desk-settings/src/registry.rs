@@ -37,6 +37,7 @@ pub static FEATURE_APP: Feature = Feature {
 
 pub static FEATURES: &[&Feature] = &[
     &FEATURE_CLIPBOARD,
+    &crate::emoji::FEATURE_EMOJI,
     &crate::mixer::FEATURE_MIXER,
     &crate::logo_menu::FEATURE_LOGO_MENU,
     &crate::lockscreen::FEATURE_LOCKSCREEN,
@@ -113,6 +114,7 @@ pub static DESK: Schema = Schema {
     keys: &[&SKIN, &LANGUAGE],
     children: &[
         ("clipboard", CLIPBOARD_SCHEMA),
+        ("emoji", crate::emoji::EMOJI_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
         ("logo-menu", crate::logo_menu::LOGO_MENU_SCHEMA),
@@ -349,17 +351,26 @@ pub static SHORTCUT_KEYS: Schema = Schema {
     id: SHORTCUTS_SCHEMA,
     path: "/io/github/OlehDzhumyk/Desk/shortcuts/",
     rust_name: "ShortcutSettings",
-    keys: &[&SC_CLIPBOARD_TOGGLE, &crate::mixer::SC_MIXER_OPEN],
+    keys: &[
+        &SC_CLIPBOARD_TOGGLE,
+        &crate::emoji::SC_EMOJI_TOGGLE,
+        &crate::mixer::SC_MIXER_OPEN,
+    ],
     children: &[],
 };
 
 /// Every shortcut of every feature, edited in one place (the «Keyboard shortcuts» page).
-pub static SHORTCUTS: &[&Shortcut] = &[&SHORTCUT_CLIPBOARD, &crate::mixer::SHORTCUT_MIXER];
+pub static SHORTCUTS: &[&Shortcut] = &[
+    &SHORTCUT_CLIPBOARD,
+    &crate::emoji::SHORTCUT_EMOJI,
+    &crate::mixer::SHORTCUT_MIXER,
+];
 
 /// All schemas, parents first (the order of the generated XML).
 pub static SCHEMAS: &[&Schema] = &[
     &DESK,
     &CLIPBOARD,
+    &crate::emoji::EMOJI,
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
     &crate::logo_menu::LOGO_MENU,
@@ -476,6 +487,7 @@ pub static PAGE_SHORTCUTS: Page = Page {
         description: "",
         items: &[
             Item::Shortcut(&SHORTCUT_CLIPBOARD),
+            Item::Shortcut(&crate::emoji::SHORTCUT_EMOJI),
             Item::Shortcut(&crate::mixer::SHORTCUT_MIXER),
         ],
     }],
@@ -500,6 +512,7 @@ pub static PAGE_CREDITS: Page = Page {
 /// The pages, in the order they are listed.
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
+    &crate::emoji::PAGE_EMOJI,
     &crate::mixer::PAGE_MIXER,
     &crate::logo_menu::PAGE_LOGO_MENU,
     &crate::lockscreen::PAGE_LOCKSCREEN,

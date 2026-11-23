@@ -6,6 +6,7 @@
 //! служби вказує на юніт systemd --user `deskd.service`).
 
 mod clipboard;
+mod emoji;
 mod mixer;
 mod panic_policy;
 mod persist;
@@ -15,7 +16,9 @@ mod trust;
 
 use std::sync::{Arc, Mutex, OnceLock};
 
-use desk_proto::{BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, MIXER_PATH};
+use desk_proto::{
+    BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, EMOJI_PATH, MIXER_PATH,
+};
 use desk_settings::tr;
 use gio::glib;
 use gio::prelude::*;
@@ -60,7 +63,7 @@ fn emit_changed(conn: &zbus::Connection) {
 
 /// Engines this build hosts (the `Features` property).
 fn features() -> Vec<String> {
-    let mut f = vec!["clipboard".to_string()];
+    let mut f = vec!["clipboard".to_string(), "emoji".to_string()];
     if cfg!(feature = "pipewire") {
         f.push("mixer".into());
     }
@@ -179,6 +182,19 @@ fn main() {
             }
         },
     );
+    let emoji_settings = settings::emoji_settings();
+    let (emoji_remember, emoji_tone) = emoji_settings
+        .as_ref()
+        .map_or((true, "none".to_string()), settings::read_emoji);
+    let emoji_eng = Arc::new(Mutex::new(emoji::EmojiEngine::new(
+        emoji::recents::Recents::default_path(),
+        emoji_remember,
+        emoji_tone,
+    )));
+    let emoji_iface = emoji::service::EmojiIface {
+        engine: emoji_eng.clone(),
+        gate: gate.clone(),
+    };
     let mixer = Arc::new(Mixer::new(graph, notifier, Some(store)));
     let mixer_iface = mixer::service::MixerIface {
         mixer: mixer.clone(),
@@ -188,6 +204,7 @@ fn main() {
         let conn = zbus::connection::Builder::session()
             .serve_at(DESK_PATH, desk)
             .serve_at(CLIPBOARD_PATH, clip)
+            .serve_at(EMOJI_PATH, emoji_iface)
             .serve_at(MIXER_PATH, mixer_iface)
             .build()
             .await?;
@@ -290,6 +307,17 @@ fn main() {
         });
     }
 
+    if let Some(s) = &emoji_settings {
+        let eng = emoji_eng.clone();
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, key| {
+            if matches!(key, "remember-recents" | "skin-tone") {
+                let (remember, tone) = settings::read_emoji(&typed);
+                emoji::service::lock(&eng).set_config(remember, tone);
+            }
+        });
+    }
+
     if let Some(s) = &gsettings {
         let eng = eng.clone();
         let conn = conn.clone();
@@ -326,5 +354,6 @@ fn main() {
     mixer.set_backend(None);
     mixer.flush();
     drop(gsettings);
+    drop(emoji_settings);
     drop(mixer_settings);
 }

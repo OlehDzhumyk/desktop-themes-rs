@@ -5,3 +5,7 @@ skin='macos'
 
 [io/github/OlehDzhumyk/Desk/clipboard]
 toggle-shortcut=['<Shift><Super>v']
+
+# Emoji and symbol picker: Ctrl+Super+Space (macOS Character Viewer convention).
+[io/github/OlehDzhumyk/Desk/emoji]
+emoji-shortcut=['<Control><Super>space']

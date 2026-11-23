@@ -26,7 +26,7 @@ The repository is a Cargo workspace:
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
-| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, emoji and symbol picker, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
@@ -201,6 +201,16 @@ Only GNOME Shell (the owner of `org.gnome.Shell`) and our own binaries, outside 
 call the content methods (all but the properties): others get `AccessDenied`, `gdbus`/`busctl`
 included. The bus name is not replaceable, and the bridge talks only to a deskd it verified.
 [ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md).
+
+`/io/github/OlehDzhumyk/Desk/Emoji`, interface `io.github.OlehDzhumyk.Desk.Emoji` (offline emoji, Unicode symbols and text faces with English/Ukrainian search, Fitzpatrick skin tones and 0600 recents in `~/.local/share/deskd/emoji.json`):
+
+| Member | Description |
+|---|---|
+| `Search(s query, s lang, u limit) -> a(sssssb)` | ranked search across English and Ukrainian names/keywords: `(id, glyph, name, category, keywords, supports_tone)` |
+| `Category(s category, u limit) -> a(sssssb)` | items in a category (`smileys`, `people`, `animals`, `food`, `travel`, `activities`, `objects`, `symbols`, `flags`, `arrows`, `math`, `currency`, `punctuation`, `text-faces`) |
+| `Recents() -> a(sssssb)` | last 36 picked items, newest first |
+| `Pick(s id, s tone) -> s` | returns the glyph with the Fitzpatrick skin-tone modifier applied and records it in recents |
+| `ClearRecents()` | clears recents and removes `emoji.json` |
 
 `/io/github/OlehDzhumyk/Desk/Mixer`, interface `io.github.OlehDzhumyk.Desk.Mixer` (volumes on the cubic
 slider scale, 1.0 = 100 %):

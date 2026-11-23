@@ -21,6 +21,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Emoji and symbol picker (`docs/spec/features/emoji.md`): offline `deskd` engine
+  (`io.github.OlehDzhumyk.Desk.Emoji`, `crates/deskd/data/emoji.tsv`) with 300+ emoji, Unicode
+  symbols and text faces searchable in English and Ukrainian, Fitzpatrick skin-tone modifiers, and
+  0600 recents persistence (`~/.local/share/deskd/emoji.json`). In `desk-bridge`, the Windows 11
+  Win+V / Win+. flyout now has live «Емодзі» and «Символи» tabs, while `macos` (`Ctrl+Super+Space`)
+  and `default` (`Super+.`) open a floating keyboard-first picker near the caret; insertion uses
+  `application/x-desk-internal` and restores the previous clipboard text so clipboard history is
+  untouched. Settings `io.github.OlehDzhumyk.Desk.Emoji` and shortcut `emoji-toggle`.
 - Logo menu in `desk-bridge` for the `macos` skin (replaces the third-party `logomenu@aryan_k`
   extension): system menu on the left of the top bar with About This System, System Settings,
   Applications, Force Quit (with confirmation dialog), Sleep, Restart, Shut Down, Lock Screen and

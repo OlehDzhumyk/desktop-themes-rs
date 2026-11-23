@@ -20,8 +20,8 @@ Every feature page names its origin («Є в Windows 11 і macOS», «Засно
 Skins:
 
 * **windows11**: flyout next to the text cursor (the caret rectangle the focused app reports to the
-  input method; the pointer otherwise). Tabs «Буфер обміну» / «Емодзі» / «Символи» (the last two are
-  shown disabled until a later stage), «Очистити все», cards with a pin button and «…», which reveals
+  input method; the pointer otherwise). Tabs «Буфер обміну» / «Емодзі» / «Символи» (all three live in
+  the same unified flyout), «Очистити все», cards with a pin button and «…», which reveals
   delete and pin like Windows 11.
 * **macos**: a Spotlight-like centred panel (macOS 26 style): large search field, list with
   relative times, preview of the selected item, keyboard hints.
@@ -91,3 +91,20 @@ Skins:
 
 * **macos**: shown on the left of the top bar (`start-here-symbolic`), replacing the third-party `logomenu@aryan_k` extension.
 * **windows11** and **default**: not shown; the standard Activities indicator is left untouched.
+
+## Emoji and symbol picker
+
+| | |
+|---|---|
+| Open | Windows 11 theme: **Super+.** or **Super+;**; macOS theme: **Ctrl+Super+Space**; Fedora: **Super+.** (`emoji-shortcut` in the theme's `desk.dconf`; override on «Keyboard shortcuts» or `themes shortcut set emoji-toggle ...`) |
+| Search | English and Ukrainian names and keywords, case-folded and apostrophe/diacritics-tolerant; ranked exact → prefix → word/keyword → substring with recents tie-break |
+| Keys | Arrows move across the grid, `Page Up/Down` jump 3 rows, `Ctrl+1..9` switch category, `Enter` inserts, `Shift+Enter` inserts and keeps open, `Esc` closes |
+| Insertion | Sets the glyph with `application/x-desk-internal` so clipboard history ignores it, sends `Shift+Insert` (`Ctrl+Shift+Insert` in terminals), then restores the previous clipboard text |
+| Skin tones | Fitzpatrick modifier (`none`, `light`, `medium-light`, `medium`, `medium-dark`, `dark`) applied to person/hand emoji (including ZWJ sequences) |
+| Storage | Last 36 picks in `~/.local/share/deskd/emoji.json` (0600); turning off `remember-recents` clears and removes the file |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Emoji`: `enabled`, `emoji-shortcut`, `skin-tone`, `remember-recents`, `close-after-insert`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `emoji-toggle` |
+
+Skins:
+
+* **windows11**: live «Емодзі» and «Символи» tabs inside the unified Win+V / Win+. flyout; stays open after insert by default.
+* **macos** and **default**: floating keyboard-first picker anchored near the text caret (pointer fallback); closes after insert by default.

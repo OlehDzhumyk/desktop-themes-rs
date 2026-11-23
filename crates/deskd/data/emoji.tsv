@@ -1,0 +1,338 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Offline emoji, Unicode symbol and text-face dataset for deskd.
+# Format: id<TAB>glyph<TAB>category<TAB>supports_tone<TAB>en_name<TAB>en_keywords<TAB>uk_name<TAB>uk_keywords
+# Categories:
+#   Emoji:   smileys, people, animals, food, travel, activities, objects, symbols, flags
+#   Symbols: arrows, math, currency, punctuation, text-faces
+
+# --- smileys ---
+grinning	😀	smileys	0	grinning face	smile happy grin joy laugh	широка усмішка	усмішка радість сміх обличчя веселий
+smiley	😃	smileys	0	grinning face with big eyes	smile happy joy awesome	усмішка з великими очима	усмішка радість сміх щастя
+smile	😄	smileys	0	grinning face with smiling eyes	smile happy laugh joy	усміхнене обличчя	усмішка радість сміх приємно
+grin	😁	smileys	0	beaming face with smiling eyes	smile grin happy teeth	сяюча усмішка	усмішка зуби радість щастя
+laughing	😆	smileys	0	grinning squinting face	laugh haha lol smile	сміх із примруженими очима	сміх хаха лол усмішка
+sweat_smile	😅	smileys	0	grinning face with sweat	smile relief nervous laugh	усмішка з потом	усмішка полегшення ніяково сміх
+rofl	🤣	smileys	0	rolling on the floor laughing	laugh lol rofl funny	качається від сміху	сміх регіт дуже смішно хаха
+joy	😂	smileys	0	face with tears of joy	laugh cry lol tears happy	сльози радості	сміх сльози хаха смішно
+slightly_smiling	🙂	smileys	0	slightly smiling face	smile ok gentle happy	легка усмішка	усмішка добре лагідно привіт
+upside_down	🙃	smileys	0	upside-down face	silly sarcasm smile	перевернуте обличчя	сарказм жарт усмішка догори
+melting	🫠	smileys	0	melting face	melt hot embarrassed awkward	тане обличчя	танути спека ніяково сором
+wink	😉	smileys	0	winking face	wink flirt joke smile	підморгування	підморгувати жарт флірт усмішка
+blush	😊	smileys	0	smiling face with smiling eyes	blush smile happy warm	рум'яна усмішка	усмішка рум'янець сором'язливо тепло
+innocent	😇	smileys	0	smiling face with halo	angel halo innocent good	ангел із німбом	ангел німб невинний добрий
+smiling_hearts	🥰	smileys	0	smiling face with hearts	love crush adore warm	закохана усмішка із серцями	любов кохання серця ніжність
+heart_eyes	😍	smileys	0	smiling face with heart-eyes	love heart adore crush	очі-сердечка	любов кохання захват серце
+star_struck	🤩	smileys	0	star-struck	wow star amazed excited	зірки в очах	захват вау зірка вражений
+kissing_heart	😘	smileys	0	face blowing a kiss	kiss love heart flirt	повітряний поцілунок	поцілунок любов серце цьом
+yum	😋	smileys	0	face savoring food	yummy delicious tasty food	смачно	смакота їжа язик смачно
+stuck_out_tongue	😛	smileys	0	face with tongue	tongue playful joke silly	показує язик	язик жарт грайливо
+zany	🤪	smileys	0	zany face	crazy wild silly goofy	шалене обличчя	божевільний смішний жарт
+thinking	🤔	smileys	0	thinking face	think hmm wonder idea question	замислене обличчя	думати роздуми хм питання ідея
+saluting	🫡	smileys	0	saluting face	salute respect yes sir	віддає честь	честь повага так точно
+shushing	🤫	smileys	0	shushing face	quiet secret shh silence	тихо	тиша секрет тсс мовчати
+zipper_mouth	🤐	smileys	0	zipper-mouth face	secret quiet zip silent	рот на замку	секрет мовчати тихо замок
+raised_eyebrow	🤨	smileys	0	face with raised eyebrow	skeptic doubt hmm suspect	піднята брова	сумнів скепсис підозра хм
+neutral	😐	smileys	0	neutral face	meh neutral poker blank	нейтральне обличчя	байдуже спокійно нуль емоцій
+expressionless	😑	smileys	0	expressionless face	blank meh tired annoyed	без емоцій	байдужість втома спокій
+smirk	😏	smileys	0	smirking face	smirk smug sly flirt	хитра усмішка	хитро натяк самовдоволення
+unamused	😒	smileys	0	unamused face	meh bored annoyed unimpressed	невдоволене обличчя	нудьга роздратування незадоволення
+rolling_eyes	🙄	smileys	0	face with rolling eyes	eyeroll whatever annoyed bored	закочує очі	очі роздратування ой та годі
+grimacing	😬	smileys	0	grimacing face	awkward oops cringe nervous	гримаса	ніяково ой незручно зуби
+relieved	😌	smileys	0	relieved face	relief calm peace relaxed	полегшення	спокій полегшення мир
+pensive	😔	smileys	0	pensive face	sad sorry pensive down	засмучене обличчя	сум жаль замисленість
+sleepy	😴	smileys	0	sleeping face	sleep tired zzz nap	спить	сон втома спати дрімати
+drooling	🤤	smileys	0	drooling face	drool hungry tasty want	пускає слину	смачно хочу їжа
+mask	😷	smileys	0	face with medical mask	sick mask doctor health	обличчя в масці	маска хворий лікар здоров'я
+sunglasses	😎	smileys	0	smiling face with sunglasses	cool sunglasses awesome chill	у сонцезахисних окулярах	крутий окуляри сонце стиль
+nerd	🤓	smileys	0	nerd face	nerd geek glasses smart study	ботан в окулярах	розумник окуляри навчання гік
+confused	😕	smileys	0	confused face	confused unsure puzzled	розгублене обличчя	розгубленість незрозуміло сумнів
+worried	😟	smileys	0	worried face	worried anxious concern	стурбоване обличчя	тривога хвилювання турбота
+open_mouth	😮	smileys	0	face with open mouth	wow surprised oh shock	відкритий рот	здивування ого шок
+hushed	😯	smileys	0	hushed face	surprised quiet wow	приголомшене обличчя	здивування тихо ого
+astonished	😲	smileys	0	astonished face	shocked amazed wow omg	вражене обличчя	шок здивування вау
+flushed	😳	smileys	0	flushed face	embarrassed blush shocked	почервоніле обличчя	сором зніяковіння здивування
+pleading	🥺	smileys	0	pleading face	please puppy eyes cute beg	благальні очі	будь ласка мило просити
+cry	😢	smileys	0	crying face	sad cry tear upset	плаче	сум сльоза плач
+sob	😭	smileys	0	loudly crying face	cry sob sad tears	ридає	плач сльози горе сум
+scream	😱	smileys	0	face screaming in fear	fear scream shock horror omg	крик від жаху	страх жах шок крик
+angry	😠	smileys	0	angry face	angry mad grumpy upset	зле обличчя	злість гнів сердитий
+rage	😡	smileys	0	enraged face	angry furious mad red	лють	гнів злість червоний лютий
+exploding_head	🤯	smileys	0	exploding head	mind blown shock wow	вибух мозку	шок враження неймовірно
+partying	🥳	smileys	0	partying face	party celebrate birthday hooray	святкове обличчя	свято день народження ура вечірка
+skull	💀	smileys	0	skull	dead skull skeleton lol	череп	смерть скелет кінець
+ghost	👻	smileys	0	ghost	ghost halloween spooky boo	привид	хеловін бу страшний
+alien	👽	smileys	0	alien	alien ufo space et	прибулець	космос нло іншопланетянин
+robot	🤖	smileys	0	robot	robot bot ai tech	робот	бот технології штучний інтелект
+poop	💩	smileys	0	pile of poo	poop funny crap	какашка	жарт смішно
+
+# --- people ---
+wave	👋	people	1	waving hand	wave hello hi bye hand	махає рукою	привіт бувай рука вітання
+raised_back_hand	🤚	people	1	raised back of hand	hand stop raised	піднята тильна сторона долоні	рука стоп
+raised_hand	✋	people	1	raised hand	stop hand high five	піднята рука	стоп рука привіт
+ok_hand	👌	people	1	OK hand	ok good perfect nice	жест окей	окей добре чудово супер
+pinched_fingers	🤌	people	1	pinched fingers	italian chef kiss gesture	зібрані пальці	італійський жест чудово
+victory	✌️	people	1	victory hand	peace victory two v	знак перемоги	перемога мир два пальці
+crossed_fingers	🤞	people	1	crossed fingers	luck hope wish fingers	схрещені пальці	удача надія пощастить
+love_you	🤟	people	1	love-you gesture	love rock hand	жест любові	любов рок рука
+thumbs_up	👍	people	1	thumbs up	yes like approve good ok	палець вгору	так лайк добре схвалюю супер
+thumbs_down	👎	people	1	thumbs down	no dislike bad reject	палець вниз	ні дизлайк погано
+fist	✊	people	1	raised fist	fist power solidarity punch	піднятий кулак	сила солідарність кулак боротьба
+clap	👏	people	1	clapping hands	clap applause bravo congrats	оплески	аплодисменти браво вітаю молодець
+raised_hands	🙌	people	1	raising hands	hooray celebrate yay hands	підняті руки	ура свято радість
+handshake	🤝	people	0	handshake	deal agree welcome partner	рукостискання	угода згода партнерство привіт
+pray	🙏	people	1	folded hands	please thanks pray hope	складені долоні	дякую будь ласка молитва прохання
+muscle	💪	people	1	flexed biceps	strong muscle gym power	біцепс	сила спорт м'язи потужно
+point_up	☝️	people	1	index pointing up	up note important one	вказівний палець вгору	увага важливо вгору
+point_right	👉	people	1	backhand index pointing right	right arrow point	вказівний палець праворуч	праворуч сюди вказівка
+point_left	👈	people	1	backhand index pointing left	left arrow point	вказівний палець ліворуч	ліворуч туди
+writing_hand	✍️	people	1	writing hand	write note pen sign	рука що пише	писати нотатка підпис
+eyes	👀	people	0	eyes	look see watch peek	очі	дивитися погляд спостерігати
+brain	🧠	people	0	brain	smart mind think intelligence	мозок	розум думати інтелект
+facepalm	🤦	people	1	person facepalming	facepalm duh embarrassed	фейспалм	рука-обличчя сором дурниця
+shrug	🤷	people	1	person shrugging	shrug dunno idk whatever	знизує плечима	не знаю байдуже плечі
+technologist	🧑‍💻	people	1	technologist	developer coder programmer laptop	програміст	розробник код ноутбук айті
+
+# --- animals ---
+dog	🐶	animals	0	dog face	dog puppy pet woof	собака	пес цуценя тварина
+cat	🐱	animals	0	cat face	cat kitty pet meow	кіт	кішка котик няв тварина
+fox	🦊	animals	0	fox	fox animal orange	лисиця	лис тварина рудий
+bear	🐻	animals	0	bear	bear animal teddy	ведмідь	мішка тварина
+panda	🐼	animals	0	panda	panda bear bamboo	панда	ведмідь бамбук
+lion	🦁	animals	0	lion	lion king animal	лев	цар звірів тварина
+frog	🐸	animals	0	frog	frog ribbit green	жаба	зелена тварина
+monkey	🙈	animals	0	see-no-evil monkey	monkey oops hide shy	мавпа закрила очі	ой соромно сховатися
+chicken	🐔	animals	0	chicken	chicken bird farm	курка	птах ферма
+penguin	🐧	animals	0	penguin	penguin linux bird cold	пінгвін	лінукс птах холод
+owl	🦉	animals	0	owl	owl bird night wise	сова	птах ніч мудрість
+butterfly	🦋	animals	0	butterfly	butterfly insect pretty	метелик	комаха красиво
+bee	🐝	animals	0	honeybee	bee honey insect buzz	бджола	мед комаха
+bug	🐛	animals	0	bug	bug insect software error	жук	баг помилка комаха
+unicorn	🦄	animals	0	unicorn	unicorn magic horse	єдиноріг	магія кінь
+turtle	🐢	animals	0	turtle	turtle slow green	черепаха	повільно зелена
+octopus	🐙	animals	0	octopus	octopus sea ocean	восьминіг	море океан
+whale	🐳	animals	0	spouting whale	whale ocean sea docker	кит	море океан
+sunflower	🌻	animals	0	sunflower	sunflower flower yellow ukraine	соняшник	квітка жовтий україна
+rose	🌹	animals	0	rose	rose flower love red	троянда	квітка любов червона
+tulip	🌷	animals	0	tulip	tulip flower spring	тюльпан	квітка весна
+cherry_blossom	🌸	animals	0	cherry blossom	sakura flower spring pink	цвіт сакури	квітка весна сакура
+herb	🌿	animals	0	herb	leaf plant nature green	гілочка	лист рослина природа зелений
+four_leaf_clover	🍀	animals	0	four leaf clover	luck clover green irish	чотирилисник	удача конюшина
+tree	🌲	animals	0	evergreen tree	tree pine forest nature	ялинка	дерево ліс природа
+sun	☀️	animals	0	sun	sun sunny bright warm weather	сонце	сонячно тепло погода світло
+moon	🌙	animals	0	crescent moon	moon night sleep dark	місяць	ніч сон темрява
+star	⭐	animals	0	star	star favorite rating gold	зірка	улюблене рейтинг золото
+sparkles	✨	animals	0	sparkles	sparkle magic shine clean new	іскри	магія блиск нове чисто
+fire	🔥	animals	0	fire	fire hot lit flame burn	вогонь	гаряче круто полум'я
+rainbow	🌈	animals	0	rainbow	rainbow colors pride sky	веселка	кольори небо
+cloud	☁️	animals	0	cloud	cloud weather sky	хмара	погода небо
+rain	🌧️	animals	0	cloud with rain	rain weather wet	дощ	погода хмара
+snowflake	❄️	animals	0	snowflake	snow winter cold ice	сніжинка	сніг зима холод лід
+zap	⚡	animals	0	high voltage	lightning bolt fast power electric	блискавка	швидко енергія струм
+
+# --- food ---
+apple	🍎	food	0	red apple	apple fruit red healthy	червоне яблуко	яблуко фрукт
+banana	🍌	food	0	banana	banana fruit yellow	банан	фрукт жовтий
+strawberry	🍓	food	0	strawberry	strawberry berry red fruit	полуниця	ягода фрукт
+watermelon	🍉	food	0	watermelon	watermelon summer fruit	кавун	літо ягода
+avocado	🥑	food	0	avocado	avocado green food	авокадо	зелений їжа
+bread	🍞	food	0	bread	bread bakery food	хліб	випічка їжа
+croissant	🥐	food	0	croissant	croissant french breakfast	круасан	сніданок випічка
+pizza	🍕	food	0	pizza	pizza food italian cheese	піца	їжа сир вечірка
+burger	🍔	food	0	hamburger	burger food fastfood	бургер	їжа фастфуд
+fries	🍟	food	0	french fries	fries potato snack	картопля фрі	картопля їжа
+taco	🌮	food	0	taco	taco mexican food	тако	їжа мексика
+sushi	🍣	food	0	sushi	sushi japanese fish	суші	їжа японська
+ramen	🍜	food	0	steaming bowl	ramen soup noodles hot	локшина	суп гаряче їжа
+cake	🎂	food	0	birthday cake	cake birthday party dessert	святковий торт	торт день народження свято
+cookie	🍪	food	0	cookie	cookie sweet snack biscuit	печиво	солодке десерт
+chocolate	🍫	food	0	chocolate bar	chocolate sweet candy	шоколад	солодке десерт
+coffee	☕	food	0	hot beverage	coffee tea cafe morning warm	кава	чай ранок напій гаряче
+tea	🍵	food	0	teacup without handle	tea green warm drink	чай	зелений напій тепло
+beer	🍺	food	0	beer mug	beer drink pub cheers	пиво	напій бар
+wine	🍷	food	0	wine glass	wine drink red cheers	вино	напій келих
+champagne	🥂	food	0	clinking glasses	cheers toast celebrate champagne	келихи	тост свято шампанське будьмо
+
+# --- travel ---
+rocket	🚀	travel	0	rocket	rocket launch space fast ship	ракета	запуск космос швидко реліз
+airplane	✈️	travel	0	airplane	plane flight travel trip	літак	політ подорож рейс
+car	🚗	travel	0	automobile	car drive auto vehicle	автомобіль	машина авто поїздка
+train	🚆	travel	0	train	train rail travel commute	потяг	поїзд залізниця подорож
+bicycle	🚲	travel	0	bicycle	bike cycle sport ride	велосипед	вело спорт прогулянка
+house	🏠	travel	0	house	home house building	будинок	дім житло
+office	🏢	travel	0	office building	office work building city	офіс	робота будівля місто
+globe	🌍	travel	0	globe showing Europe-Africa	world earth globe planet	земна куля	світ земля планета європа
+map	🗺️	travel	0	world map	map travel geography	карта світу	мапа подорож
+compass	🧭	travel	0	compass	compass direction navigate	компас	напрямок навігація
+mountain	⛰️	travel	0	mountain	mountain nature hike	гора	природа похід
+beach	🏖️	travel	0	beach with umbrella	beach vacation summer sea	пляж	відпустка літо море
+camping	🏕️	travel	0	camping	camp tent nature	кемпінг	намет природа похід
+
+# --- activities ---
+party_popper	🎉	activities	0	party popper	party tada celebrate congrats	хлопавка	свято вітаю ура перемога
+confetti	🎊	activities	0	confetti ball	celebrate party confetti	конфеті	свято радість
+balloon	🎈	activities	0	balloon	balloon party birthday	повітряна кулька	свято день народження
+gift	🎁	activities	0	wrapped gift	gift present birthday box	подарунок	сюрприз свято коробка
+trophy	🏆	activities	0	trophy	trophy win award prize champion	кубок	перемога нагорода приз
+medal	🏅	activities	0	sports medal	medal award win	медаль	нагорода перемога
+soccer	⚽	activities	0	soccer ball	football soccer sport goal	футбольний м'яч	футбол спорт гра
+basketball	🏀	activities	0	basketball	basketball sport ball	баскетбольний м'яч	баскетбол спорт
+video_game	🎮	activities	0	video game	game controller play gaming	геймпад	гра відеогра геймінг
+art	🎨	activities	0	artist palette	art paint design color draw	палітра	мистецтво дизайн колір малювання
+music	🎵	activities	0	musical note	music note song sound	нота	музика пісня звук
+headphones	🎧	activities	0	headphone	headphones audio music listen	навушники	аудіо музика звук
+microphone	🎤	activities	0	microphone	mic sing podcast voice	мікрофон	голос запис пісня
+clapper	🎬	activities	0	clapper board	movie film video cinema	кінохлопавка	фільм кіно відео
+target	🎯	activities	0	bullseye	target goal aim hit focus	мішень	ціль мета влучно фокус
+
+# --- objects ---
+laptop	💻	objects	0	laptop	computer laptop code dev tech	ноутбук	комп'ютер робота код
+desktop	🖥️	objects	0	desktop computer	monitor screen pc computer	монітор	комп'ютер екран
+keyboard	⌨️	objects	0	keyboard	keyboard type keys input	клавіатура	друк клавіші текст
+phone	📱	objects	0	mobile phone	phone smartphone mobile call	смартфон	телефон мобільний
+camera	📷	objects	0	camera	camera photo picture shot	камера	фото знімок
+light_bulb	💡	objects	0	light bulb	idea tip bright light lamp	лампочка	ідея порада світло
+battery	🔋	objects	0	battery	battery power charge energy	батарея	заряд енергія живлення
+plug	🔌	objects	0	electric plug	plug power cable connect	вилка	живлення підключення кабель
+magnifying_glass	🔍	objects	0	magnifying glass tilted left	search find zoom inspect	лупа	пошук знайти збільшити
+lock	🔒	objects	0	locked	lock security private password	замок	безпека пароль закрито
+unlock	🔓	objects	0	unlocked	unlock open security	відкритий замок	відкрито доступ
+key	🔑	objects	0	key	key password access secret	ключ	пароль доступ секрет
+hammer	🔨	objects	0	hammer	tool build fix hammer	молоток	інструмент ремонт
+wrench	🔧	objects	0	wrench	tool fix config settings	гайковий ключ	інструмент налаштування ремонт
+gear	⚙️	objects	0	gear	settings config preferences options	шестерня	налаштування параметри конфіг
+package	📦	objects	0	package	box parcel delivery build	пакунок	коробка доставка пакет
+envelope	✉️	objects	0	envelope	mail email letter message	конверт	пошта лист повідомлення
+memo	📝	objects	0	memo	note write edit doc todo	нотатка	запис текст документ
+calendar	📅	objects	0	calendar	date schedule event plan	календар	дата розклад подія
+folder	📁	objects	0	file folder	folder directory files	тека	папка файли каталог
+clipboard	📋	objects	0	clipboard	clipboard paste copy list	буфер обміну	список копіювати вставити
+pushpin	📌	objects	0	pushpin	pin tack save mark	кнопка	закріпити позначка
+paperclip	📎	objects	0	paperclip	attach clip file link	скріпка	вкладення файл
+link	🔗	objects	0	link	url chain connect hyperlink	посилання	лінк ланцюг адреса
+scissors	✂️	objects	0	scissors	cut trim edit	ножиці	вирізати обрізати
+book	📖	objects	0	open book	book read docs manual	книга	читати документація
+bookmark	🔖	objects	0	bookmark	bookmark save tag	закладка	зберегти мітка
+clock	🕒	objects	0	three o'clock	time clock hour schedule	годинник	час година розклад
+hourglass	⏳	objects	0	hourglass not done	wait loading time timer	пісочний годинник	очікування час таймер
+bell	🔔	objects	0	bell	notification alert ring sound	дзвіночок	сповіщення звук нагадування
+mute	🔇	objects	0	muted speaker	mute silent quiet sound	без звуку	тихо вимкнути звук
+speaker	🔊	objects	0	speaker high volume	volume loud sound audio	гучно	звук гучність аудіо
+megaphone	📢	objects	0	loudspeaker	announce news broadcast	гучномовець	оголошення новина
+shield	🛡️	objects	0	shield	security protect defense safe	щит	безпека захист
+trash	🗑️	objects	0	wastebasket	delete trash bin remove	кошик	видалити сміття прибрати
+
+# --- symbols ---
+red_heart	❤️	symbols	0	red heart	love heart like favorite	червоне серце	любов серце кохання лайк
+orange_heart	🧡	symbols	0	orange heart	love heart orange	помаранчеве серце	любов серце
+yellow_heart	💛	symbols	0	yellow heart	love heart yellow ukraine	жовте серце	любов серце україна
+green_heart	💚	symbols	0	green heart	love heart green	зелене серце	любов серце
+blue_heart	💙	symbols	0	blue heart	love heart blue ukraine	синє серце	любов серце україна
+purple_heart	💜	symbols	0	purple heart	love heart purple	фіолетове серце	любов серце
+white_heart	🤍	symbols	0	white heart	love heart white pure	біле серце	любов серце
+broken_heart	💔	symbols	0	broken heart	sad breakup heart hurt	розбите серце	сум біль серце
+check_mark	✅	symbols	0	check mark button	done ok yes pass complete	галочка	готово так виконано ок
+cross_mark	❌	symbols	0	cross mark	no wrong error cancel fail	хрестик	ні помилка скасувати
+warning	⚠️	symbols	0	warning	alert caution danger warn	попередження	увага обережно небезпека
+prohibited	🚫	symbols	0	prohibited	no ban forbidden block	заборонено	ні блок не можна
+question	❓	symbols	0	red question mark	question help what ask	знак питання	питання допомога що
+exclamation	❗	symbols	0	red exclamation mark	important alert bang warn	знак оклику	важливо увага
+info	ℹ️	symbols	0	information	info help details about	інформація	довідка деталі
+plus_emoji	➕	symbols	0	plus	add plus more	плюс	додати більше
+minus_emoji	➖	symbols	0	minus	subtract minus remove	мінус	відняти прибрати
+recycle	♻️	symbols	0	recycling symbol	recycle green eco reuse	переробка	екологія повторно
+infinity_emoji	♾️	symbols	0	infinity	forever endless loop	нескінченність	завжди безмежно
+hundred	💯	symbols	0	hundred points	100 perfect score agree	сто балів	ідеально сто відсотків згоден
+new_badge	🆕	symbols	0	NEW button	new fresh latest	нове	новинка свіже
+ok_badge	🆗	symbols	0	OK button	ok good agree	окей	добре згода
+
+# --- flags ---
+flag_ua	🇺🇦	flags	0	flag: Ukraine	ukraine ua kyiv flag	прапор України	україна київ прапор уа
+flag_eu	🇪🇺	flags	0	flag: European Union	europe eu flag	прапор Євросоюзу	європа єс прапор
+flag_us	🇺🇸	flags	0	flag: United States	usa us america flag	прапор США	сша америка прапор
+flag_gb	🇬🇧	flags	0	flag: United Kingdom	uk britain england flag	прапор Великої Британії	британія англія прапор
+flag_pl	🇵🇱	flags	0	flag: Poland	poland pl warsaw flag	прапор Польщі	польща варшава прапор
+flag_de	🇩🇪	flags	0	flag: Germany	germany de berlin flag	прапор Німеччини	німеччина берлін прапор
+flag_fr	🇫🇷	flags	0	flag: France	france fr paris flag	прапор Франції	франція париж прапор
+flag_ca	🇨🇦	flags	0	flag: Canada	canada ca flag	прапор Канади	канада прапор
+flag_jp	🇯🇵	flags	0	flag: Japan	japan jp tokyo flag	прапор Японії	японія токіо прапор
+flag_white	🏳️	flags	0	white flag	surrender peace flag	білий прапор	мир прапор
+flag_checkered	🏁	flags	0	chequered flag	finish race end flag	фінішний прапор	фініш гонка кінець
+
+# --- arrows (Unicode symbols) ---
+arrow_left	←	arrows	0	leftwards arrow	arrow left back previous	стрілка ліворуч	стрілка назад вліво
+arrow_up	↑	arrows	0	upwards arrow	arrow up top	стрілка вгору	стрілка вверх вгору
+arrow_right	→	arrows	0	rightwards arrow	arrow right next forward to	стрілка праворуч	стрілка вперед вправо далі
+arrow_down	↓	arrows	0	downwards arrow	arrow down bottom	стрілка вниз	стрілка донизу вниз
+arrow_lr	↔	arrows	0	left right arrow	arrow both horizontal	двобічна стрілка	стрілка горизонтальна
+arrow_ud	↕	arrows	0	up down arrow	arrow vertical	вертикальна стрілка	стрілка вгору вниз
+arrow_dbl_right	⇒	arrows	0	rightwards double arrow	implies double arrow right	подвійна стрілка праворуч	слідує стрілка праворуч
+arrow_dbl_left	⇐	arrows	0	leftwards double arrow	double arrow left	подвійна стрілка ліворуч	стрілка ліворуч
+arrow_dbl_lr	⇔	arrows	0	left right double arrow	iff equivalent double arrow	еквівалентність	стрілка рівносильно
+arrow_return	↵	arrows	0	downwards arrow with corner leftwards	enter return newline	повернення каретки	ентер перенос рядка
+arrow_ne	↗	arrows	0	north east arrow	external link diagonal up right	стрілка вгору-праворуч	зовнішнє посилання діагональ
+arrow_se	↘	arrows	0	south east arrow	diagonal down right	стрілка вниз-праворуч	діагональ вниз
+arrow_cw	↻	arrows	0	clockwise open circle arrow	refresh reload repeat	оновити за годинниковою	повтор оновлення
+arrow_ccw	↺	arrows	0	anticlockwise open circle arrow	undo revert counter	скасувати проти годинникової	повернути назад
+
+# --- math (Unicode symbols) ---
+math_plus_minus	±	math	0	plus-minus sign	plus minus approx math	плюс-мінус	математика приблизно
+math_times	×	math	0	multiplication sign	multiply times cross math	знак множення	помножити математика хрест
+math_divide	÷	math	0	division sign	divide division math	знак ділення	поділити математика
+math_neq	≠	math	0	not equal to	not equal different math	не дорівнює	різні математика
+math_approx	≈	math	0	almost equal to	approximately about math	приблизно дорівнює	близько математика
+math_leq	≤	math	0	less-than or equal to	less equal math	менше або дорівнює	математика нерівність
+math_geq	≥	math	0	greater-than or equal to	greater equal math	більше або дорівнює	математика нерівність
+math_inf	∞	math	0	infinity	infinity endless math	нескінченність	математика безмежно
+math_sqrt	√	math	0	square root	root radical check math	квадратний корінь	корінь математика
+math_sum	∑	math	0	n-ary summation	sum sigma total math	сума	сигма математика
+math_pi	π	math	0	greek small letter pi	pi circle 3.14 math	число пі	пі математика коло
+math_delta	Δ	math	0	greek capital letter delta	delta change diff triangle	дельта	різниця зміна математика
+math_degree	°	math	0	degree sign	degree temperature angle	градус	температура кут
+math_micro	µ	math	0	micro sign	micro mu prefix	мікро	мю математика
+math_section	§	math	0	section sign	section paragraph law	параграф	розділ закон
+math_permille	‰	math	0	per mille sign	permille percent thousand	проміле	відсоток тисяча
+math_half	½	math	0	vulgar fraction one half	half 1/2 fraction	одна друга	половина дріб
+math_sup2	²	math	0	superscript two	squared power 2	у квадраті	ступінь два
+math_sup3	³	math	0	superscript three	cubed power 3	у кубі	ступінь три
+
+# --- currency (Unicode symbols) ---
+curr_uah	₴	currency	0	hryvnia sign	hryvnia uah ukraine money currency	гривня	грн україна гроші валюта
+curr_usd	$	currency	0	dollar sign	dollar usd money currency	долар	гроші валюта сша
+curr_eur	€	currency	0	euro sign	euro eur europe money currency	євро	гроші валюта європа
+curr_gbp	£	currency	0	pound sign	pound gbp sterling money currency	фунт стерлінгів	фунт гроші валюта
+curr_jpy	¥	currency	0	yen sign	yen yuan jpy cny money currency	єна	юань гроші валюта
+curr_pln	zł	currency	0	Polish zloty	zloty pln poland money currency	злотий	польща гроші валюта
+curr_chf	₣	currency	0	franc sign	franc chf money currency	франк	гроші валюта
+curr_btc	₿	currency	0	bitcoin sign	bitcoin btc crypto currency	біткоїн	крипто валюта
+curr_cent	¢	currency	0	cent sign	cent penny coin money	цент	монета гроші
+
+# --- punctuation (Unicode symbols) ---
+punct_mdash	—	punctuation	0	em dash	dash long punctuation typography	довге тире	тире пунктуація типографіка
+punct_ndash	–	punctuation	0	en dash	dash range punctuation	коротке тире	тире діапазон пунктуація
+punct_ellipsis	…	punctuation	0	horizontal ellipsis	dots three ellipsis	три крапки	багатокрапка пунктуація
+punct_laquo	«	punctuation	0	left-pointing double angle quotation mark	quote guillemet open	ліва ялинка	лапки відкрити пунктуація
+punct_raquo	»	punctuation	0	right-pointing double angle quotation mark	quote guillemet close	права ялинка	лапки закрити пунктуація
+punct_ldquo	“	punctuation	0	left double quotation mark	quote open english	верхні лапки відкрити	лапки пунктуація
+punct_rdquo	”	punctuation	0	right double quotation mark	quote close english	верхні лапки закрити	лапки пунктуація
+punct_bullet	•	punctuation	0	bullet	dot list item bullet	маркер списку	крапка список
+punct_middot	·	punctuation	0	middle dot	dot separator interpunct	середня крапка	роздільник крапка
+punct_copy	©	punctuation	0	copyright sign	copyright legal symbol	знак охорони авторського права	копірайт право
+punct_reg	®	punctuation	0	registered sign	registered trademark	зареєстрована торгова марка	марка символ
+punct_tm	™	punctuation	0	trade mark sign	trademark brand	торгова марка	бренд символ
+punct_check	✓	punctuation	0	check mark	tick check ok done	галочка	готово так
+punct_cross	✗	punctuation	0	ballot x	cross no cancel	хрестик	ні скасувати
+punct_nbspace	№	punctuation	0	numero sign	number no ukraine	знак номера	номер пунктуація
+
+# --- text-faces (kaomoji) ---
+kaomoji_shrug	¯\_(ツ)_/¯	text-faces	0	shrug kaomoji	shrug dunno idk text face	знизування плечима	не знаю плечі смайл
+kaomoji_lenny	( ͡° ͜ʖ ͡°)	text-faces	0	lenny face	lenny smirk joke text face	хитрий погляд	жарт смайл натяк
+kaomoji_tableflip	(╯°□°)╯︵ ┻━┻	text-faces	0	table flip	flip angry table rage	перевернути стіл	злість стіл жарт
+kaomoji_unflip	┬─┬ノ( º _ ºノ)	text-faces	0	put table back	calm unflip table polite	поставити стіл на місце	спокій стіл ввічливо
+kaomoji_happy	(◕‿◕)	text-faces	0	happy kaomoji	happy cute smile face	радісний смайл	усмішка мило радість
+kaomoji_sparkle	(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧	text-faces	0	sparkle magic kaomoji	magic sparkle hooray excited	магічні іскри	ура радість блиск
+kaomoji_hug	(っ◔◡◔)っ	text-faces	0	hug kaomoji	hug warm cute love	обійми	тепло мило обійняти
+kaomoji_cry	(ಥ﹏ಥ)	text-faces	0	crying kaomoji	cry sad tears upset	плачучий смайл	сум сльози плач
+kaomoji_disapprove	ಠ_ಠ	text-faces	0	look of disapproval	stare disapprove serious judge	суворий погляд	несхвалення серйозно
+kaomoji_bear	ʕ•ᴥ•ʔ	text-faces	0	bear kaomoji	bear cute animal face	ведмедик	мило тварина смайл
+kaomoji_cat	(=^･ω･^=)	text-faces	0	cat kaomoji	cat kitty cute meow	котик	кіт няв мило
+kaomoji_thumbs	(b ᵔ▽ᵔ)b	text-faces	0	thumbs up kaomoji	good nice approve cool	клас	супер добре схвалення
