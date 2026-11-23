@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 10:24+0000\n"
+"POT-Creation-Date: 2026-11-23 14:46+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -242,8 +242,9 @@ msgid "Desktop"
 msgstr "Робочий стіл"
 
 #: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
-#: bridge/src/quickSettings.ts:120 bridge/src/quickSettings.ts:158
-#: bridge/src/quickSettings.ts:160 bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:128 bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:193 bridge/src/quickSettings.ts:195
+#: bridge/src/quickSettings.ts:197
 msgid "Theme"
 msgstr "Тема"
 
@@ -251,43 +252,43 @@ msgstr "Тема"
 msgid "Open “Desktop”…"
 msgstr "Відкрити «Робочий стіл»…"
 
-#: bridge/src/quickSettings.ts:107
+#: bridge/src/quickSettings.ts:115
 msgid "service unavailable"
 msgstr "служба недоступна"
 
-#: bridge/src/quickSettings.ts:119
+#: bridge/src/quickSettings.ts:127
 msgid "{name} (mixed)"
 msgstr "{name} (змішано)"
 
-#: bridge/src/quickSettings.ts:129
+#: bridge/src/quickSettings.ts:137
 msgid "{count} of {total} modules active"
 msgstr "активних модулів: {count} з {total}"
 
-#: bridge/src/quickSettings.ts:131
+#: bridge/src/quickSettings.ts:139
 msgid "{name}: modules {modules}"
 msgstr "{name}: модулі {modules}"
 
-#: bridge/src/quickSettings.ts:154
-msgid "applying “{name}”…"
-msgstr "застосування «{name}»…"
-
-#: bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:162 bridge/src/quickSettings.ts:197
 msgid "Could not apply “{name}”: {error}"
 msgstr "Не вдалося застосувати «{name}»: {error}"
 
-#: bridge/src/quickSettings.ts:207
+#: bridge/src/quickSettings.ts:189
+msgid "applying “{name}”…"
+msgstr "застосування «{name}»…"
+
+#: bridge/src/quickSettings.ts:242
 msgid "Clipboard settings…"
 msgstr "Налаштування буфера обміну…"
 
-#: bridge/src/quickSettings.ts:234
+#: bridge/src/quickSettings.ts:269
 msgid "private mode"
 msgstr "приватний режим"
 
-#: bridge/src/quickSettings.ts:255
+#: bridge/src/quickSettings.ts:290
 msgid "deskd is unavailable"
 msgstr "deskd недоступний"
 
-#: bridge/src/quickSettings.ts:261
+#: bridge/src/quickSettings.ts:296
 msgid "The history is empty"
 msgstr "Історія порожня"
 
@@ -546,10 +547,7 @@ msgid ""
 "A macOS-style system menu on the left of the top bar with quick actions for "
 "About This System, System Settings, Applications, Force Quit and power "
 "controls. Drawn by the shell bridge when the macOS skin is active."
-msgstr ""
-"Системне меню в стилі macOS ліворуч на верхній панелі зі швидкими діями «Про "
-"систему», «Налаштування системи», «Програми», «Примусово завершити» та "
-"керуванням живленням. Малюється мостом оболонки, коли активний скін macOS."
+msgstr "Системне меню в стилі macOS ліворуч на верхній панелі зі швидкими діями «Про систему», «Налаштування системи», «Програми», «Примусово завершити» та керуванням живленням. Малюється мостом оболонки, коли активний скін macOS."
 
 #: crates/desk-settings/src/logo_menu.rs:78
 msgid "Top bar"
@@ -920,12 +918,21 @@ msgstr ""
 "схему {schema} не встановлено (data/install.sh), працюю з типовими "
 "налаштуваннями"
 
-#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:233
+#: crates/deskd/src/main.rs:202 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
 
-#: crates/themes-core/src/apply.rs:153
+#: crates/themes-core/src/apply.rs:129
+#, rust-format
+msgid ""
+"“{name}” is an experimental theme and is applied only after an explicit "
+"confirmation: {warning}"
+msgstr ""
+"«{name}» — експериментальна тема, її застосовують лише після явного "
+"підтвердження: {warning}"
+
+#: crates/themes-core/src/apply.rs:192
 #, rust-format
 msgid ""
 "theme “{theme}” (module {module}) not found; its keys go back to the "
@@ -934,7 +941,7 @@ msgstr ""
 "тему «{theme}» (модуль {module}) не знайдено — її ключі повертаються до "
 "стандартних"
 
-#: crates/themes-core/src/apply.rs:198
+#: crates/themes-core/src/apply.rs:237
 #, rust-format
 msgid ""
 "shortcut conflict: {conflict}; the feature keeps it, the system shortcut "
@@ -943,23 +950,42 @@ msgstr ""
 "конфлікт скорочень: {conflict}; скорочення лишається функції, системне його "
 "втрачає"
 
-#: crates/themes-core/src/apply.rs:203
+#: crates/themes-core/src/apply.rs:242
 #, rust-format
 msgid "shortcut conflict: {conflict}; change one of them (themes shortcut set)"
 msgstr ""
 "конфлікт скорочень: {conflict}; змініть одне з них (themes shortcut set)"
 
-#: crates/themes-core/src/apply.rs:386
+#: crates/themes-core/src/apply.rs:378
 #, rust-format
 msgid "extension {uuid} is not installed"
 msgstr "розширення {uuid} не встановлене"
 
-#: crates/themes-core/src/apply.rs:390
+#: crates/themes-core/src/apply.rs:382
 #, rust-format
 msgid "extension {uuid} is turned off as broken (see “themes doctor”)"
 msgstr "розширення {uuid} вимкнено як несправне (див. «themes doctor»)"
 
-#: crates/themes-core/src/apply.rs:547
+#: crates/themes-core/src/apply.rs:548
+#, rust-format
+msgid ""
+"applying “{theme}” hit an error after its hooks ran, so it was completed: "
+"{error}"
+msgstr ""
+"під час застосування «{theme}» сталася помилка вже після хуків, тому "
+"застосування завершено: {error}"
+
+#: crates/themes-core/src/apply.rs:554
+#, rust-format
+msgid "could not apply “{theme}”: {error}. The changes were rolled back."
+msgstr "не вдалося застосувати «{theme}»: {error}. Зміни скасовано."
+
+#: crates/themes-core/src/apply.rs:562
+#, rust-format
+msgid "Not everything could be undone: {problems}"
+msgstr "Не все вдалося скасувати: {problems}"
+
+#: crates/themes-core/src/apply.rs:696
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): the theme's extensions will not work until you turn them "
@@ -969,45 +995,45 @@ msgstr ""
 "розширення теми не працюватимуть, доки ви їх не ввімкнете (themes doctor --"
 "enable-extensions або кнопка у вікні «Теми»)"
 
-#: crates/themes-core/src/apply.rs:555
+#: crates/themes-core/src/apply.rs:704
 msgid "the session is locked; new extensions turn on after unlocking"
 msgstr "сеанс заблоковано — нові розширення ввімкнуться після розблокування"
 
-#: crates/themes-core/src/apply.rs:576
+#: crates/themes-core/src/apply.rs:725
 #, rust-format
 msgid ""
 "the shell does not know the extension {uuid} yet (installed after login)"
 msgstr "оболонка ще не знає про розширення {uuid} (встановлене після входу)"
 
-#: crates/themes-core/src/apply.rs:582
+#: crates/themes-core/src/apply.rs:731
 #, rust-format
 msgid "extension {uuid}: {state} {error}"
 msgstr "розширення {uuid}: {state} {error}"
 
-#: crates/themes-core/src/apply.rs:591
+#: crates/themes-core/src/apply.rs:740
 #, rust-format
 msgid "extension {uuid} did not turn on live (state {state})"
 msgstr "розширення {uuid} не ввімкнулося наживо (стан {state})"
 
-#: crates/themes-core/src/apply.rs:602
+#: crates/themes-core/src/apply.rs:751
 #, rust-format
 msgid "extension {uuid} did not turn off live"
 msgstr "розширення {uuid} не вимкнулося наживо"
 
-#: crates/themes-core/src/apply.rs:610
+#: crates/themes-core/src/apply.rs:759
 #, rust-format
 msgid "swapping {old} ↔ {new} live leaves panel artefacts"
 msgstr "заміна {old} ↔ {new} наживо лишає артефакти панелі"
 
-#: crates/themes-core/src/apply.rs:646
+#: crates/themes-core/src/apply.rs:795
 msgid "automatic rollback after applying"
 msgstr "автовідкат після застосування"
 
-#: crates/themes-core/src/apply.rs:713
+#: crates/themes-core/src/apply.rs:862
 msgid "the theme “fedora” cannot be deleted: it is the standard look"
 msgstr "тему «fedora» видаляти не можна — це стандартний вигляд"
 
-#: crates/themes-core/src/apply.rs:726
+#: crates/themes-core/src/apply.rs:875
 #, rust-format
 msgid ""
 "the theme “{theme}” is active now (modules: {modules}); apply another one "
@@ -1041,6 +1067,11 @@ msgstr "; тоді була застосована тема «{theme}»"
 msgid "; likely culprit: {suspects}"
 msgstr "; ймовірний винуватець: {suspects}"
 
+#: crates/themes-core/src/dconf.rs:189
+#, rust-format
+msgid "could not restore {keys}"
+msgstr "не вдалося відновити {keys}"
+
 #: crates/themes-core/src/doctor.rs:141
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
@@ -1063,7 +1094,7 @@ msgid "To turn them on again: themes doctor --enable-extensions"
 msgstr "Увімкнути знову: themes doctor --enable-extensions"
 
 #: crates/themes-core/src/doctor.rs:181 crates/themes-core/src/doctor.rs:206
-#: crates/themes-core/src/doctor.rs:217 crates/themes-core/src/tokens.rs:143
+#: crates/themes-core/src/doctor.rs:217 crates/themes-core/src/tokens.rs:142
 #, rust-format
 msgid "theme “{theme}”: {error}"
 msgstr "тема «{theme}»: {error}"
@@ -1207,36 +1238,36 @@ msgstr "оновлено {path}"
 msgid "journal: {line}"
 msgstr "журнал: {line}"
 
-#: crates/themes-core/src/doctor.rs:750
+#: crates/themes-core/src/doctor.rs:766
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr "версія GNOME Shell змінилася: {old} → {new} (після оновлення системи)"
 
-#: crates/themes-core/src/doctor.rs:779
+#: crates/themes-core/src/doctor.rs:795
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr "застаріле (OUT_OF_DATE) для цієї версії GNOME"
 
-#: crates/themes-core/src/doctor.rs:781
+#: crates/themes-core/src/doctor.rs:797
 msgid "error (ERROR)"
 msgstr "помилка (ERROR)"
 
-#: crates/themes-core/src/doctor.rs:803
+#: crates/themes-core/src/doctor.rs:819
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr "{uuid}: увімкнене, але не встановлене"
 
-#: crates/themes-core/src/doctor.rs:811
+#: crates/themes-core/src/doctor.rs:827
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 "{uuid}: встановлене, але оболонка його ще не завантажила (потрібен перевхід)"
 
-#: crates/themes-core/src/doctor.rs:823
+#: crates/themes-core/src/doctor.rs:839
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr "{uuid}: metadata.json не підтримує GNOME {version}"
 
-#: crates/themes-core/src/doctor.rs:840
+#: crates/themes-core/src/doctor.rs:856
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
@@ -1245,27 +1276,27 @@ msgstr ""
 "розширення {uuid} (міст робочого столу: «Тема» у швидких налаштуваннях, "
 "буфер обміну) не встановлене"
 
-#: crates/themes-core/src/doctor.rs:848
+#: crates/themes-core/src/doctor.rs:864
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr "розширення {uuid} вимкнене"
 
-#: crates/themes-core/src/doctor.rs:867
+#: crates/themes-core/src/doctor.rs:883
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr "{uuid} вимкнено {since} ({reason})"
 
-#: crates/themes-core/src/doctor.rs:908
+#: crates/themes-core/src/doctor.rs:924
 #, rust-format
 msgid "turned off {uuid}"
 msgstr "вимкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:965
+#: crates/themes-core/src/doctor.rs:982
 #, rust-format
 msgid "turned on {uuid}"
 msgstr "увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:999
+#: crates/themes-core/src/doctor.rs:1016
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
@@ -1273,18 +1304,18 @@ msgstr ""
 "GNOME вимкнув розширення після збою оболонки. Відкрийте «Теми», щоб "
 "увімкнути їх знову."
 
-#: crates/themes-core/src/doctor.rs:1004
+#: crates/themes-core/src/doctor.rs:1021
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr "GNOME оновлено: {old} → {new}"
 
-#: crates/themes-core/src/doctor.rs:1013 crates/themes/src/cli.rs:470
-#: crates/themes/src/gui/window.rs:940
+#: crates/themes-core/src/doctor.rs:1030 crates/themes/src/cli.rs:480
+#: crates/themes/src/gui/window.rs:951
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr "знову увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1016
+#: crates/themes-core/src/doctor.rs:1033
 msgid "Themes: system check"
 msgstr "Теми: перевірка системи"
 
@@ -1341,23 +1372,30 @@ msgstr "перевизначення flatpak «{line}» теми відхиле�
 msgid "flatpak not found; overrides skipped"
 msgstr "flatpak не знайдено — overrides пропущено"
 
-#: crates/themes-core/src/gtklinks.rs:37 crates/themes-core/src/gtklinks.rs:109
+#: crates/themes-core/src/gtklinks.rs:39
 #, rust-format
 msgid "backup {path} not restored (the place is taken)"
 msgstr "резервну копію {path} не відновлено (місце зайняте)"
 
-#: crates/themes-core/src/gtklinks.rs:59
+#: crates/themes-core/src/gtklinks.rs:69
 #, rust-format
 msgid "{path} was changed by hand; not updated"
 msgstr "{path} змінено вручну — не оновлено"
 
-#: crates/themes-core/src/gtklinks.rs:79 crates/themes-core/src/gtklinks.rs:96
-#: crates/themes-core/src/tokens.rs:226
+#: crates/themes-core/src/gtklinks.rs:96 crates/themes-core/src/gtklinks.rs:115
+#: crates/themes-core/src/tokens.rs:225
 #, rust-format
 msgid "{path} was changed by hand; left as it is"
 msgstr "{path} змінено вручну — залишено як є"
 
-#: crates/themes-core/src/hooks.rs:45
+#: crates/themes-core/src/hooks.rs:84
+#, rust-format
+msgid ""
+"hook {hook} of the theme {theme} did not finish in {seconds} s and was "
+"stopped"
+msgstr "хук {hook} теми {theme} не завершився за {seconds} с і його зупинено"
+
+#: crates/themes-core/src/hooks.rs:91
 #, rust-format
 msgid "hook {hook} of the theme {theme} exited with code {code}: {error}"
 msgstr "хук {hook} теми {theme} завершився з кодом {code}: {error}"
@@ -1406,12 +1444,12 @@ msgstr "Налаштування програм (палітра термінал
 msgid "unknown module “{module}” (available: look, behavior, sounds, apps)"
 msgstr "невідомий модуль «{module}» (доступні: look, behavior, sounds, apps)"
 
-#: crates/themes-core/src/paths.rs:65
+#: crates/themes-core/src/paths.rs:68
 #, rust-format
 msgid "no baseline-* found in {path}"
 msgstr "не знайдено baseline-* у {path}"
 
-#: crates/themes-core/src/shell.rs:314 crates/themes/src/gui/window.rs:101
+#: crates/themes-core/src/shell.rs:485 crates/themes/src/gui/window.rs:101
 #: crates/themes/src/gui/window.rs:162 crates/themes/src/gui/window.rs:174
 #: crates/themes/src/gui/window.rs:271
 msgid "Themes"
@@ -1452,26 +1490,26 @@ msgstr "некоректний id: дозволені a-z 0-9 . _ - (до 64 с�
 msgid "the id “fedora” is reserved"
 msgstr "id «fedora» зарезервовано"
 
-#: crates/themes-core/src/snapshot.rs:118
+#: crates/themes-core/src/snapshot.rs:117
 #, rust-format
 msgid "the theme “{theme}” already exists (add --force to overwrite it)"
 msgstr "тема «{theme}» вже існує (додайте --force для перезапису)"
 
-#: crates/themes-core/src/snapshot.rs:153
+#: crates/themes-core/src/snapshot.rs:152
 #, rust-format
 msgid ""
 "the key {key} is reset compared to the baseline; the snapshot does not show "
 "it"
 msgstr "ключ {key} скинуто відносно baseline — у знімку не відображається"
 
-#: crates/themes-core/src/snapshot.rs:222
+#: crates/themes-core/src/snapshot.rs:221
 #, rust-format
 msgid ""
 "the extension {uuid} from the baseline is disabled now; the snapshot will "
 "not keep that"
 msgstr "розширення {uuid} з baseline зараз вимкнене — знімок цього не збереже"
 
-#: crates/themes-core/src/snapshot.rs:287
+#: crates/themes-core/src/snapshot.rs:286
 #, rust-format
 msgid "Snapshot of the look from {date}"
 msgstr "Знімок вигляду від {date}"
@@ -1510,7 +1548,7 @@ msgstr "некоректний id теми: {id}"
 msgid "theme “{theme}” not found in {path}"
 msgstr "тему «{theme}» не знайдено у {path}"
 
-#: crates/themes-core/src/tokens.rs:249
+#: crates/themes-core/src/tokens.rs:247
 #, rust-format
 msgid ""
 "{path} already exists and is not a link of the manager; the generated file "
@@ -1518,6 +1556,26 @@ msgid ""
 msgstr ""
 "{path} уже існує і не є посиланням менеджера — згенерований файл не "
 "підключено"
+
+#: crates/themes-core/src/txn.rs:217
+#, rust-format
+msgid "the interrupted apply of “{theme}” ({modules}, {started}) was completed"
+msgstr "перерване застосування «{theme}» ({modules}, {started}) завершено"
+
+#: crates/themes-core/src/txn.rs:224
+#, rust-format
+msgid ""
+"the interrupted apply of “{theme}” ({modules}, {started}) was rolled back"
+msgstr "перерване застосування «{theme}» ({modules}, {started}) скасовано"
+
+#: crates/themes-core/src/txn.rs:236
+#, rust-format
+msgid ""
+"an apply of “{theme}” started {started} was interrupted at the step {step}; "
+"“themes doctor --fix” finishes it"
+msgstr ""
+"застосування «{theme}», розпочате {started}, перервано на кроці {step}; "
+"«themes doctor --fix» його завершить"
 
 #: crates/themes-core/src/util.rs:31
 msgid "unclosed single quote"
@@ -1527,12 +1585,17 @@ msgstr "незакрита одинарна лапка"
 msgid "unclosed double quote"
 msgstr "незакрита подвійна лапка"
 
-#: crates/themes-core/src/util.rs:122
+#: crates/themes-core/src/util.rs:123
 #, rust-format
 msgid "could not start {command}: {error}"
 msgstr "не вдалося запустити {command}: {error}"
 
-#: crates/themes-core/src/util.rs:143
+#: crates/themes-core/src/util.rs:135 crates/themes-core/src/util.rs:145
+#, rust-format
+msgid "no stdin for {command}"
+msgstr "немає стандартного вводу для {command}"
+
+#: crates/themes-core/src/util.rs:159
 #, rust-format
 msgid ""
 "command failed: {command}\n"
@@ -1541,12 +1604,12 @@ msgstr ""
 "команда не вдалася: {command}\n"
 "{error}"
 
-#: crates/themes-core/src/util.rs:275
+#: crates/themes-core/src/util.rs:311
 #, rust-format
 msgid "could not move {from} → {to}: {error}"
 msgstr "не вдалося перемістити {from} → {to}: {error}"
 
-#: crates/themes-core/src/util.rs:298
+#: crates/themes-core/src/util.rs:334
 #, rust-format
 msgid "could not copy {path}: {error}"
 msgstr "не вдалося скопіювати {path}: {error}"
@@ -1682,36 +1745,34 @@ msgstr "Дизайн-токени (tokens.toml): перевірка, генер�
 msgid ""
 "Page: themes | mix | features | clipboard | logo-menu | shortcuts | general "
 "| credits"
-msgstr ""
-"Сторінка: themes | mix | features | clipboard | logo-menu | shortcuts | "
-"general | credits"
+msgstr "Сторінка: themes | mix | features | clipboard | logo-menu | shortcuts | general | credits"
 
 #: crates/themes/src/cli.rs:51
 msgid "Keyboard shortcuts of the features (the theme gives the default)"
 msgstr "Клавіатурні скорочення функцій (тема задає типові)"
 
-#: crates/themes/src/cli.rs:223 crates/themes/src/gui/window.rs:697
-#: crates/themes/src/gui/window.rs:726 crates/themes/src/gui/window.rs:838
-#: crates/themes/src/gui/window.rs:873
+#: crates/themes/src/cli.rs:222 crates/themes/src/gui/window.rs:702
+#: crates/themes/src/gui/window.rs:737 crates/themes/src/gui/window.rs:849
+#: crates/themes/src/gui/window.rs:884
 #, rust-format
 msgid "Error: {error}"
 msgstr "Помилка: {error}"
 
-#: crates/themes/src/cli.rs:294
+#: crates/themes/src/cli.rs:293
 #, rust-format
 msgid "active: {modules}"
 msgstr "активні: {modules}"
 
-#: crates/themes/src/cli.rs:309
+#: crates/themes/src/cli.rs:308
 msgid "(unknown: no theme has been applied yet)"
 msgstr "(невідомо — тему ще не застосовували)"
 
-#: crates/themes/src/cli.rs:322
+#: crates/themes/src/cli.rs:321
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr "(усі модулі з теми «{theme}»)"
 
-#: crates/themes/src/cli.rs:375
+#: crates/themes/src/cli.rs:385
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
@@ -1720,52 +1781,52 @@ msgstr ""
 "Збережено тему «{name}» ({id}): ключів dconf {keys} ({per_module}), "
 "розширень {extensions}"
 
-#: crates/themes/src/cli.rs:385 crates/themes/src/cli.rs:781
+#: crates/themes/src/cli.rs:395 crates/themes/src/cli.rs:794
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:138
 #, rust-format
 msgid "warning: {text}"
 msgstr "увага: {text}"
 
-#: crates/themes/src/cli.rs:398
+#: crates/themes/src/cli.rs:408
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr "Тему «{name}» видалено (переміщено до {path})"
 
-#: crates/themes/src/cli.rs:417
+#: crates/themes/src/cli.rs:427
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr "Розширення знову ввімкнено (disable-user-extensions=false)."
 
-#: crates/themes/src/cli.rs:420
+#: crates/themes/src/cli.rs:430
 msgid "Extensions are already on."
 msgstr "Розширення й так увімкнені."
 
-#: crates/themes/src/cli.rs:438 crates/themes/src/gui/window.rs:917
+#: crates/themes/src/cli.rs:448 crates/themes/src/gui/window.rs:928
 msgid "running"
 msgstr "запущено"
 
-#: crates/themes/src/cli.rs:440 crates/themes/src/gui/window.rs:919
+#: crates/themes/src/cli.rs:450 crates/themes/src/gui/window.rs:930
 msgid "not running"
 msgstr "не запущено"
 
-#: crates/themes/src/cli.rs:445
+#: crates/themes/src/cli.rs:455
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr "Перевірено розширень: {count}"
 
-#: crates/themes/src/cli.rs:448 crates/themes/src/gui/window.rs:926
+#: crates/themes/src/cli.rs:458 crates/themes/src/gui/window.rs:937
 msgid "No problems found."
 msgstr "Проблем не знайдено."
 
-#: crates/themes/src/cli.rs:460
+#: crates/themes/src/cli.rs:470
 msgid "fix with: themes doctor --fix"
 msgstr "виправить: themes doctor --fix"
 
-#: crates/themes/src/cli.rs:467
+#: crates/themes/src/cli.rs:477
 #, rust-format
 msgid "fixed: {what}"
 msgstr "виправлено: {what}"
 
-#: crates/themes/src/cli.rs:508
+#: crates/themes/src/cli.rs:518
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
@@ -1774,26 +1835,26 @@ msgstr ""
 "«{name}» — експериментальна тема: {warning}\n"
 "Запустіть ще раз із --yes, щоб усе одно застосувати."
 
-#: crates/themes/src/cli.rs:515
+#: crates/themes/src/cli.rs:525
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr "«{name}» — експериментальна тема."
 
-#: crates/themes/src/cli.rs:521 crates/themes/src/cli.rs:578
+#: crates/themes/src/cli.rs:531 crates/themes/src/cli.rs:592
 msgid "Cancelled: the theme was not applied."
 msgstr "Скасовано: тему не застосовано."
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:529
+#: crates/themes/src/cli.rs:539
 msgid "Apply it anyway? [y/N]"
 msgstr "Усе одно застосувати? [y/N]"
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:535
+#: crates/themes/src/cli.rs:545
 msgid "y|yes"
 msgstr "т|так"
 
-#: crates/themes/src/cli.rs:564
+#: crates/themes/src/cli.rs:578
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -1804,7 +1865,7 @@ msgstr ""
 "{list}\n"
 "Запустіть ще раз з --yes, щоб усе одно застосувати."
 
-#: crates/themes/src/cli.rs:572
+#: crates/themes/src/cli.rs:586
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -1813,7 +1874,7 @@ msgstr ""
 "Тема «{name}» задає ключі, що запускають команди:\n"
 "{list}"
 
-#: crates/themes/src/cli.rs:595
+#: crates/themes/src/cli.rs:609
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
@@ -1822,85 +1883,85 @@ msgstr ""
 "Ключі, що запускають команди ({count}); застосування просить підтвердження "
 "(--yes), якщо його не було раніше:"
 
-#: crates/themes/src/cli.rs:603
+#: crates/themes/src/cli.rs:617
 msgid "  (approved)"
 msgstr "  (схвалено)"
 
-#: crates/themes/src/cli.rs:627
+#: crates/themes/src/cli.rs:640
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr "автовідкат: розширення {uuid} вимкнено ({reason})"
 
-#: crates/themes/src/cli.rs:645
+#: crates/themes/src/cli.rs:658
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr "перевизначення flatpak відхилено: «{line}»: {why}"
 
-#: crates/themes/src/cli.rs:677
+#: crates/themes/src/cli.rs:690
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 "Пробний запуск для «{name}» ({id}), модулі: {modules} — нічого не змінено"
 
-#: crates/themes/src/cli.rs:683
+#: crates/themes/src/cli.rs:696
 #, rust-format
 msgid "Write ({count}):"
 msgstr "Записати ({count}):"
 
-#: crates/themes/src/cli.rs:689
+#: crates/themes/src/cli.rs:702
 #, rust-format
 msgid "Reset ({count}):"
 msgstr "Скинути ({count}):"
 
-#: crates/themes/src/cli.rs:698
+#: crates/themes/src/cli.rs:711
 #, rust-format
 msgid "Extensions: {list}"
 msgstr "Розширення: {list}"
 
-#: crates/themes/src/cli.rs:722
+#: crates/themes/src/cli.rs:735
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr "Тему «{name}» ({id}) застосовано; модулі: {modules}."
 
-#: crates/themes/src/cli.rs:731
+#: crates/themes/src/cli.rs:744
 msgid "before:"
 msgstr "попередньо:"
 
-#: crates/themes/src/cli.rs:734
+#: crates/themes/src/cli.rs:747
 msgid "now:"
 msgstr "тепер:"
 
-#: crates/themes/src/cli.rs:736
+#: crates/themes/src/cli.rs:749
 msgid "dconf keys changed:"
 msgstr "змінено ключів dconf:"
 
-#: crates/themes/src/cli.rs:738
+#: crates/themes/src/cli.rs:751
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr "{count} (з них скинуто до типових: {resets})"
 
-#: crates/themes/src/cli.rs:743
+#: crates/themes/src/cli.rs:756
 msgid "extensions:"
 msgstr "розширення:"
 
-#: crates/themes/src/cli.rs:749
+#: crates/themes/src/cli.rs:762
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr "увімкнено: {added}   вимкнено: {removed}"
 
-#: crates/themes/src/cli.rs:756
+#: crates/themes/src/cli.rs:769
 msgid "GTK links:"
 msgstr "посилання GTK:"
 
-#: crates/themes/src/cli.rs:763
+#: crates/themes/src/cli.rs:776
 msgid "cleaned up after extensions:"
 msgstr "прибрано після розширень:"
 
-#: crates/themes/src/cli.rs:768
+#: crates/themes/src/cli.rs:781
 msgid "hooks:"
 msgstr "хуки:"
 
-#: crates/themes/src/cli.rs:786
+#: crates/themes/src/cli.rs:799
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
@@ -1908,7 +1969,7 @@ msgstr ""
 "GNOME Shell зараз не запущено — зміни оболонки набудуть чинності при "
 "наступному вході."
 
-#: crates/themes/src/cli.rs:792
+#: crates/themes/src/cli.rs:805
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
@@ -1918,11 +1979,11 @@ msgstr ""
 "розширення теми не працюють. Перевірте «themes doctor» і ввімкніть їх: "
 "themes doctor --enable-extensions"
 
-#: crates/themes/src/cli.rs:798
+#: crates/themes/src/cli.rs:811
 msgid "You MUST log out and log in again:"
 msgstr "ПОТРІБНО вийти з сесії та увійти знову:"
 
-#: crates/themes/src/cli.rs:806
+#: crates/themes/src/cli.rs:819
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
@@ -1930,29 +1991,29 @@ msgstr ""
 "Застосовано наживо, перевхід не потрібен (відкриті програми GTK4/libadwaita "
 "варто перезапустити)."
 
-#: crates/themes/src/cli.rs:821
+#: crates/themes/src/cli.rs:834
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr "Згенеровано з tokens.toml ({count}):"
 
-#: crates/themes/src/cli.rs:829
+#: crates/themes/src/cli.rs:842
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr "з tokens.toml ({count}, {ms} мс):"
 
-#: crates/themes/src/cli.rs:837
+#: crates/themes/src/cli.rs:850
 msgid "cache up to date"
 msgstr "кеш актуальний"
 
-#: crates/themes/src/cli.rs:838
+#: crates/themes/src/cli.rs:851
 msgid "generated"
 msgstr "згенеровано"
 
-#: crates/themes/src/cli.rs:839
+#: crates/themes/src/cli.rs:852
 msgid "will be generated"
 msgstr "буде згенеровано"
 
-#: crates/themes/src/cli.rs:844
+#: crates/themes/src/cli.rs:857
 #, rust-format
 msgid "link: {path}"
 msgstr "посилання: {path}"
@@ -2063,9 +2124,9 @@ msgid "All items will be deleted, pinned ones too. This cannot be undone."
 msgstr "Буде видалено всі записи, зокрема закріплені. Це не можна скасувати."
 
 #: crates/themes/src/gui/features.rs:346 crates/themes/src/gui/features.rs:398
-#: crates/themes/src/gui/window.rs:637 crates/themes/src/gui/window.rs:690
-#: crates/themes/src/gui/window.rs:803 crates/themes/src/gui/window.rs:863
-#: crates/themes/src/gui/window.rs:995
+#: crates/themes/src/gui/window.rs:637 crates/themes/src/gui/window.rs:695
+#: crates/themes/src/gui/window.rs:814 crates/themes/src/gui/window.rs:874
+#: crates/themes/src/gui/window.rs:1006
 msgid "Cancel"
 msgstr "Скасувати"
 
@@ -2189,7 +2250,7 @@ msgstr "Не вдалося запустити {app}: {error}"
 msgid "Save as theme"
 msgstr "Зберегти як тему"
 
-#: crates/themes/src/gui/window.rs:183 crates/themes/src/gui/window.rs:795
+#: crates/themes/src/gui/window.rs:183 crates/themes/src/gui/window.rs:806
 msgid "Save the current look as a theme"
 msgstr "Зберегти поточний вигляд як тему"
 
@@ -2295,12 +2356,12 @@ msgstr "Застосувати експериментальну тему «{name
 msgid "Apply anyway"
 msgstr "Усе одно застосувати"
 
-#: crates/themes/src/gui/window.rs:682
+#: crates/themes/src/gui/window.rs:687
 #, rust-format
 msgid "Allow “{name}” to run commands?"
 msgstr "Дозволити темі «{name}» запускати команди?"
 
-#: crates/themes/src/gui/window.rs:684
+#: crates/themes/src/gui/window.rs:689 crates/themes/src/service.rs:137
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"
@@ -2311,53 +2372,53 @@ msgstr ""
 "\n"
 "{list}"
 
-#: crates/themes/src/gui/window.rs:691
+#: crates/themes/src/gui/window.rs:696
 msgid "Allow and apply"
 msgstr "Дозволити й застосувати"
 
-#: crates/themes/src/gui/window.rs:731
+#: crates/themes/src/gui/window.rs:742
 msgid "Error: the apply thread crashed"
 msgstr "Помилка: потік застосування впав"
 
-#: crates/themes/src/gui/window.rs:736 crates/themes/src/service.rs:138
+#: crates/themes/src/gui/window.rs:747 crates/themes/src/service.rs:186
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr "Тему «{name}» застосовано"
 
-#: crates/themes/src/gui/window.rs:740
+#: crates/themes/src/gui/window.rs:751
 #, rust-format
 msgid "“{modules}” from the theme “{name}” applied"
 msgstr "«{modules}» з теми «{name}» застосовано"
 
-#: crates/themes/src/gui/window.rs:747
+#: crates/themes/src/gui/window.rs:758
 #, rust-format
 msgid " (warnings: {count})"
 msgstr " (попереджень: {count})"
 
-#: crates/themes/src/gui/window.rs:752
+#: crates/themes/src/gui/window.rs:763
 #, rust-format
 msgid "{what}. Some shell changes start working after you log in again"
 msgstr "{what}. Частина змін оболонки запрацює після перевходу"
 
-#: crates/themes/src/gui/window.rs:757
+#: crates/themes/src/gui/window.rs:768
 msgid "Log out"
 msgstr "Вийти з сесії"
 
-#: crates/themes/src/gui/window.rs:760
+#: crates/themes/src/gui/window.rs:771
 #, rust-format
 msgid "{what} live"
 msgstr "{what} наживо"
 
-#: crates/themes/src/gui/window.rs:778
+#: crates/themes/src/gui/window.rs:789
 #, rust-format
 msgid "Extensions with errors turned off: {list}"
 msgstr "Розширення з помилкою вимкнено: {list}"
 
-#: crates/themes/src/gui/window.rs:791 crates/themes/src/gui/window.rs:805
+#: crates/themes/src/gui/window.rs:802 crates/themes/src/gui/window.rs:816
 msgid "Theme name"
 msgstr "Назва теми"
 
-#: crates/themes/src/gui/window.rs:797
+#: crates/themes/src/gui/window.rs:808
 msgid ""
 "The current settings (look, behaviour, sounds, apps), the enabled extensions "
 "and the GTK files will be saved as a new theme."
@@ -2365,25 +2426,25 @@ msgstr ""
 "Поточні налаштування (вигляд, поведінка, звуки, програми), увімкнені "
 "розширення та файли GTK буде збережено як нову тему."
 
-#: crates/themes/src/gui/window.rs:804
+#: crates/themes/src/gui/window.rs:815
 msgid "Save"
 msgstr "Зберегти"
 
-#: crates/themes/src/gui/window.rs:837
+#: crates/themes/src/gui/window.rs:848
 #, rust-format
 msgid "Theme “{name}” saved"
 msgstr "Тему «{name}» збережено"
 
-#: crates/themes/src/gui/window.rs:839
+#: crates/themes/src/gui/window.rs:850
 msgid "Saving failed"
 msgstr "Помилка збереження"
 
-#: crates/themes/src/gui/window.rs:856
+#: crates/themes/src/gui/window.rs:867
 #, rust-format
 msgid "Delete the theme “{name}”?"
 msgstr "Видалити тему «{name}»?"
 
-#: crates/themes/src/gui/window.rs:858
+#: crates/themes/src/gui/window.rs:869
 msgid ""
 "The theme folder will be moved to “trash” in the themes root; you can "
 "restore it by hand."
@@ -2391,50 +2452,50 @@ msgstr ""
 "Теку теми буде переміщено до «trash» у корені тем — її можна повернути "
 "вручну."
 
-#: crates/themes/src/gui/window.rs:864
+#: crates/themes/src/gui/window.rs:875
 msgid "Delete"
 msgstr "Видалити"
 
-#: crates/themes/src/gui/window.rs:872
+#: crates/themes/src/gui/window.rs:883
 #, rust-format
 msgid "Theme “{name}” deleted"
 msgstr "Тему «{name}» видалено"
 
-#: crates/themes/src/gui/window.rs:885
+#: crates/themes/src/gui/window.rs:896
 msgid "Fixing…"
 msgstr "Виправлення…"
 
-#: crates/themes/src/gui/window.rs:887
+#: crates/themes/src/gui/window.rs:898
 msgid "Checking the system…"
 msgstr "Перевірка системи…"
 
-#: crates/themes/src/gui/window.rs:908
+#: crates/themes/src/gui/window.rs:919
 #, rust-format
 msgid "Check failed: {error}"
 msgstr "Помилка перевірки: {error}"
 
-#: crates/themes/src/gui/window.rs:914
+#: crates/themes/src/gui/window.rs:925
 #, rust-format
 msgid "GNOME Shell {version} ({state}), extensions checked: {count}."
 msgstr "GNOME Shell {version} ({state}), перевірено розширень: {count}."
 
-#: crates/themes/src/gui/window.rs:945
+#: crates/themes/src/gui/window.rs:956
 msgid "The system is fine"
 msgstr "Система в порядку"
 
-#: crates/themes/src/gui/window.rs:947
+#: crates/themes/src/gui/window.rs:958
 msgid "Check results"
 msgstr "Результати перевірки"
 
-#: crates/themes/src/gui/window.rs:952
+#: crates/themes/src/gui/window.rs:963
 msgid "Close"
 msgstr "Закрити"
 
-#: crates/themes/src/gui/window.rs:954
+#: crates/themes/src/gui/window.rs:965
 msgid "Fix"
 msgstr "Виправити"
 
-#: crates/themes/src/gui/window.rs:982
+#: crates/themes/src/gui/window.rs:993
 msgid ""
 "After a GNOME Shell crash the system turned all extensions off (disable-user-"
 "extensions), so the themes work without them now."
@@ -2442,7 +2503,7 @@ msgstr ""
 "Після збою GNOME Shell система вимкнула всі розширення (disable-user-"
 "extensions), тому теми зараз працюють без них."
 
-#: crates/themes/src/gui/window.rs:991
+#: crates/themes/src/gui/window.rs:1002
 msgid ""
 "If the crash happens again, GNOME turns the extensions off again. It is "
 "safer to switch to the standard theme first."
@@ -2450,32 +2511,36 @@ msgstr ""
 "Якщо збій повториться, GNOME знову вимкне розширення. Безпечніше спершу "
 "перейти на стандартну тему."
 
-#: crates/themes/src/gui/window.rs:994
+#: crates/themes/src/gui/window.rs:1005
 msgid "Turn extensions on?"
 msgstr "Увімкнути розширення?"
 
-#: crates/themes/src/gui/window.rs:1000
+#: crates/themes/src/gui/window.rs:1011
 msgid "Switch to “Fedora” and turn on"
 msgstr "Перейти на «Fedora» й увімкнути"
 
-#: crates/themes/src/gui/window.rs:1003
+#: crates/themes/src/gui/window.rs:1014
 msgid "Turn on"
 msgstr "Увімкнути"
 
-#: crates/themes/src/gui/window.rs:1010
+#: crates/themes/src/gui/window.rs:1021
 msgid "Extensions turned on again"
 msgstr "Розширення знову ввімкнено"
 
-#: crates/themes/src/gui/window.rs:1014
+#: crates/themes/src/gui/window.rs:1025
 #, rust-format
 msgid "Failed: {error}"
 msgstr "Не вдалося: {error}"
 
-#: crates/themes/src/service.rs:125
+#: crates/themes/src/service.rs:96
+msgid "internal error of the theme service"
+msgstr "внутрішня помилка служби тем"
+
+#: crates/themes/src/service.rs:174
 msgid "Themes: extensions turned off"
 msgstr "Теми: розширення вимкнено"
 
-#: crates/themes/src/service.rs:127
+#: crates/themes/src/service.rs:176
 #, rust-format
 msgid ""
 "After the theme was applied these extensions went into an error state and "
@@ -2484,7 +2549,7 @@ msgstr ""
 "Після застосування теми розширення перейшли в стан помилки й були вимкнені: "
 "{list}"
 
-#: crates/themes/src/service.rs:142
+#: crates/themes/src/service.rs:190
 #, rust-format
 msgid "You need to log in again: {reasons}"
 msgstr "Потрібен перевхід: {reasons}"

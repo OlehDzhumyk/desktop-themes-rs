@@ -228,21 +228,22 @@ impl Shell {
             .unwrap_or(false)
     }
 
+    /// A stream of the signals that match `rule`, subscribed now (so nothing sent after this
+    /// call is missed).
+    fn signals(&self, rule: &str) -> Option<zbus::MessageStream> {
+        zbus::block_on(zbus::MessageStream::for_match_rule(rule, &self.conn, None)).ok()
+    }
+
     /// Чекає, доки `on` стануть ACTIVE (або ERROR/OUT_OF_DATE), а `off` перестануть бути ACTIVE.
-    /// Перше ввімкнення розширення асинхронне: спершу INITIALIZED, потім ACTIVE.
+    /// Перше ввімкнення розширення асинхронне: спершу INITIALIZED, потім ACTIVE. Waits on the
+    /// shell's `ExtensionStateChanged` signal (no polling), at most `timeout`.
     pub fn settle_targets(
         &self,
         on: &[String],
         off: &[String],
         timeout: Duration,
     ) -> HashMap<String, Option<ExtInfo>> {
-        let start = Instant::now();
-        loop {
-            let infos: HashMap<String, Option<ExtInfo>> = on
-                .iter()
-                .chain(off)
-                .map(|u| (u.clone(), self.ext_info(u)))
-                .collect();
+        self.wait_states(on.iter().chain(off).cloned().collect(), timeout, |infos| {
             let on_done = on.iter().all(|u| match &infos[u] {
                 None => true, // невідоме оболонці — чекати марно
                 Some(i) => i.state == ExtState::Active || i.state.broken(),
@@ -252,35 +253,201 @@ impl Shell {
                     .as_ref()
                     .is_none_or(|i| i.state != ExtState::Active && !i.state.transitional())
             });
-            if (on_done && off_done) || start.elapsed() >= timeout {
-                return infos;
-            }
-            std::thread::sleep(Duration::from_millis(200));
-        }
+            on_done && off_done
+        })
     }
 
     /// Чекає, доки розширення вийдуть із перехідних станів, і повертає їхні стани.
     pub fn settle(&self, uuids: &[String], timeout: Duration) -> HashMap<String, Option<ExtInfo>> {
-        let start = Instant::now();
+        self.wait_states(uuids.to_vec(), timeout, |infos| {
+            !infos
+                .values()
+                .any(|i| i.as_ref().is_some_and(|i| i.state.transitional()))
+        })
+    }
+
+    /// Reads the states of `uuids` until `done` says so, re-reading on every
+    /// `ExtensionStateChanged`; gives up at `timeout` and returns the last states.
+    fn wait_states(
+        &self,
+        uuids: Vec<String>,
+        timeout: Duration,
+        done: impl Fn(&HashMap<String, Option<ExtInfo>>) -> bool,
+    ) -> HashMap<String, Option<ExtInfo>> {
+        let alarm = Alarm::new(Instant::now() + timeout);
+        // subscribed before the first read: a change between the read and the wait is not lost
+        let mut changes = self.signals(
+            "type='signal',sender='org.gnome.Shell',interface='org.gnome.Shell.Extensions',\
+             member='ExtensionStateChanged'",
+        );
         loop {
             let infos: HashMap<String, Option<ExtInfo>> = uuids
                 .iter()
                 .map(|u| (u.clone(), self.ext_info(u)))
                 .collect();
-            let busy = infos
-                .values()
-                .any(|i| i.as_ref().is_some_and(|i| i.state.transitional()));
-            if !busy || start.elapsed() >= timeout {
+            if done(&infos) {
                 return infos;
             }
-            std::thread::sleep(Duration::from_millis(150));
+            let Some(stream) = changes.as_mut() else {
+                return infos; // no subscription: nothing to wait on
+            };
+            if alarm.run(next_message(stream)).flatten().is_none() {
+                return infos;
+            }
         }
+    }
+
+    /// Subscribes to dconf change notifications (`ca.desrt.dconf.Writer.Notify`). Call it before
+    /// writing, then [`Shell::after_dconf_change`].
+    pub fn watch_dconf(&self) -> Option<DconfWatch> {
+        self.signals("type='signal',interface='ca.desrt.dconf.Writer',member='Notify'")
+            .map(DconfWatch)
+    }
+
+    /// Waits until the shell has processed a dconf change of one of `keys`, at most `timeout`:
+    /// first the writer's `Notify` covering a key (the bus has then queued it for the shell as
+    /// well), then a call the shell answers from its main loop, which runs after the queued
+    /// notification. False when the notification did not come in time.
+    pub fn after_dconf_change(
+        &self,
+        watch: DconfWatch,
+        keys: &[String],
+        timeout: Duration,
+    ) -> bool {
+        let alarm = Alarm::new(Instant::now() + timeout);
+        let mut stream = watch.0;
+        let seen = loop {
+            match alarm.run(next_message(&mut stream)).flatten() {
+                Some(m) => {
+                    let covers = m
+                        .body()
+                        .deserialize::<(String, Vec<String>, String)>()
+                        .is_ok_and(|(prefix, changes, _)| notify_covers(&prefix, &changes, keys));
+                    if covers {
+                        break true;
+                    }
+                }
+                None => break false,
+            }
+        };
+        let _ = self.version();
+        seen
+    }
+}
+
+/// A subscription made by [`Shell::watch_dconf`].
+pub struct DconfWatch(zbus::MessageStream);
+
+/// Whether a dconf `Notify(prefix, changes)` covers one of `keys`: the changed paths are
+/// `prefix + change` (a path ending in `/` is a directory), or `prefix` alone when `changes` is
+/// empty.
+fn notify_covers(prefix: &str, changes: &[String], keys: &[String]) -> bool {
+    let paths: Vec<String> = if changes.is_empty() {
+        vec![prefix.to_string()]
+    } else {
+        changes.iter().map(|c| format!("{prefix}{c}")).collect()
+    };
+    keys.iter().any(|k| {
+        paths
+            .iter()
+            .any(|p| k == p || (p.ends_with('/') && k.starts_with(p.as_str())))
+    })
+}
+
+/// The next message of a stream (`None` when it ended or failed).
+async fn next_message(stream: &mut zbus::MessageStream) -> Option<zbus::Message> {
+    use zbus::export::futures_core::Stream;
+    std::future::poll_fn(|cx| std::pin::Pin::new(&mut *stream).poll_next(cx))
+        .await
+        .and_then(|r| r.ok())
+}
+
+/// A deadline that wakes whatever waits on it: one sleeping helper thread per deadline, so
+/// waits on signals need no polling. [`Alarm::run`] can be called many times.
+pub(crate) struct Alarm {
+    inner: std::sync::Arc<AlarmInner>,
+}
+
+struct AlarmInner {
+    fired: std::sync::atomic::AtomicBool,
+    waker: std::sync::Mutex<Option<std::task::Waker>>,
+    cancelled: std::sync::Mutex<bool>,
+    cv: std::sync::Condvar,
+}
+
+impl Drop for Alarm {
+    fn drop(&mut self) {
+        let mut g = self
+            .inner
+            .cancelled
+            .lock()
+            .unwrap_or_else(|p| p.into_inner());
+        *g = true;
+        self.inner.cv.notify_one();
+    }
+}
+
+impl Alarm {
+    pub(crate) fn new(deadline: Instant) -> Alarm {
+        use std::sync::atomic::Ordering;
+        let inner = std::sync::Arc::new(AlarmInner {
+            fired: std::sync::atomic::AtomicBool::new(false),
+            waker: std::sync::Mutex::new(None),
+            cancelled: std::sync::Mutex::new(false),
+            cv: std::sync::Condvar::new(),
+        });
+        let i = inner.clone();
+        std::thread::spawn(move || {
+            let mut g = i.cancelled.lock().unwrap_or_else(|p| p.into_inner());
+            while !*g {
+                let left = deadline.saturating_duration_since(Instant::now());
+                if left.is_zero() {
+                    break;
+                }
+                g =
+                    i.cv.wait_timeout(g, left)
+                        .unwrap_or_else(|p| p.into_inner())
+                        .0;
+            }
+            if *g {
+                return;
+            }
+            drop(g);
+            i.fired.store(true, Ordering::SeqCst);
+            if let Some(w) = i.waker.lock().unwrap_or_else(|p| p.into_inner()).take() {
+                w.wake();
+            }
+        });
+        Alarm { inner }
+    }
+
+    /// Runs `fut` to completion or until the deadline, whichever comes first (`None`: time is
+    /// up).
+    pub(crate) fn run<T>(&self, fut: impl std::future::Future<Output = T>) -> Option<T> {
+        use std::sync::atomic::Ordering;
+        use std::task::Poll;
+        let mut fut = std::pin::pin!(fut);
+        zbus::block_on(std::future::poll_fn(|cx| {
+            if let Poll::Ready(v) = fut.as_mut().poll(cx) {
+                return Poll::Ready(Some(v));
+            }
+            *self.inner.waker.lock().unwrap_or_else(|p| p.into_inner()) = Some(cx.waker().clone());
+            if self.inner.fired.load(Ordering::SeqCst) {
+                return Poll::Ready(None);
+            }
+            Poll::Pending
+        }))
     }
 }
 
 pub(crate) fn session() -> Option<Connection> {
-    crate::util::ensure_bus();
-    zbus::block_on(Connection::session()).ok()
+    zbus::block_on(async {
+        match crate::util::fallback_bus_address() {
+            Some(a) => zbus::connection::Builder::address(a.as_str()).build().await,
+            None => Connection::session().await,
+        }
+    })
+    .ok()
 }
 
 /// Перезавантажити тему оболонки: user-theme стежить за своїм ключем `name` і перечитує
@@ -292,8 +459,12 @@ pub fn reload_user_theme(shell: &Shell, name: &str) -> bool {
     }
     let key = crate::SHELL_THEME_KEY;
     let val = crate::dconf::read(key);
+    // the extension must see the empty name before the real one comes back
+    let watch = shell.watch_dconf();
     let _ = crate::dconf::write(key, "''");
-    std::thread::sleep(Duration::from_millis(150));
+    if let Some(w) = watch {
+        shell.after_dconf_change(w, &[key.to_string()], Duration::from_secs(2));
+    }
     match val {
         Some(v) => crate::dconf::write(key, &v).is_ok(),
         None => {
@@ -315,4 +486,40 @@ pub fn notify(summary: &str, body: &str, icon: &str) -> Result<()> {
             .await
     })?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dconf_notify_paths() {
+        let keys = vec!["/org/gnome/desktop/interface/clock-format".to_string()];
+        assert!(notify_covers(
+            "/org/gnome/desktop/interface/clock-format",
+            &[],
+            &keys
+        ));
+        assert!(notify_covers(
+            "/org/gnome/desktop/",
+            &["interface/clock-format".into()],
+            &keys
+        ));
+        assert!(notify_covers("/org/gnome/", &["desktop/".into()], &keys));
+        assert!(!notify_covers(
+            "/org/gnome/",
+            &["shell/x".into(), "desktop/y".into()],
+            &keys
+        ));
+    }
+
+    #[test]
+    fn alarm_returns_ready_values_and_gives_up_at_the_deadline() {
+        let later = Alarm::new(Instant::now() + Duration::from_secs(3600));
+        assert_eq!(later.run(async { 7 }), Some(7));
+        assert_eq!(later.run(async { 8 }), Some(8));
+        // a future that never completes, with a deadline already passed
+        let passed = Alarm::new(Instant::now());
+        assert_eq!(passed.run(std::future::pending::<()>()), None);
+    }
 }

@@ -622,7 +622,7 @@ impl ThemesWindow {
     pub fn apply(self: &Rc<Self>, id: String, modules: Vec<Module>) {
         let info = self.themes.borrow().iter().find(|t| t.id == id).cloned();
         let Some(info) = info.filter(|i| i.experimental) else {
-            self.confirm_commands(id, modules);
+            self.confirm_commands(id, modules, false);
             return;
         };
         let dlg = adw::AlertDialog::builder()
@@ -640,7 +640,7 @@ impl ThemesWindow {
         let t = self.clone();
         dlg.connect_response(None, move |_, r| {
             if r == "apply" {
-                t.confirm_commands(id.clone(), modules.clone());
+                t.confirm_commands(id.clone(), modules.clone(), true);
             } else {
                 // повернути вибір у «Змішати» до поточного стану
                 let t = t.clone();
@@ -652,7 +652,8 @@ impl ThemesWindow {
 
     /// Ключі теми, що запускають команди (скорочення, термінал, автозапуск): перший раз показати
     /// їх у діалозі й застосувати лише після згоди (S-5). Згода запам'ятовується для ключа й команди.
-    fn confirm_commands(self: &Rc<Self>, id: String, modules: Vec<Module>) {
+    /// `confirmed`: the user already said yes to the experimental-theme dialog.
+    fn confirm_commands(self: &Rc<Self>, id: String, modules: Vec<Module>, confirmed: bool) {
         if self.busy.get() {
             return;
         }
@@ -661,17 +662,21 @@ impl ThemesWindow {
             let ctx = t.ctx.clone();
             let (id2, mods) = (id.clone(), modules.clone());
             let plan = gio::spawn_blocking(move || {
-                themes_core::apply::apply_opts(&ctx, &id2, &mods, true, true)
+                let dry = themes_core::apply::Options {
+                    dry_run: true,
+                    ..Default::default()
+                };
+                themes_core::apply::apply(&ctx, &id2, &mods, &dry)
                     .map(|r| (r.name, themes_core::commands::pending(&ctx, &r.writes)))
             })
             .await;
             // a failed dry run: apply_now meets the same error and reports it
             let Ok(Ok((name, pending))) = plan else {
-                t.apply_now(id, modules);
+                t.apply_now(id, modules, confirmed);
                 return;
             };
             if pending.is_empty() {
-                t.apply_now(id, modules);
+                t.apply_now(id, modules, confirmed);
                 return;
             }
             let list: Vec<String> = pending
@@ -696,7 +701,7 @@ impl ThemesWindow {
                     if let Err(e) = themes_core::commands::approve(&t2.ctx, &pending) {
                         t2.toast(&tr!("Error: {error}", error = e), 10);
                     }
-                    t2.apply_now(id.clone(), modules.clone());
+                    t2.apply_now(id.clone(), modules.clone(), confirmed);
                 } else {
                     let t = t2.clone();
                     glib::spawn_future_local(async move { t.reload().await });
@@ -706,7 +711,9 @@ impl ThemesWindow {
         });
     }
 
-    fn apply_now(self: &Rc<Self>, id: String, modules: Vec<Module>) {
+    /// `confirmed`: the user said yes in the experimental-theme dialog (the library refuses an
+    /// experimental theme without it).
+    fn apply_now(self: &Rc<Self>, id: String, modules: Vec<Module>, confirmed: bool) {
         if self.busy.get() {
             return;
         }
@@ -716,8 +723,12 @@ impl ThemesWindow {
             let ctx = t.ctx.clone();
             let id2 = id.clone();
             let mods = modules.clone();
+            let opts = themes_core::apply::Options {
+                confirmed,
+                ..Default::default()
+            };
             let res =
-                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, false))
+                gio::spawn_blocking(move || themes_core::apply::apply(&ctx, &id2, &mods, &opts))
                     .await;
             t.set_busy(None);
             let res = match res {

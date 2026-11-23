@@ -713,7 +713,6 @@ pub struct DoctorOptions {
     reason = "a list of independent checks, each one pushes its own issues"
 )]
 pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
-    crate::util::ensure_bus();
     let mut rep = DoctorReport::default();
     let shell = if opt.wait_shell.is_zero() {
         Shell::connect()
@@ -738,6 +737,23 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     rep.gnome_version = version.clone();
 
     let mut st = State::load(ctx);
+    // an apply that was interrupted (crash, kill, power loss): --fix completes or rolls it back
+    if let Some(p) = st.pending.clone() {
+        rep.push(
+            "error",
+            "interrupted-apply",
+            crate::txn::describe(&p),
+            None,
+            true,
+        );
+        if opt.fix
+            && let Some(r) = crate::txn::recover(ctx)?
+        {
+            rep.fixed.push(r.message());
+            rep.fixed.extend(r.warnings);
+            st = State::load(ctx);
+        }
+    }
     rep.previous_gnome_version = st.gnome_version.clone();
     if let (Some(prev), Some(cur)) = (&st.gnome_version, &version)
         && prev != cur
@@ -932,11 +948,12 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             dconf::write(EXT_KEY, &dconf::fmt_strv(&en))?;
             let ok = match &shell {
                 Some(sh) => {
-                    let infos = sh.settle(std::slice::from_ref(&b.uuid), Duration::from_secs(4));
-                    std::thread::sleep(Duration::from_millis(500));
-                    let st_now = sh.ext_info(&b.uuid).map(|i| i.state);
-                    let _ = infos;
-                    st_now == Some(ExtState::Active)
+                    let infos = sh.settle_targets(
+                        std::slice::from_ref(&b.uuid),
+                        &[],
+                        Duration::from_secs(4),
+                    );
+                    infos.get(&b.uuid).cloned().flatten().map(|i| i.state) == Some(ExtState::Active)
                 }
                 None => true, // перевіриться при вході
             };

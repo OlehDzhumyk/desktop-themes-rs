@@ -1,0 +1,52 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- The theme manager service (the themes binary in service mode, activated on demand, exits when idle).
+     crates/themes/src/service.rs implements it (contract test introspection_matches_xml);
+     the bridge reads this file. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Themes">
+    <!-- (id, name, description, modules the theme has) -->
+    <method name="List">
+      <arg type="a(sssas)" direction="out"/>
+    </method>
+    <!-- Experimental themes: id to warning text (ADR 0006). -->
+    <method name="Experimental">
+      <arg type="a{ss}" direction="out"/>
+    </method>
+    <!-- Unapproved dconf keys that run commands (S-5): (key, value). -->
+    <method name="PendingCommands">
+      <arg name="theme" type="s" direction="in"/>
+      <arg name="modules" type="as" direction="in"/>
+      <arg name="commands" type="a(ss)" direction="out"/>
+    </method>
+    <!-- Module to theme id. -->
+    <method name="Current">
+      <arg type="a{ss}" direction="out"/>
+    </method>
+    <!-- Apply a theme (no modules: all). Refuses experimental themes and unapproved command keys (AccessDenied). -->
+    <method name="Apply">
+      <arg name="theme" type="s" direction="in"/>
+      <arg name="modules" type="as" direction="in"/>
+      <arg name="relogin" type="b" direction="out"/>
+      <arg name="message" type="s" direction="out"/>
+      <arg name="warnings" type="as" direction="out"/>
+    </method>
+    <!-- Apply after the user explicitly confirmed an experimental theme and/or command keys. -->
+    <method name="ApplyConfirmed">
+      <arg name="theme" type="s" direction="in"/>
+      <arg name="modules" type="as" direction="in"/>
+      <arg name="relogin" type="b" direction="out"/>
+      <arg name="message" type="s" direction="out"/>
+      <arg name="warnings" type="as" direction="out"/>
+    </method>
+    <!-- System check (fix: repair what can be repaired). -->
+    <method name="Doctor">
+      <arg name="fix" type="b" direction="in"/>
+      <arg name="ok" type="b" direction="out"/>
+      <arg name="messages" type="as" direction="out"/>
+      <arg name="report" type="s" direction="out"/>
+    </method>
+    <signal name="Changed">
+      <arg name="modules" type="a{ss}"/>
+    </signal>
+  </interface>
+</node>

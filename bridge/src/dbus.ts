@@ -197,23 +197,16 @@ export class ClipboardClient {
     }
 }
 
-const THEMES_XML = `<node><interface name="io.github.OlehDzhumyk.Themes">
-  <method name="List"><arg type="a(sssas)" direction="out"/></method>
-  <method name="Current"><arg type="a{ss}" direction="out"/></method>
-  <method name="Experimental"><arg type="a{ss}" direction="out"/></method>
-  <method name="Apply"><arg type="s" direction="in"/><arg type="as" direction="in"/>
-    <arg type="b" direction="out"/><arg type="s" direction="out"/><arg type="as" direction="out"/></method>
-  <signal name="Changed"><arg type="a{ss}"/></signal>
-</interface></node>`;
-
 export type ThemeRow = [string, string, string, string[]];
 
-/** Methods of io.github.OlehDzhumyk.Themes (THEMES_XML above). */
+/** Methods of io.github.OlehDzhumyk.Themes (data/dbus/io.github.OlehDzhumyk.Themes.xml). */
 interface ThemesProxy extends Proxy {
     ListAsync(): Promise<[ThemeRow[]]>;
     CurrentAsync(): Promise<[Record<string, string>]>;
     ExperimentalAsync(): Promise<[Record<string, string>]>;
+    PendingCommandsAsync(id: string, modules: string[]): Promise<[[string, string][]]>;
     ApplyAsync(id: string, modules: string[]): Promise<[boolean, string, string[]]>;
+    ApplyConfirmedAsync(id: string, modules: string[]): Promise<[boolean, string, string[]]>;
 }
 
 /** The theme manager service (themes --dbus-service, activated on demand, exits when idle). */
@@ -221,8 +214,8 @@ export class ThemesClient {
     private _proxy: ThemesProxy;
     private _signalId: number;
 
-    constructor(onChanged: () => void) {
-        const Wrapper = proxyClass<ThemesProxy>(THEMES_XML);
+    constructor(extDir: string, onChanged: () => void) {
+        const Wrapper = proxyClass<ThemesProxy>(readXml(extDir, 'io.github.OlehDzhumyk.Themes'));
         this._proxy = new Wrapper(Gio.DBus.session, THEMES_BUS, THEMES_PATH, null, null,
             Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES | Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION);
         this._signalId = this._proxy.connectSignal('Changed', () => { onChanged(); });
@@ -233,18 +226,30 @@ export class ThemesClient {
         return [themes, current];
     }
 
-    /** Experimental themes: id → warning text (needs confirmation before Apply). */
+    /**
+     * Experimental themes: id → warning text (ADR 0006). Fails closed: an error is thrown on,
+     * never taken for "no experimental themes".
+     */
     async experimental(): Promise<Record<string, string>> {
-        try {
-            const [map] = await this._proxy.ExperimentalAsync();
-            return map;
-        } catch {
-            return {}; // an older service without the method
-        }
+        const [map] = await this._proxy.ExperimentalAsync();
+        return map;
     }
 
-    async apply(id: string): Promise<[boolean, string, string[]]> {
-        const [relogin, message, warnings] = await this._proxy.ApplyAsync(id, []);
+    /**
+     * Unapproved command keys for `id` (S-5): [key, value] pairs. Fails closed: an error is
+     * thrown on, never taken for "no pending commands".
+     */
+    async pendingCommands(id: string): Promise<[string, string][]> {
+        const [cmds] = await this._proxy.PendingCommandsAsync(id, []);
+        return cmds;
+    }
+
+    /** Apply; `confirmed`: the user said yes to the experimental warning and/or command keys
+     * (ApplyConfirmed). Without it the service refuses both. */
+    async apply(id: string, confirmed: boolean): Promise<[boolean, string, string[]]> {
+        const [relogin, message, warnings] = confirmed
+            ? await this._proxy.ApplyConfirmedAsync(id, [])
+            : await this._proxy.ApplyAsync(id, []);
         return [relogin, message, warnings];
     }
 

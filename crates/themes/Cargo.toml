@@ -22,6 +22,8 @@ gtk.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 zbus.workspace = true
+# blocking pool of the D-Bus service (already built for zbus with this feature)
+zruntime = { version = "0.2.4", default-features = false, features = ["unblock"] }
 themes-core.workspace = true
 desk-proto.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
