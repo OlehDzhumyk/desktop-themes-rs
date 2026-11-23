@@ -1344,6 +1344,7 @@ dependencies = [
  "serde_json",
  "themes-core",
  "zbus",
+ "zruntime",
 ]
 
 [[package]]
