@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 14:34+0000\n"
+"POT-Creation-Date: 2026-11-23 14:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -233,6 +233,46 @@ msgstr ""
 msgid "Background"
 msgstr ""
 
+#: crates/desk-settings/src/logo_menu.rs:12
+#: crates/desk-settings/src/logo_menu.rs:66
+msgid "Logo menu"
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:13
+msgid "From macOS"
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:40
+msgid "Show logo menu"
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:41
+msgid "Show a system menu on the left of the top bar in the macOS skin."
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:50
+msgid "Hide Activities button"
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:51
+msgid "Hide the default Activities indicator while the logo menu is shown."
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:67
+msgid "System menu on the left of the top bar in the macOS skin"
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:69
+msgid ""
+"A macOS-style system menu on the left of the top bar with quick actions for "
+"About This System, System Settings, Applications, Force Quit and power "
+"controls. Drawn by the shell bridge when the macOS skin is active."
+msgstr ""
+
+#: crates/desk-settings/src/logo_menu.rs:78
+msgid "Top bar"
+msgstr ""
+
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
 msgid "Volume mixer"
@@ -293,7 +333,7 @@ msgid "Hidden applications"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:139
-#: crates/desk-settings/src/registry.rs:258
+#: crates/desk-settings/src/registry.rs:260
 msgid "Keyboard shortcut"
 msgstr ""
 
@@ -318,225 +358,225 @@ msgid "Mixer"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:214
-#: crates/desk-settings/src/registry.rs:416
+#: crates/desk-settings/src/registry.rs:424
 msgid "How to open"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:215
-#: crates/desk-settings/src/registry.rs:417
+#: crates/desk-settings/src/registry.rs:425
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:380
+#: crates/desk-settings/src/registry.rs:388
 msgid "Clipboard"
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:372
+#: crates/desk-settings/src/registry.rs:380
 msgid "Application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:55
+#: crates/desk-settings/src/registry.rs:56
 msgid "simple menu (and a toggle in quick settings)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:59
+#: crates/desk-settings/src/registry.rs:60
 msgid "macOS-style panel (centred, with search)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:63
+#: crates/desk-settings/src/registry.rs:64
 msgid "Windows 11-style Win+V panel (next to the cursor)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:67
+#: crates/desk-settings/src/registry.rs:68
 msgid "Panel style"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:85
+#: crates/desk-settings/src/registry.rs:86
 msgid "System default"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:98
-#: crates/desk-settings/src/registry.rs:448
+#: crates/desk-settings/src/registry.rs:99
+#: crates/desk-settings/src/registry.rs:456
 msgid "Language"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:99
+#: crates/desk-settings/src/registry.rs:100
 msgid "Language of the window, the command line and the shell panels"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:146
+#: crates/desk-settings/src/registry.rs:148
 msgid "Record history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:147
+#: crates/desk-settings/src/registry.rs:149
 msgid "Turn off to disable the feature completely"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:160
+#: crates/desk-settings/src/registry.rs:162
 msgid "History size"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:161
+#: crates/desk-settings/src/registry.rs:163
 msgid "How many unpinned items to keep"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:172
+#: crates/desk-settings/src/registry.rs:174
 msgid "Images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:173
+#: crates/desk-settings/src/registry.rs:175
 msgid "Also record copied images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:186
+#: crates/desk-settings/src/registry.rs:188
 msgid "Largest image, KiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:187
+#: crates/desk-settings/src/registry.rs:189
 msgid "Bigger images are not recorded"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:204
+#: crates/desk-settings/src/registry.rs:206
 msgid "Image budget, MiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:205
+#: crates/desk-settings/src/registry.rs:207
 msgid "When images take more space, the oldest are dropped"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:218
+#: crates/desk-settings/src/registry.rs:220
 msgid "Keep between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:219
+#: crates/desk-settings/src/registry.rs:221
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:230
+#: crates/desk-settings/src/registry.rs:232
 msgid "Keep images between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:231
+#: crates/desk-settings/src/registry.rs:233
 msgid "Otherwise images live only until you log out"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:239
+#: crates/desk-settings/src/registry.rs:241
 msgid "Private mode"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:240
+#: crates/desk-settings/src/registry.rs:242
 msgid "Temporarily record nothing"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:247
+#: crates/desk-settings/src/registry.rs:249
 msgid "Paste the chosen item"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:248
+#: crates/desk-settings/src/registry.rs:250
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:293
+#: crates/desk-settings/src/registry.rs:295
 msgid "Excluded applications"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:328
-#: crates/desk-settings/src/registry.rs:340
+#: crates/desk-settings/src/registry.rs:330
+#: crates/desk-settings/src/registry.rs:342
 msgid "Open the clipboard panel"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:364
+#: crates/desk-settings/src/registry.rs:372
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:371
-#: crates/desk-settings/src/registry.rs:467
+#: crates/desk-settings/src/registry.rs:379
+#: crates/desk-settings/src/registry.rs:475
 #: crates/themes/src/gui/features.rs:694 crates/themes/src/gui/window.rs:303
 msgid "Features"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:373
+#: crates/desk-settings/src/registry.rs:381
 msgid "About the project"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:381
+#: crates/desk-settings/src/registry.rs:389
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:383
+#: crates/desk-settings/src/registry.rs:391
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
 "theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:392
+#: crates/desk-settings/src/registry.rs:400
 msgid "History"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:404
+#: crates/desk-settings/src/registry.rs:412
 msgid "Privacy"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:406
+#: crates/desk-settings/src/registry.rs:414
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:422
+#: crates/desk-settings/src/registry.rs:430
 msgid "deskd service"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:431
+#: crates/desk-settings/src/registry.rs:439
 msgid "Clear history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:440
+#: crates/desk-settings/src/registry.rs:448
 msgid "General"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:441
+#: crates/desk-settings/src/registry.rs:449
 msgid "Language of the application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:442
+#: crates/desk-settings/src/registry.rs:450
 msgid "Settings of the Themes application itself."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:449
+#: crates/desk-settings/src/registry.rs:457
 msgid "The change takes effect after the window is restarted."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:456
+#: crates/desk-settings/src/registry.rs:464
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:457
+#: crates/desk-settings/src/registry.rs:465
 msgid "All shortcuts of the features in one place"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:459
+#: crates/desk-settings/src/registry.rs:467
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
 "refused."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:478
+#: crates/desk-settings/src/registry.rs:486
 msgid "Credits"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:479
+#: crates/desk-settings/src/registry.rs:487
 msgid "Projects the themes and features are based on, and their licences"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:481
+#: crates/desk-settings/src/registry.rs:489
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "
@@ -958,7 +998,7 @@ msgstr ""
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:479
+#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:480
 #: crates/themes/src/gui/window.rs:951
 #, rust-format
 msgid "turned on again: {uuid}"
@@ -1372,115 +1412,116 @@ msgstr ""
 msgid "Design tokens (tokens.toml): check, generate, a theme from a wallpaper"
 msgstr ""
 
-#: crates/themes/src/cli.rs:49
+#: crates/themes/src/cli.rs:50
 msgid ""
-"Page: themes | mix | features | clipboard | shortcuts | general | credits"
+"Page: themes | mix | features | clipboard | logo-menu | shortcuts | general "
+"| credits"
 msgstr ""
 
-#: crates/themes/src/cli.rs:50
+#: crates/themes/src/cli.rs:51
 msgid "Keyboard shortcuts of the features (the theme gives the default)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:221 crates/themes/src/gui/window.rs:702
+#: crates/themes/src/cli.rs:222 crates/themes/src/gui/window.rs:702
 #: crates/themes/src/gui/window.rs:737 crates/themes/src/gui/window.rs:849
 #: crates/themes/src/gui/window.rs:884
 #, rust-format
 msgid "Error: {error}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:292
+#: crates/themes/src/cli.rs:293
 #, rust-format
 msgid "active: {modules}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:307
+#: crates/themes/src/cli.rs:308
 msgid "(unknown: no theme has been applied yet)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:320
+#: crates/themes/src/cli.rs:321
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:384
+#: crates/themes/src/cli.rs:385
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
 "extensions {extensions}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:394 crates/themes/src/cli.rs:793
+#: crates/themes/src/cli.rs:395 crates/themes/src/cli.rs:794
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:138
 #, rust-format
 msgid "warning: {text}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:407
+#: crates/themes/src/cli.rs:408
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:426
+#: crates/themes/src/cli.rs:427
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:429
+#: crates/themes/src/cli.rs:430
 msgid "Extensions are already on."
 msgstr ""
 
-#: crates/themes/src/cli.rs:447 crates/themes/src/gui/window.rs:928
+#: crates/themes/src/cli.rs:448 crates/themes/src/gui/window.rs:928
 msgid "running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:449 crates/themes/src/gui/window.rs:930
+#: crates/themes/src/cli.rs:450 crates/themes/src/gui/window.rs:930
 msgid "not running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:454
+#: crates/themes/src/cli.rs:455
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:457 crates/themes/src/gui/window.rs:937
+#: crates/themes/src/cli.rs:458 crates/themes/src/gui/window.rs:937
 msgid "No problems found."
 msgstr ""
 
-#: crates/themes/src/cli.rs:469
+#: crates/themes/src/cli.rs:470
 msgid "fix with: themes doctor --fix"
 msgstr ""
 
-#: crates/themes/src/cli.rs:476
+#: crates/themes/src/cli.rs:477
 #, rust-format
 msgid "fixed: {what}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:517
+#: crates/themes/src/cli.rs:518
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:524
+#: crates/themes/src/cli.rs:525
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr ""
 
-#: crates/themes/src/cli.rs:530 crates/themes/src/cli.rs:591
+#: crates/themes/src/cli.rs:531 crates/themes/src/cli.rs:592
 msgid "Cancelled: the theme was not applied."
 msgstr ""
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:538
+#: crates/themes/src/cli.rs:539
 msgid "Apply it anyway? [y/N]"
 msgstr ""
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:544
+#: crates/themes/src/cli.rs:545
 msgid "y|yes"
 msgstr ""
 
-#: crates/themes/src/cli.rs:577
+#: crates/themes/src/cli.rs:578
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -1488,143 +1529,143 @@ msgid ""
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:585
+#: crates/themes/src/cli.rs:586
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
 "{list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:608
+#: crates/themes/src/cli.rs:609
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
 "unless approved before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:616
+#: crates/themes/src/cli.rs:617
 msgid "  (approved)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:639
+#: crates/themes/src/cli.rs:640
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:657
+#: crates/themes/src/cli.rs:658
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:689
+#: crates/themes/src/cli.rs:690
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 
-#: crates/themes/src/cli.rs:695
+#: crates/themes/src/cli.rs:696
 #, rust-format
 msgid "Write ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:701
+#: crates/themes/src/cli.rs:702
 #, rust-format
 msgid "Reset ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:710
+#: crates/themes/src/cli.rs:711
 #, rust-format
 msgid "Extensions: {list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:734
+#: crates/themes/src/cli.rs:735
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr ""
 
-#: crates/themes/src/cli.rs:743
+#: crates/themes/src/cli.rs:744
 msgid "before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:746
+#: crates/themes/src/cli.rs:747
 msgid "now:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:748
+#: crates/themes/src/cli.rs:749
 msgid "dconf keys changed:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:750
+#: crates/themes/src/cli.rs:751
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:755
+#: crates/themes/src/cli.rs:756
 msgid "extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:761
+#: crates/themes/src/cli.rs:762
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:768
+#: crates/themes/src/cli.rs:769
 msgid "GTK links:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:775
+#: crates/themes/src/cli.rs:776
 msgid "cleaned up after extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:780
+#: crates/themes/src/cli.rs:781
 msgid "hooks:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:798
+#: crates/themes/src/cli.rs:799
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
 msgstr ""
 
-#: crates/themes/src/cli.rs:804
+#: crates/themes/src/cli.rs:805
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
 "them on: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes/src/cli.rs:810
+#: crates/themes/src/cli.rs:811
 msgid "You MUST log out and log in again:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:818
+#: crates/themes/src/cli.rs:819
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:833
+#: crates/themes/src/cli.rs:834
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:841
+#: crates/themes/src/cli.rs:842
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:849
+#: crates/themes/src/cli.rs:850
 msgid "cache up to date"
 msgstr ""
 
-#: crates/themes/src/cli.rs:850
+#: crates/themes/src/cli.rs:851
 msgid "generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:851
+#: crates/themes/src/cli.rs:852
 msgid "will be generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:856
+#: crates/themes/src/cli.rs:857
 #, rust-format
 msgid "link: {path}"
 msgstr ""
@@ -2420,12 +2461,60 @@ msgstr ""
 msgid "More"
 msgstr ""
 
-#: bridge/src/mixer/feature.ts:156
-msgid "Could not switch the device"
+#: bridge/src/logoMenu/actions.ts:76
+msgid "this window"
 msgstr ""
 
-#: bridge/src/mixer/feature.ts:197
+#: bridge/src/logoMenu/actions.ts:78
+msgid "Force quit “{title}”?"
+msgstr ""
+
+#: bridge/src/logoMenu/actions.ts:79
+msgid "Unsaved changes in this window will be lost."
+msgstr ""
+
+#: bridge/src/logoMenu/actions.ts:80
+msgid "Force Quit"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:71
+msgid "About This System"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:73
+msgid "System Settings…"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:74 bridge/src/mixer/feature.ts:197
 msgid "Applications"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:75
+msgid "Force Quit…"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:77
+msgid "Sleep"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:78
+msgid "Restart…"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:79
+msgid "Shut Down…"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:81
+msgid "Lock Screen"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:82
+msgid "Log Out…"
+msgstr ""
+
+#: bridge/src/mixer/feature.ts:156
+msgid "Could not switch the device"
 msgstr ""
 
 #: bridge/src/mixer/feature.ts:201

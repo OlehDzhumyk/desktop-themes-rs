@@ -210,3 +210,6 @@
 /* macos: compact rows inside the disclosure, as in the Control Center sound page */
 .desk-skin-macos .desk-mixer-heading { font-size: 9pt; }
 .desk-skin-macos .desk-mixer-app { spacing: 8px; }
+
+/* ------------------------------------------------------------------ logo menu (macos top bar) */
+.desk-logo-menu-icon { icon-size: 16px; }

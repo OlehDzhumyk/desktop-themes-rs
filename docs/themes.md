@@ -13,8 +13,8 @@ dark colour scheme key in `settings.dconf`).
 
 WhiteSur GTK/shell theme, WhiteSur icons and cursors, WhiteSur wallpapers, Inter UI font,
 JetBrains Mono, a bottom dock (Dash to Dock), blurred panel (Blur my Shell), Spotlight-style
-launcher, clipboard history (desk-bridge, skin `macos`: a Spotlight-like panel on Shift+Super+V), and
-a lock-screen layout.
+launcher, a macOS-style logo menu on the left of the top bar and clipboard history (desk-bridge,
+skin `macos`: a Spotlight-like panel on Shift+Super+V), and a lock-screen layout.
 
 * Names used: GTK `WhiteSur-Light`, shell `WhiteSur-Dark`, icons `WhiteSur`, cursor `WhiteSur-cursors`,
   fonts `Inter`, `JetBrains Mono`.
@@ -82,9 +82,9 @@ are fixed system files and cannot be themed. Choosing an alert sound in Settings
 ## Own extensions
 
 * `desk-bridge@desktop-themes-rs` (TypeScript sources in `bridge/`): the one shell-side bridge to
-  deskd and the theme service: the "Theme" toggle in quick settings (formerly `themes-quick`) and the
-  clipboard history panels. Enabled in every theme (a theme cannot switch it off). See
-  docs/features.md.
+  deskd and the theme service: the "Theme" toggle in quick settings (formerly `themes-quick`), the
+  clipboard history panels, the volume mixer and the macOS logo menu. Enabled in every theme (a
+  theme cannot switch it off). See docs/features.md.
 * `extensions/lockscreen-layout@desktop-themes-rs`: patches the GNOME Shell 51 unlock dialog (clock
   position, size and font, blur, tint, dedicated background). No network, no subprocesses; everything
   is restored in `disable()`. Settings schema `org.gnome.shell.extensions.lockscreen-layout`, driven

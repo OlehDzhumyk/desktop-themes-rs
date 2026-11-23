@@ -8,7 +8,7 @@
 #   1. retires them: their D-Bus activation file and .desktop file are removed, the extensions are
 #      dropped from enabled/disabled-extensions (lockscreen-layout is switched to
 #      lockscreen-layout@desktop-themes-rs), their directories are moved to the theme root's trash;
-#      themes-quick@desktop-themes-rs, which desk-bridge replaced, is retired the same way;
+#      themes-quick@desktop-themes-rs and logomenu@aryan_k, which desk-bridge replaced, are retired the same way;
 #   2. renames those uuids in every installed theme's extensions.txt (your own themes too) and in
 #      state.json (applied/broken extensions);
 #   3. installs the public build: themes (scripts/install-themes.sh, bundled themes only, stale
@@ -64,7 +64,7 @@ for u in lst:
         r = u
     elif re.fullmatch(r"lockscreen-layout@.*\.local", u):
         r = "lockscreen-layout@desktop-themes-rs"
-    elif u.startswith("themes-quick@"):
+    elif u.startswith("themes-quick@") or u == "logomenu@aryan_k":
         r = ""
     else:
         r = u
@@ -87,7 +87,7 @@ fix_list /org/gnome/shell/disabled-extensions
 
 # ---- 1c. legacy extension directories -> trash (after the shell had a moment to disable them)
 moved=0
-for d in "$EXT_DIR"/themes-quick@* "$EXT_DIR"/lockscreen-layout@*.local; do
+for d in "$EXT_DIR"/themes-quick@* "$EXT_DIR"/lockscreen-layout@*.local "$EXT_DIR"/logomenu@aryan_k; do
   [ -d "$d" ] || continue
   [ "$moved" = 1 ] || { [ "$DRY_RUN" = 1 ] || sleep 2; }
   moved=1
@@ -100,12 +100,13 @@ done
 say "theme extension lists and state"
 for f in "$DT_ROOT"/themes/*/extensions.txt; do
   [ -f "$f" ] || continue
-  if grep -Eq '^[[:space:]]*[+-]?(lockscreen-layout@.*\.local|themes-quick@)' "$f"; then
+  if grep -Eq '^[[:space:]]*[+-]?(lockscreen-layout@.*\.local|themes-quick@|logomenu@aryan_k([[:space:]]|#|$))' "$f"; then
     note "update $(basename "$(dirname "$f")")/extensions.txt"
     if [ "$DRY_RUN" = 0 ]; then
       sed -E -i \
         -e "s/^([[:space:]]*[+-]?)lockscreen-layout@[^[:space:]#]*\.local/\1$LOCK_NEW/" \
-        -e '/^[[:space:]]*[+-]?themes-quick@/d' "$f"
+        -e '/^[[:space:]]*[+-]?themes-quick@/d' \
+        -e '/^[[:space:]]*[+-]?logomenu@aryan_k([[:space:]]|#|$)/d' "$f"
     fi
   fi
 done
@@ -120,7 +121,7 @@ st = json.load(open(p, encoding="utf-8"))
 def ren(u):
     if re.fullmatch(r"lockscreen-layout@.*\.local", u):
         return "lockscreen-layout@desktop-themes-rs"
-    if u.startswith("themes-quick@"):
+    if u.startswith("themes-quick@") or u == "logomenu@aryan_k":
         return None
     return u
 changed = False

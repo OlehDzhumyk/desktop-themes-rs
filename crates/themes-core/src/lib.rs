@@ -36,6 +36,7 @@ pub const PERMANENT_EXTENSIONS: &[&str] = &["desk-bridge@desktop-themes-rs"];
 /// Розширення, які замінив міст або які вилучено (прибираються з `enabled-extensions` під час міграції/застосування).
 pub const RETIRED_EXTENSIONS: &[&str] = &[
     "themes-quick@desktop-themes-rs",
+    "logomenu@aryan_k",
     "liquid-glass@thinkingcoding1231.gmail.com",
 ];
 pub const APP_ID: &str = "io.github.OlehDzhumyk.Themes";

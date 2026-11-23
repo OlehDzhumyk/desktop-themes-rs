@@ -77,3 +77,17 @@ read and written, the cubic volume scale) is adapted from
 [wiremix](https://github.com/tsowell/wiremix) (Copyright Thomas Sowell, **MIT OR Apache-2.0**; used under
 MIT, compatible with GPL-3.0-or-later), `src/wirehose/` → `crates/deskd/src/mixer/pw.rs` and `model.rs`
 (attribution in the file headers). The application model, defaults, memory and the UI are new.
+
+## Logo menu
+
+| | |
+|---|---|
+| Open | left side of the top bar (shown only in the `macos` skin) |
+| Items | About This System, System Settings…, Applications, Force Quit… (asks for confirmation before killing the focused window), Sleep, Restart…, Shut Down…, Lock Screen, Log Out… |
+| Activities | hides the default Activities indicator while shown (`hide-activities`) and restores it when disabled, hidden or on any other skin |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.LogoMenu`: `enabled`, `hide-activities` |
+
+Skins:
+
+* **macos**: shown on the left of the top bar (`start-here-symbolic`), replacing the third-party `logomenu@aryan_k` extension.
+* **windows11** and **default**: not shown; the standard Activities indicator is left untouched.

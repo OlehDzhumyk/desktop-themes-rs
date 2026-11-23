@@ -21,6 +21,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 |---|---|
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
+| Logo menu (`logo-menu`) | From macOS |
 | Lock screen (`lockscreen`) | Available in Windows 11 and macOS |
 | Application (`app`) | — |
 
@@ -74,6 +75,15 @@ Path `/io/github/OlehDzhumyk/Desk/mixer/`.
 | `hide-apps` | string list | `[]` |  | Hidden applications | Application keys (app id or program name) never listed in the mixer | mixer | — (gsettings only) |
 | `mixer-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | mixer | shortcut row on `--page shortcuts` |
 
+## `io.github.OlehDzhumyk.Desk.LogoMenu`
+
+Path `/io/github/OlehDzhumyk/Desk/logo-menu/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Show logo menu | Show a system menu on the left of the top bar in the macOS skin. | logo-menu | switch on `--page logo-menu` |
+| `hide-activities` | boolean | `true` |  | Hide Activities button | Hide the default Activities indicator while the logo menu is shown. | logo-menu | switch on `--page logo-menu` |
+
 ## `org.gnome.shell.extensions.lockscreen-layout`
 
 Path `/org/gnome/shell/extensions/lockscreen-layout/`.
@@ -115,6 +125,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
 | `mixer` | Volume mixer | Mixer, How to open |
+| `logo-menu` | Logo menu | Top bar |
 | `lockscreen` | Lock screen | Layout, Time and date, Background |
 | `shortcuts` | Keyboard shortcuts | Features |
 | `general` | General | Language |

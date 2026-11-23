@@ -28,6 +28,7 @@
     <child name="clipboard" schema="io.github.OlehDzhumyk.Desk.Clipboard"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
+    <child name="logo-menu" schema="io.github.OlehDzhumyk.Desk.LogoMenu"/>
   </schema>
 
   <schema id="io.github.OlehDzhumyk.Desk.Clipboard" path="/io/github/OlehDzhumyk/Desk/clipboard/">
@@ -142,6 +143,19 @@
       <default>[]</default>
       <summary>Shortcut that opens the volume mixer (in force)</summary>
       <description>The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global.</description>
+    </key>
+  </schema>
+
+  <schema id="io.github.OlehDzhumyk.Desk.LogoMenu" path="/io/github/OlehDzhumyk/Desk/logo-menu/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Show the logo menu on the left of the top bar in the macOS skin</summary>
+      <description>Show a system menu on the left of the top bar in the macOS skin.</description>
+    </key>
+    <key name="hide-activities" type="b">
+      <default>true</default>
+      <summary>Hide the default Activities indicator while the logo menu is shown</summary>
+      <description>Hide the default Activities indicator while the logo menu is shown.</description>
     </key>
   </schema>
 </schemalist>
