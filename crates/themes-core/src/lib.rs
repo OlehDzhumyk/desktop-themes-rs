@@ -33,7 +33,7 @@ pub use paths::Ctx;
 /// «Тема», буфер обміну та інші функції deskd).
 pub const PERMANENT_EXTENSIONS: &[&str] = &["desk-bridge@desktop-themes-rs"];
 /// Розширення, які замінив міст (прибираються з `enabled-extensions` під час міграції/застосування).
-pub const RETIRED_EXTENSIONS: &[&str] = &["themes-quick@desktop-themes-rs"];
+pub const RETIRED_EXTENSIONS: &[&str] = &["themes-quick@desktop-themes-rs", "logomenu@aryan_k"];
 pub const APP_ID: &str = "io.github.OlehDzhumyk.Themes";
 pub const DBUS_NAME: &str = "io.github.OlehDzhumyk.Themes";
 pub const DBUS_PATH: &str = "/io/github/OlehDzhumyk/Themes";

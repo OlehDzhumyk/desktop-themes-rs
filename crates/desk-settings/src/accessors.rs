@@ -376,3 +376,36 @@ impl MixerSettings {
         self.0.set_strv(Self::MIXER_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
+
+/// `io.github.OlehDzhumyk.Desk.LogoMenu` at `/io/github/OlehDzhumyk/Desk/logo-menu/`.
+#[derive(Clone, Debug)]
+pub struct LogoMenuSettings(pub gio::Settings);
+
+impl LogoMenuSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.LogoMenu";
+    pub const ENABLED: &'static str = "enabled";
+    pub const HIDE_ACTIVITIES: &'static str = "hide-activities";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Show the logo menu on the left of the top bar in the macOS skin
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Hide the default Activities indicator while the logo menu is shown
+    pub fn hide_activities(&self) -> bool {
+        self.0.boolean(Self::HIDE_ACTIVITIES)
+    }
+
+    pub fn set_hide_activities(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::HIDE_ACTIVITIES, v)
+    }
+}

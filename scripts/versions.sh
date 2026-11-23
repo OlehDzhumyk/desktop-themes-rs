@@ -39,7 +39,6 @@ EGO_EXTENSIONS=(
   "appindicatorsupport@rgcjonas.gmail.com 75340 v66 94fe0ef32b84f184fee0ce2bb0edca7020a99e48210c43bbfc0c884a5c4660de"
   "blur-my-shell@aunetx 78246 v78 065d53b27dff3bbdd867deeab0316c030da7702c8c313c2a734d0eb05cf4f4a7"
   "dash-to-dock@micxgx.gmail.com 76105 v110 b05003e79835a35451e94931539ba1977f2a7a93b652a4fc6b7be60a77c18ae1"
-  "logomenu@aryan_k 75631 v45 78e6507d9aa033a17e7e2997ac5a1190b327b97ba019a313f1a9285854753ed2"
   "compiz-alike-magic-lamp-effect@hermes83.github.com 76122 v25 a3a445a0f0329b581fec6edd2c33f143eec9b267cbb9b028bb6d7bff990cc420"
   "spotlight@nin 75194 v15 783862968f999b51eaa4fd10ca2e4747f309d64efa45db7fa580a884b2a214cd"
   "dash-to-panel@jderose9.github.com 75054 v74 8989c892f9795948e4490f47dc092218e42d771a6fec3dd44431cb48700ac2e5"
