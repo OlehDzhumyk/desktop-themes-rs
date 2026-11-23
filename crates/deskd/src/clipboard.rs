@@ -28,6 +28,8 @@ pub struct Config {
     pub history_size: usize,
     pub images: bool,
     pub image_max_bytes: usize,
+    /// Загальний бюджет байтів тимчасових зображень у `$XDG_RUNTIME_DIR` (tmpfs).
+    pub image_budget_bytes: usize,
     pub persist: bool,
     pub persist_images: bool,
     pub private: bool,
@@ -41,6 +43,7 @@ impl Default for Config {
             history_size: 50,
             images: true,
             image_max_bytes: 8192 * 1024,
+            image_budget_bytes: 256 * 1024 * 1024,
             persist: true,
             persist_images: false,
             private: false,
@@ -361,12 +364,8 @@ impl Engine {
             e.text = String::from_utf8_lossy(data).into_owned();
         } else {
             let name = format!("{hash:016x}.{}", image_ext(mime));
-            let dir = self.images_dir(self.cfg.persist && self.cfg.persist_images);
-            if ensure_private_dir(&dir)
-                .and_then(|_| write_private(&dir.join(&name), data))
-                .is_err()
-            {
-                return Pushed::Skipped(Skip::Unsupported);
+            if let Err(skip) = self.store_image(&name, data) {
+                return Pushed::Skipped(skip);
             }
             e.image = name;
             e.text = image_label(mime, data);
@@ -511,6 +510,7 @@ impl Engine {
             }
         }
         self.trim();
+        self.shrink_images_to_budget();
         if !self.cfg.persist {
             let _ = std::fs::remove_file(self.store_path());
         }
@@ -582,6 +582,94 @@ impl Engine {
             }
         }
         self.trim();
+    }
+}
+
+/// Запас вільного місця в runtime-теці, який зображення не чіпають: там сокети PipeWire, Wayland
+/// і D-Bus, яким теж потрібні байти.
+const RUNTIME_RESERVE: u64 = 32 * 1024 * 1024;
+
+/// Вільні байти файлової системи теки (`statvfs`: `f_bavail * f_frsize`, через GIO).
+fn free_bytes(dir: &Path) -> Option<u64> {
+    use gio::prelude::FileExt;
+    let info = gio::File::for_path(dir)
+        .query_filesystem_info(
+            gio::FILE_ATTRIBUTE_FILESYSTEM_FREE,
+            gio::Cancellable::NONE,
+        )
+        .ok()?;
+    Some(info.attribute_uint64(gio::FILE_ATTRIBUTE_FILESYSTEM_FREE))
+}
+
+/// Бюджет байтів і вільне місце для тимчасових зображень (R-5): окремо від решти рушія.
+impl Engine {
+    /// Зображення лежать у runtime-теці (tmpfs), а не в постійній.
+    fn images_in_runtime(&self) -> bool {
+        !(self.cfg.persist && self.cfg.persist_images)
+    }
+
+    /// Байти зображень в історії.
+    fn image_bytes(&self) -> u64 {
+        self.items
+            .iter()
+            .filter(|e| !e.image.is_empty())
+            .map(|e| e.size)
+            .sum()
+    }
+
+    /// Прибрати найстаріший незакріплений запис із зображенням. `false`, якщо такого немає.
+    fn evict_oldest_image(&mut self) -> bool {
+        let Some(pos) = self
+            .items
+            .iter()
+            .rposition(|e| !e.pinned && !e.image.is_empty())
+        else {
+            return false;
+        };
+        let e = self.items.remove(pos);
+        self.remove_image_file(&e);
+        true
+    }
+
+    /// Знизити суму байтів зображень до бюджету (після зменшення бюджету в налаштуваннях).
+    fn shrink_images_to_budget(&mut self) {
+        if !self.images_in_runtime() {
+            return;
+        }
+        let budget = self.cfg.image_budget_bytes as u64;
+        while self.image_bytes() > budget && self.evict_oldest_image() {}
+    }
+
+    /// Звільнити місце під зображення в `need` байт: бюджет сумарних байтів, потім вільне місце
+    /// файлової системи (`free` повертає його; `None` — невідомо, не блокуємо). Найстаріші
+    /// зображення витісняються першими, закріплені — ніколи. `false`: місця не набралося.
+    fn make_room(&mut self, need: u64, free: &dyn Fn() -> Option<u64>) -> bool {
+        let budget = self.cfg.image_budget_bytes as u64;
+        if need > budget {
+            return false;
+        }
+        while self.image_bytes() + need > budget {
+            if !self.evict_oldest_image() {
+                return false;
+            }
+        }
+        while free().is_some_and(|f| f < need.saturating_add(RUNTIME_RESERVE)) {
+            if !self.evict_oldest_image() {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Записати файл зображення у відповідну теку. У runtime-теці — з урахуванням бюджету й
+    /// вільного місця.
+    fn store_image(&mut self, name: &str, data: &[u8]) -> Result<(), Skip> {
+        let dir = self.images_dir(!self.images_in_runtime());
+        ensure_private_dir(&dir).map_err(|_| Skip::Unsupported)?;
+        if self.images_in_runtime() && !self.make_room(data.len() as u64, &|| free_bytes(&dir)) {
+            return Err(Skip::TooLarge);
+        }
+        write_private(&dir.join(name), data).map_err(|_| Skip::Unsupported)
     }
 }
 
@@ -813,5 +901,100 @@ mod tests {
         assert_eq!(image_size(&png(3, 7)), Some((3, 7)));
         assert_eq!(image_size(b"GIF89a\x02\x00\x05\x00"), Some((2, 5)));
         assert_eq!(image_size(b"nope"), None);
+    }
+
+    fn image_of(n: usize, tag: u8) -> Vec<u8> {
+        let mut v = png(2, 2);
+        v.resize(n, tag);
+        v
+    }
+
+    /// Бюджет байтів: найстаріші зображення йдуть першими, закріплені лишаються, а зображення,
+    /// що не вміщується навіть після витіснення, пропускається.
+    #[test]
+    fn image_budget_evicts_oldest_first() {
+        let cfg = Config {
+            image_budget_bytes: 3000,
+            ..Config::default()
+        };
+        let (mut e, d) = engine("budget", cfg);
+        let Pushed::Added(a) = e.push("image/png", &image_of(1000, 1), &[], "", 1) else {
+            panic!("a")
+        };
+        let Pushed::Added(b) = e.push("image/png", &image_of(1000, 2), &[], "", 2) else {
+            panic!("b")
+        };
+        let Pushed::Added(c) = e.push("image/png", &image_of(1000, 3), &[], "", 3) else {
+            panic!("c")
+        };
+        assert_eq!(e.image_bytes(), 3000);
+        // четверте витісняє найстаріше (a); файл теж зникає
+        let a_path = e.image_path(e.find(a).unwrap()).unwrap();
+        let Pushed::Added(_) = e.push("image/png", &image_of(1000, 4), &[], "", 4) else {
+            panic!("d")
+        };
+        assert!(e.find(a).is_none() && !a_path.exists());
+        assert!(e.find(b).is_some() && e.find(c).is_some());
+        // закріплене не витісняється: b закріплено, тож іде c
+        e.pin(b, true);
+        let Pushed::Added(_) = e.push("image/png", &image_of(1000, 5), &[], "", 5) else {
+            panic!("e")
+        };
+        assert!(e.find(b).is_some() && e.find(c).is_none());
+        // більше за весь бюджет — пропуск без шкоди для історії
+        let n = e.len();
+        assert_eq!(
+            e.push("image/png", &image_of(3001, 6), &[], "", 6),
+            Pushed::Skipped(Skip::TooLarge)
+        );
+        assert_eq!(e.len(), n);
+        assert!(e.image_bytes() <= 3000);
+        // усе закріплено — нічого витісняти: пропуск
+        let ids: Vec<u64> = e.list("", 0).iter().map(|i| i.id).collect();
+        for id in ids {
+            e.pin(id, true);
+        }
+        assert_eq!(
+            e.push("image/png", &image_of(2500, 7), &[], "", 7),
+            Pushed::Skipped(Skip::TooLarge)
+        );
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    /// Зменшення бюджету в налаштуваннях одразу витісняє зайве.
+    #[test]
+    fn lowering_the_budget_evicts() {
+        let (mut e, d) = engine("budget-lower", Config::default());
+        for t in 1..=3u8 {
+            e.push("image/png", &image_of(1000, t), &[], "", i64::from(t));
+        }
+        assert_eq!(e.image_bytes(), 3000);
+        let cfg = Config {
+            image_budget_bytes: 1500,
+            ..e.cfg.clone()
+        };
+        assert!(e.set_config(cfg));
+        assert_eq!(e.image_bytes(), 1000);
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    /// Мало вільного місця у файловій системі: витісняємо свої зображення, а коли їх немає —
+    /// не пишемо.
+    #[test]
+    fn free_space_is_respected() {
+        let (mut e, d) = engine("budget-free", Config::default());
+        e.push("image/png", &image_of(1000, 1), &[], "", 1);
+        e.push("image/png", &image_of(1000, 2), &[], "", 2);
+        // вільно менше за запас: витісняє обидва, і все одно не вміщається
+        assert!(!e.make_room(10, &|| Some(RUNTIME_RESERVE - 1)));
+        assert_eq!(e.image_bytes(), 0);
+        // достатньо місця — нічого не чіпає; невідомо — теж
+        e.push("image/png", &image_of(1000, 3), &[], "", 3);
+        assert!(e.make_room(10, &|| Some(RUNTIME_RESERVE + 10)));
+        assert!(e.make_room(10, &|| None));
+        assert_eq!(e.image_bytes(), 1000);
+        // справжній statvfs працює на існуючій теці
+        assert!(free_bytes(&d).is_some());
+        let _ = std::fs::remove_dir_all(d);
     }
 }

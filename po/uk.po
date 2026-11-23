@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-22 21:24+0000\n"
+"POT-Creation-Date: 2026-11-23 09:53+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -28,7 +28,7 @@ msgstr "Пошук у буфері обміну"
 msgid "Clipboard settings"
 msgstr "Налаштування буфера обміну"
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:131
+#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:134
 #: bridge/src/clipboard/winFlyout.ts:61
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
@@ -193,53 +193,53 @@ msgstr "{row}, без звуку"
 msgid "Desktop"
 msgstr "Робочий стіл"
 
-#: bridge/src/quickSettings.ts:55 bridge/src/quickSettings.ts:56
-#: bridge/src/quickSettings.ts:93 bridge/src/quickSettings.ts:129
-#: bridge/src/quickSettings.ts:131 bridge/src/quickSettings.ts:133
+#: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
+#: bridge/src/quickSettings.ts:120 bridge/src/quickSettings.ts:158
+#: bridge/src/quickSettings.ts:160 bridge/src/quickSettings.ts:162
 msgid "Theme"
 msgstr "Тема"
 
-#: bridge/src/quickSettings.ts:60
+#: bridge/src/quickSettings.ts:73
 msgid "Open “Desktop”…"
 msgstr "Відкрити «Робочий стіл»…"
 
-#: bridge/src/quickSettings.ts:80
+#: bridge/src/quickSettings.ts:107
 msgid "service unavailable"
 msgstr "служба недоступна"
 
-#: bridge/src/quickSettings.ts:92
+#: bridge/src/quickSettings.ts:119
 msgid "{name} (mixed)"
 msgstr "{name} (змішано)"
 
-#: bridge/src/quickSettings.ts:102
+#: bridge/src/quickSettings.ts:129
 msgid "{count} of {total} modules active"
 msgstr "активних модулів: {count} з {total}"
 
-#: bridge/src/quickSettings.ts:104
+#: bridge/src/quickSettings.ts:131
 msgid "{name}: modules {modules}"
 msgstr "{name}: модулі {modules}"
 
-#: bridge/src/quickSettings.ts:125
+#: bridge/src/quickSettings.ts:154
 msgid "applying “{name}”…"
 msgstr "застосування «{name}»…"
 
-#: bridge/src/quickSettings.ts:133
+#: bridge/src/quickSettings.ts:162
 msgid "Could not apply “{name}”: {error}"
 msgstr "Не вдалося застосувати «{name}»: {error}"
 
-#: bridge/src/quickSettings.ts:172
+#: bridge/src/quickSettings.ts:207
 msgid "Clipboard settings…"
 msgstr "Налаштування буфера обміну…"
 
-#: bridge/src/quickSettings.ts:199
+#: bridge/src/quickSettings.ts:234
 msgid "private mode"
 msgstr "приватний режим"
 
-#: bridge/src/quickSettings.ts:213
+#: bridge/src/quickSettings.ts:255
 msgid "deskd is unavailable"
 msgstr "deskd недоступний"
 
-#: bridge/src/quickSettings.ts:217
+#: bridge/src/quickSettings.ts:261
 msgid "The history is empty"
 msgstr "Історія порожня"
 
@@ -528,7 +528,7 @@ msgid "Hidden applications"
 msgstr "Приховані програми"
 
 #: crates/desk-settings/src/mixer.rs:139
-#: crates/desk-settings/src/registry.rs:240
+#: crates/desk-settings/src/registry.rs:258
 msgid "Keyboard shortcut"
 msgstr "Клавіатурне скорочення"
 
@@ -556,22 +556,22 @@ msgid "Mixer"
 msgstr "Мікшер"
 
 #: crates/desk-settings/src/mixer.rs:214
-#: crates/desk-settings/src/registry.rs:396
+#: crates/desk-settings/src/registry.rs:416
 msgid "How to open"
 msgstr "Як відкрити"
 
 #: crates/desk-settings/src/mixer.rs:215
-#: crates/desk-settings/src/registry.rs:397
+#: crates/desk-settings/src/registry.rs:417
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr "Скорочення змінюється на сторінці «Клавіатурні скорочення»."
 
 #: crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:361
+#: crates/desk-settings/src/registry.rs:380
 msgid "Clipboard"
 msgstr "Буфер обміну"
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:353
+#: crates/desk-settings/src/registry.rs:372
 msgid "Application"
 msgstr "Програма"
 
@@ -596,7 +596,7 @@ msgid "System default"
 msgstr "Як у системі"
 
 #: crates/desk-settings/src/registry.rs:98
-#: crates/desk-settings/src/registry.rs:428
+#: crates/desk-settings/src/registry.rs:448
 msgid "Language"
 msgstr "Мова"
 
@@ -636,50 +636,58 @@ msgstr "Найбільше зображення, КіБ"
 msgid "Bigger images are not recorded"
 msgstr "Більші зображення не записуються"
 
-#: crates/desk-settings/src/registry.rs:200
+#: crates/desk-settings/src/registry.rs:204
+msgid "Image budget, MiB"
+msgstr "Бюджет зображень, МіБ"
+
+#: crates/desk-settings/src/registry.rs:205
+msgid "When images take more space, the oldest are dropped"
+msgstr "Коли зображень більше, найстаріші видаляються"
+
+#: crates/desk-settings/src/registry.rs:218
 msgid "Keep between sessions"
 msgstr "Зберігати між сеансами"
 
-#: crates/desk-settings/src/registry.rs:201
+#: crates/desk-settings/src/registry.rs:219
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 "Текст зберігається у ~/.local/share/deskd/clipboard (доступ лише для вас)"
 
-#: crates/desk-settings/src/registry.rs:212
+#: crates/desk-settings/src/registry.rs:230
 msgid "Keep images between sessions"
 msgstr "Зберігати зображення між сеансами"
 
-#: crates/desk-settings/src/registry.rs:213
+#: crates/desk-settings/src/registry.rs:231
 msgid "Otherwise images live only until you log out"
 msgstr "Інакше зображення живуть лише до виходу з сеансу"
 
-#: crates/desk-settings/src/registry.rs:221
+#: crates/desk-settings/src/registry.rs:239
 msgid "Private mode"
 msgstr "Приватний режим"
 
-#: crates/desk-settings/src/registry.rs:222
+#: crates/desk-settings/src/registry.rs:240
 msgid "Temporarily record nothing"
 msgstr "Тимчасово нічого не записувати"
 
-#: crates/desk-settings/src/registry.rs:229
+#: crates/desk-settings/src/registry.rs:247
 msgid "Paste the chosen item"
 msgstr "Вставляти вибране"
 
-#: crates/desk-settings/src/registry.rs:230
+#: crates/desk-settings/src/registry.rs:248
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr "Після вибору запис одразу вставляється у вікно, де ви працювали"
 
-#: crates/desk-settings/src/registry.rs:275
+#: crates/desk-settings/src/registry.rs:293
 msgid "Excluded applications"
 msgstr "Виключені програми"
 
-#: crates/desk-settings/src/registry.rs:309
-#: crates/desk-settings/src/registry.rs:321
+#: crates/desk-settings/src/registry.rs:328
+#: crates/desk-settings/src/registry.rs:340
 msgid "Open the clipboard panel"
 msgstr "Відкрити буфер обміну"
 
-#: crates/desk-settings/src/registry.rs:345
+#: crates/desk-settings/src/registry.rs:364
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
@@ -687,21 +695,21 @@ msgstr ""
 "Функції, які є в Windows 11 і macOS, для GNOME. Їх виконує служба deskd, а "
 "вигляд підлаштовується під поточну тему."
 
-#: crates/desk-settings/src/registry.rs:352
-#: crates/desk-settings/src/registry.rs:447
+#: crates/desk-settings/src/registry.rs:371
+#: crates/desk-settings/src/registry.rs:467
 #: crates/themes/src/gui/features.rs:691 crates/themes/src/gui/window.rs:299
 msgid "Features"
 msgstr "Функції"
 
-#: crates/desk-settings/src/registry.rs:354
+#: crates/desk-settings/src/registry.rs:373
 msgid "About the project"
 msgstr "Про проєкт"
 
-#: crates/desk-settings/src/registry.rs:362
+#: crates/desk-settings/src/registry.rs:381
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr "Історія скопійованого: Win+V у Windows 11, Shift+Super+V у macOS"
 
-#: crates/desk-settings/src/registry.rs:364
+#: crates/desk-settings/src/registry.rs:383
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
@@ -710,15 +718,15 @@ msgstr ""
 "Історія скопійованого: тексти й зображення, закріплення, пошук. Зберігається "
 "у службі deskd; панель малює міст оболонки у стилі поточної теми."
 
-#: crates/desk-settings/src/registry.rs:373
+#: crates/desk-settings/src/registry.rs:392
 msgid "History"
 msgstr "Історія"
 
-#: crates/desk-settings/src/registry.rs:384
+#: crates/desk-settings/src/registry.rs:404
 msgid "Privacy"
 msgstr "Приватність"
 
-#: crates/desk-settings/src/registry.rs:386
+#: crates/desk-settings/src/registry.rs:406
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
@@ -726,39 +734,39 @@ msgstr ""
 "Паролі з менеджерів паролів (позначка x-kde-passwordManagerHint, KeePassXC, "
 "Bitwarden, 1Password, «Секрети» тощо) ніколи не записуються."
 
-#: crates/desk-settings/src/registry.rs:402
+#: crates/desk-settings/src/registry.rs:422
 msgid "deskd service"
 msgstr "Служба deskd"
 
-#: crates/desk-settings/src/registry.rs:411
+#: crates/desk-settings/src/registry.rs:431
 msgid "Clear history"
 msgstr "Очистити історію"
 
-#: crates/desk-settings/src/registry.rs:420
+#: crates/desk-settings/src/registry.rs:440
 msgid "General"
 msgstr "Загальні"
 
-#: crates/desk-settings/src/registry.rs:421
+#: crates/desk-settings/src/registry.rs:441
 msgid "Language of the application"
 msgstr "Мова програми"
 
-#: crates/desk-settings/src/registry.rs:422
+#: crates/desk-settings/src/registry.rs:442
 msgid "Settings of the Themes application itself."
 msgstr "Налаштування самої програми «Теми»."
 
-#: crates/desk-settings/src/registry.rs:429
+#: crates/desk-settings/src/registry.rs:449
 msgid "The change takes effect after the window is restarted."
 msgstr "Зміна набуває чинності після перезапуску вікна."
 
-#: crates/desk-settings/src/registry.rs:436
+#: crates/desk-settings/src/registry.rs:456
 msgid "Keyboard shortcuts"
 msgstr "Клавіатурні скорочення"
 
-#: crates/desk-settings/src/registry.rs:437
+#: crates/desk-settings/src/registry.rs:457
 msgid "All shortcuts of the features in one place"
 msgstr "Усі скорочення функцій в одному місці"
 
-#: crates/desk-settings/src/registry.rs:439
+#: crates/desk-settings/src/registry.rs:459
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
@@ -767,15 +775,15 @@ msgstr ""
 "Тема задає типове скорочення; ваш вибір має перевагу над ним і лишається "
 "після зміни теми. Скорочення, яке вже використовує інша дія, не приймається."
 
-#: crates/desk-settings/src/registry.rs:458
+#: crates/desk-settings/src/registry.rs:478
 msgid "Credits"
 msgstr "Подяки"
 
-#: crates/desk-settings/src/registry.rs:459
+#: crates/desk-settings/src/registry.rs:479
 msgid "Projects the themes and features are based on, and their licences"
 msgstr "Проєкти, на яких засновано теми й функції, та їхні ліцензії"
 
-#: crates/desk-settings/src/registry.rs:461
+#: crates/desk-settings/src/registry.rs:481
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "
@@ -785,12 +793,12 @@ msgstr ""
 "CREDITS.md; ліцензії — ті, що вказали автори (перевіряйте файл LICENSE у "
 "їхніх сховищах)."
 
-#: crates/deskd/src/clipboard.rs:149
+#: crates/deskd/src/clipboard.rs:152
 #, rust-format
 msgid "{format} image {width}×{height}"
 msgstr "Зображення {format} {width}×{height}"
 
-#: crates/deskd/src/clipboard.rs:154
+#: crates/deskd/src/clipboard.rs:157
 #, rust-format
 msgid "{format} image"
 msgstr "Зображення {format}"

@@ -160,6 +160,7 @@ Schema `io.github.OlehDzhumyk.Desk.Clipboard` (path `/io/github/OlehDzhumyk/Desk
 | `history-size` | uint | 50 | 5..500 (unpinned items) |
 | `images` | bool | `true` | |
 | `image-max-kb` | uint | 8192 | 64..65536 |
+| `image-budget-mb` | uint | 256 | 16..4096 (total of session images in `$XDG_RUNTIME_DIR`) |
 | `persist` | bool | `true` | |
 | `persist-images` | bool | `false` | |
 | `private-mode` | bool | `false` | |
@@ -188,6 +189,7 @@ The window page `--page clipboard` shows History, Privacy, "How to open" and a d
 |---|---|
 | Huge text (> 256 KiB) | skipped, not truncated (a truncated paste would corrupt data); no error shown; the clipboard itself still has it |
 | Huge image (> `image-max-kb`) | skipped; same |
+| Images together over `image-budget-mb`, or `$XDG_RUNTIME_DIR` nearly full (less than 32 MiB left after the write) | the oldest unpinned images leave the history first; if still no room (all pinned), the new image is skipped. Applies to session images only (`persist-images` off) |
 | Image + text offered | text is recorded, image is not |
 | HTML / rich text | recorded as plain text only |
 | File copied in Files | not recorded as a file (no `text/uri-list` support); a text form, if offered, is recorded |
