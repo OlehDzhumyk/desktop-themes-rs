@@ -5,11 +5,13 @@
 //! `desk-bridge@desktop-themes-rs`, а логіка й стан живуть тут. Активується шиною (D-Bus-файл
 //! служби вказує на юніт systemd --user `deskd.service`).
 
+mod appearance;
 mod clipboard;
 mod emoji;
 mod mixer;
 mod panic_policy;
 mod persist;
+mod schedule;
 mod service;
 mod settings;
 mod trust;
@@ -17,7 +19,8 @@ mod trust;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use desk_proto::{
-    BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, EMOJI_PATH, MIXER_PATH,
+    APPEARANCE_PATH, BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, EMOJI_PATH,
+    MIXER_PATH,
 };
 use desk_settings::tr;
 use gio::glib;
@@ -63,7 +66,11 @@ fn emit_changed(conn: &zbus::Connection) {
 
 /// Engines this build hosts (the `Features` property).
 fn features() -> Vec<String> {
-    let mut f = vec!["clipboard".to_string(), "emoji".to_string()];
+    let mut f = vec![
+        "clipboard".to_string(),
+        "appearance".to_string(),
+        "emoji".to_string(),
+    ];
     if cfg!(feature = "pipewire") {
         f.push("mixer".into());
     }
@@ -198,14 +205,51 @@ fn main() {
     let mixer = Arc::new(Mixer::new(graph, notifier, Some(store)));
     let mixer_iface = mixer::service::MixerIface {
         mixer: mixer.clone(),
+        gate: gate.clone(),
+    };
+
+    // automatic light/dark appearance engine and its one-shot wake scheduler
+    let appearance_settings = settings::appearance_settings();
+    let interface_settings = settings::interface_settings();
+    let appearance_cfg = appearance_settings
+        .as_ref()
+        .map_or_else(Default::default, settings::read_appearance);
+    let initial_scheme = interface_settings.as_ref().map_or(
+        appearance::solar::Scheme::Light,
+        settings::read_color_scheme,
+    );
+    let appearance_eng: appearance::Shared =
+        Arc::new(Mutex::new(appearance::AppearanceEngine::new(
+            appearance_cfg,
+            initial_scheme,
+            settings::set_color_scheme_async,
+            appearance::local_now_system,
+            appearance::cities::detect_system_timezone,
+        )));
+    let appearance_scheduler = schedule::Scheduler::spawn("deskd-appearance", {
+        let eng = appearance_eng.clone();
+        let bus = bus.clone();
+        move || {
+            let (delay, changed) = appearance::lock(&eng).tick();
+            if changed && let Some(conn) = bus.get() {
+                zbus::block_on(appearance::service::emit_changed(conn));
+            }
+            delay
+        }
+    });
+    let appearance_iface = appearance::service::AppearanceIface {
+        eng: appearance_eng.clone(),
+        scheduler: appearance_scheduler.clone(),
         gate,
     };
+
     let conn = zbus::block_on(async {
         let conn = zbus::connection::Builder::session()
             .serve_at(DESK_PATH, desk)
             .serve_at(CLIPBOARD_PATH, clip)
             .serve_at(EMOJI_PATH, emoji_iface)
             .serve_at(MIXER_PATH, mixer_iface)
+            .serve_at(APPEARANCE_PATH, appearance_iface)
             .build()
             .await?;
         service::own_name(&conn, replace).await?;
@@ -335,6 +379,39 @@ fn main() {
         });
     }
 
+    {
+        let sched = appearance_scheduler.clone();
+        schedule::watch_system_events(move || sched.trigger());
+    }
+    if let Some(s) = &appearance_settings {
+        let eng = appearance_eng.clone();
+        let sched = appearance_scheduler.clone();
+        let conn = conn.clone();
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, _| {
+            let cfg = settings::read_appearance(&typed);
+            appearance::lock(&eng).set_config(cfg);
+            sched.trigger();
+            let conn = conn.clone();
+            std::thread::spawn(move || {
+                zbus::block_on(appearance::service::emit_changed(&conn));
+            });
+        });
+    }
+    if let Some(s) = &interface_settings {
+        let eng = appearance_eng.clone();
+        let conn = conn.clone();
+        s.connect_changed(Some("color-scheme"), move |s, _| {
+            let scheme = settings::read_color_scheme(s);
+            if appearance::lock(&eng).on_external_scheme_change(scheme) {
+                let conn = conn.clone();
+                std::thread::spawn(move || {
+                    zbus::block_on(appearance::service::emit_changed(&conn));
+                });
+            }
+        });
+    }
+
     // logout / `systemctl --user stop`: leave the main loop so that the pending history is written
     match Signals::new([SIGHUP, SIGINT, SIGTERM]) {
         Ok(mut signals) => {
@@ -350,10 +427,13 @@ fn main() {
         }
     }
     main_loop.run();
+    appearance_scheduler.shutdown();
     saver.flush();
     mixer.set_backend(None);
     mixer.flush();
     drop(gsettings);
     drop(emoji_settings);
     drop(mixer_settings);
+    drop(appearance_settings);
+    drop(interface_settings);
 }

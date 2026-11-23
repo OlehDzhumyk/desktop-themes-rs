@@ -29,11 +29,26 @@ All notable changes to this project are documented in this file. The format is b
   and `default` (`Super+.`) open a floating keyboard-first picker near the caret; insertion uses
   `application/x-desk-internal` and restores the previous clipboard text so clipboard history is
   untouched. Settings `io.github.OlehDzhumyk.Desk.Emoji` and shortcut `emoji-toggle`.
+- Automatic light/dark appearance (`auto-dark`): `deskd` now hosts the `appearance` engine
+  (`io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance`) with a
+  shared one-shot wake scheduler (`crates/deskd/src/schedule.rs`) that reacts to suspend/resume
+  and timezone changes. Supports `manual`, `light`, `dark`, `auto-sun` (offline NOAA solar
+  sunrise/sunset with a built-in world and Ukrainian city table, decimal coordinates, or timezone
+  fallback), and `auto-time` (fixed 24-hour times), plus manual override until the next transition
+  and settings `io.github.OlehDzhumyk.Desk.Appearance` (`mode`, `dark-from`, `light-from`,
+  `location`, `twilight-offset`, `override-until-next`) with an «Appearance» page in the window.
 - Logo menu in `desk-bridge` for the `macos` skin (replaces the third-party `logomenu@aryan_k`
   extension): system menu on the left of the top bar with About This System, System Settings,
   Applications, Force Quit (with confirmation dialog), Sleep, Restart, Shut Down, Lock Screen and
   Log Out, plus settings `io.github.OlehDzhumyk.Desk.LogoMenu` (`enabled`, `hide-activities`) and a
   «Logo menu» page in the window. `logomenu@aryan_k` is retired during apply and migration.
+- Settings hub «Робочий стіл» ("Desktop"): renamed the window, `.desktop` and metainfo entries from
+  Themes to Desktop; replaced the top view switcher with a responsive `adw::NavigationSplitView`
+  sidebar organizing Appearance (Themes, Mix), Features (all registry feature pages), Application
+  (Keyboard shortcuts, General, System) and About (Credits); added `Ctrl+F` search across all pages
+  and settings (matching both translated text and English msgids, with row jump and reduced-motion
+  highlight); added per-page «Reset page», an inline System page (doctor check/fix, baseline info,
+  «Reset all»), and an editable string-list widget for `excluded-apps` and `hide-apps`.
 - Volume mixer: one slider (and mute, «Play on…») per application that plays sound, output and input
   device switching, in the quick settings sound menu, skinned for Windows 11 («Мікшер гучності»,
   Ctrl+Super+V), macOS (Control Center «Звук» page with a collapsed «Програми» disclosure) and Fedora
@@ -76,9 +91,6 @@ All notable changes to this project are documented in this file. The format is b
 - `docs/maintainer.md`: releases, CI, build environment, pinned versions, known workarounds.
 - CI: a check that no `.rs` file is outside every crate's module tree
   (`tools/check-orphan-rs.sh`), `tools/update-image-digests.sh`, `tools/ego-pin.sh`.
-- CI / local check: `tools/check-theme-dconf-schemas.py` (`just theme-schemas`, part of `just check`
-  and CI `static-checks`) verifies theme `.dconf` keys against installed and bundled GSettings
-  schemas.
 
 ### Changed
 
@@ -122,17 +134,6 @@ All notable changes to this project are documented in this file. The format is b
   cancelled on disable.
 - `data/install.sh` compiles the GSettings schemas of repository extensions after copying them
   (`lockscreen-layout` failed to load with a missing `gschemas.compiled` after a reinstall).
-- `scripts/install-extensions.sh` fails loudly if `glib-compile-schemas` is missing and cleans up
-  stray `*.orig` files after patching; `scripts/install-assets.sh` installs Cascadia Code's
-  `OFL.txt` alongside the font files; third-party licence notes in `CREDITS.md` and feature specs
-  corrected (`blur-my-shell`, `tilingshell`, `arcmenu`, `logomenu`).
-
-### Removed
-
-- Removed the experimental `macos-glass` bundled theme and the `liquid-glass` extension
-  (`scripts/versions.sh`, `scripts/install-extensions.sh`). `themes doctor` warns when `macos-glass`
-  or a retired extension (`liquid-glass`, `clipboard-indicator`) is active or still installed, and
-  `--fix` migrates `macos-glass` modules to `macos` and disables retired extensions.
 
 ## [0.3.0] - 2026-11-22
 

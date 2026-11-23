@@ -22,6 +22,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
 | Emoji and symbols (`emoji`) | In Windows 11 and macOS |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
+| Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
 | Logo menu (`logo-menu`) | From macOS |
 | Lock screen (`lockscreen`) | Available in Windows 11 and macOS |
 | Application (`app`) | — |
@@ -86,8 +87,21 @@ Path `/io/github/OlehDzhumyk/Desk/mixer/`.
 | `show-silent-apps` | boolean | `false` |  | Show silent applications | Also list applications that keep a sound stream open without playing | mixer | switch on `--page mixer` |
 | `remember-app-volume` | boolean | `false` |  | Remember application volume | Stored in ~/.local/share/deskd/mixer/apps.json (mode 0600): application ids with a volume and a mute flag. Turning it off forgets them and deletes the file. | mixer | switch on `--page mixer` |
 | `volume-step` | unsigned | `5` | 1…20 (step 1) | Volume step, % | How much an arrow key changes a slider (Shift: 1 %) | mixer | spin button on `--page mixer` |
-| `hide-apps` | string list | `[]` |  | Hidden applications | Application keys (app id or program name) never listed in the mixer | mixer | — (gsettings only) |
+| `hide-apps` | string list | `[]` |  | Hidden applications | Applications never listed in the mixer (app id or program name) | mixer | list on `--page mixer` |
 | `mixer-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | mixer | shortcut row on `--page shortcuts` |
+
+## `io.github.OlehDzhumyk.Desk.Appearance`
+
+Path `/io/github/OlehDzhumyk/Desk/appearance/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `mode` | choice | `'manual'` | `manual`, `light`, `dark`, `auto-sun`, `auto-time` | Colour scheme mode | How deskd manages org.gnome.desktop.interface color-scheme: 'manual' leaves it alone, 'light' and 'dark' keep it fixed, 'auto-sun' follows local sunrise and sunset, and 'auto-time' switches at dark-from and light-from. | appearance | drop-down on `--page appearance` |
+| `dark-from` | string | `'20:00'` |  | Dark from | Time to switch to dark mode (HH:MM, 24-hour) | appearance | entry on `--page appearance` |
+| `light-from` | string | `'07:00'` |  | Light from | Time to switch to light mode (HH:MM, 24-hour) | appearance | entry on `--page appearance` |
+| `location` | string | `''` |  | Location | Used locally to compute sunrise and sunset (no network requests). Accepts a city name from the built-in table or decimal coordinates 'lat,lon'; empty falls back to the system timezone. | appearance | entry on `--page appearance` |
+| `twilight-offset` | integer | `0` | -60…60 (step 5) | Twilight offset (minutes) | Shift sunrise and sunset earlier (negative) or later (positive) | appearance | spin button on `--page appearance` |
+| `override-until-next` | boolean | `true` |  | Keep manual changes until next transition | If you switch light or dark manually, wait until the next sunrise or sunset before switching back | appearance | switch on `--page appearance` |
 
 ## `io.github.OlehDzhumyk.Desk.LogoMenu`
 
@@ -141,6 +155,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
 | `emoji` | Emoji and symbols | Picker, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
+| `appearance` | Appearance | Mode, Solar schedule, Fixed schedule |
 | `logo-menu` | Logo menu | Top bar |
 | `lockscreen` | Lock screen | Layout, Time and date, Background |
 | `shortcuts` | Keyboard shortcuts | Features |

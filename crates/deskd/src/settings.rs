@@ -5,9 +5,11 @@
 //! Об'єкти `gio::Settings` живуть лише в головному потоці (там крутиться цикл GLib); з потоків
 //! zbus зміни надсилаються через `glib::MainContext::invoke`.
 
-use desk_settings::accessors::ClipboardSettings;
+use desk_settings::accessors::{AppearanceSettings, ClipboardSettings, Mode};
 use gio::glib;
+use gio::prelude::*;
 
+use crate::appearance::solar::{AppearanceMode, Scheme};
 use crate::clipboard::Config;
 
 pub fn clipboard_settings() -> Option<ClipboardSettings> {
@@ -63,4 +65,50 @@ pub fn read_mixer(
             hide_apps: s.hide_apps(),
         },
     )
+}
+
+const INTERFACE_SCHEMA: &str = "org.gnome.desktop.interface";
+const COLOR_SCHEME_KEY: &str = "color-scheme";
+
+/// GSettings `io.github.OlehDzhumyk.Desk.Appearance` (None while the schema is not installed).
+pub fn appearance_settings() -> Option<AppearanceSettings> {
+    AppearanceSettings::new()
+}
+
+/// Read the appearance engine configuration from GSettings.
+pub fn read_appearance(s: &AppearanceSettings) -> crate::appearance::Config {
+    let mode = match s.mode() {
+        Mode::Manual => AppearanceMode::Manual,
+        Mode::Light => AppearanceMode::Light,
+        Mode::Dark => AppearanceMode::Dark,
+        Mode::AutoSun => AppearanceMode::AutoSun,
+        Mode::AutoTime => AppearanceMode::AutoTime,
+    };
+    crate::appearance::Config {
+        mode,
+        dark_from: s.dark_from(),
+        light_from: s.light_from(),
+        location: s.location(),
+        twilight_offset: s.twilight_offset(),
+        override_until_next: s.override_until_next(),
+    }
+}
+
+/// GSettings `org.gnome.desktop.interface` (None when unavailable).
+pub fn interface_settings() -> Option<gio::Settings> {
+    desk_settings::schema_installed(INTERFACE_SCHEMA).then(|| gio::Settings::new(INTERFACE_SCHEMA))
+}
+
+/// Read the current `color-scheme` from `org.gnome.desktop.interface`.
+pub fn read_color_scheme(s: &gio::Settings) -> Scheme {
+    Scheme::parse(&s.string(COLOR_SCHEME_KEY)).unwrap_or(Scheme::Light)
+}
+
+/// Write `org.gnome.desktop.interface color-scheme` from any thread via the GLib main loop.
+pub fn set_color_scheme_async(scheme: Scheme) {
+    glib::MainContext::default().invoke(move || {
+        if let Some(s) = interface_settings() {
+            let _ = s.set_string(COLOR_SCHEME_KEY, scheme.as_gsettings_str());
+        }
+    });
 }

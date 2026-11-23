@@ -19,12 +19,15 @@ pub const MIXER_PATH: &str = "/io/github/OlehDzhumyk/Desk/Mixer";
 pub const MIXER_IFACE: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 /// Version of the Mixer interface (its `Version` property): bumped on incompatible changes only.
 pub const MIXER_VERSION: u32 = 1;
+pub const APPEARANCE_PATH: &str = "/io/github/OlehDzhumyk/Desk/Appearance";
+pub const APPEARANCE_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
 pub const CLIPBOARD_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Clipboard";
 pub const EMOJI_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Emoji";
 pub const MIXER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Mixer";
+pub const APPEARANCE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.Desk.gschema.xml");
 
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
@@ -32,6 +35,8 @@ pub const CLIPBOARD_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Clipboard.xml");
 pub const EMOJI_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Emoji.xml");
 pub const MIXER_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Mixer.xml");
+pub const APPEARANCE_XML: &str =
+    include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Appearance.xml");
 
 /// Offered by the bridge with the clipboard content it set itself (paste from the history), so
 /// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
@@ -193,6 +198,23 @@ pub struct MixerApp {
     pub playing: bool,
     pub device: u32,
     pub streams: Vec<u32>,
+}
+
+/// Appearance (auto-dark) client proxy in its own module so its `Changed` signal does not clash.
+pub mod appearance {
+    /// Client proxy of the automatic light/dark appearance engine.
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.Appearance",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/Appearance"
+    )]
+    pub trait Appearance {
+        fn status(&self) -> zbus::Result<(String, String, String, String, bool, bool)>;
+        fn set_scheme(&self, scheme: &str) -> zbus::Result<()>;
+        fn recompute(&self) -> zbus::Result<()>;
+        #[zbus(signal)]
+        fn changed(&self) -> zbus::Result<()>;
+    }
 }
 
 /// Клієнтський проксі самої служби (версія, список функцій).

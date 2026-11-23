@@ -108,3 +108,13 @@ Skins:
 
 * **windows11**: live «Емодзі» and «Символи» tabs inside the unified Win+V / Win+. flyout; stays open after insert by default.
 * **macos** and **default**: floating keyboard-first picker anchored near the text caret (pointer fallback); closes after insert by default.
+## Automatic light/dark
+
+| | |
+|---|---|
+| Modes | `manual` (default, does not touch `color-scheme`), `light`, `dark`, `auto-sun` (local sunrise/sunset via NOAA solar algorithm), `auto-time` (fixed 24-hour times, default `20:00` to `07:00`) |
+| Location | city name from the built-in offline table, decimal coordinates `lat,lon`, or empty (falls back to the system timezone; zero network requests) |
+| Manual override | switching light/dark manually (GNOME Quick Settings or D-Bus `SetScheme`) while in an auto mode holds the manual choice until the next scheduled transition when `override-until-next` is enabled |
+| Scheduling | one-shot wake timer in `deskd` (zero idle wakeups in `manual`/`light`/`dark`), re-armed automatically on resume from suspend (`org.freedesktop.login1.Manager.PrepareForSleep`) and timezone changes (`org.freedesktop.timedate1`) |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance` (`Status`, `SetScheme`, `Recompute`, signal `Changed`) |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Appearance`: `mode`, `dark-from`, `light-from`, `location`, `twilight-offset`, `override-until-next` |

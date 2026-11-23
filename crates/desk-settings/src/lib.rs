@@ -4,6 +4,7 @@
 //! typed accessors, docs/settings.md), the generated accessors ([`accessors`], feature `gio`) and
 //! the gettext helpers shared by all Rust crates ([`i18n`], [`tr!`], [`trn!`]).
 
+pub mod appearance;
 pub mod emoji;
 pub mod generate;
 pub mod i18n;
@@ -20,6 +21,7 @@ pub mod validate;
 #[rustfmt::skip]
 pub mod accessors;
 
+pub use appearance::*;
 pub use emoji::*;
 pub use lockscreen::*;
 pub use logo_menu::*;

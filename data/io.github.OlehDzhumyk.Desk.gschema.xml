@@ -29,6 +29,7 @@
     <child name="emoji" schema="io.github.OlehDzhumyk.Desk.Emoji"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
+    <child name="appearance" schema="io.github.OlehDzhumyk.Desk.Appearance"/>
     <child name="logo-menu" schema="io.github.OlehDzhumyk.Desk.LogoMenu"/>
   </schema>
 
@@ -185,11 +186,53 @@
     <key name="hide-apps" type="as">
       <default>[]</default>
       <summary>Application keys (app id or program name) never listed in the mixer</summary>
+      <description>Applications never listed in the mixer (app id or program name)</description>
     </key>
     <key name="mixer-shortcut" type="as">
       <default>[]</default>
       <summary>Shortcut that opens the volume mixer (in force)</summary>
       <description>The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global.</description>
+    </key>
+  </schema>
+
+  <schema id="io.github.OlehDzhumyk.Desk.Appearance" path="/io/github/OlehDzhumyk/Desk/appearance/">
+    <key name="mode" type="s">
+      <choices>
+        <choice value="manual"/>
+        <choice value="light"/>
+        <choice value="dark"/>
+        <choice value="auto-sun"/>
+        <choice value="auto-time"/>
+      </choices>
+      <default>'manual'</default>
+      <summary>Colour scheme mode</summary>
+      <description>How deskd manages org.gnome.desktop.interface color-scheme: 'manual' leaves it alone, 'light' and 'dark' keep it fixed, 'auto-sun' follows local sunrise and sunset, and 'auto-time' switches at dark-from and light-from.</description>
+    </key>
+    <key name="dark-from" type="s">
+      <default>'20:00'</default>
+      <summary>Time to switch to dark mode (HH:MM, 24-hour)</summary>
+      <description>Time to switch to dark mode (HH:MM, 24-hour)</description>
+    </key>
+    <key name="light-from" type="s">
+      <default>'07:00'</default>
+      <summary>Time to switch to light mode (HH:MM, 24-hour)</summary>
+      <description>Time to switch to light mode (HH:MM, 24-hour)</description>
+    </key>
+    <key name="location" type="s">
+      <default>''</default>
+      <summary>City name or coordinates (lat,lon) for sunrise and sunset</summary>
+      <description>Used locally to compute sunrise and sunset (no network requests). Accepts a city name from the built-in table or decimal coordinates 'lat,lon'; empty falls back to the system timezone.</description>
+    </key>
+    <key name="twilight-offset" type="i">
+      <range min="-60" max="60"/>
+      <default>0</default>
+      <summary>Shift sunrise and sunset earlier (negative) or later (positive), in minutes</summary>
+      <description>Shift sunrise and sunset earlier (negative) or later (positive)</description>
+    </key>
+    <key name="override-until-next" type="b">
+      <default>true</default>
+      <summary>Keep manual light/dark changes until the next scheduled transition</summary>
+      <description>If you switch light or dark manually, wait until the next sunrise or sunset before switching back</description>
     </key>
   </schema>
 

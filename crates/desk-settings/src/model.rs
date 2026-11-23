@@ -53,7 +53,7 @@ pub enum Kind {
     },
     /// `s` → entry row
     Str { default: &'static str },
-    /// `as` → not edited in the window (shown read-only when asked)
+    /// `as` → list editor row
     StrList { default: &'static [&'static str] },
     /// `as` of GTK accelerators → shortcut row
     Accel { default: &'static [&'static str] },
