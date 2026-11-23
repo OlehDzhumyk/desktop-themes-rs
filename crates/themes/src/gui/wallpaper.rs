@@ -273,8 +273,8 @@ async fn create(toasts: &adw::ToastOverlay, path: &Path, title: String, id: Stri
 }
 
 /// Subtitle of the «Accent from wallpaper» status row (D-Bus `WallpaperAccent`).
-pub fn status_text(st: (bool, String, String, bool, String, String)) -> String {
-    let (enabled, seed, accent, mono, _uri, error) = st;
+pub fn status_text(st: (bool, String, String, bool, String, String, String)) -> String {
+    let (enabled, seed, accent, mono, _uri, error, palette) = st;
     if !enabled {
         return tr!("off");
     }
@@ -289,6 +289,17 @@ pub fn status_text(st: (bool, String, String, bool, String, String)) -> String {
         accent = accent,
         colour = seed
     );
+    let s = if palette.is_empty() {
+        s
+    } else {
+        format!(
+            "{s}. {}",
+            tr!(
+                "The app colours of the theme “{theme}” follow it too",
+                theme = palette
+            )
+        )
+    };
     if mono {
         format!("{s}. {}", tr!("The image has almost no colour"))
     } else {

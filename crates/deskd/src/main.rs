@@ -218,13 +218,15 @@ fn main() {
             delay
         }
     });
-    let wallpaper_eng: appearance::wallpaper::Shared =
-        Arc::new(Mutex::new(appearance::wallpaper::WallpaperEngine::new(
+    let wallpaper_eng: appearance::wallpaper::Shared = Arc::new(Mutex::new(
+        appearance::wallpaper::WallpaperEngine::new(
             appearance_settings
                 .as_ref()
                 .map_or_else(Default::default, settings::read_wallpaper),
             appearance::wallpaper::state_path(),
-        )));
+        )
+        .with_manager_state(appearance::wallpaper::manager_state_path()),
+    ));
     let appearance_iface = appearance::service::AppearanceIface {
         eng: appearance_eng.clone(),
         scheduler: appearance_scheduler.clone(),
