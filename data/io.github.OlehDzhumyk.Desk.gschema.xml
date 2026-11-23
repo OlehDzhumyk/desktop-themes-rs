@@ -26,6 +26,7 @@
       <description>'system' follows the session locale (LANGUAGE, LC_MESSAGES); 'uk' or 'en' overrides it for desktop-themes-rs only (the window, the themes command, deskd and desk-bridge).</description>
     </key>
     <child name="clipboard" schema="io.github.OlehDzhumyk.Desk.Clipboard"/>
+    <child name="emoji" schema="io.github.OlehDzhumyk.Desk.Emoji"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="appearance" schema="io.github.OlehDzhumyk.Desk.Appearance"/>
@@ -93,10 +94,56 @@
     </key>
   </schema>
 
+  <schema id="io.github.OlehDzhumyk.Desk.Emoji" path="/io/github/OlehDzhumyk/Desk/emoji/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable the emoji and symbol picker</summary>
+      <description>Open a keyboard-first panel to search and insert emoji, symbols and text faces</description>
+    </key>
+    <key name="emoji-shortcut" type="as">
+      <default>['&lt;Super&gt;period']</default>
+      <summary>Shortcut that opens the emoji and symbol picker (in force)</summary>
+      <description>The accelerators the bridge binds. Themes write their default here from desk.dconf (Super+. and Super+; for Windows 11, Ctrl+Super+Space for macOS, Super+. for Fedora); an override in io.github.OlehDzhumyk.Desk.Shortcuts emoji-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global.</description>
+    </key>
+    <key name="skin-tone" type="s">
+      <choices>
+        <choice value="none"/>
+        <choice value="light"/>
+        <choice value="medium-light"/>
+        <choice value="medium"/>
+        <choice value="medium-dark"/>
+        <choice value="dark"/>
+      </choices>
+      <default>'none'</default>
+      <summary>Default Fitzpatrick skin-tone modifier for person emoji</summary>
+      <description>Applied to person and hand emoji when inserted</description>
+    </key>
+    <key name="remember-recents" type="b">
+      <default>true</default>
+      <summary>Keep recently picked emoji and symbols across sessions</summary>
+      <description>Stored in ~/.local/share/deskd/emoji.json (mode 0600, last 36 picked). Turning it off clears the list and deletes the file.</description>
+    </key>
+    <key name="close-after-insert" type="s">
+      <choices>
+        <choice value="skin"/>
+        <choice value="always"/>
+        <choice value="never"/>
+      </choices>
+      <default>'skin'</default>
+      <summary>Whether the emoji picker closes after inserting an item</summary>
+      <description>'skin': windows11 stays open while macos and default close; 'always': close in every skin; 'never': keep open until dismissed.</description>
+    </key>
+  </schema>
+
   <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
     <key name="clipboard-toggle" type="as">
       <default>[]</default>
       <summary>Your shortcut for the clipboard panel (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="emoji-toggle" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for the emoji and symbol picker (override)</summary>
       <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
     <key name="mixer-open" type="as">
@@ -187,6 +234,21 @@
       <default>true</default>
       <summary>Keep manual light/dark changes until the next scheduled transition</summary>
       <description>If you switch light or dark manually, wait until the next sunrise or sunset before switching back</description>
+    </key>
+    <key name="accent-from-wallpaper" type="b">
+      <default>false</default>
+      <summary>The desktop accent colour follows the current wallpaper</summary>
+      <description>When on, deskd watches org.gnome.desktop.background picture-uri and picture-uri-dark and sets org.gnome.desktop.interface accent-color to the GNOME named accent nearest the wallpaper's seed colour. The image is decoded by a `themes tokens seed` child process. Turning it off restores the accent that was in force before.</description>
+    </key>
+    <key name="accent-source" type="s">
+      <choices>
+        <choice value="active"/>
+        <choice value="light"/>
+        <choice value="dark"/>
+      </choices>
+      <default>'active'</default>
+      <summary>Which wallpaper variant gives the accent colour</summary>
+      <description>'active' uses picture-uri-dark when color-scheme is 'prefer-dark' and picture-uri otherwise; 'light' always uses picture-uri; 'dark' always uses picture-uri-dark.</description>
     </key>
   </schema>
 

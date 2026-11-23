@@ -8,6 +8,7 @@
 pub mod cities;
 pub mod service;
 pub mod solar;
+pub mod wallpaper;
 
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;

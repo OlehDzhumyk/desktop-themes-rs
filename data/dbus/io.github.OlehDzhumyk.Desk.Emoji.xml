@@ -1,0 +1,40 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Emoji and symbol picker engine of deskd. Offline dataset of emoji, Unicode symbols and
+     text faces with English and Ukrainian names/keywords, skin-tone modifiers and local recents.
+     Access (ADR 0008): every method answers AccessDenied unless the caller is the owner of
+     org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any sandbox. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Emoji">
+    <!-- Ranked search across English and Ukrainian names/keywords.
+         lang: "uk" | "en" | "" (controls the returned display name language; both languages are
+         always searched). limit: 0 = default cap.
+         Item: (id, glyph, name, category, keywords, supports_tone). -->
+    <method name="Search">
+      <arg name="query" type="s" direction="in"/>
+      <arg name="lang" type="s" direction="in"/>
+      <arg name="limit" type="u" direction="in"/>
+      <arg name="items" type="a(sssssb)" direction="out"/>
+    </method>
+    <!-- Items in a category (e.g. "smileys", "people", "arrows", "math", "text-faces").
+         limit: 0 = all items in the category. -->
+    <method name="Category">
+      <arg name="category" type="s" direction="in"/>
+      <arg name="limit" type="u" direction="in"/>
+      <arg name="items" type="a(sssssb)" direction="out"/>
+    </method>
+    <!-- Recently picked items, newest first (up to 36). Empty when remember-recents is off. -->
+    <method name="Recents">
+      <arg name="items" type="a(sssssb)" direction="out"/>
+    </method>
+    <!-- Pick an item by id, applying the Fitzpatrick skin tone ("none" | "light" | "medium-light"
+         | "medium" | "medium-dark" | "dark") if supported, and record it in recents when enabled.
+         Returns the final glyph string to insert. -->
+    <method name="Pick">
+      <arg name="id" type="s" direction="in"/>
+      <arg name="tone" type="s" direction="in"/>
+      <arg name="glyph" type="s" direction="out"/>
+    </method>
+    <!-- Forget all recently picked items and remove the recents file. -->
+    <method name="ClearRecents"/>
+  </interface>
+</node>

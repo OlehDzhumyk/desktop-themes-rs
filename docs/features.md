@@ -20,8 +20,8 @@ Every feature page names its origin («Є в Windows 11 і macOS», «Засно
 Skins:
 
 * **windows11**: flyout next to the text cursor (the caret rectangle the focused app reports to the
-  input method; the pointer otherwise). Tabs «Буфер обміну» / «Емодзі» / «Символи» (the last two are
-  shown disabled until a later stage), «Очистити все», cards with a pin button and «…», which reveals
+  input method; the pointer otherwise). Tabs «Буфер обміну» / «Емодзі» / «Символи» (all three live in
+  the same unified flyout), «Очистити все», cards with a pin button and «…», which reveals
   delete and pin like Windows 11.
 * **macos**: a Spotlight-like centred panel (macOS 26 style): large search field, list with
   relative times, preview of the selected item, keyboard hints.
@@ -92,6 +92,22 @@ Skins:
 * **macos**: shown on the left of the top bar (`start-here-symbolic`), replacing the third-party `logomenu@aryan_k` extension.
 * **windows11** and **default**: not shown; the standard Activities indicator is left untouched.
 
+## Emoji and symbol picker
+
+| | |
+|---|---|
+| Open | Windows 11 theme: **Super+.** or **Super+;**; macOS theme: **Ctrl+Super+Space**; Fedora: **Super+.** (`emoji-shortcut` in the theme's `desk.dconf`; override on «Keyboard shortcuts» or `themes shortcut set emoji-toggle ...`) |
+| Search | English and Ukrainian names and keywords, case-folded and apostrophe/diacritics-tolerant; ranked exact → prefix → word/keyword → substring with recents tie-break |
+| Keys | Arrows move across the grid, `Page Up/Down` jump 3 rows, `Ctrl+1..9` switch category, `Enter` inserts, `Shift+Enter` inserts and keeps open, `Esc` closes |
+| Insertion | Sets the glyph with `application/x-desk-internal` so clipboard history ignores it, sends `Shift+Insert` (`Ctrl+Shift+Insert` in terminals), then restores the previous clipboard text |
+| Skin tones | Fitzpatrick modifier (`none`, `light`, `medium-light`, `medium`, `medium-dark`, `dark`) applied to person/hand emoji (including ZWJ sequences) |
+| Storage | Last 36 picks in `~/.local/share/deskd/emoji.json` (0600); turning off `remember-recents` clears and removes the file |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Emoji`: `enabled`, `emoji-shortcut`, `skin-tone`, `remember-recents`, `close-after-insert`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `emoji-toggle` |
+
+Skins:
+
+* **windows11**: live «Емодзі» and «Символи» tabs inside the unified Win+V / Win+. flyout; stays open after insert by default.
+* **macos** and **default**: floating keyboard-first picker anchored near the text caret (pointer fallback); closes after insert by default.
 ## Automatic light/dark
 
 | | |
@@ -100,8 +116,23 @@ Skins:
 | Location | city name from the built-in offline table, decimal coordinates `lat,lon`, or empty (falls back to the system timezone; zero network requests) |
 | Manual override | switching light/dark manually (GNOME Quick Settings or D-Bus `SetScheme`) while in an auto mode holds the manual choice until the next scheduled transition when `override-until-next` is enabled |
 | Scheduling | one-shot wake timer in `deskd` (zero idle wakeups in `manual`/`light`/`dark`), re-armed automatically on resume from suspend (`org.freedesktop.login1.Manager.PrepareForSleep`) and timezone changes (`org.freedesktop.timedate1`) |
-| D-Bus | `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance` (`Status`, `SetScheme`, `Recompute`, signal `Changed`) |
-| Settings | GSettings `io.github.OlehDzhumyk.Desk.Appearance`: `mode`, `dark-from`, `light-from`, `location`, `twilight-offset`, `override-until-next` |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance` (`Status`, `SetScheme`, `Recompute`, `WallpaperAccent`, signal `Changed`) |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Appearance`: `mode`, `dark-from`, `light-from`, `location`, `twilight-offset`, `override-until-next`, `accent-from-wallpaper`, `accent-source` |
+
+## Theme from wallpaper
+
+| | |
+|---|---|
+| Create a theme | `themes tokens from-image PATH --name ID` (CLI), or «Create theme from wallpaper…» on the «Appearance» page: file chooser, seed colour, light/dark preview with contrast numbers, name, then «Apply» in the toast. `--force` moves the old theme to `trash/` first |
+| Inspect an image | `themes tokens seed PATH [--json]`: seed colour, nearest GNOME accent, «almost no colour» note, light/dark core colours and their contrast; writes nothing |
+| Accent from wallpaper | setting `accent-from-wallpaper` (off by default): `deskd` follows `org.gnome.desktop.background picture-uri`/`picture-uri-dark` (GSettings signals, 500 ms debounce, no polling) and sets `org.gnome.desktop.interface accent-color` to the named accent nearest the seed. `accent-source` picks the variant (`active` follows `color-scheme`). The image is decoded in a `themes tokens seed` child process. Turning it off restores the accent in force before (unless a theme or the user changed it since); `themes doctor` shows the state |
+| Images | every gdk-pixbuf format; animated images use the first frame; slideshow XML uses its first image; images under 16×16 or fully transparent are refused |
+| Entry points | CLI (`themes tokens from-image`, `themes tokens seed`), window («Appearance» page: switch, source, current accent, create button), quick settings («Theme» menu: «Accent from wallpaper» switch, all skins), D-Bus `WallpaperAccent()` |
+
+Skins: the quick settings switch is the same in `macos`, `windows11` and `default`; the skin-specific
+pickers of the spec (macOS dot grid, Windows 11 «Automatic» drop-down) are not built yet. Token
+themes and hand-made themes (`macos`, `windows11`) both get only the GNOME `accent-color` change in
+the live mode; a full token-palette overlay is not built yet.
 
 ## Focus modes
 

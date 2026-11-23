@@ -7,6 +7,7 @@
 
 mod appearance;
 mod clipboard;
+mod emoji;
 mod focus;
 mod mixer;
 mod panic_policy;
@@ -19,8 +20,8 @@ mod trust;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use desk_proto::{
-    APPEARANCE_PATH, BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, FOCUS_PATH,
-    MIXER_PATH,
+    APPEARANCE_PATH, BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, EMOJI_PATH,
+    FOCUS_PATH, MIXER_PATH,
 };
 use desk_settings::tr;
 use gio::glib;
@@ -66,7 +67,11 @@ fn emit_changed(conn: &zbus::Connection) {
 
 /// Engines this build hosts (the `Features` property).
 fn features() -> Vec<String> {
-    let mut f = vec!["clipboard".to_string(), "appearance".to_string()];
+    let mut f = vec![
+        "clipboard".to_string(),
+        "appearance".to_string(),
+        "emoji".to_string(),
+    ];
     f.push("focus".into());
     if cfg!(feature = "pipewire") {
         f.push("mixer".into());
@@ -186,6 +191,19 @@ fn main() {
             }
         },
     );
+    let emoji_settings = settings::emoji_settings();
+    let (emoji_remember, emoji_tone) = emoji_settings
+        .as_ref()
+        .map_or((true, "none".to_string()), settings::read_emoji);
+    let emoji_eng = Arc::new(Mutex::new(emoji::EmojiEngine::new(
+        emoji::recents::Recents::default_path(),
+        emoji_remember,
+        emoji_tone,
+    )));
+    let emoji_iface = emoji::service::EmojiIface {
+        engine: emoji_eng.clone(),
+        gate: gate.clone(),
+    };
     let mixer = Arc::new(Mixer::new(graph, notifier, Some(store)));
     let mixer_iface = mixer::service::MixerIface {
         mixer: mixer.clone(),
@@ -221,10 +239,18 @@ fn main() {
             delay
         }
     });
+    let wallpaper_eng: appearance::wallpaper::Shared =
+        Arc::new(Mutex::new(appearance::wallpaper::WallpaperEngine::new(
+            appearance_settings
+                .as_ref()
+                .map_or_else(Default::default, settings::read_wallpaper),
+            appearance::wallpaper::state_path(),
+        )));
     let appearance_iface = appearance::service::AppearanceIface {
         eng: appearance_eng.clone(),
         scheduler: appearance_scheduler.clone(),
         gate: gate.clone(),
+        wallpaper: wallpaper_eng.clone(),
     };
 
     // focus modes: state machine, reconciliation with the live keys, one-shot schedule timer
@@ -276,6 +302,7 @@ fn main() {
         let conn = zbus::connection::Builder::session()
             .serve_at(DESK_PATH, desk)
             .serve_at(CLIPBOARD_PATH, clip)
+            .serve_at(EMOJI_PATH, emoji_iface)
             .serve_at(MIXER_PATH, mixer_iface)
             .serve_at(APPEARANCE_PATH, appearance_iface)
             .serve_at(FOCUS_PATH, focus_iface)
@@ -380,6 +407,17 @@ fn main() {
         });
     }
 
+    if let Some(s) = &emoji_settings {
+        let eng = emoji_eng.clone();
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, key| {
+            if matches!(key, "remember-recents" | "skin-tone") {
+                let (remember, tone) = settings::read_emoji(&typed);
+                emoji::service::lock(&eng).set_config(remember, tone);
+            }
+        });
+    }
+
     if let Some(s) = &gsettings {
         let eng = eng.clone();
         let conn = conn.clone();
@@ -405,12 +443,30 @@ fn main() {
             focus_sched.trigger();
         });
     }
+    // live accent from the wallpaper: GSettings signals, a 500 ms debounce, a decoding child
+    let wallpaper_watch = {
+        let conn = conn.clone();
+        appearance::wallpaper::Watch::start(wallpaper_eng.clone(), move || {
+            let conn = conn.clone();
+            std::thread::spawn(move || {
+                zbus::block_on(appearance::service::emit_changed(&conn));
+            });
+        })
+        .map(std::rc::Rc::new)
+    };
     if let Some(s) = &appearance_settings {
         let eng = appearance_eng.clone();
         let sched = appearance_scheduler.clone();
         let conn = conn.clone();
         let typed = s.clone();
-        s.0.connect_changed(None, move |_, _| {
+        let watch = wallpaper_watch.clone();
+        s.0.connect_changed(None, move |_, key| {
+            if matches!(key, "accent-from-wallpaper" | "accent-source") {
+                if let Some(w) = &watch {
+                    w.settings_changed(settings::read_wallpaper(&typed));
+                }
+                return;
+            }
             let cfg = settings::read_appearance(&typed);
             appearance::lock(&eng).set_config(cfg);
             sched.trigger();
@@ -494,10 +550,12 @@ fn main() {
     mixer.set_backend(None);
     mixer.flush();
     drop(gsettings);
+    drop(emoji_settings);
     drop(mixer_settings);
     drop(appearance_settings);
     drop(interface_settings);
     drop(focus_settings);
     drop(notifications_settings);
     drop(sound_settings);
+    drop(wallpaper_watch);
 }

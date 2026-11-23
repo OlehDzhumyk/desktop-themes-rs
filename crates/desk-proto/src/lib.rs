@@ -12,6 +12,9 @@ pub const DESK_PATH: &str = "/io/github/OlehDzhumyk/Desk";
 pub const DESK_IFACE: &str = "io.github.OlehDzhumyk.Desk";
 pub const CLIPBOARD_PATH: &str = "/io/github/OlehDzhumyk/Desk/Clipboard";
 pub const CLIPBOARD_IFACE: &str = "io.github.OlehDzhumyk.Desk.Clipboard";
+pub const EMOJI_PATH: &str = "/io/github/OlehDzhumyk/Desk/Emoji";
+pub const EMOJI_IFACE: &str = "io.github.OlehDzhumyk.Desk.Emoji";
+pub const EMOJI_INTERFACE: &str = EMOJI_IFACE;
 pub const MIXER_PATH: &str = "/io/github/OlehDzhumyk/Desk/Mixer";
 pub const MIXER_IFACE: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 /// Version of the Mixer interface (its `Version` property): bumped on incompatible changes only.
@@ -24,6 +27,7 @@ pub const FOCUS_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Focus";
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
 pub const CLIPBOARD_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Clipboard";
+pub const EMOJI_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Emoji";
 pub const MIXER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 pub const APPEARANCE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Appearance";
 pub const FOCUS_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Focus";
@@ -32,6 +36,7 @@ pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.D
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
 pub const CLIPBOARD_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Clipboard.xml");
+pub const EMOJI_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Emoji.xml");
 pub const MIXER_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Mixer.xml");
 pub const APPEARANCE_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Appearance.xml");
@@ -74,6 +79,36 @@ pub struct ClipItem {
     pub time: i64,
     /// Розмір вмісту в байтах.
     pub size: u64,
+}
+
+/// Emoji and symbol picker: item type and client proxy.
+pub mod emoji {
+    use serde::{Deserialize, Serialize};
+
+    /// One emoji, Unicode symbol or text face (`(sssssb)`).
+    #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, zbus::Type)]
+    pub struct EmojiItem {
+        pub id: String,
+        pub glyph: String,
+        pub name: String,
+        pub category: String,
+        pub keywords: String,
+        pub supports_tone: bool,
+    }
+
+    /// Client proxy of the emoji engine.
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.Emoji",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/Emoji"
+    )]
+    pub trait Emoji {
+        fn search(&self, query: &str, lang: &str, limit: u32) -> zbus::Result<Vec<EmojiItem>>;
+        fn category(&self, category: &str, limit: u32) -> zbus::Result<Vec<EmojiItem>>;
+        fn recents(&self) -> zbus::Result<Vec<EmojiItem>>;
+        fn pick(&self, id: &str, tone: &str) -> zbus::Result<String>;
+        fn clear_recents(&self) -> zbus::Result<()>;
+    }
 }
 
 /// Mixer: what `ListDevices` takes, what `Changed` reports, and the client proxy (its own module:
@@ -181,6 +216,8 @@ pub mod appearance {
         fn status(&self) -> zbus::Result<(String, String, String, String, bool, bool)>;
         fn set_scheme(&self, scheme: &str) -> zbus::Result<()>;
         fn recompute(&self) -> zbus::Result<()>;
+        /// Live "accent from wallpaper": (enabled, seed, accent, monochrome, uri, error).
+        fn wallpaper_accent(&self) -> zbus::Result<(bool, String, String, bool, String, String)>;
         #[zbus(signal)]
         fn changed(&self) -> zbus::Result<()>;
     }
@@ -296,6 +333,16 @@ mod tests {
     fn item_signature_matches_xml() {
         assert_eq!(ClipItem::SIGNATURE.to_string(), "(tssssbxt)");
         assert!(CLIPBOARD_XML.contains("type=\"a(tssssbxt)\""));
+    }
+
+    #[test]
+    fn emoji_signature_matches_xml() {
+        assert_eq!(emoji::EmojiItem::SIGNATURE.to_string(), "(sssssb)");
+        assert!(EMOJI_XML.contains("type=\"a(sssssb)\""));
+        let m = xml_members(EMOJI_XML);
+        for name in ["Search", "Category", "Recents", "Pick", "ClearRecents"] {
+            assert!(m.contains(&("method".into(), name.into())), "{name}");
+        }
     }
 
     #[test]

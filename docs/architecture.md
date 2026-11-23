@@ -26,7 +26,7 @@ The repository is a Cargo workspace:
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
-| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, focus modes, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, emoji and symbol picker, focus modes, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
@@ -202,6 +202,16 @@ call the content methods (all but the properties): others get `AccessDenied`, `g
 included. The bus name is not replaceable, and the bridge talks only to a deskd it verified.
 [ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md).
 
+`/io/github/OlehDzhumyk/Desk/Emoji`, interface `io.github.OlehDzhumyk.Desk.Emoji` (offline emoji, Unicode symbols and text faces with English/Ukrainian search, Fitzpatrick skin tones and 0600 recents in `~/.local/share/deskd/emoji.json`):
+
+| Member | Description |
+|---|---|
+| `Search(s query, s lang, u limit) -> a(sssssb)` | ranked search across English and Ukrainian names/keywords: `(id, glyph, name, category, keywords, supports_tone)` |
+| `Category(s category, u limit) -> a(sssssb)` | items in a category (`smileys`, `people`, `animals`, `food`, `travel`, `activities`, `objects`, `symbols`, `flags`, `arrows`, `math`, `currency`, `punctuation`, `text-faces`) |
+| `Recents() -> a(sssssb)` | last 36 picked items, newest first |
+| `Pick(s id, s tone) -> s` | returns the glyph with the Fitzpatrick skin-tone modifier applied and records it in recents |
+| `ClearRecents()` | clears recents and removes `emoji.json` |
+
 `/io/github/OlehDzhumyk/Desk/Mixer`, interface `io.github.OlehDzhumyk.Desk.Mixer` (volumes on the cubic
 slider scale, 1.0 = 100 %):
 
@@ -225,12 +235,17 @@ nothing until asked; `model.rs` holds every rule and is tested with mocked graph
 | `Status() -> (s mode, s scheme, s next_transition, s location_label, b polar, b overridden)` | current mode, effective scheme (`light`/`dark`), next transition (`HH:MM` or empty), resolved location, polar day/night flag, manual override state |
 | `SetScheme(s scheme)` | manually switch `light`/`dark`/`default`, respecting `override-until-next` in auto modes |
 | `Recompute()` | force immediate schedule recomputation and timer re-arm |
-| signal `Changed()` | emitted when mode, scheme, schedule or override state changes |
+| `WallpaperAccent() -> (b enabled, s seed, s accent, b monochrome, s uri, s error)` | live "accent from wallpaper": on/off, last seed and named accent, near-monochrome flag, source wallpaper URI, last decoding error |
+| signal `Changed()` | emitted when mode, scheme, schedule, override or wallpaper-accent state changes |
 
 The engine (`crates/deskd/src/appearance/`) computes local sunrise/sunset offline using the NOAA
 solar algorithm, shares the one-shot wake scheduler (`crates/deskd/src/schedule.rs`) with
 suspend/resume and timezone watchers, and writes `org.gnome.desktop.interface color-scheme` only
-when the effective scheme changes.
+when the effective scheme changes. `appearance/wallpaper.rs` follows the wallpaper keys while
+`accent-from-wallpaper` is on (GSettings signals, one 500 ms debounce), runs
+`themes tokens seed --json` as a child process (an untrusted image never runs inside deskd), and
+writes `accent-color`; the accent to restore is kept in `~/.cache/desktop-themes/wallpaper-accent.json`,
+which is deleted when the setting is turned off.
 
 `/io/github/OlehDzhumyk/Desk/Focus`, interface `io.github.OlehDzhumyk.Desk.Focus`:
 
