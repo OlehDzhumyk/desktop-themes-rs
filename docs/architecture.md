@@ -217,6 +217,5 @@ distribution's is older.
   `start.sh --theme ID --ext DIR` loads a theme's dconf into the private database (never
   `themes apply`); `input.py` sends keys/clicks (Mutter RemoteDesktop) and takes screenshots (Mutter
   ScreenCast → PipeWire → gst); `stop.sh` kills only its own processes.
-  `clipboard-test.sh THEME SHORTCUT OUTDIR` is the end-to-end clipboard test (copy three samples
-  with wl-copy, open the panel, paste the 2nd into a GTK 4 text field, verify).
+  The clipboard end-to-end test lives in the container harness (`tests/e2e`, `just e2e`).
   Never call `toolbox` from inside `run.sh`: podman would see a different runtime dir.
