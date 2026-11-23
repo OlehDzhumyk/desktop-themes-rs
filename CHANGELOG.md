@@ -21,6 +21,16 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Focus modes (`focus`): `deskd` hosts the focus engine (`io.github.OlehDzhumyk.Desk.Focus` at
+  `/io/github/OlehDzhumyk/Desk/Focus`) with built-in Do not disturb, Work and Sleep modes plus custom
+  ones (allowed apps, mute sounds, weekday schedules with midnight wrap), timed starts and focus
+  sessions with a break. Ending a mode, a restart or a crash restores exactly the
+  `show-banners`/`event-sounds` value it changed; turning GNOME's own do-not-disturb off ends the
+  mode ([ADR 0009](docs/adr/0009-deskd-writes-do-not-disturb-keys.md)). Entry points: a «Фокус»
+  quick settings tile and panel icon for every skin (focus sessions with a countdown in
+  `windows11`), `themes focus`, a «Фокус» page in the window, and a `themes doctor` line. Settings
+  `io.github.OlehDzhumyk.Desk.Focus` (`enabled`, `active-mode`, `summary-on-end`, `session-length`,
+  `session-break`).
 - Automatic light/dark appearance (`auto-dark`): `deskd` now hosts the `appearance` engine
   (`io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance`) with a
   shared one-shot wake scheduler (`crates/deskd/src/schedule.rs`) that reacts to suspend/resume
