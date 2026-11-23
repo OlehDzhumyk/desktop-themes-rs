@@ -11,6 +11,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {ClipboardFeature} from './clipboard/feature.js';
+import {FocusFeature} from './focus/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
 import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
@@ -19,6 +20,7 @@ import {DeskIndicator, launchGui} from './quickSettings.js';
 const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
 const LOGO_MENU_SCHEMA = 'io.github.OlehDzhumyk.Desk.LogoMenu';
 const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
+const FOCUS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Focus';
 
 export default class DeskBridge extends Extension {
     private _settings: Gio.Settings | null = null;
@@ -28,6 +30,8 @@ export default class DeskBridge extends Extension {
     private _mixerSettings: Gio.Settings | null = null;
     private _logoMenu: LogoMenuFeature | null = null;
     private _logoMenuSettings: Gio.Settings | null = null;
+    private _focus: FocusFeature | null = null;
+    private _focusSettings: Gio.Settings | null = null;
     private _skinId = 0;
     private _langId = 0;
 
@@ -50,6 +54,7 @@ export default class DeskBridge extends Extension {
         this._settings = settings;
         this._mixerSettings = this._schema(MIXER_SCHEMA);
         this._logoMenuSettings = this._schema(LOGO_MENU_SCHEMA);
+        this._focusSettings = this._schema(FOCUS_SCHEMA);
         initI18n(this, settings.get_string('language'));
         this._build(clipSettings);
         this._skinId = settings.connect('changed::skin', () => { this._applySkin(); });
@@ -86,10 +91,18 @@ export default class DeskBridge extends Extension {
                 console.warn(`desk-bridge: the logo menu is unavailable: ${String(e)}`);
             }
         }
+        try {
+            this._focus = new FocusFeature(this.path, this._focusSettings, this._skin(),
+                () => { launchGui('focus'); });
+        } catch (e) {
+            console.warn(`desk-bridge: focus modes are unavailable: ${String(e)}`);
+        }
         this._applySkin();
     }
 
     private _teardown(): void {
+        this._focus?.destroy();
+        this._focus = null;
         this._indicator?.setClipboard(null);
         this._clipboard?.destroy();
         this._clipboard = null;
@@ -111,6 +124,7 @@ export default class DeskBridge extends Extension {
         this._clipboard?.setSkin(skin);
         this._mixer?.setSkin(skin);
         this._logoMenu?.setSkin(skin);
+        this._focus?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
     }
 
@@ -125,5 +139,6 @@ export default class DeskBridge extends Extension {
         this._settings = null;
         this._mixerSettings = null;
         this._logoMenuSettings = null;
+        this._focusSettings = null;
     }
 }
