@@ -12,7 +12,7 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {HORIZONTAL, VERTICAL, animationsEnabled, iconButton, label, syncSystemClasses} from '../clipboard/panel.js';
+import {HORIZONTAL, VERTICAL, animationsEnabled, iconButton, label, syncSystemClasses} from '../ui/primitives.js';
 import {_, fmt} from '../i18n.js';
 import {errorText, pushModal} from '../shellTypes.js';
 import {type ColorFormat, type ColorItem, type ColorPickerClient, FORMATS, asFormat} from './client.js';

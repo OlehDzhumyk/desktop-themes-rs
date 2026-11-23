@@ -317,7 +317,8 @@
 .desk-accent-slate  .desk-emoji-cat.active, .desk-accent-slate  .desk-emoji-cell:selected { border-color: #6f8396; }
 
 /* ------------------------------------------------------------------ colour picker */
-/* The eyedropper pill next to the pointer, the history panel and the «Copied …» toast. default:
+/* The eyedropper pill next to the pointer and the history panel (the «Copied …» toast is a
+   shared toast, see below). default:
    shell theme colours (popup-menu-content); macos and windows11: the skins' palettes, light and
    dark; .desk-hc adds outlines so nothing depends on colour alone. */
 .desk-color-backdrop { background-color: transparent; }
@@ -418,16 +419,6 @@
 .desk-accent-purple .desk-color-row:selected, .desk-accent-purple .desk-color-format:checked { border-color: #9141ac; }
 .desk-accent-slate  .desk-color-row:selected, .desk-accent-slate  .desk-color-format:checked { border-color: #6f8396; }
 
-.desk-color-toast {
-  padding: 8px 16px; border-radius: 99px; font-size: 10.5pt; font-weight: 600;
-  color: #f2f2f2; background-color: rgba(30,30,32,0.94);
-  border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-}
-.desk-color-toast.desk-skin-windows11 { border-radius: 8px; background-color: #2b2b2b; }
-.desk-light.desk-color-toast { color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14); }
-.desk-light.desk-color-toast.desk-skin-windows11 { background-color: #f3f3f3; }
-.desk-hc.desk-color-toast { border: 2px solid currentColor; }
-
 /* ------------------------------------------------------------------ on-screen displays (osd/popup.ts)
    Click-through, one at a time. windows11: acrylic bar (icon, bar, number). macos: translucent
    square (.desk-osd-square, icon above the bar) or pill (.desk-osd-row). The part above 100 %
@@ -506,35 +497,49 @@
 .desk-osd.desk-hc.desk-light .desk-osd-over { background-color: #8a4b00; }
 .desk-osd.desk-hc.desk-light .desk-osd-marker { background-color: #c00000; }
 
-/* ------------------------------------------------------------------ text extractor (OCR) */
-/* The region overlay: the area outside the selection is dimmed, the selection stays clear with
-   a frame. The toast is a small non-interactive label near the bottom of the monitor. */
-.desk-ocr-dim { background-color: rgba(0,0,0,0.45); }
-.desk-ocr-selection { border: 2px solid -st-accent-color; }
-.desk-ocr-hint {
+/* ------------------------------------------------------------------ shared toast (ui/toast.ts)
+   A small non-interactive message near the bottom of the monitor: the colour picker «Copied …»
+   (with .desk-toast-pill), the text extractor status. Dark by default, .desk-light follows the
+   colour scheme, .desk-hc gives an opaque surface and an outline. */
+.desk-toast {
+  spacing: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 10.5pt;
+  color: #f2f2f2;
+  background-color: rgba(30,30,32,0.94);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+.desk-toast-label { color: inherit; }
+.desk-toast-pill { border-radius: 99px; font-weight: 600; }
+/* windows11: rounded 8 px, solid surface; macos: rounded pill, translucent */
+.desk-toast.desk-skin-windows11 { border-radius: 8px; background-color: #2b2b2b; }
+.desk-toast.desk-skin-macos { border-radius: 18px; background-color: rgba(40,40,40,0.9); }
+.desk-light.desk-toast { color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14); }
+.desk-light.desk-toast.desk-skin-windows11 { background-color: #f3f3f3; }
+/* high contrast: after the skin and light rules so it wins over them */
+.desk-hc.desk-toast { color: #ffffff; background-color: #000000; border: 2px solid currentColor; }
+.desk-hc.desk-light.desk-toast { color: #000000; background-color: #ffffff; }
+
+/* ------------------------------------------------------------------ region selector (ui/regionOverlay.ts)
+   Text extractor (and screenshots): the area outside the selection is dimmed, the selection stays
+   clear with a frame, a hint sits at the top of the monitor. */
+.desk-region-dim { background-color: rgba(0,0,0,0.45); }
+.desk-region-selection { border: 2px solid -st-accent-color; }
+.desk-region-hint {
   font-size: 11pt;
   padding: 8px 14px;
   border-radius: 999px;
   color: #ffffff;
   background-color: rgba(0,0,0,0.75);
 }
-.desk-ocr-toast {
-  spacing: 10px;
-  padding: 10px 16px;
-  border-radius: 12px;
-  color: #ffffff;
-  background-color: rgba(30,30,30,0.92);
-  font-size: 10.5pt;
-}
-.desk-ocr-toast-label { color: inherit; }
-/* windows11: PowerToys-like darker dim, light-blue frame, rounded 8 px toast */
-.desk-skin-windows11 .desk-ocr-dim { background-color: rgba(0,0,0,0.55); }
-.desk-skin-windows11 .desk-ocr-selection { border: 2px solid #60cdff; }
-.desk-ocr-toast.desk-skin-windows11 { border-radius: 8px; background-color: rgba(32,32,32,0.96); }
-/* macos: lighter dim, thin white frame, pill toast */
-.desk-skin-macos .desk-ocr-dim { background-color: rgba(0,0,0,0.3); }
-.desk-skin-macos .desk-ocr-selection { border: 1px solid rgba(255,255,255,0.95); }
-.desk-ocr-toast.desk-skin-macos { border-radius: 18px; background-color: rgba(40,40,40,0.9); }
-/* high contrast: opaque surfaces and a thick frame */
-.desk-hc .desk-ocr-selection { border: 3px solid #ffffff; }
-.desk-hc .desk-ocr-hint, .desk-ocr-toast.desk-hc { background-color: #000000; border: 2px solid #ffffff; }
+/* windows11: PowerToys-like darker dim, light-blue frame */
+.desk-skin-windows11 .desk-region-dim { background-color: rgba(0,0,0,0.55); }
+.desk-skin-windows11 .desk-region-selection { border: 2px solid #60cdff; }
+/* macos: lighter dim, thin white frame */
+.desk-skin-macos .desk-region-dim { background-color: rgba(0,0,0,0.3); }
+.desk-skin-macos .desk-region-selection { border: 1px solid rgba(255,255,255,0.95); }
+/* high contrast: opaque hint and a thick frame */
+.desk-hc .desk-region-selection { border: 3px solid #ffffff; }
+.desk-hc .desk-region-hint { background-color: #000000; border: 2px solid #ffffff; }

@@ -11,7 +11,7 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {HORIZONTAL, VERTICAL, animationsEnabled} from '../clipboard/panel.js';
+import {HORIZONTAL, VERTICAL, animationsEnabled} from '../ui/primitives.js';
 import {_, currentLanguage, fmt} from '../i18n.js';
 import {errorText, inputMethod, pushModal} from '../shellTypes.js';
 import type {EmojiClient, EmojiItem} from './client.js';

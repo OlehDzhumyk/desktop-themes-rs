@@ -3,7 +3,7 @@
 // (normal mode only, so the lock screen never sees it), the availability check, the region
 // overlay, the capture, the deskd call and the clipboard. deskd runs Tesseract; the bridge never
 // keeps the pixels.
-import Gio from 'gi://Gio';
+import type Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
@@ -13,37 +13,13 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import type {ClipboardFeature} from '../clipboard/feature.js';
 import {_, fmt} from '../i18n.js';
 import {errorText} from '../shellTypes.js';
+import {type Region, RegionOverlay, captureRegion, pngSize} from '../ui/regionOverlay.js';
+import {DeskToast} from '../ui/toast.js';
 import {OcrClient, type OcrResult, ocrErrorKind, ocrErrorMessage} from './client.js';
-import {type Region, RegionOverlay} from './overlay.js';
-import {OcrToast} from './toast.js';
 
 const SHORTCUT_KEY = 'ocr-shortcut';
-
-/** Width and height from the IHDR chunk of a PNG (deskd checks them against the image). */
-function pngSize(png: Uint8Array): [number, number] | null {
-    if (png.length < 24)
-        return null;
-    const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
-    return [view.getUint32(16), view.getUint32(20)];
-}
-
-/** The PNG of a region of the stage, at physical pixels (two monitors with different scaling). */
-function capture(region: Region): Promise<Uint8Array> {
-    const stream = Gio.MemoryOutputStream.new_resizable();
-    const shooter = new Shell.Screenshot();
-    return new Promise((resolve, reject) => {
-        shooter.screenshot_area(region.x, region.y, region.width, region.height, stream,
-            (_s: Shell.Screenshot | null, res: Gio.AsyncResult) => {
-                try {
-                    shooter.screenshot_area_finish(res);
-                    stream.close(null);
-                    resolve(stream.steal_as_bytes().toArray());
-                } catch (e) {
-                    reject(e instanceof Error ? e : new Error(String(e)));
-                }
-            });
-    });
-}
+/** How long a result stays on screen. */
+const RESULT_MS = 4000;
 
 /** The toast text for a result: what was copied, or that nothing was found, and missing data. */
 function resultMessage(r: OcrResult): string {
@@ -63,7 +39,7 @@ export class OcrFeature {
     private _client = new OcrClient();
     private _skin: string;
     private _overlay: RegionOverlay | null = null;
-    private _toast: OcrToast | null = null;
+    private _toast: DeskToast | null = null;
     private _running = false;
     private _bound = false;
     private _settingsIds: number[] = [];
@@ -87,10 +63,8 @@ export class OcrFeature {
     setSkin(skin: string): void {
         if (skin === this._skin)
             return;
+        // the next run builds the overlay and styles the toast in the new skin
         this._skin = skin;
-        // the next run builds the overlay and the toast in the new skin
-        this._toast?.destroy();
-        this._toast = null;
     }
 
     private _bind(): void {
@@ -109,9 +83,13 @@ export class OcrFeature {
         return this._destroyed;
     }
 
-    private _toastWidget(): OcrToast {
-        this._toast ??= new OcrToast(this._skin);
+    private _toastWidget(): DeskToast {
+        this._toast ??= new DeskToast();
         return this._toast;
+    }
+
+    private _showResult(text: string): void {
+        this._toastWidget().show(text, this._skin, RESULT_MS);
     }
 
     /** The shortcut: a press while a run is going is ignored (one recognition at a time). */
@@ -134,7 +112,7 @@ export class OcrFeature {
             return;
         if (!available) {
             // AC-OCR-03: say so at once, and no overlay
-            this._toastWidget().show(missingEngine());
+            this._showResult(missingEngine());
             return;
         }
         // an earlier result must not end up in the screenshot
@@ -143,19 +121,19 @@ export class OcrFeature {
         if (!region || this._gone())
             return;
         try {
-            const png = await capture(region);
+            const png = await captureRegion(region);
             if (this._gone())
                 return;
             const size = pngSize(png);
             if (!size)
                 throw new Error('the screenshot is not a PNG image');
-            this._toastWidget().busy(_('Recognising text…'));
+            this._toastWidget().busy(_('Recognising text…'), this._skin);
             const result = await this._client.recognize(png, size[0], size[1]);
             if (this._gone())
                 return;
             if (result.text)
                 this._copy(result.text);
-            this._toastWidget().show(resultMessage(result));
+            this._showResult(resultMessage(result));
         } catch (e) {
             this._report(e);
         }
@@ -164,7 +142,10 @@ export class OcrFeature {
     /** The region the user selects, or null when cancelled (Esc) or the grab was refused. */
     private _select(): Promise<Region | null> {
         return new Promise(resolve => {
-            this._overlay = new RegionOverlay(this._skin, region => {
+            this._overlay = new RegionOverlay(this._skin, {
+                accessibleName: _('Select the text to copy'),
+                hint: _('Drag over the text to copy it. Arrow keys and Enter select with the keyboard; Esc cancels.'),
+            }, region => {
                 this._overlay = null;
                 resolve(region);
             });
@@ -205,7 +186,7 @@ export class OcrFeature {
             console.warn(`desk-bridge: text recognition failed: ${errorText(e)}`);
             text = fmt(_('Could not recognise text: {error}'), {error: ocrErrorMessage(e)});
         }
-        this._toastWidget().show(text);
+        this._showResult(text);
     }
 
     destroy(): void {

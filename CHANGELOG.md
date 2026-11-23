@@ -156,6 +156,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- The bridge's shared UI parts live in `bridge/src/ui/`: primitives (orientations, motion setting,
+  system style classes, icon button, label), one skin-aware toast (`.desk-toast`, used by the
+  colour picker and the text extractor; it now follows `.desk-light` and the macOS skin) and the
+  region selector with its physical-pixel capture (`.desk-region-*`), ready for screenshots.
 - `deskd` start-up is split into one engine per feature behind an `Engine` trait (register, start,
   shutdown in reverse order); the shared resume and time zone watcher wakes every engine that asks.
   No behavior changes: the same D-Bus paths, `Features`, bus name handling and shutdown writes.
