@@ -42,7 +42,7 @@ which never touches the real session. Acceptance criteria are written to become 
 **Hub.** The settings window «Робочий стіл» (today «Теми»); see [settings-hub](features/settings-hub.md).
 
 **Inheritance.** `INHERITS=<id>` in `theme.conf`: a theme takes every file it does not have from its
-parent ([theme-contract](../theme-contract.md)). Example: `macos-glass` inherits `macos`.
+parent ([theme-contract](../theme-contract.md)). Example: a snapshot with `INHERITS=macos`.
 
 **Look / behaviour / sounds / apps.** The four [modules](#module).
 

@@ -49,6 +49,7 @@ UI strings are quoted in English; the shipped texts are Ukrainian and English (s
 | **Partial** | on `main`, but a part of the specified behaviour is missing |
 | **Planned** | not written yet; the spec is the brief for the implementer |
 | **Experimental** | on `main` but known to be unsafe or unfinished; off by default or clearly marked |
+| **Removed** | was shipped, then taken out; the spec stays as the record |
 
 ## Stages
 
@@ -87,7 +88,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Lock screen layouts | Implemented | 0 | In Windows 11 and macOS | [lock-screen](features/lock-screen.md) |
 | Clipboard history | Implemented | 1 | In Windows 11 and macOS; based on Clipboard Indicator (MIT) | [clipboard](features/clipboard.md) |
 | Spotlight-style launcher (third-party today) | Partial | 0 | Based on Spotlight by itsnin (GPL-3.0-or-later) | [search](features/search.md) |
-| Liquid Glass variant | Experimental | 0 | Based on Liquid Glass extension | [liquid-glass](features/liquid-glass.md) |
+| Liquid Glass variant (`macos-glass`) | Removed | 0 | Based on Liquid Glass extension | [liquid-glass](features/liquid-glass.md) |
 | Volume mixer and audio device switching | Implemented | 2 | From Windows, adapted for macOS | [mixer](features/mixer.md) |
 | Emoji and symbol picker | Implemented | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
 | Focus modes and do-not-disturb schedules | Implemented | 2 | In Windows 11 and macOS | [focus](features/focus.md) |

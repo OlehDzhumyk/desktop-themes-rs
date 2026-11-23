@@ -24,8 +24,8 @@ generators). `bridge/` is the TypeScript GNOME Shell extension. `themes/` holds 
 - **bridge**: the shell extension `desk-bridge@desktop-themes-rs`. Thin: UI and clipboard capture only.
 - **deskd**: the Rust session daemon; owns logic and storage, talks D-Bus.
 - **INHERITS**: `INHERITS=<id>` in `theme.conf`; a child theme layers over a parent.
-- **experimental theme**: one whose `theme.conf` says so (e.g. `macos-glass`); it has crashed the
-  shell on real hardware. Applying it needs explicit user confirmation ([ADR 0006](docs/adr/0006-experimental-themes-need-confirmation.md)).
+- **experimental theme**: one whose `theme.conf` has `EXPERIMENTAL=true` (none is bundled now).
+  Applying it needs explicit user confirmation ([ADR 0006](docs/adr/0006-experimental-themes-need-confirmation.md)).
 
 ## Ways to hurt yourself
 
