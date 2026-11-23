@@ -18,12 +18,15 @@ pub const MIXER_IFACE: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 pub const MIXER_VERSION: u32 = 1;
 pub const APPEARANCE_PATH: &str = "/io/github/OlehDzhumyk/Desk/Appearance";
 pub const APPEARANCE_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Appearance";
+pub const FOCUS_PATH: &str = "/io/github/OlehDzhumyk/Desk/Focus";
+pub const FOCUS_INTERFACE: &str = "io.github.OlehDzhumyk.Desk.Focus";
 
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
 pub const CLIPBOARD_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Clipboard";
 pub const MIXER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Mixer";
 pub const APPEARANCE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Appearance";
+pub const FOCUS_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Focus";
 pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.Desk.gschema.xml");
 
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
@@ -32,6 +35,7 @@ pub const CLIPBOARD_XML: &str =
 pub const MIXER_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Mixer.xml");
 pub const APPEARANCE_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Appearance.xml");
+pub const FOCUS_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Focus.xml");
 
 /// Offered by the bridge with the clipboard content it set itself (paste from the history), so
 /// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
@@ -179,6 +183,44 @@ pub mod appearance {
         fn recompute(&self) -> zbus::Result<()>;
         #[zbus(signal)]
         fn changed(&self) -> zbus::Result<()>;
+    }
+}
+
+/// Focus modes client proxy in its own module so its signals do not clash.
+pub mod focus {
+    /// `Status()`: mode, name, icon, source, until, break_until, next_mode, next_start,
+    /// allowed_apps.
+    pub type Status = (
+        String,
+        String,
+        String,
+        String,
+        i64,
+        i64,
+        String,
+        i64,
+        Vec<String>,
+    );
+
+    /// Client proxy of the focus modes engine.
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.Focus",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/Focus"
+    )]
+    pub trait Focus {
+        fn status(&self) -> zbus::Result<Status>;
+        fn list_modes(&self) -> zbus::Result<String>;
+        fn start(&self, mode: &str, until: i64) -> zbus::Result<()>;
+        fn start_session(&self, minutes: u32) -> zbus::Result<()>;
+        fn stop(&self) -> zbus::Result<()>;
+        fn save_mode(&self, mode: &str) -> zbus::Result<()>;
+        fn delete_mode(&self, id: &str) -> zbus::Result<()>;
+        fn recompute(&self) -> zbus::Result<()>;
+        #[zbus(signal)]
+        fn changed(&self) -> zbus::Result<()>;
+        #[zbus(signal)]
+        fn session_ended(&self) -> zbus::Result<()>;
     }
 }
 

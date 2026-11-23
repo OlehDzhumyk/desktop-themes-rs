@@ -29,6 +29,7 @@
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="appearance" schema="io.github.OlehDzhumyk.Desk.Appearance"/>
+    <child name="focus" schema="io.github.OlehDzhumyk.Desk.Focus"/>
     <child name="logo-menu" schema="io.github.OlehDzhumyk.Desk.LogoMenu"/>
   </schema>
 
@@ -186,6 +187,36 @@
       <default>true</default>
       <summary>Keep manual light/dark changes until the next scheduled transition</summary>
       <description>If you switch light or dark manually, wait until the next sunrise or sunset before switching back</description>
+    </key>
+  </schema>
+
+  <schema id="io.github.OlehDzhumyk.Desk.Focus" path="/io/github/OlehDzhumyk/Desk/focus/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Focus modes and their schedules are on</summary>
+      <description>Off: deskd ends the active mode (restoring what it changed) and arms no schedule.</description>
+    </key>
+    <key name="active-mode" type="s">
+      <default>''</default>
+      <summary>Id of the active focus mode (written by deskd; empty: none)</summary>
+      <description>A mirror of deskd's state for display and recovery: if the state file is lost while this is set, deskd restores the notification banners at start-up. Start and end modes with `themes focus`, the window or the quick settings tile, not by writing this key.</description>
+    </key>
+    <key name="summary-on-end" type="b">
+      <default>true</default>
+      <summary>Show the number of missed notifications when a focus mode ends</summary>
+      <description>Tell how many notifications arrived while the mode was on</description>
+    </key>
+    <key name="session-length" type="u">
+      <range min="5" max="120"/>
+      <default>25</default>
+      <summary>Length of a focus session, in minutes</summary>
+      <description>Length of a focus session (Windows 11 style)</description>
+    </key>
+    <key name="session-break" type="u">
+      <range min="0" max="30"/>
+      <default>5</default>
+      <summary>Break after a focus session, in minutes (0: none)</summary>
+      <description>0: no break</description>
     </key>
   </schema>
 

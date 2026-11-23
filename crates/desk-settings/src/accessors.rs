@@ -493,6 +493,69 @@ impl AppearanceSettings {
     }
 }
 
+/// `io.github.OlehDzhumyk.Desk.Focus` at `/io/github/OlehDzhumyk/Desk/focus/`.
+#[derive(Clone, Debug)]
+pub struct FocusSettings(pub gio::Settings);
+
+impl FocusSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Focus";
+    pub const ENABLED: &'static str = "enabled";
+    pub const ACTIVE_MODE: &'static str = "active-mode";
+    pub const SUMMARY_ON_END: &'static str = "summary-on-end";
+    pub const SESSION_LENGTH: &'static str = "session-length";
+    pub const SESSION_BREAK: &'static str = "session-break";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Focus modes and their schedules are on
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Id of the active focus mode (written by deskd; empty: none)
+    pub fn active_mode(&self) -> String {
+        self.0.string(Self::ACTIVE_MODE).to_string()
+    }
+
+    pub fn set_active_mode(&self, v: String) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::ACTIVE_MODE, &v)
+    }
+
+    /// Show the number of missed notifications when a focus mode ends
+    pub fn summary_on_end(&self) -> bool {
+        self.0.boolean(Self::SUMMARY_ON_END)
+    }
+
+    pub fn set_summary_on_end(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SUMMARY_ON_END, v)
+    }
+
+    /// Length of a focus session, in minutes
+    pub fn session_length(&self) -> u32 {
+        self.0.uint(Self::SESSION_LENGTH)
+    }
+
+    pub fn set_session_length(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::SESSION_LENGTH, v)
+    }
+
+    /// Break after a focus session, in minutes (0: none)
+    pub fn session_break(&self) -> u32 {
+        self.0.uint(Self::SESSION_BREAK)
+    }
+
+    pub fn set_session_break(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::SESSION_BREAK, v)
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.LogoMenu` at `/io/github/OlehDzhumyk/Desk/logo-menu/`.
 #[derive(Clone, Debug)]
 pub struct LogoMenuSettings(pub gio::Settings);

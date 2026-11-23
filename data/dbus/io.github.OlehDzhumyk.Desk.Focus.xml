@@ -1,0 +1,61 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Focus modes engine of deskd: named modes (do not disturb, work, sleep, custom) started by
+     hand, by schedule or as a timed focus session. deskd writes
+     org.gnome.desktop.notifications show-banners (and event-sounds for modes that mute sounds)
+     and restores the earlier value when the mode ends; the bridge shows the tile and the status
+     icon and lets allowed apps through. Modes are stored in ~/.local/share/deskd/focus.json.
+
+     Access (ADR 0008): methods are served to the owner of org.gnome.Shell and desktop-themes-rs
+     binaries only (same user, outside any sandbox). -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Focus">
+    <!-- Current state. mode/name/icon: the active mode ("" = none); source: "manual",
+         "schedule", "session" or ""; until: end of the active mode in Unix seconds (0 = until
+         turned off); break_until: end of the break after a session (0 = none); next_mode and
+         next_start: the next scheduled start (0 = none); allowed_apps: app ids whose banners
+         still show. -->
+    <method name="Status">
+      <arg name="mode" type="s" direction="out"/>
+      <arg name="name" type="s" direction="out"/>
+      <arg name="icon" type="s" direction="out"/>
+      <arg name="source" type="s" direction="out"/>
+      <arg name="until" type="x" direction="out"/>
+      <arg name="break_until" type="x" direction="out"/>
+      <arg name="next_mode" type="s" direction="out"/>
+      <arg name="next_start" type="x" direction="out"/>
+      <arg name="allowed_apps" type="as" direction="out"/>
+    </method>
+    <!-- The modes as a JSON array: id, name, label (translated), icon, block_banners,
+         mute_sounds, allowed_apps, hide_badges, schedule ({days, start, end} or null), builtin. -->
+    <method name="ListModes">
+      <arg name="modes" type="s" direction="out"/>
+    </method>
+    <!-- Start a mode by hand until the given Unix time (0 = until turned off). It overrides
+         schedules until it ends. -->
+    <method name="Start">
+      <arg name="mode" type="s" direction="in"/>
+      <arg name="until" type="x" direction="in"/>
+    </method>
+    <!-- Start a focus session of do not disturb (0 minutes = the session-length setting),
+         followed by the session-break. -->
+    <method name="StartSession">
+      <arg name="minutes" type="u" direction="in"/>
+    </method>
+    <!-- End the active mode (a scheduled one stays off until its next occurrence). -->
+    <method name="Stop"/>
+    <!-- Add or replace a mode, given as JSON with the fields of ListModes. -->
+    <method name="SaveMode">
+      <arg name="mode" type="s" direction="in"/>
+    </method>
+    <!-- Delete a custom mode (the built-in ones cannot be deleted). -->
+    <method name="DeleteMode">
+      <arg name="id" type="s" direction="in"/>
+    </method>
+    <!-- Re-evaluate schedules now and re-arm the timer. -->
+    <method name="Recompute"/>
+    <!-- Emitted whenever the state, the modes or the next scheduled start change. -->
+    <signal name="Changed"/>
+    <!-- Emitted when a focus session runs out. -->
+    <signal name="SessionEnded"/>
+  </interface>
+</node>
