@@ -40,6 +40,13 @@ All notable changes to this project are documented in this file. The format is b
   wallpaper» switch in the quick settings «Theme» menu, and a `themes doctor` line while it is on.
   `themes tokens from-image` now reads slideshow XML (first image), refuses images under 16×16,
   notes near-monochrome images, and with `--force` moves the old theme to `trash/`.
+- Theme from wallpaper, live palette and skin pickers: token themes with a generated libadwaita
+  stylesheet get the wallpaper seed's full light/dark palette while "accent from wallpaper" is on
+  (`themes tokens overlay SEED | --remove`, run by `deskd`; recorded in `state.json`, reverted on
+  off, theme switch, `themes reset` and `themes doctor --fix`; ADR 0010). D-Bus
+  `WallpaperAccent()` also returns the theme whose palette follows. The quick settings «Theme»
+  menu shows a dot grid with a rainbow «From wallpaper» dot (`macos`), an «Accent colour:
+  Automatic / Manual» drop-down (`windows11`) or the switch (`default`).
 - Emoji and symbol picker (`docs/spec/features/emoji.md`): offline `deskd` engine
   (`io.github.OlehDzhumyk.Desk.Emoji`, `crates/deskd/data/emoji.tsv`) with 300+ emoji, Unicode
   symbols and text faces searchable in English and Ukrainian, Fitzpatrick skin-tone modifiers, and

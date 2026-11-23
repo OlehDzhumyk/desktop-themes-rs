@@ -82,6 +82,9 @@ pub struct State {
     /// cannot follow links into ~/.cache): destination → source and content hash.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub gtk_copies: BTreeMap<String, GtkCopy>,
+    /// The live wallpaper palette in the generated gtk.css copy (see `overlay`, ADR 0010).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wallpaper_overlay: Option<crate::overlay::Overlay>,
     /// An apply in progress (intent journal, see `txn`): present only between its first side
     /// effect and its commit, or after it was interrupted.
     #[serde(default, skip_serializing_if = "Option::is_none")]

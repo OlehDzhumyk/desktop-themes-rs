@@ -11,6 +11,13 @@
 //! wallpaper-accent.json`; turning the setting off restores it (when nobody changed the accent
 //! since) and deletes the file. A left-over file at start-up with the setting off (deskd was
 //! stopped in between) is reverted the same way.
+//!
+//! For a token theme the libadwaita palette follows too (ADR 0010): after each accepted seed a
+//! `themes tokens overlay SEED` child puts the seed's palette into the generated `gtk.css` copy;
+//! turning the setting off (or a left-over overlay at start-up) runs `themes tokens overlay
+//! --remove`. One worker thread runs these children in order, so "off" after "on" always wins.
+//! themes-core owns the overlay (its lock, its record in state.json); deskd only reads the
+//! record for the status.
 
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -110,12 +117,34 @@ pub struct Status {
     pub monochrome: bool,
     pub uri: String,
     pub error: String,
+    /// The token theme whose libadwaita palette follows the wallpaper ("": accent only).
+    pub palette: String,
+}
+
+/// Directory of the overlay next to `wallpaper-accent.json` (themes-core `overlay::DIR`).
+pub const OVERLAY_DIR: &str = "wallpaper-overlay";
+
+/// A request to `themes tokens overlay`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Job {
+    Install(String),
+    Remove,
+}
+
+/// The theme of the overlay recorded in the manager's state.json ("" without one).
+pub fn overlay_theme(state_json: &str) -> String {
+    serde_json::from_str::<serde_json::Value>(state_json)
+        .ok()
+        .and_then(|v| v["wallpaper_overlay"]["theme"].as_str().map(str::to_string))
+        .unwrap_or_default()
 }
 
 pub struct WallpaperEngine {
     cfg: Config,
     saved: Option<Saved>,
     state_path: PathBuf,
+    /// The manager's state.json (read-only: the overlay record), if known.
+    manager_state: Option<PathBuf>,
     error: String,
 }
 
@@ -128,8 +157,21 @@ impl WallpaperEngine {
             cfg,
             saved,
             state_path,
+            manager_state: None,
             error: String::new(),
         }
+    }
+
+    /// Where the manager keeps state.json (for the palette in the status).
+    pub fn with_manager_state(mut self, p: PathBuf) -> Self {
+        self.manager_state = Some(p);
+        self
+    }
+
+    /// Whether an overlay may be installed: its cache directory exists (the record itself is
+    /// themes-core's; `--remove` sorts out the rest).
+    pub fn overlay_left(&self) -> bool {
+        self.state_path.with_file_name(OVERLAY_DIR).exists()
     }
 
     pub fn config(&self) -> &Config {
@@ -149,6 +191,11 @@ impl WallpaperEngine {
             monochrome: s.monochrome,
             uri: s.uri,
             error: self.error.clone(),
+            palette: self
+                .manager_state
+                .as_ref()
+                .and_then(|p| std::fs::read_to_string(p).ok())
+                .map_or_default(|t| overlay_theme(&t)),
         }
     }
 
@@ -238,6 +285,16 @@ impl WallpaperEngine {
     }
 }
 
+/// The manager's state.json (`DESKTOP_THEMES_ROOT`, else `~/.local/share/desktop-themes`).
+pub fn manager_state_path() -> PathBuf {
+    std::env::var_os("DESKTOP_THEMES_ROOT")
+        .map_or_else(
+            || glib::user_data_dir().join("desktop-themes"),
+            PathBuf::from,
+        )
+        .join("state.json")
+}
+
 /// `$XDG_CACHE_HOME/desktop-themes/wallpaper-accent.json` (the cache root of themes-core).
 pub fn state_path() -> PathBuf {
     std::env::var_os("DESKTOP_THEMES_CACHE")
@@ -300,6 +357,41 @@ fn decode(path: &Path) -> Result<Seed, String> {
         .ok_or_else(|| "themes tokens seed: unexpected output".to_string())
 }
 
+/// Runs `themes --json tokens overlay SEED | --remove` (blocking; on the overlay worker).
+fn run_overlay(job: &Job) -> Result<(), String> {
+    let mut cmd = std::process::Command::new(themes_bin());
+    cmd.args(["--json", "tokens", "overlay"]);
+    match job {
+        Job::Install(seed) => cmd.arg(seed),
+        Job::Remove => cmd.arg("--remove"),
+    };
+    let out = cmd
+        .stdin(std::process::Stdio::null())
+        .output()
+        .map_err(|e| e.to_string())?;
+    if out.status.success() {
+        Ok(())
+    } else {
+        Err(String::from_utf8_lossy(&out.stderr).trim().to_string())
+    }
+}
+
+/// One thread that runs the overlay children in the order they were asked for.
+fn overlay_worker(notify: Arc<dyn Fn() + Send + Sync>) -> Jobs {
+    let (tx, rx) = std::sync::mpsc::channel::<Job>();
+    std::thread::spawn(move || {
+        for job in rx {
+            if let Err(e) = run_overlay(&job) {
+                eprintln!("deskd: themes tokens overlay ({job:?}): {e}");
+            }
+            notify();
+        }
+    });
+    tx
+}
+
+type Jobs = std::sync::mpsc::Sender<Job>;
+
 /// Main-thread side of the live mode: GSettings signals, the debounce, the child process.
 pub struct Watch {
     _bg: gio::Settings,
@@ -307,6 +399,7 @@ pub struct Watch {
     pending: std::rc::Rc<std::cell::RefCell<Option<glib::SourceId>>>,
     eng: Shared,
     notify: Arc<dyn Fn() + Send + Sync>,
+    jobs: Jobs,
 }
 
 impl Watch {
@@ -315,12 +408,14 @@ impl Watch {
     pub fn start(eng: Shared, notify: impl Fn() + Send + Sync + 'static) -> Option<Self> {
         let bg = schema(BACKGROUND_SCHEMA)?;
         let iface = schema(INTERFACE_SCHEMA).filter(has_accent)?;
+        let notify: Arc<dyn Fn() + Send + Sync> = Arc::new(notify);
         let w = Self {
             _bg: bg.clone(),
             iface: iface.clone(),
             pending: Default::default(),
             eng,
-            notify: Arc::new(notify),
+            jobs: overlay_worker(notify.clone()),
+            notify,
         };
         for key in ["picture-uri", "picture-uri-dark"] {
             let k = w.kicker();
@@ -349,15 +444,17 @@ impl Watch {
 
     fn kicker(&self) -> impl Fn() + 'static {
         let (pending, eng, notify) = (self.pending.clone(), self.eng.clone(), self.notify.clone());
+        let jobs = self.jobs.clone();
         move || {
             if let Some(id) = pending.borrow_mut().take() {
                 id.remove();
             }
-            let (p2, eng, notify) = (pending.clone(), eng.clone(), notify.clone());
+            let (p2, eng, notify, jobs) =
+                (pending.clone(), eng.clone(), notify.clone(), jobs.clone());
             let id = glib::timeout_add_local_once(DEBOUNCE, move || {
                 // this source has fired: drop its id without removing it
                 p2.borrow_mut().take();
-                evaluate(&eng, &notify);
+                evaluate(&eng, &notify, &jobs);
             });
             *pending.borrow_mut() = Some(id);
         }
@@ -368,15 +465,19 @@ impl Watch {
         let off = !cfg.enabled;
         lock(&self.eng).set_config(cfg);
         if off {
-            restore(&self.eng, &self.iface, &self.notify);
+            restore(&self.eng, &self.iface, &self.notify, &self.jobs);
         }
         self.kick();
     }
 }
 
-fn restore(eng: &Shared, iface: &gio::Settings, notify: &Arc<dyn Fn() + Send + Sync>) {
+fn restore(eng: &Shared, iface: &gio::Settings, notify: &Arc<dyn Fn() + Send + Sync>, jobs: &Jobs) {
     let current = iface.string(ACCENT_KEY);
     let had = lock(eng).saved.is_some();
+    // the palette first: the theme's own stylesheet is back when the accent returns
+    if lock(eng).overlay_left() {
+        let _ = jobs.send(Job::Remove);
+    }
     if let Some(a) = lock(eng).turn_off_if_disabled(&current) {
         let _ = iface.set_string(ACCENT_KEY, &a);
     }
@@ -387,12 +488,12 @@ fn restore(eng: &Shared, iface: &gio::Settings, notify: &Arc<dyn Fn() + Send + S
 
 /// Reads the settings (main thread) and, when a wallpaper is wanted, decodes it on a worker
 /// thread; the result comes back to the main thread to be written.
-fn evaluate(eng: &Shared, notify: &Arc<dyn Fn() + Send + Sync>) {
+fn evaluate(eng: &Shared, notify: &Arc<dyn Fn() + Send + Sync>, jobs: &Jobs) {
     let (Some(bg), Some(iface)) = (schema(BACKGROUND_SCHEMA), schema(INTERFACE_SCHEMA)) else {
         return;
     };
     if !lock(eng).config().enabled {
-        restore(eng, &iface, notify);
+        restore(eng, &iface, notify, jobs);
         return;
     }
     let cfg = lock(eng).config().clone();
@@ -402,7 +503,7 @@ fn evaluate(eng: &Shared, notify: &Arc<dyn Fn() + Send + Sync>) {
     let Some(path) = gio::File::for_uri(&uri).path() else {
         return;
     };
-    let (eng, notify) = (eng.clone(), notify.clone());
+    let (eng, notify, jobs) = (eng.clone(), notify.clone(), jobs.clone());
     std::thread::spawn(move || {
         let res = decode(&path);
         glib::MainContext::default().invoke(move || {
@@ -415,8 +516,14 @@ fn evaluate(eng: &Shared, notify: &Arc<dyn Fn() + Send + Sync>) {
             let changed = match res {
                 Ok(seed) => {
                     let current = iface.string(ACCENT_KEY);
+                    let hex = seed.seed.clone();
+                    let accepted = wanted.as_deref() == Some(uri.as_str());
                     if let Some(a) = e.on_seed(&uri, wanted.as_deref(), seed, &current) {
                         let _ = iface.set_string(ACCENT_KEY, &a);
+                    }
+                    if accepted {
+                        // token themes: the libadwaita palette follows too (idempotent)
+                        let _ = jobs.send(Job::Install(hex));
                     }
                     true
                 }
@@ -554,6 +661,30 @@ mod tests {
         e.set_config(Config::default());
         assert_eq!(e.turn_off_if_disabled("purple"), None);
         assert!(!path.exists());
+    }
+
+    #[test]
+    fn overlay_record_and_leftover_cache() {
+        assert_eq!(
+            overlay_theme(
+                r##"{"modules":{},"wallpaper_overlay":{"theme":"lavender","seed":"#2a7f62"}}"##
+            ),
+            "lavender"
+        );
+        assert_eq!(overlay_theme(r#"{"modules":{}}"#), "");
+        assert_eq!(overlay_theme("broken"), "");
+        let path = tmp("overlay");
+        let e = WallpaperEngine::new(ON, path.clone());
+        assert!(!e.overlay_left());
+        assert_eq!(e.status().palette, "", "no manager state: accent only");
+        let dir = path.with_file_name(OVERLAY_DIR).join("lavender");
+        std::fs::create_dir_all(&dir).unwrap();
+        let st = path.with_file_name("state.json");
+        std::fs::write(&st, r#"{"wallpaper_overlay":{"theme":"lavender"}}"#).unwrap();
+        let e = e.with_manager_state(st);
+        assert!(e.overlay_left(), "a left-over cache asks for --remove");
+        assert_eq!(e.status().palette, "lavender");
+        let _ = std::fs::remove_dir_all(path.parent().unwrap());
     }
 
     #[test]

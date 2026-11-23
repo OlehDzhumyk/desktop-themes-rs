@@ -28,7 +28,8 @@
     <method name="Recompute"/>
     <!-- Live "accent from wallpaper" (setting accent-from-wallpaper): whether it is on, the seed
          colour ("#rrggbb") and named accent last derived, whether the image is almost
-         monochrome, the wallpaper URI it came from, and the last decoding error ("" if none). -->
+         monochrome, the wallpaper URI it came from, the last decoding error ("" if none), and
+         the token theme whose libadwaita palette follows the wallpaper ("": accent only). -->
     <method name="WallpaperAccent">
       <arg name="enabled" type="b" direction="out"/>
       <arg name="seed" type="s" direction="out"/>
@@ -36,6 +37,7 @@
       <arg name="monochrome" type="b" direction="out"/>
       <arg name="uri" type="s" direction="out"/>
       <arg name="error" type="s" direction="out"/>
+      <arg name="palette" type="s" direction="out"/>
     </method>
     <!-- Emitted whenever mode, scheme, schedule, override or wallpaper-accent state changes. -->
     <signal name="Changed"/>

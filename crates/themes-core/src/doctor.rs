@@ -703,12 +703,52 @@ fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
 }
 
 /// deskd's live "accent from wallpaper" keeps its state in the cache while it is on
-/// (docs/spec/features/theme-from-wallpaper.md): say which accent it set and what "off" restores.
-fn check_wallpaper_accent(ctx: &Ctx, rep: &mut DoctorReport) {
+/// (docs/spec/features/theme-from-wallpaper.md): say which accent it set and what "off" restores,
+/// and whether a token theme's libadwaita palette follows it. A palette left behind while the
+/// live mode is off (deskd stopped in between) is a fixable warning.
+fn check_wallpaper_accent(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
     let p = crate::tokens::cache_root(ctx).join("wallpaper-accent.json");
+    let ov = st.wallpaper_overlay.as_ref();
     let Ok(text) = std::fs::read_to_string(&p) else {
+        if ov.is_none() && !crate::overlay::dir(ctx).exists() {
+            return;
+        }
+        let mut w = Vec::new();
+        if fix
+            && let Ok(_lock) = Lock::acquire(ctx)
+            && crate::overlay::remove_locked(ctx, &mut State::load(ctx), &mut w).is_ok()
+        {
+            rep.fixed.push(tr!("removed the wallpaper palette"));
+            for m in w {
+                rep.push("warning", "wallpaper-palette", m, None, false);
+            }
+        } else {
+            rep.push(
+                "warning",
+                "wallpaper-palette",
+                tr!(
+                    "a wallpaper palette is left in the libadwaita stylesheet, but “Accent from wallpaper” is off (themes doctor --fix)"
+                ),
+                None,
+                true,
+            );
+        }
         return;
     };
+    if let Some(o) = ov {
+        rep.push(
+            "info",
+            "wallpaper-palette",
+            tr!(
+                "the libadwaita colours of the theme “{theme}” follow the wallpaper (seed colour {colour}): {path}",
+                theme = o.theme,
+                colour = o.seed,
+                path = o.dest
+            ),
+            None,
+            false,
+        );
+    }
     let v: serde_json::Value = serde_json::from_str(&text).unwrap_or_default();
     let s = |k: &str| v[k].as_str().unwrap_or("?").to_string();
     rep.push(
@@ -1044,7 +1084,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_retired(ctx, &mut st, &enabled, opt.fix, &mut rep);
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
-    check_wallpaper_accent(ctx, &mut rep);
+    check_wallpaper_accent(ctx, &st, opt.fix, &mut rep);
     check_schemas(ctx, &enabled, opt.fix, &mut rep);
     check_values(&cur, &mut rep);
     check_deskd(&mut rep);

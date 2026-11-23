@@ -33,6 +33,12 @@ const T12: &str = n_(
     "Show the seed colour, the nearest GNOME accent and a light/dark preview of an image (nothing is written)",
 );
 
+const T13: &str = n_(
+    "Put the palette of a seed colour over the applied token theme's libadwaita stylesheet (deskd's live \"accent from wallpaper\"), or take it out",
+);
+const T14: &str = n_("Seed colour (#rrggbb)");
+const T15: &str = n_("Take the wallpaper palette out: the theme's own stylesheet goes back");
+
 #[derive(Subcommand)]
 pub enum TokensCmd {
     #[command(about = T01)]
@@ -63,6 +69,13 @@ pub enum TokensCmd {
     },
     #[command(about = T12)]
     Seed { path: PathBuf },
+    #[command(about = T13)]
+    Overlay {
+        #[arg(help = T14, required_unless_present = "remove", conflicts_with = "remove")]
+        seed: Option<String>,
+        #[arg(long, help = T15)]
+        remove: bool,
+    },
 }
 
 fn ms(d: Duration) -> f64 {
@@ -83,7 +96,51 @@ pub fn exec(ctx: &Ctx, cmd: TokensCmd, json: bool) -> Result<i32, Error> {
             no_wallpaper,
         } => from_image(ctx, &path, &name, title, force, out, no_wallpaper, json),
         TokensCmd::Seed { path } => seed(&path, json),
+        TokensCmd::Overlay { seed, remove } => overlay(ctx, seed.as_deref(), remove, json),
     }
+}
+
+/// `themes tokens overlay SEED | --remove`: deskd runs it as a child process (the manager's
+/// lock and state.json stay in themes-core; ADR 0010).
+fn overlay(ctx: &Ctx, seed: Option<&str>, remove: bool, json: bool) -> Result<i32, Error> {
+    use themes_core::overlay;
+    if remove || seed.is_none() {
+        let mut w = Vec::new();
+        let had = overlay::remove(ctx, &mut w)?;
+        if json {
+            println!("{}", json!({ "removed": had, "warnings": w }));
+        } else {
+            for m in &w {
+                eprintln!("{m}");
+            }
+            println!(
+                "{}",
+                if had {
+                    tr!("the wallpaper palette is removed")
+                } else {
+                    tr!("no wallpaper palette is installed")
+                }
+            );
+        }
+        return Ok(0);
+    }
+    let o = overlay::install(ctx, seed.unwrap_or_default())?;
+    if json {
+        println!("{}", serde_json::to_string(&o).unwrap_or_default());
+    } else {
+        match &o.theme {
+            Some(t) => println!(
+                "{}",
+                tr!(
+                    "the colours of the theme “{theme}” follow the wallpaper: {path}",
+                    theme = t,
+                    path = o.path.clone().unwrap_or_default()
+                )
+            ),
+            None => println!("{}", o.note),
+        }
+    }
+    Ok(0)
 }
 
 fn keys(ctx: &Ctx, id: &str, json: bool) -> Result<i32, Error> {

@@ -14,6 +14,7 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 export const UUID = 'desk-bridge@desktop-themes-rs';
 
@@ -132,6 +133,98 @@ export function bridgeState() {
         keybound: clip?._bound ?? false,
         language: b?._settings?.get_string('language') ?? null,
     };
+}
+
+// ---- the accent control of the «Theme» quick settings menu (accentPicker.ts)
+function accentItems() {
+    return bridge()?._indicator?._themes?._accentSection?._getMenuItems() ?? [];
+}
+
+function accentDots() {
+    const out = [];
+    const walk = a => {
+        for (const c of a.get_children()) {
+            if (c.has_style_class_name?.('desk-accent-dot'))
+                out.push(c);
+            walk(c);
+        }
+    };
+    accentItems().forEach(walk);
+    return out;
+}
+
+/** Which control the skin shows: kind 'switch', 'dots' or 'dropdown', with its state. */
+export function accentPicker() {
+    const res = {kind: null, label: '', on: null, options: [], dots: []};
+    for (const it of accentItems()) {
+        if (it instanceof PopupMenu.PopupSwitchMenuItem) {
+            Object.assign(res, {kind: 'switch', label: it.label.text, on: it.state});
+        } else if (it instanceof PopupMenu.PopupSubMenuMenuItem) {
+            res.kind = 'dropdown';
+            res.label = it.label.text;
+            res.options = it.menu._getMenuItems().map(m => ({
+                label: m.label.text, checked: m._ornament === PopupMenu.Ornament.CHECK,
+            }));
+        }
+    }
+    const dots = accentDots();
+    if (dots.length) {
+        res.kind = 'dots';
+        res.dots = dots.map(d => ({name: d.accessible_name, checked: d.checked, focusable: d.can_focus}));
+    }
+    return res;
+}
+
+/** Click the dot or activate the drop-down option with this accessible name / label. */
+export function pickAccent(name) {
+    const dot = accentDots().find(d => d.accessible_name === name);
+    if (dot) {
+        dot.emit('clicked', 1);
+        return true;
+    }
+    for (const it of accentItems()) {
+        const opt = it.menu?._getMenuItems?.().find(m => m.label?.text === name);
+        if (opt) {
+            opt.activate(Clutter.get_current_event());
+            return true;
+        }
+    }
+    throw new Error(`no accent control named ${name}`);
+}
+
+/** Open quick settings and the «Theme» menu, then give the n-th dot the key focus. */
+export function focusAccentDot(n) {
+    Main.panel.statusArea.quickSettings.menu.open(false);
+    bridge()._indicator._themes.menu.open(false);
+    accentDots()[n].grab_key_focus();
+    return global.stage.key_focus?.accessible_name ?? null;
+}
+
+/** Resolve once the dot with this accessible name has the key focus (notify::key-focus). */
+export function waitFocus(name, timeoutMs = 10000) {
+    return new Promise((resolve, reject) => {
+        let timer = 0;
+        const id = global.stage.connect('notify::key-focus', () => check());
+        const finish = ok => {
+            global.stage.disconnect(id);
+            if (timer)
+                GLib.source_remove(timer);
+            if (ok)
+                resolve(true);
+            else
+                reject(new Error(`key focus is on ${global.stage.key_focus?.accessible_name}, not ${name}`));
+        };
+        const check = () => {
+            if (global.stage.key_focus?.accessible_name === name)
+                finish(true);
+        };
+        timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeoutMs, () => {
+            timer = 0;
+            finish(false);
+            return GLib.SOURCE_REMOVE;
+        });
+        check();
+    });
 }
 
 /** State of the macOS logo menu in the top bar. */

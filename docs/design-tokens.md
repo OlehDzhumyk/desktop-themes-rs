@@ -140,6 +140,7 @@ themes tokens generate ID [--force] [--repeat N]   # fill the cache, print files
 themes tokens keys ID                # derived dconf keys (dconf load format)
 themes tokens from-image PATH --name ID [--title NAME] [--no-wallpaper] [--out DIR] [--force]
 themes tokens seed PATH              # seed colour, nearest GNOME accent, light/dark preview (writes nothing)
+themes tokens overlay SEED | --remove   # live wallpaper palette over the applied token theme (deskd runs it)
 themes apply ID --dry-run            # also lists generated files and links
 ```
 
@@ -156,6 +157,16 @@ near-monochrome image (seed chroma < 0.04) is reported («The image has almost n
 GNOME accent is `slate`. `--force` over a theme in the themes root moves the old directory to
 `trash/` first. `themes tokens seed` runs the same analysis and prints it; deskd's live "accent
 from wallpaper" mode runs it as a child process ([feature spec](spec/features/theme-from-wallpaper.md)).
+
+**Live wallpaper palette.** While "accent from wallpaper" is on, deskd runs `themes tokens overlay
+SEED` after each new seed. When the applied look's `gtk.css` is a generated copy, the theme's token
+chain is loaded with one more layer on top, the seed's tonal palette (`[colors.light]` and
+`[colors.dark]`, backdrop colours included; validated like any theme), and the libadwaita
+stylesheet rendered from it replaces the copy's content. The result lives in
+`<cache>/wallpaper-overlay/<id>/gtk.css`; `state.json` records it (`wallpaper_overlay`) with the
+theme's own generated file, which `--remove`, a new look, `themes reset` or `themes doctor --fix`
+(with the mode off) write back. Hand-made stylesheets are never replaced
+([ADR 0010](adr/0010-live-wallpaper-palette-overlay.md)).
 
 ## Visual checks
 

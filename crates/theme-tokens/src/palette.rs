@@ -395,6 +395,32 @@ pub fn tokens_toml(p: &Palette, name: &str, image: Option<&str>) -> String {
     out
 }
 
+/// Label of the live wallpaper layer in a token chain (messages, cache key).
+pub const OVERLAY_LAYER: &str = "wallpaper-overlay/tokens.toml";
+
+/// The layer that the live "accent from wallpaper" mode puts above a token theme: the tonal
+/// palette of `seed` as `[colors.light]` and `[colors.dark]`. Only colours are replaced; radii,
+/// fonts, motion and the colours this palette does not name stay the theme's. AA by construction.
+pub fn overlay_toml(seed: Rgba) -> String {
+    let seed = seed.opaque();
+    let p = tonal(seed.to_oklab().to_lch());
+    let mut out = format!(
+        "# Live wallpaper palette (seed colour {}).\nschema = 1\n",
+        seed.hex()
+    );
+    for (group, v) in [("light", &p.light), ("dark", &p.dark)] {
+        // backdrop colours follow the window too, so no tint of the theme's own hue is left
+        let window = v.iter().find(|(k, _)| *k == "window_bg").map(|(_, c)| *c);
+        let mut v = v.clone();
+        if let Some(w) = window {
+            v.push(("headerbar_backdrop", w));
+            v.push(("sidebar_backdrop", w));
+        }
+        colors_table(&mut out, group, &v);
+    }
+    out
+}
+
 /// Whole pipeline for packed RGB pixels.
 pub fn from_pixels(rgb: &[u8]) -> (Vec<Cluster>, Palette) {
     let cs = clusters(rgb, K);
@@ -463,6 +489,27 @@ mod tests {
             assert!(l.tokens.terminal_palette().is_some());
             let (_, pal2) = from_pixels(&img);
             assert_eq!(text, tokens_toml(&pal2, "Test", None));
+        }
+    }
+
+    #[test]
+    fn overlay_layer_passes_aa_over_any_theme_colours() {
+        // the theme pairs dark accent text with a light accent: the overlay replaces both
+        let theme =
+            "[colors]\naccent = \"#ffe066\"\naccent_fg = \"#202020\"\n[radii]\nbutton = 3\n";
+        for hex in ["#1e3a8a", "#fde047", "#808080", "#000000", "#ffffff"] {
+            let layer = overlay_toml(Rgba::parse(hex).unwrap());
+            let l = crate::load::load_chain(&[
+                (OVERLAY_LAYER.into(), layer.clone()),
+                ("theme".into(), theme.into()),
+            ])
+            .unwrap_or_else(|e| panic!("{hex}: {e}\n{layer}"));
+            assert_eq!(
+                l.tokens.radii.button,
+                Some(3),
+                "other tables stay the theme's"
+            );
+            assert_eq!(layer, overlay_toml(Rgba::parse(hex).unwrap()));
         }
     }
 

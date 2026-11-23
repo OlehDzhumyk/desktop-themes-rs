@@ -8,9 +8,11 @@ the picture as wallpaper. A second, live mode lets the accent follow the current
 ## Status
 
 * `themes tokens from-image` (creating a theme from an image): **Implemented** (CLI and the hub button «Створити тему із шпалер…»).
-* Live "accent follows wallpaper": **Partial** (stage 2): deskd sets `accent-color` for every theme; the token-palette overlay for
-  token themes and the skin-specific pickers (macOS dot grid, Windows 11 drop-down) are not built yet; one switch in the quick
-  settings «Theme» menu serves all skins.
+* Live "accent follows wallpaper": **Implemented** (stage 2): deskd sets `accent-color` for every theme and, for token themes with
+  a generated libadwaita stylesheet, installs the seed's palette as an overlay in the copied `gtk.css`
+  ([ADR 0010](../../adr/0010-live-wallpaper-palette-overlay.md)); the quick settings «Theme» menu has the macOS dot grid, the
+  Windows 11 «Automatic» drop-down and the default switch. Deviations: the overlay changes the libadwaita stylesheet only (not
+  the shell layer or the terminal); a theme switch or a user accent wins until the next wallpaper change.
 
 Origin badge: *From Windows, adapted for macOS style* (Windows 11 offers an automatic accent from the wallpaper; macOS tints windows by the
 wallpaper and has a "multicolour" accent but does not derive a full theme). Algorithm: original (k-means in OKLab, see
@@ -49,7 +51,7 @@ Page «Вигляд» (see [settings-hub](settings-hub.md)): the button «Ств
 **seed colour and the light/dark preview** before saving, asks for a name, then offers «Застосувати». The `default` GNOME accent is also
 set to the nearest named accent on apply, so GNOME's own widgets agree.
 
-### Live mode: accent follows wallpaper (planned)
+### Live mode: accent follows wallpaper
 
 Setting `accent-from-wallpaper` (off by default). When on:
 

@@ -83,12 +83,12 @@ impl AppearanceIface {
         Ok(())
     }
 
-    #[zbus(out_args("enabled", "seed", "accent", "monochrome", "uri", "error"))]
+    #[zbus(out_args("enabled", "seed", "accent", "monochrome", "uri", "error", "palette"))]
     async fn wallpaper_accent(
         &self,
         #[zbus(header)] hdr: Header<'_>,
         #[zbus(connection)] conn: &zbus::Connection,
-    ) -> zbus::fdo::Result<(bool, String, String, bool, String, String)> {
+    ) -> zbus::fdo::Result<(bool, String, String, bool, String, String, String)> {
         self.gate.check(conn, Some(&hdr)).await?;
         let st = wallpaper::lock(&self.wallpaper).status();
         Ok((
@@ -98,6 +98,7 @@ impl AppearanceIface {
             st.monochrome,
             st.uri,
             st.error,
+            st.palette,
         ))
     }
 
@@ -231,9 +232,12 @@ mod tests {
 
             p.recompute().await.unwrap();
 
-            let (enabled, _, accent, _, _, error) = p.wallpaper_accent().await.unwrap();
+            let (enabled, _, accent, _, _, error, palette) = p.wallpaper_accent().await.unwrap();
             assert!(!enabled);
-            assert_eq!((accent.as_str(), error.as_str()), ("", ""));
+            assert_eq!(
+                (accent.as_str(), error.as_str(), palette.as_str()),
+                ("", "", "")
+            );
         });
     }
 }

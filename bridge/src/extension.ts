@@ -16,6 +16,7 @@ import {EmojiFeature} from './emoji/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
 import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
+import type {Skin} from './accentPicker.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
 const APPEARANCE_SCHEMA = 'io.github.OlehDzhumyk.Desk.Appearance';
@@ -131,9 +132,9 @@ export default class DeskBridge extends Extension {
         this._indicator = null;
     }
 
-    private _skin(): string {
+    private _skin(): Skin {
         const s = this._settings?.get_string('skin') ?? 'default';
-        return ['macos', 'windows11'].includes(s) ? s : 'default';
+        return s === 'macos' || s === 'windows11' ? s : 'default';
     }
 
     private _applySkin(): void {
@@ -142,6 +143,7 @@ export default class DeskBridge extends Extension {
         this._emoji?.setSkin(skin);
         this._mixer?.setSkin(skin);
         this._logoMenu?.setSkin(skin);
+        this._indicator?.setSkin(skin);
         this._focus?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
     }

@@ -20,7 +20,7 @@ fn target_dir(ctx: &Ctx, kind: &str) -> PathBuf {
     }
 }
 
-fn file_hash(p: &Path) -> Option<String> {
+pub(crate) fn file_hash(p: &Path) -> Option<String> {
     std::fs::read(p)
         .ok()
         .map(|b| format!("{:016x}", theme_tokens::cache::fnv1a64(&b)))
@@ -48,7 +48,7 @@ fn restore_backup(ctx: &Ctx, st: &mut State, dest: &str, warnings: &mut Vec<Stri
 }
 
 /// Temporary name of a copy being written (renamed into place when complete).
-fn tmp_name(dest: &Path) -> PathBuf {
+pub(crate) fn tmp_name(dest: &Path) -> PathBuf {
     let name = dest.file_name().unwrap_or_default().to_string_lossy();
     dest.with_file_name(format!(".{name}.themes-tmp"))
 }
@@ -78,7 +78,8 @@ pub fn refresh_copies(st: &mut State, warnings: &mut Vec<String>) -> Vec<String>
 }
 
 /// Removes the links and copies the manager made and puts the user's files back. Every change
-/// is saved at once, so an interruption leaves a state this function can finish later.
+/// is saved at once, so an interruption leaves a state this function can finish later. A live
+/// wallpaper palette in a copy goes with the copy (its hash is recorded like any other).
 pub fn unlink_all(ctx: &Ctx, st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
     let copies: Vec<(String, GtkCopy)> = st
         .gtk_copies
@@ -102,6 +103,7 @@ pub fn unlink_all(ctx: &Ctx, st: &mut State, warnings: &mut Vec<String>) -> Resu
         st.save(ctx)?;
         restore_backup(ctx, st, &dest, warnings)?;
     }
+    crate::overlay::forget(ctx, st)?;
     let links: Vec<(String, String)> = st
         .links
         .iter()

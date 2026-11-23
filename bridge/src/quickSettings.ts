@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Quick settings items of the bridge: “Theme” (theme switcher, formerly the themes-quick extension,
-// with the “Accent from wallpaper” switch) and, for the default skin, “Clipboard” (recent items,
-// private mode, clear).
+// with the skin's “accent from wallpaper” control, see accentPicker.ts) and, for the default skin,
+// “Clipboard” (recent items, private mode, clear).
 import Gio from 'gi://Gio';
 import GioUnix from 'gi://GioUnix';
 import GLib from 'gi://GLib';
@@ -11,6 +11,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {QuickMenuToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
+import {buildAccentPicker, type Skin} from './accentPicker.js';
 import {confirm} from './confirmDialog.js';
 import {ThemesClient, type ThemeRow} from './dbus.js';
 import {_, fmt} from './i18n.js';
@@ -21,8 +22,6 @@ import {itemAccessibleName, oneLine} from './clipboard/panel.js';
 const THEME_ICON = 'preferences-desktop-appearance-symbolic';
 const CLIP_ICON = 'edit-paste-symbolic';
 const MODULES = ['look', 'behavior', 'sounds', 'apps'];
-/** io.github.OlehDzhumyk.Desk.Appearance: deskd follows the wallpaper while it is true. */
-const ACCENT_KEY = 'accent-from-wallpaper';
 
 /** The typings say `new()` always finds the file; at run time it returns null when it does not. */
 function desktopApp(id: string): GioUnix.DesktopAppInfo | null {
@@ -65,7 +64,8 @@ class ThemesToggle extends QuickMenuToggle {
     declare private _busy: boolean;
     declare private _accentSection: PopupMenu.PopupMenuSection;
     declare private _appearance: Gio.Settings | null;
-    declare private _accentId: number;
+    declare private _accentSkin: Skin;
+    declare private _unpick: (() => void) | null;
     /** Destroyed, by disable() or by the shell tearing the stage down at logout (from C, so no
      * JS destroy() override runs then); async work that finishes later must not touch it. */
     declare private _destroyed: boolean;
@@ -79,7 +79,8 @@ class ThemesToggle extends QuickMenuToggle {
         this._accentSection = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._accentSection);
         this._appearance = null;
-        this._accentId = 0;
+        this._accentSkin = 'default';
+        this._unpick = null;
         this.menu.addAction(_('Open “Desktop”…'), () => {
             launchGui();
             Main.panel.closeQuickSettings();
@@ -90,8 +91,8 @@ class ThemesToggle extends QuickMenuToggle {
         this._client = null;
         this.connect('destroy', () => {
             this._destroyed = true;
-            if (this._accentId)
-                this._appearance?.disconnect(this._accentId);
+            this._unpick?.();
+            this._unpick = null;
             this._client?.destroy();
             destroyMenu(this);
         });
@@ -109,18 +110,26 @@ class ThemesToggle extends QuickMenuToggle {
         void this._refresh();
     }
 
-    /** The “Accent from wallpaper” switch (the same in every skin); deskd does the work. */
+    /** The “accent from wallpaper” control; deskd does the work. */
     attachAppearance(appearance: Gio.Settings): void {
         this._appearance = appearance;
-        const sw = new PopupMenu.PopupSwitchMenuItem(_('Accent from wallpaper'),
-            appearance.get_boolean(ACCENT_KEY));
-        sw.connect('toggled', (_i: unknown, on: boolean) => {
-            appearance.set_boolean(ACCENT_KEY, on);
-        });
-        this._accentId = appearance.connect(`changed::${ACCENT_KEY}`, () => {
-            sw.setToggleState(appearance.get_boolean(ACCENT_KEY));
-        });
-        this._accentSection.addMenuItem(sw);
+        this._buildAccent();
+    }
+
+    /** Each skin has its own control (macOS dot grid, Windows 11 drop-down, switch). */
+    setSkin(skin: Skin): void {
+        if (skin === this._accentSkin)
+            return;
+        this._accentSkin = skin;
+        this._buildAccent();
+    }
+
+    _buildAccent(): void {
+        this._unpick?.();
+        this._unpick = null;
+        this._accentSection.removeAll();
+        if (this._appearance)
+            this._unpick = buildAccentPicker(this._accentSection, this._accentSkin, this._appearance);
     }
 
     /** Read through a method: TypeScript cannot see the change across an await. */
@@ -351,6 +360,10 @@ class DeskIndicator extends SystemIndicator {
         this._themes.attach(extDir);
         if (appearance)
             this._themes.attachAppearance(appearance);
+    }
+
+    setSkin(skin: Skin): void {
+        this._themes.setSkin(skin);
     }
 
     /** The clipboard toggle exists only with the default skin. */

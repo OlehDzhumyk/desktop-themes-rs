@@ -126,13 +126,19 @@ Skins:
 | Create a theme | `themes tokens from-image PATH --name ID` (CLI), or «Create theme from wallpaper…» on the «Appearance» page: file chooser, seed colour, light/dark preview with contrast numbers, name, then «Apply» in the toast. `--force` moves the old theme to `trash/` first |
 | Inspect an image | `themes tokens seed PATH [--json]`: seed colour, nearest GNOME accent, «almost no colour» note, light/dark core colours and their contrast; writes nothing |
 | Accent from wallpaper | setting `accent-from-wallpaper` (off by default): `deskd` follows `org.gnome.desktop.background picture-uri`/`picture-uri-dark` (GSettings signals, 500 ms debounce, no polling) and sets `org.gnome.desktop.interface accent-color` to the named accent nearest the seed. `accent-source` picks the variant (`active` follows `color-scheme`). The image is decoded in a `themes tokens seed` child process. Turning it off restores the accent in force before (unless a theme or the user changed it since); `themes doctor` shows the state |
+| Wallpaper palette | token themes whose libadwaita stylesheet is generated (e.g. `lavender`, themes from `from-image`) also get the seed's full light/dark palette: `themes tokens overlay SEED` (run by `deskd`) renders the theme's tokens with the palette on top into `~/.cache/desktop-themes/wallpaper-overlay/` and writes it into the copied `~/.config/gtk-4.0/gtk.css`. Radii, fonts, the shell layer and the terminal stay the theme's. Turning the mode off, applying another look, `themes reset` and `themes doctor --fix` (with the mode off) put the theme's own stylesheet back and delete the cache; a gtk.css you edited is never touched ([ADR 0010](adr/0010-live-wallpaper-palette-overlay.md)). Hand-made stylesheets (`macos`, `windows11`) keep accent-only |
 | Images | every gdk-pixbuf format; animated images use the first frame; slideshow XML uses its first image; images under 16×16 or fully transparent are refused |
-| Entry points | CLI (`themes tokens from-image`, `themes tokens seed`), window («Appearance» page: switch, source, current accent, create button), quick settings («Theme» menu: «Accent from wallpaper» switch, all skins), D-Bus `WallpaperAccent()` |
+| Entry points | CLI (`themes tokens from-image`, `themes tokens seed`, `themes tokens overlay SEED / --remove`), window («Appearance» page: switch, source, current accent and palette, create button), quick settings («Theme» menu, per skin, below), D-Bus `WallpaperAccent()` (with the theme whose palette follows) |
 
-Skins: the quick settings switch is the same in `macos`, `windows11` and `default`; the skin-specific
-pickers of the spec (macOS dot grid, Windows 11 «Automatic» drop-down) are not built yet. Token
-themes and hand-made themes (`macos`, `windows11`) both get only the GNOME `accent-color` change in
-the live mode; a full token-palette overlay is not built yet.
+Skins (quick settings «Theme» menu; every control writes `accent-from-wallpaper`, `deskd` does the work):
+
+* `macos`: «Accent colour» row of dots, the nine GNOME accents and a rainbow «From wallpaper» dot
+  (like Multicolour). A colour dot sets `accent-color` and turns the live mode off; the rainbow dot
+  turns it on. The dots are radio buttons for screen readers; Tab and the arrow keys move between
+  them. Without `accent-color` (GNOME before 47) the switch is shown instead.
+* `windows11`: «Accent colour: Automatic / Manual» drop-down; «Automatic» turns the live mode on,
+  «Manual» turns it off (the previous accent comes back).
+* `default`: the «Accent from wallpaper» switch.
 
 ## Focus modes
 

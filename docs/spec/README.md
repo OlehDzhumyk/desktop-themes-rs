@@ -58,7 +58,7 @@ UI strings are quoted in English; the shipped texts are Ukrainian and English (s
 | 0 | theme manager (CLI, window, service), modules, inheritance, doctor | done |
 | 1 | `deskd` + `desk-bridge`, skins, clipboard history | done |
 | 1.5 | foundations: design tokens, settings registry, i18n and accessibility, CI and performance budgets, these specs | done (follow-ups: see below) |
-| 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | implemented; theme from wallpaper is Partial |
+| 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | implemented |
 | 3 | capture family: screenshots, annotation, recording, OCR, colour picker | proposed |
 | 4 | own search engine, Quick Look, shortcut guide, window layouts | proposed |
 | 5 | phone integration | proposed |
@@ -93,7 +93,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Emoji and symbol picker | Implemented | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
 | Focus modes and do-not-disturb schedules | Implemented | 2 | In Windows 11 and macOS | [focus](features/focus.md) |
 | Automatic light/dark by sunset | Implemented | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |
-| Theme from wallpaper | Partial | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
+| Theme from wallpaper | Implemented | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
 | Settings hub "Desktop" | Implemented | 2 | Original | [settings-hub](features/settings-hub.md) |
 | Screenshots, annotation, screen recording | Planned | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |
 | OCR text extractor | Planned | 3 | In Windows 11 and macOS | [ocr](features/ocr.md) |
