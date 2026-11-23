@@ -22,6 +22,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
 | Emoji and symbols (`emoji`) | In Windows 11 and macOS |
 | Colour picker (`color-picker`) | In Windows 11 (PowerToys) and macOS (Digital Color Meter) |
+| Text extractor (`ocr`) | In Windows 11 (PowerToys Text Extractor) and macOS (Live Text) |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | On-screen displays (`osd`) | In Windows 11 and macOS |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
@@ -82,6 +83,19 @@ Path `/io/github/OlehDzhumyk/Desk/color-picker/`.
 | `copy-on-pick` | boolean | `true` |  | Copy on pick | Put the picked colour on the clipboard in the chosen format | color-picker | switch on `--page color-picker` |
 | `color-picker-shortcut` | shortcut list | `['<Shift><Super>c']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Shift+Super+C for Windows 11 and Fedora, Ctrl+Shift+Super+C for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts color-picker-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | color-picker | shortcut row on `--page shortcuts` |
 
+## `io.github.OlehDzhumyk.Desk.Ocr`
+
+Path `/io/github/OlehDzhumyk/Desk/ocr/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Text extractor | Select a region of the screen and copy the text in it, recognised locally | ocr | switch on `--page ocr` |
+| `languages` | string list | `['ukr', 'eng']` |  | Languages | Codes as `tesseract --list-langs` prints them. Codes without installed data are left out and named in the result toast; recognition runs with the others. | ocr | list on `--page ocr` |
+| `record-in-history` | boolean | `true` |  | Record in clipboard history | False: the text is still copied to the clipboard, but the clipboard history does not record it (as in private mode). | ocr | switch on `--page ocr` |
+| `keep-line-breaks` | boolean | `true` |  | Keep line breaks | Paragraph breaks are always kept; words broken with a hyphen at a line end are joined. | ocr | switch on `--page ocr` |
+| `max-megapixels` | unsigned | `20` | 1…50 (step 1) | Largest region, megapixels | deskd refuses an image with width × height above this value × 1 000 000. | ocr | spin button on `--page ocr` |
+| `ocr-shortcut` | shortcut list | `['<Shift><Super>t']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Shift+Super+T for Windows 11 and Fedora, Ctrl+Shift+Super+T for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts ocr-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | ocr | shortcut row on `--page shortcuts` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -92,6 +106,7 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `emoji-toggle` | shortcut list | `[]` |  | Open the emoji and symbol picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | emoji | shortcut row on `--page shortcuts` |
 | `mixer-open` | shortcut list | `[]` |  | Open the volume mixer | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | mixer | shortcut row on `--page shortcuts` |
 | `color-picker-toggle` | shortcut list | `[]` |  | Pick a colour from the screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | color-picker | shortcut row on `--page shortcuts` |
+| `ocr-toggle` | shortcut list | `[]` |  | Copy text from the screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | ocr | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
 
@@ -190,6 +205,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `emoji-toggle` | Open the emoji and symbol picker | emoji | `/io/github/OlehDzhumyk/Desk/emoji/emoji-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/emoji-toggle` |
 | `mixer-open` | Open the volume mixer | mixer | `/io/github/OlehDzhumyk/Desk/mixer/mixer-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/mixer-open` |
 | `color-picker-toggle` | Pick a colour from the screen | color-picker | `/io/github/OlehDzhumyk/Desk/color-picker/color-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/color-picker-toggle` |
+| `ocr-toggle` | Copy text from the screen | ocr | `/io/github/OlehDzhumyk/Desk/ocr/ocr-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/ocr-toggle` |
 
 ## Pages of the window
 
@@ -198,6 +214,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
 | `emoji` | Emoji and symbols | Picker, How to open |
 | `color-picker` | Colour picker | Picker, History, How to open |
+| `ocr` | Text extractor | Recognition, Clipboard, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `osd` | On-screen displays | Display, Style |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |

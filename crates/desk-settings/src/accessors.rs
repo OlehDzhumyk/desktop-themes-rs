@@ -499,6 +499,79 @@ impl ColorPickerSettings {
     }
 }
 
+/// `io.github.OlehDzhumyk.Desk.Ocr` at `/io/github/OlehDzhumyk/Desk/ocr/`.
+#[derive(Clone, Debug)]
+pub struct OcrSettings(pub gio::Settings);
+
+impl OcrSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Ocr";
+    pub const ENABLED: &'static str = "enabled";
+    pub const LANGUAGES: &'static str = "languages";
+    pub const RECORD_IN_HISTORY: &'static str = "record-in-history";
+    pub const KEEP_LINE_BREAKS: &'static str = "keep-line-breaks";
+    pub const MAX_MEGAPIXELS: &'static str = "max-megapixels";
+    pub const OCR_SHORTCUT: &'static str = "ocr-shortcut";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable the OCR text extractor
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Tesseract language codes used for recognition
+    pub fn languages(&self) -> Vec<String> {
+        self.0.strv(Self::LANGUAGES).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_languages(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::LANGUAGES, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Put recognised text into the clipboard history
+    pub fn record_in_history(&self) -> bool {
+        self.0.boolean(Self::RECORD_IN_HISTORY)
+    }
+
+    pub fn set_record_in_history(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::RECORD_IN_HISTORY, v)
+    }
+
+    /// Keep the line breaks inside paragraphs
+    pub fn keep_line_breaks(&self) -> bool {
+        self.0.boolean(Self::KEEP_LINE_BREAKS)
+    }
+
+    pub fn set_keep_line_breaks(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::KEEP_LINE_BREAKS, v)
+    }
+
+    /// Largest region that is recognised, in megapixels
+    pub fn max_megapixels(&self) -> u32 {
+        self.0.uint(Self::MAX_MEGAPIXELS)
+    }
+
+    pub fn set_max_megapixels(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::MAX_MEGAPIXELS, v)
+    }
+
+    /// Shortcut that starts the text extractor (in force)
+    pub fn ocr_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::OCR_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_ocr_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::OCR_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -509,6 +582,7 @@ impl ShortcutSettings {
     pub const EMOJI_TOGGLE: &'static str = "emoji-toggle";
     pub const MIXER_OPEN: &'static str = "mixer-open";
     pub const COLOR_PICKER_TOGGLE: &'static str = "color-picker-toggle";
+    pub const OCR_TOGGLE: &'static str = "ocr-toggle";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -549,6 +623,15 @@ impl ShortcutSettings {
 
     pub fn set_color_picker_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::COLOR_PICKER_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the text extractor (override)
+    pub fn ocr_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::OCR_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_ocr_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::OCR_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
 

@@ -17,3 +17,7 @@ emoji-shortcut=['<Super>period', '<Super>semicolon']
 # Colour picker: Win+Shift+C, as PowerToys Color Picker.
 [io/github/OlehDzhumyk/Desk/color-picker]
 color-picker-shortcut=['<Shift><Super>c']
+
+# Text extractor (OCR): Shift+Super+T, as PowerToys Text Extractor.
+[io/github/OlehDzhumyk/Desk/ocr]
+ocr-shortcut=['<Shift><Super>t']

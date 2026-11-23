@@ -14,6 +14,7 @@ pub mod lockscreen;
 pub mod logo_menu;
 pub mod mixer;
 pub mod model;
+pub mod ocr;
 pub mod osd;
 pub mod registry;
 pub mod shortcuts;
@@ -32,6 +33,7 @@ pub use lockscreen::*;
 pub use logo_menu::*;
 pub use mixer::*;
 pub use model::*;
+pub use ocr::*;
 pub use osd::*;
 pub use registry::*;
 

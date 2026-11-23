@@ -13,3 +13,7 @@ emoji-shortcut=['<Super>period']
 # Colour picker: Shift+Super+C.
 [io/github/OlehDzhumyk/Desk/color-picker]
 color-picker-shortcut=['<Shift><Super>c']
+
+# Text extractor (OCR): Shift+Super+T, as PowerToys Text Extractor.
+[io/github/OlehDzhumyk/Desk/ocr]
+ocr-shortcut=['<Shift><Super>t']

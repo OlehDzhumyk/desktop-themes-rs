@@ -51,7 +51,8 @@ Same as the screenshot overlay; during recognition the dimmed overlay is replace
 ## Settings (proposed, `io.github.OlehDzhumyk.Desk.Ocr`)
 
 `enabled` (true), `languages` (as, `['ukr','eng']`), `record-in-history` (true), `keep-line-breaks` (true),
-`toggle-shortcut` (per theme, overridable), `max-megapixels` (uint 1..50, 20).
+`ocr-shortcut` (per theme, overridable in `io.github.OlehDzhumyk.Desk.Shortcuts` `ocr-toggle`; not
+`toggle-shortcut`, because shell keybinding names are global), `max-megapixels` (uint 1..50, 20).
 
 ## Privacy & security
 
