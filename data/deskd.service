@@ -3,12 +3,17 @@ Description=Desktop features daemon of desktop-themes-rs (clipboard history, ...
 Documentation=https://github.com/OlehDzhumyk/desktop-themes-rs
 PartOf=graphical-session.target
 After=graphical-session.target
+# Restarts: at most 5 in 60 s, then the unit stays failed (a crash loop must not burn the session).
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=dbus
 BusName=io.github.OlehDzhumyk.Desk
 ExecStart=%h/.local/bin/deskd
+# A crash (signal, non-zero exit) restarts the daemon; a normal stop (logout, SIGTERM) does not.
 Restart=on-failure
 RestartSec=2
+TimeoutStopSec=10
 # deskd keeps its data in ~/.local/share/deskd and $XDG_RUNTIME_DIR/deskd only
 NoNewPrivileges=yes

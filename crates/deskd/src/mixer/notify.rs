@@ -67,6 +67,14 @@ impl Notifier {
         let spawned = std::thread::Builder::new()
             .name("deskd-mixer-notify".into())
             .spawn(move || {
+                // A panic in `emit` must not end this thread: no later signal would go out.
+                let send = |flags: u8| {
+                    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| emit(flags)))
+                        .is_err()
+                    {
+                        eprintln!("deskd: mixer: sending a change signal panicked");
+                    }
+                };
                 let mut c = Coalesce::new(QUIET, MAX_WAIT);
                 loop {
                     let now = Instant::now();
@@ -81,9 +89,9 @@ impl Notifier {
                         Err(RecvTimeoutError::Timeout) => {
                             let now = Instant::now();
                             if let Some(flags) = c.take_due(now) {
-                                emit(flags);
+                                send(flags);
                             } else if next.is_some_and(|at| at <= now) {
-                                emit(super::model::dirty::APPS);
+                                send(super::model::dirty::APPS);
                             }
                         }
                     }

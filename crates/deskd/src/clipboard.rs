@@ -593,10 +593,7 @@ const RUNTIME_RESERVE: u64 = 32 * 1024 * 1024;
 fn free_bytes(dir: &Path) -> Option<u64> {
     use gio::prelude::FileExt;
     let info = gio::File::for_path(dir)
-        .query_filesystem_info(
-            gio::FILE_ATTRIBUTE_FILESYSTEM_FREE,
-            gio::Cancellable::NONE,
-        )
+        .query_filesystem_info(gio::FILE_ATTRIBUTE_FILESYSTEM_FREE, gio::Cancellable::NONE)
         .ok()?;
     Some(info.attribute_uint64(gio::FILE_ATTRIBUTE_FILESYSTEM_FREE))
 }

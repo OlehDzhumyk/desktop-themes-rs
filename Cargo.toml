@@ -27,5 +27,7 @@ desk-settings = { path = "crates/desk-settings" }
 opt-level = 3
 lto = "fat"
 codegen-units = 1
-panic = "abort"
+# unwind, not abort: deskd must survive a panic in one handler or thread (see src/panic_policy.rs).
+# Costs about 0.5 MB per binary; the code on the non-panicking path is unchanged.
+panic = "unwind"
 strip = true

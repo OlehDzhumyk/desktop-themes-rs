@@ -7,6 +7,7 @@
 
 mod clipboard;
 mod mixer;
+mod panic_policy;
 mod persist;
 mod service;
 mod settings;
