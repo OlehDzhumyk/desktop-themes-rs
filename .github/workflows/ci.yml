@@ -68,7 +68,10 @@ jobs:
           cat clippy.log
           exit $rc
       - name: No orphan .rs files (not reachable from a module tree)
-        run: tools/check-orphan-rs.sh
+        run: |
+          # The container runs as root on a checkout owned by another uid: let git read it.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          tools/check-orphan-rs.sh
 
   rust-test:
     name: cargo test
