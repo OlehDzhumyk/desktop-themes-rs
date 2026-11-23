@@ -5,10 +5,12 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use desk_proto::ClipItem;
+use zbus::message::Header;
 use zbus::object_server::SignalEmitter;
 
 use crate::clipboard::{Engine, Pushed};
 use crate::persist::Saver;
+use crate::trust::Gate;
 
 pub type Shared = Arc<Mutex<Engine>>;
 
@@ -21,6 +23,23 @@ pub fn now() -> i64 {
 
 pub(crate) fn lock(e: &Shared) -> MutexGuard<'_, Engine> {
     e.lock().unwrap_or_else(|p| p.into_inner())
+}
+
+/// Own [`desk_proto::BUS_NAME`]. Not replaceable (ADR 0008): only with `replace` (the development
+/// mode `deskd --replace`) the name is taken from a `--replace` deskd and left replaceable.
+pub async fn own_name(conn: &zbus::Connection, replace: bool) -> zbus::Result<()> {
+    use zbus::fdo::{RequestNameFlags as F, RequestNameReply};
+    let mut flags = F::DO_NOT_QUEUE;
+    if replace {
+        flags = F::DO_NOT_QUEUE | F::ALLOW_REPLACEMENT | F::REPLACE_EXISTING;
+    }
+    match conn
+        .request_name_with_flags(desk_proto::BUS_NAME, flags)
+        .await?
+    {
+        RequestNameReply::PrimaryOwner | RequestNameReply::AlreadyOwner => Ok(()),
+        _ => Err(zbus::Error::NameTaken),
+    }
 }
 
 fn not_found(id: u64) -> zbus::fdo::Error {
@@ -50,20 +69,27 @@ pub struct ClipboardIface {
     pub saver: Saver,
     /// Записати приватний режим у GSettings (у тестах — нічого).
     pub set_private: fn(bool),
+    /// Content and changes only for the shell and our binaries (ADR 0008).
+    pub gate: Gate,
 }
 
 #[zbus::interface(name = "io.github.OlehDzhumyk.Desk.Clipboard")]
 impl ClipboardIface {
+    #[allow(clippy::too_many_arguments)] // the bus arguments plus header, connection, emitter
     async fn push(
         &self,
         mime: String,
         data: Vec<u8>,
         offered: Vec<String>,
         source_app: String,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
         #[zbus(signal_emitter)] em: SignalEmitter<'_>,
-    ) -> u64 {
+    ) -> zbus::fdo::Result<u64> {
+        self.gate.check(conn, Some(&hdr)).await?;
         let r = {
             let mut eng = lock(&self.eng);
+            eng.expire(now());
             let r = eng.push(&mime, &data, &offered, &source_app, now());
             if !matches!(r, Pushed::Skipped(_)) {
                 self.saver.touch();
@@ -74,29 +100,50 @@ impl ClipboardIface {
             Pushed::Added(id) | Pushed::Bumped(id) => {
                 let _ = Self::changed(&em).await;
                 let _ = self.count_changed(&em).await;
-                id
+                Ok(id)
             }
-            Pushed::Skipped(_) => 0,
+            Pushed::Skipped(_) => Ok(0),
         }
     }
 
-    fn list(&self, query: String, limit: u32) -> Vec<ClipItem> {
-        lock(&self.eng).list(&query, limit)
+    async fn list(
+        &self,
+        query: String,
+        limit: u32,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<Vec<ClipItem>> {
+        self.gate.check(conn, Some(&hdr)).await?;
+        let mut eng = lock(&self.eng);
+        eng.expire(now());
+        Ok(eng.list(&query, limit))
     }
 
     #[zbus(out_args("mime", "data"))]
-    fn get(&self, id: u64) -> zbus::fdo::Result<(String, Vec<u8>)> {
-        lock(&self.eng).get(id).ok_or_else(|| not_found(id))
+    async fn get(
+        &self,
+        id: u64,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<(String, Vec<u8>)> {
+        self.gate.check(conn, Some(&hdr)).await?;
+        let mut eng = lock(&self.eng);
+        eng.expire(now());
+        eng.get(id).ok_or_else(|| not_found(id))
     }
 
     #[zbus(out_args("mime", "data"))]
     async fn activate(
         &self,
         id: u64,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
         #[zbus(signal_emitter)] em: SignalEmitter<'_>,
     ) -> zbus::fdo::Result<(String, Vec<u8>)> {
+        self.gate.check(conn, Some(&hdr)).await?;
         let r = {
             let mut eng = lock(&self.eng);
+            eng.expire(now());
             let r = eng.activate(id, now());
             self.saver.touch();
             r
@@ -110,8 +157,11 @@ impl ClipboardIface {
         &self,
         id: u64,
         pinned: bool,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
         #[zbus(signal_emitter)] em: SignalEmitter<'_>,
     ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         let found = {
             let mut eng = lock(&self.eng);
             let found = eng.find(id).is_some();
@@ -127,7 +177,14 @@ impl ClipboardIface {
         Ok(())
     }
 
-    async fn delete(&self, id: u64, #[zbus(signal_emitter)] em: SignalEmitter<'_>) {
+    async fn delete(
+        &self,
+        id: u64,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+        #[zbus(signal_emitter)] em: SignalEmitter<'_>,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         let changed = {
             let mut eng = lock(&self.eng);
             let c = eng.delete(id);
@@ -140,9 +197,17 @@ impl ClipboardIface {
             let _ = Self::changed(&em).await;
             let _ = self.count_changed(&em).await;
         }
+        Ok(())
     }
 
-    async fn clear(&self, keep_pinned: bool, #[zbus(signal_emitter)] em: SignalEmitter<'_>) {
+    async fn clear(
+        &self,
+        keep_pinned: bool,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+        #[zbus(signal_emitter)] em: SignalEmitter<'_>,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, Some(&hdr)).await?;
         {
             let mut eng = lock(&self.eng);
             eng.clear(keep_pinned);
@@ -150,6 +215,7 @@ impl ClipboardIface {
         }
         let _ = Self::changed(&em).await;
         let _ = self.count_changed(&em).await;
+        Ok(())
     }
 
     #[zbus(property)]
@@ -157,10 +223,18 @@ impl ClipboardIface {
         lock(&self.eng).cfg.private
     }
 
+    /// Turning private mode off from a sandbox would re-enable recording: gated as well.
     #[zbus(property)]
-    fn set_private(&mut self, value: bool) {
+    async fn set_private(
+        &self,
+        value: bool,
+        #[zbus(header)] hdr: Option<Header<'_>>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        self.gate.check(conn, hdr.as_ref()).await?;
         lock(&self.eng).cfg.private = value;
         (self.set_private)(value);
+        Ok(())
     }
 
     #[zbus(property)]
@@ -184,6 +258,124 @@ mod tests {
 
     use super::*;
 
+    /// A private `dbus-daemon` for this test only (killed on drop). `None` when not installed.
+    struct Bus(std::process::Child, String);
+
+    impl Bus {
+        fn start(dir: &std::path::Path) -> Option<Bus> {
+            use std::io::BufRead;
+            let mut child = std::process::Command::new("dbus-daemon")
+                .args(["--session", "--nofork", "--nopidfile", "--print-address=1"])
+                .arg(format!("--address=unix:path={}", dir.join("bus").display()))
+                .env_clear()
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::null())
+                .spawn()
+                .ok()?;
+            let mut line = String::new();
+            std::io::BufReader::new(child.stdout.take()?)
+                .read_line(&mut line)
+                .ok()?;
+            Some(Bus(child, line.trim().to_string()))
+        }
+
+        async fn connect(&self) -> zbus::Connection {
+            zbus::connection::Builder::address(self.1.as_str())
+                .build()
+                .await
+                .unwrap()
+        }
+    }
+
+    impl Drop for Bus {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+
+    /// On a real (private) bus: a foreign client is refused content and changes, the owner of
+    /// org.gnome.Shell is served (and loses that when it releases the name), metadata stays
+    /// open, and the bus name cannot be taken over.
+    #[test]
+    fn untrusted_clients_are_refused() {
+        let dir = std::env::temp_dir().join(format!("deskd-trust-bus-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let Some(bus) = Bus::start(&dir) else {
+            eprintln!("dbus-daemon not installed: skipped");
+            return;
+        };
+        zbus::block_on(async {
+            let mut eng = Engine::new(Default::default(), dir.join("data"), dir.join("run"));
+            eng.push("text/plain", b"a secret note", &[], "", 1);
+            let server = zbus::connection::Builder::address(bus.1.as_str())
+                .serve_at(
+                    desk_proto::CLIPBOARD_PATH,
+                    ClipboardIface {
+                        eng: Arc::new(Mutex::new(eng)),
+                        saver: Saver::noop(),
+                        set_private: |_| {},
+                        // the test binary is deskd's caller here: not one of the trusted binaries
+                        gate: Gate::new(Arc::new(crate::trust::Trust::with_binaries(vec![]))),
+                    },
+                )
+                .build()
+                .await
+                .unwrap();
+            own_name(&server, false).await.unwrap();
+
+            let client = bus.connect().await;
+            let p = desk_proto::ClipboardProxy::builder(&client)
+                .cache_properties(zbus::proxy::CacheProperties::No)
+                .build()
+                .await
+                .unwrap();
+            let refused = |r: zbus::Result<()>| {
+                let e = r.unwrap_err().to_string();
+                assert!(e.contains("AccessDenied"), "{e}");
+            };
+            refused(p.list("", 0).await.map(drop));
+            refused(p.get(1).await.map(drop));
+            refused(p.activate(1).await.map(drop));
+            refused(p.push("text/plain", b"injected", &[], "").await.map(drop));
+            refused(p.delete(1).await);
+            refused(p.clear(false).await);
+            refused(p.set_private(true).await);
+            assert_eq!(p.count().await.unwrap(), 1, "metadata stays open");
+
+            // the stand-in shell: owning org.gnome.Shell makes the same client trusted
+            client.request_name(crate::trust::SHELL_NAME).await.unwrap();
+            let items = p.list("", 0).await.unwrap();
+            assert_eq!(items[0].text, "a secret note");
+            client.release_name(crate::trust::SHELL_NAME).await.unwrap();
+            refused(p.list("", 0).await.map(drop));
+
+            // S-2: nobody takes the name over, not even with REPLACE_EXISTING
+            let thief = bus.connect().await;
+            use zbus::fdo::RequestNameFlags as F;
+            let r = thief
+                .request_name_with_flags(
+                    desk_proto::BUS_NAME,
+                    F::REPLACE_EXISTING | F::DO_NOT_QUEUE,
+                )
+                .await;
+            assert!(matches!(r, Err(zbus::Error::NameTaken)), "{r:?}");
+            let dbus = zbus::fdo::DBusProxy::new(&client).await.unwrap();
+            let owner = dbus
+                .get_name_owner(desk_proto::BUS_NAME.try_into().unwrap())
+                .await
+                .unwrap();
+            assert_eq!(
+                Some(owner.as_ref()),
+                server.unique_name().map(|n| n.as_ref())
+            );
+        });
+        drop(bus);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
     /// Члени, які генерує `#[zbus::interface]`, збігаються з data/dbus/*.xml (його читає міст).
     #[test]
     fn introspection_matches_xml() {
@@ -197,6 +389,7 @@ mod tests {
             eng: Arc::new(Mutex::new(eng)),
             saver: Saver::noop(),
             set_private: |_| {},
+            gate: Gate::open(),
         };
         iface.introspect_to_writer(&mut xml, 0);
         assert_eq!(xml_members(&xml), xml_members(CLIPBOARD_XML), "{xml}");
