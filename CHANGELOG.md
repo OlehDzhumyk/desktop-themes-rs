@@ -30,6 +30,14 @@ All notable changes to this project are documented in this file. The format is b
   wallpaper» switch in the quick settings «Theme» menu, and a `themes doctor` line while it is on.
   `themes tokens from-image` now reads slideshow XML (first image), refuses images under 16×16,
   notes near-monochrome images, and with `--force` moves the old theme to `trash/`.
+- Emoji and symbol picker (`docs/spec/features/emoji.md`): offline `deskd` engine
+  (`io.github.OlehDzhumyk.Desk.Emoji`, `crates/deskd/data/emoji.tsv`) with 300+ emoji, Unicode
+  symbols and text faces searchable in English and Ukrainian, Fitzpatrick skin-tone modifiers, and
+  0600 recents persistence (`~/.local/share/deskd/emoji.json`). In `desk-bridge`, the Windows 11
+  Win+V / Win+. flyout now has live «Емодзі» and «Символи» tabs, while `macos` (`Ctrl+Super+Space`)
+  and `default` (`Super+.`) open a floating keyboard-first picker near the caret; insertion uses
+  `application/x-desk-internal` and restores the previous clipboard text so clipboard history is
+  untouched. Settings `io.github.OlehDzhumyk.Desk.Emoji` and shortcut `emoji-toggle`.
 - Automatic light/dark appearance (`auto-dark`): `deskd` now hosts the `appearance` engine
   (`io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance`) with a
   shared one-shot wake scheduler (`crates/deskd/src/schedule.rs`) that reacts to suspend/resume

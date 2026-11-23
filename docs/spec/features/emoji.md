@@ -8,9 +8,11 @@ inserts it into the focused window, exactly like the [clipboard](clipboard.md) p
 
 ## Status
 
-**Planned** (stage 2). Origin badge: *In Windows 11 and macOS*. Data: Unicode CLDR annotations
-(Unicode licence, data only); optional integration with the GNOME emoji picker's data. The Windows 11 clipboard
-flyout already shows disabled tabs «Емодзі» and «Символи» as placeholders.
+**Implemented** (stage 2). Origin badge: *In Windows 11 and macOS*. Offline curated dataset in
+`crates/deskd/data/emoji.tsv` (300+ emoji, Unicode symbols and text faces with English and Ukrainian
+names/keywords), served over `io.github.OlehDzhumyk.Desk.Emoji`. The Windows 11 clipboard flyout
+now has live interactive «Емодзі» and «Символи» tabs; `macos` and `default` open a floating
+keyboard-first picker anchored near the caret/pointer.
 
 ## Reference behaviour
 
@@ -72,15 +74,15 @@ the panel opens with a built-in minimal set and a warning logged.
   (0600). No index in memory when idle beyond the loaded table (<= 2 MB).
 * The bridge draws skins, forwards keys, inserts.
 
-## Settings (proposed, `io.github.OlehDzhumyk.Desk.Emoji`)
+## Settings (`io.github.OlehDzhumyk.Desk.Emoji`)
 
 | Key | Type | Default |
 |---|---|---|
 | `enabled` | bool | true |
-| `toggle-shortcut` | as | per theme (`['<Super>period','<Super>semicolon']` windows11) |
+| `emoji-shortcut` | as | per theme (`['<Super>period','<Super>semicolon']` windows11, `['<Control><Super>space']` macos, `['<Super>period']` fedora) |
 | `skin-tone` | choice `none,light,medium-light,medium,medium-dark,dark` | `none` |
 | `remember-recents` | bool | true |
-| `close-after-insert` | bool | per skin |
+| `close-after-insert` | choice `skin,always,never` | `skin` |
 
 ## Privacy & security
 

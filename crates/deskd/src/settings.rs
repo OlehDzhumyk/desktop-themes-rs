@@ -39,6 +39,16 @@ pub fn set_private_async(value: bool) {
     });
 }
 
+/// GSettings `io.github.OlehDzhumyk.Desk.Emoji` (None while the schema is not installed).
+pub fn emoji_settings() -> Option<desk_settings::accessors::EmojiSettings> {
+    desk_settings::accessors::EmojiSettings::new()
+}
+
+/// Emoji engine settings: `(remember_recents, default_skin_tone)`.
+pub fn read_emoji(s: &desk_settings::accessors::EmojiSettings) -> (bool, String) {
+    (s.remember_recents(), s.skin_tone().as_str().to_string())
+}
+
 /// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
 pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
     desk_settings::accessors::MixerSettings::new()

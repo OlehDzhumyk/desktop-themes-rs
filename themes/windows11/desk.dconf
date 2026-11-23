@@ -9,3 +9,7 @@ toggle-shortcut=['<Super>v']
 # Volume mixer flyout: Win+Ctrl+V, as Windows 11 opens its sound output panel.
 [io/github/OlehDzhumyk/Desk/mixer]
 mixer-shortcut=['<Control><Super>v']
+
+# Emoji and symbol picker: Win+. and Win+;, opening the Emoji tab of the unified flyout.
+[io/github/OlehDzhumyk/Desk/emoji]
+emoji-shortcut=['<Super>period', '<Super>semicolon']

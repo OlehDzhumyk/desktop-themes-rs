@@ -8,6 +8,7 @@
 //   'uk'     → the catalogue locale/uk.json that assemble.mjs builds from po/uk.po, so the panels
 //              stay Ukrainian even when the session runs in English;
 //   'en'     → the English source strings.
+import GLib from 'gi://GLib';
 import type {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {errorText} from './shellTypes.js';
@@ -47,6 +48,14 @@ export function _(msgid: string): string {
     if (_catalog)
         return _catalog[msgid] ?? msgid;
     return _ext ? _ext.gettext(msgid) : msgid;
+}
+
+/** Active UI language code ('uk' or 'en') for localized deskd queries such as emoji search. */
+export function currentLanguage(): string {
+    if (_lang === 'uk' || _lang === 'en')
+        return _lang;
+    const names = GLib.get_language_names();
+    return names.some(n => n.toLowerCase().startsWith('uk')) ? 'uk' : 'en';
 }
 
 /** Substitute named placeholders: fmt(template, {name}) replaces {name}. */
