@@ -14,6 +14,7 @@ pub mod color;
 pub mod generate;
 pub mod load;
 pub mod palette;
+pub mod picker;
 pub mod schema;
 pub mod validate;
 
