@@ -764,7 +764,7 @@ fn check_gtk_flatpak(ctx: &Ctx, st: &mut State, fix: bool, rep: &mut DoctorRepor
         .gtk_copies
         .keys()
         .any(|k| Path::new(k).starts_with(&ctx.gtk4));
-    if has_gtk4 && crate::util::which("flatpak").is_some() {
+    if has_gtk4 && crate::util::which("flatpak") {
         let text =
             std::fs::read_to_string(ctx.flatpak_overrides.join("global")).unwrap_or_default();
         if !has_flatpak_gtk4_access(&text) {
@@ -1648,15 +1648,17 @@ mod tests {
         std::os::unix::fs::symlink(&src, &dst).unwrap();
         let mut st = State::default();
         st.modules.insert(Module::Look, "win".into());
-        st.links.insert(
-            dst.to_string_lossy().into(),
-            src.to_string_lossy().into(),
-        );
+        st.links
+            .insert(dst.to_string_lossy().into(), src.to_string_lossy().into());
         st.save(&ctx).unwrap();
 
         let mut rep = DoctorReport::default();
         check_gtk_flatpak(&ctx, &mut st, false, &mut rep);
-        assert!(rep.issues.iter().any(|i| i.kind == "gtk-symlinks" && i.fixable));
+        assert!(
+            rep.issues
+                .iter()
+                .any(|i| i.kind == "gtk-symlinks" && i.fixable)
+        );
 
         let mut rep2 = DoctorReport::default();
         check_gtk_flatpak(&ctx, &mut st, true, &mut rep2);

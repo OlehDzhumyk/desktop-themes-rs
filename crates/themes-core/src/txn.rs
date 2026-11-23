@@ -433,7 +433,10 @@ mod tests {
             .insert("/nonexistent/gtk.css".into(), "/nonexistent/b".into());
         let mut w = vec![];
         crate::gtklinks::unlink_all(&f.ctx, &mut st, &mut w).unwrap();
-        assert!(st.backups.is_empty() && st.gtk_copies.is_empty() && st.links.is_empty(), "{st:?}");
+        assert!(
+            st.backups.is_empty() && st.gtk_copies.is_empty() && st.links.is_empty(),
+            "{st:?}"
+        );
         assert_eq!(read(&f.ctx.gtk4.join("gtk.css")), "/* mine */\n");
         assert!(w.is_empty(), "{w:?}");
         // a copy the user replaced is left alone, and the backup is not forced over it

@@ -159,8 +159,7 @@ fn collect_files(
 ) -> Result<()> {
     if src.is_dir() {
         dirs.push(dest.to_path_buf());
-        let mut entries: Vec<_> = std::fs::read_dir(src)?
-            .collect::<std::io::Result<Vec<_>>>()?;
+        let mut entries: Vec<_> = std::fs::read_dir(src)?.collect::<std::io::Result<Vec<_>>>()?;
         entries.sort_by_key(std::fs::DirEntry::file_name);
         for entry in entries {
             let name = entry.file_name();
