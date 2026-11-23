@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 10:15+0000\n"
+"POT-Creation-Date: 2026-11-23 10:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -535,34 +535,35 @@ msgid ""
 "LICENSE file in their repositories)."
 msgstr ""
 
-#: crates/deskd/src/clipboard.rs:149
+#: crates/deskd/src/clipboard.rs:246
 #, rust-format
 msgid "{format} image {width}×{height}"
 msgstr ""
 
-#: crates/deskd/src/clipboard.rs:154
+#: crates/deskd/src/clipboard.rs:251
 #, rust-format
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/main.rs:31
+#: crates/deskd/src/main.rs:32
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
 "\n"
 "Usage: deskd [--replace]\n"
-"  --replace   take the bus name over from a running deskd\n"
+"  --replace   development: take the bus name over from a deskd started with "
+"--replace, and let the next one take it\n"
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:114
+#: crates/deskd/src/main.rs:115
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:203 crates/themes/src/service.rs:317
+#: crates/deskd/src/main.rs:198 crates/themes/src/service.rs:319
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -1019,7 +1020,7 @@ msgstr ""
 msgid "no baseline-* found in {path}"
 msgstr ""
 
-#: crates/themes-core/src/shell.rs:442 crates/themes/src/gui/window.rs:101
+#: crates/themes-core/src/shell.rs:453 crates/themes/src/gui/window.rs:101
 #: crates/themes/src/gui/window.rs:158 crates/themes/src/gui/window.rs:170
 #: crates/themes/src/gui/window.rs:267
 msgid "Themes"
@@ -1125,18 +1126,18 @@ msgid ""
 "is not linked"
 msgstr ""
 
-#: crates/themes-core/src/txn.rs:193
+#: crates/themes-core/src/txn.rs:217
 #, rust-format
 msgid "the interrupted apply of “{theme}” ({modules}, {started}) was completed"
 msgstr ""
 
-#: crates/themes-core/src/txn.rs:200
+#: crates/themes-core/src/txn.rs:224
 #, rust-format
 msgid ""
 "the interrupted apply of “{theme}” ({modules}, {started}) was rolled back"
 msgstr ""
 
-#: crates/themes-core/src/txn.rs:212
+#: crates/themes-core/src/txn.rs:236
 #, rust-format
 msgid ""
 "an apply of “{theme}” started {started} was interrupted at the step {step}; "
@@ -1855,7 +1856,7 @@ msgstr ""
 msgid "Error: the apply thread crashed"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:678 crates/themes/src/service.rs:163
+#: crates/themes/src/gui/window.rs:678 crates/themes/src/service.rs:165
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr ""
@@ -2003,18 +2004,18 @@ msgstr ""
 msgid "internal error of the theme service"
 msgstr ""
 
-#: crates/themes/src/service.rs:151
+#: crates/themes/src/service.rs:153
 msgid "Themes: extensions turned off"
 msgstr ""
 
-#: crates/themes/src/service.rs:153
+#: crates/themes/src/service.rs:155
 #, rust-format
 msgid ""
 "After the theme was applied these extensions went into an error state and "
 "were turned off: {list}"
 msgstr ""
 
-#: crates/themes/src/service.rs:167
+#: crates/themes/src/service.rs:169
 #, rust-format
 msgid "You need to log in again: {reasons}"
 msgstr ""

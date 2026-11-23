@@ -6,6 +6,19 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Security
+
+- deskd serves clipboard content, history changes and the mixer only to GNOME Shell and its own
+  binaries (same user, outside any sandbox); Flatpak apps with session-bus access and tools such as
+  `gdbus` get `AccessDenied` ([ADR 0008](docs/adr/0008-deskd-serves-content-to-trusted-callers.md)).
+- deskd's bus name can no longer be taken over (only `deskd --replace`, for development, is
+  replaceable), and the bridge pushes and pastes nothing unless the name's owner is the installed
+  deskd.
+- Clipboard: image names in `history.json` are validated (a crafted name could read or delete files
+  outside deskd's directory); SVG is no longer captured and images must be PNG, JPEG, GIF or WebP by
+  their bytes; more password-manager hints are honoured; text that looks like a password or token is
+  kept in memory only for 120 s and never saved; the bridge's own paste is not recorded again.
+
 ### Added
 
 - Volume mixer: one slider (and mute, «Play on…») per application that plays sound, output and input

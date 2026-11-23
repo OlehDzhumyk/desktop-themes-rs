@@ -196,10 +196,10 @@ loads the same files at runtime).
 | `Pin(t id, b pinned)`, `Delete(t id)`, `Clear(b keep_pinned)` | |
 | property `Private b` (rw), `Enabled b`, `Count u`; signal `Changed()` | |
 
-```sh
-gdbus call --session -d io.github.OlehDzhumyk.Desk -o /io/github/OlehDzhumyk/Desk/Clipboard \
-  -m io.github.OlehDzhumyk.Desk.Clipboard.List "" 5
-```
+Only GNOME Shell (the owner of `org.gnome.Shell`) and our own binaries, outside any sandbox, may
+call the content methods (all but the properties): others get `AccessDenied`, `gdbus`/`busctl`
+included. The bus name is not replaceable, and the bridge talks only to a deskd it verified.
+[ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md).
 
 `/io/github/OlehDzhumyk/Desk/Mixer`, interface `io.github.OlehDzhumyk.Desk.Mixer` (volumes on the cubic
 slider scale, 1.0 = 100 %):
@@ -253,6 +253,5 @@ distribution's is older.
   `start.sh --theme ID --ext DIR` loads a theme's dconf into the private database (never
   `themes apply`); `input.py` sends keys/clicks (Mutter RemoteDesktop) and takes screenshots (Mutter
   ScreenCast → PipeWire → gst); `stop.sh` kills only its own processes.
-  `clipboard-test.sh THEME SHORTCUT OUTDIR` is the end-to-end clipboard test (copy three samples
-  with wl-copy, open the panel, paste the 2nd into a GTK 4 text field, verify).
+  The clipboard end-to-end test lives in the container harness (`tests/e2e`, `just e2e`).
   Never call `toolbox` from inside `run.sh`: podman would see a different runtime dir.

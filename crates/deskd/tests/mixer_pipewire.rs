@@ -206,6 +206,9 @@ fn mixer_against_an_isolated_pipewire() {
             .build()
             .await
             .unwrap();
+        // deskd serves its lists only to the shell and its own binaries (ADR 0008): this test
+        // stands in for the shell
+        conn.request_name("org.gnome.Shell").await.unwrap();
         let dbus = zbus::fdo::DBusProxy::new(&conn).await.unwrap();
         let mut owners = dbus.receive_name_owner_changed().await.unwrap();
 

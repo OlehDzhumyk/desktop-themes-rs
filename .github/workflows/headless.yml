@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Headless GNOME Shell jobs: the clipboard end-to-end test (tools/headless) and the performance
-# harness (tools/perf).
+# Headless GNOME Shell job: the performance harness (tools/perf). The clipboard end-to-end test
+# moved to the container harness (tests/e2e, e2e.yml, ADR 0007).
 #
 # Why this is not part of the required CI: it starts a real gnome-shell --headless (mutter with
 # the software "surfaceless" renderer, no GPU needed) on a private D-Bus, and drives it with
@@ -48,50 +48,6 @@ env:
   XDG_RUNTIME_DIR: /run/user/0
 
 jobs:
-  clipboard-e2e:
-    name: clipboard end-to-end (${{ matrix.theme }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    container:
-      image: registry.fedoraproject.org/fedora:45
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {theme: fedora, keys: "Shift+Super+v"}
-          - {theme: macos, keys: "Shift+Super+v"}
-          - {theme: windows11, keys: "Super+v"}
-    steps:
-      - name: Install packages
-        run: |
-          dnf install -y --setopt=install_weak_deps=False \
-            git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel rust cargo \
-            nodejs npm gnome-shell mutter gjs dbus-daemon dconf glib2 gtk4 wl-clipboard \
-            python3-gobject mesa-dri-drivers mesa-libEGL adwaita-icon-theme procps-ng
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            .cargo-home/registry
-            .cargo-home/git
-            target
-          key: cargo-fedora45-headless-${{ hashFiles('Cargo.lock') }}
-          restore-keys: cargo-fedora45-headless-
-      - name: Build deskd and the bridge
-        run: |
-          cargo build --locked -p deskd
-          (cd bridge && npm ci --no-audit --no-fund && npm run build)
-      - name: Prepare the container
-        run: tools/headless/ci-env.sh
-      - name: Clipboard end-to-end test
-        run: tools/headless/clipboard-test.sh "${{ matrix.theme }}" "${{ matrix.keys }}" "$RUNNER_TEMP/shots"
-      - name: Shell log on failure
-        if: failure()
-        run: |
-          for f in "$XDG_RUNTIME_DIR"/headless-*/state/*.log; do echo "::group::$f"; tail -n 80 "$f"; echo "::endgroup::"; done
-
   perf:
     name: performance budgets (report only)
     if: github.event_name == 'workflow_dispatch' && inputs.perf
