@@ -38,6 +38,32 @@ All notable changes to this project are documented in this file. The format is b
   `themes doctor`, the experimental-theme confirmation, and nothing left behind after disable or
   logout. Harness approach and two modules from ddterm (see CREDITS.md).
 
+- Clipboard: `image-budget-mb` (default 256 MiB) caps all session images together; the oldest
+  unpinned images are dropped first, and nothing is written when `$XDG_RUNTIME_DIR` has less than
+  32 MiB left after the image.
+- Themes: `flatpak.conf` lines are limited to an allowlist (read-only GTK, theme and icon folders,
+  `GTK_THEME`, an app id); other lines are refused with a warning in `apply`, `apply --dry-run` and
+  `themes doctor`. Dconf keys that run commands (custom shortcut `command`, terminal `exec`,
+  autostart) are listed in `apply --dry-run` and need `--yes` or a dialog in the window the first
+  time; the yes is remembered per key and command. The bundled windows11 shortcut asks once.
+  The D-Bus service (quick settings) does not ask yet. See `docs/theme-contract.md`.
+- `docs/maintainer.md`: releases, CI, build environment, pinned versions, known workarounds.
+- CI: a check that no `.rs` file is outside every crate's module tree
+  (`tools/check-orphan-rs.sh`), `tools/update-image-digests.sh`, `tools/ego-pin.sh`.
+
+### Changed
+
+- Release builds unwind on panic (`panic = "unwind"`, about 0.5 MB more per binary) so that `deskd`
+  survives a panic in one handler or thread; `deskd.service` limits restarts to 5 in 60 seconds.
+- The minimum Rust version is 1.100 (it was 1.89 on paper but 1.92 in fact): `rust-version` equals
+  `rust-toolchain.toml`, and CI checks that they stay equal.
+- Container images in CI and the Containerfile are pinned by digest; Dependabot watches `docker`.
+- Selected clippy lints are on for all crates: `cast_possible_truncation`, `cast_sign_loss`,
+  `too_many_lines` (150), `map_unwrap_or`.
+- Extension ZIPs from extensions.gnome.org are verified by SHA-256 before they are unpacked;
+  `install-extensions.sh --latest` is removed (it could not be verified), and `bootstrap.sh --rustup`
+  verifies a pinned `rustup-init` instead of piping `curl` into `sh`.
+
 ### Fixed
 
 - Bridge: disabling it left the menus of its quick settings toggles (theme, clipboard), their items
