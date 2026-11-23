@@ -7,7 +7,7 @@ default:
     @just --list
 
 # everything CI checks, locally
-check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep
+check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep orphan-rs
 
 # fast checks for what you changed vs origin/main
 check-changed:
@@ -58,6 +58,10 @@ gen:
 i18n:
     cargo xtask pot
     cargo test -p desk-settings --locked --test i18n_lint
+
+# .rs files that no crate compiles (dead copies of modules), see tools/check-orphan-rs.sh
+orphan-rs:
+    tools/check-orphan-rs.sh
 
 # structural lint rules (tools/ast-grep) and their own tests
 ast-grep:
