@@ -139,6 +139,7 @@ themes tokens check [ID...]          # all themes with tokens, or the given ones
 themes tokens generate ID [--force] [--repeat N]   # fill the cache, print files and time
 themes tokens keys ID                # derived dconf keys (dconf load format)
 themes tokens from-image PATH --name ID [--title NAME] [--no-wallpaper] [--out DIR] [--force]
+themes tokens seed PATH              # seed colour, nearest GNOME accent, light/dark preview (writes nothing)
 themes apply ID --dry-run            # also lists generated files and links
 ```
 
@@ -149,7 +150,12 @@ population × chroma score that is neither near-black nor near-white (grey image
 accent). A tonal palette on the seed hue (fixed OKLCH lightness steps, low-chroma neutrals,
 status colours on fixed hues) is pushed until every pair passes AA, and the terminal palette uses
 the six ANSI hues nudged 15 % towards the seed. The result is a normal `tokens.toml` (validated
-before it is written) in `themes/<ID>/` of the theme root, with the image as wallpaper.
+before it is written) in `themes/<ID>/` of the theme root, with the image as wallpaper. A slideshow
+XML gives its first image; images under 16×16 px or without opaque pixels are refused; a
+near-monochrome image (seed chroma < 0.04) is reported («The image has almost no colour») and its
+GNOME accent is `slate`. `--force` over a theme in the themes root moves the old directory to
+`trash/` first. `themes tokens seed` runs the same analysis and prints it; deskd's live "accent
+from wallpaper" mode runs it as a child process ([feature spec](spec/features/theme-from-wallpaper.md)).
 
 ## Visual checks
 

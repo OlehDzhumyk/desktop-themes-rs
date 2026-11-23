@@ -21,6 +21,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Theme from wallpaper (stage 2): live "accent from wallpaper" in `deskd` (settings
+  `accent-from-wallpaper`, `accent-source`; follows `org.gnome.desktop.background` with a 500 ms
+  debounce and sets `accent-color` to the nearest GNOME named accent, decoding the image in a
+  `themes tokens seed` child process; turning it off restores the previous accent), D-Bus
+  `Appearance.WallpaperAccent()`, `themes tokens seed PATH`, «Create theme from wallpaper…» in the
+  window (seed and light/dark preview with contrast numbers, name, «Apply»), an «Accent from
+  wallpaper» switch in the quick settings «Theme» menu, and a `themes doctor` line while it is on.
+  `themes tokens from-image` now reads slideshow XML (first image), refuses images under 16×16,
+  notes near-monochrome images, and with `--force` moves the old theme to `trash/`.
 - Automatic light/dark appearance (`auto-dark`): `deskd` now hosts the `appearance` engine
   (`io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance`) with a
   shared one-shot wake scheduler (`crates/deskd/src/schedule.rs`) that reacts to suspend/resume
