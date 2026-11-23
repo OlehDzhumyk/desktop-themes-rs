@@ -91,7 +91,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Volume mixer and audio device switching | Implemented | 2 | From Windows, adapted for macOS | [mixer](features/mixer.md) |
 | Emoji and symbol picker | Planned | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
 | Focus modes and do-not-disturb schedules | Planned | 2 | In Windows 11 and macOS | [focus](features/focus.md) |
-| Automatic light/dark by sunset | Planned | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |
+| Automatic light/dark by sunset | Implemented | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |
 | Theme from wallpaper | Partial | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
 | Settings hub "Desktop" | Partial | 1.5 / 2 | Original | [settings-hub](features/settings-hub.md) |
 | Screenshots, annotation, screen recording | Planned | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |

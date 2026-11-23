@@ -8,8 +8,13 @@ choice.
 
 ## Status
 
-**Planned** (stage 2). Origin badge: *From macOS, adapted for Windows 11 style* (macOS has "Auto" appearance by sunrise/sunset;
+**Implemented** (stage 2). Origin badge: *From macOS, adapted for Windows 11 style* (macOS has "Auto" appearance by sunrise/sunset;
 Windows 11 has a manual light/dark switch only, with third-party schedulers).
+
+*Gaps:* optional GNOME location service (GeoClue) lookup and skin-specific quick-settings
+indicators are deferred to a follow-up PR; offline city/coordinate lookup, timezone fallback,
+NOAA solar scheduling, fixed-time scheduling, manual override until next transition, and D-Bus
+control (`io.github.OlehDzhumyk.Desk.Appearance`) are implemented in `deskd`.
 
 ## Reference behaviour
 

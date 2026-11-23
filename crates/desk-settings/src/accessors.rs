@@ -377,6 +377,122 @@ impl MixerSettings {
     }
 }
 
+/// Values of `io.github.OlehDzhumyk.Desk.Appearance` `mode`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Mode {
+    #[default]
+    Manual,
+    Light,
+    Dark,
+    AutoSun,
+    AutoTime,
+}
+
+impl Mode {
+    pub const ALL: [Mode; 5] = [
+        Mode::Manual,
+        Mode::Light,
+        Mode::Dark,
+        Mode::AutoSun,
+        Mode::AutoTime,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Mode::Manual => "manual",
+            Mode::Light => "light",
+            Mode::Dark => "dark",
+            Mode::AutoSun => "auto-sun",
+            Mode::AutoTime => "auto-time",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "manual" => Mode::Manual,
+            "light" => Mode::Light,
+            "dark" => Mode::Dark,
+            "auto-sun" => Mode::AutoSun,
+            "auto-time" => Mode::AutoTime,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/appearance/`.
+#[derive(Clone, Debug)]
+pub struct AppearanceSettings(pub gio::Settings);
+
+impl AppearanceSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Appearance";
+    pub const MODE: &'static str = "mode";
+    pub const DARK_FROM: &'static str = "dark-from";
+    pub const LIGHT_FROM: &'static str = "light-from";
+    pub const LOCATION: &'static str = "location";
+    pub const TWILIGHT_OFFSET: &'static str = "twilight-offset";
+    pub const OVERRIDE_UNTIL_NEXT: &'static str = "override-until-next";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Colour scheme mode
+    pub fn mode(&self) -> Mode {
+        Mode::parse(&self.0.string(Self::MODE))
+    }
+
+    pub fn set_mode(&self, v: Mode) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::MODE, v.as_str())
+    }
+
+    /// Time to switch to dark mode (HH:MM, 24-hour)
+    pub fn dark_from(&self) -> String {
+        self.0.string(Self::DARK_FROM).to_string()
+    }
+
+    pub fn set_dark_from(&self, v: String) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::DARK_FROM, &v)
+    }
+
+    /// Time to switch to light mode (HH:MM, 24-hour)
+    pub fn light_from(&self) -> String {
+        self.0.string(Self::LIGHT_FROM).to_string()
+    }
+
+    pub fn set_light_from(&self, v: String) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::LIGHT_FROM, &v)
+    }
+
+    /// City name or coordinates (lat,lon) for sunrise and sunset
+    pub fn location(&self) -> String {
+        self.0.string(Self::LOCATION).to_string()
+    }
+
+    pub fn set_location(&self, v: String) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::LOCATION, &v)
+    }
+
+    /// Shift sunrise and sunset earlier (negative) or later (positive), in minutes
+    pub fn twilight_offset(&self) -> i32 {
+        self.0.int(Self::TWILIGHT_OFFSET)
+    }
+
+    pub fn set_twilight_offset(&self, v: i32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_int(Self::TWILIGHT_OFFSET, v)
+    }
+
+    /// Keep manual light/dark changes until the next scheduled transition
+    pub fn override_until_next(&self) -> bool {
+        self.0.boolean(Self::OVERRIDE_UNTIL_NEXT)
+    }
+
+    pub fn set_override_until_next(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::OVERRIDE_UNTIL_NEXT, v)
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.LogoMenu` at `/io/github/OlehDzhumyk/Desk/logo-menu/`.
 #[derive(Clone, Debug)]
 pub struct LogoMenuSettings(pub gio::Settings);

@@ -26,7 +26,7 @@ The repository is a Cargo workspace:
 | `crates/themes` | binary `themes` | CLI (`clap`), GTK 4 / libadwaita window («Теми»: themes, mix, «Функції»), theme D-Bus service (`--dbus-service`) |
 | `crates/desk-proto` | library | shared D-Bus names, interface XML (`data/dbus/`), the `ClipItem` type and a zbus client proxy |
 | `crates/desk-settings` | library | the settings registry (one source for the GSettings schema, typed accessors, the window's preference pages and docs/settings.md; `cargo xtask gen`) and the gettext helpers (`tr!`) |
-| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
+| `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
 `themes` with no arguments opens the window; `themes --dbus-service` is what the bus activates;
@@ -217,6 +217,20 @@ slider scale, 1.0 = 100 %):
 The engine (`crates/deskd/src/mixer/`) keeps a PipeWire connection on its own thread and changes
 nothing until asked; `model.rs` holds every rule and is tested with mocked graphs,
 `tests/mixer_pipewire.rs` runs deskd against an isolated PipeWire and WirePlumber.
+
+`/io/github/OlehDzhumyk/Desk/Appearance`, interface `io.github.OlehDzhumyk.Desk.Appearance`:
+
+| Member | Description |
+|---|---|
+| `Status() -> (s mode, s scheme, s next_transition, s location_label, b polar, b overridden)` | current mode, effective scheme (`light`/`dark`), next transition (`HH:MM` or empty), resolved location, polar day/night flag, manual override state |
+| `SetScheme(s scheme)` | manually switch `light`/`dark`/`default`, respecting `override-until-next` in auto modes |
+| `Recompute()` | force immediate schedule recomputation and timer re-arm |
+| signal `Changed()` | emitted when mode, scheme, schedule or override state changes |
+
+The engine (`crates/deskd/src/appearance/`) computes local sunrise/sunset offline using the NOAA
+solar algorithm, shares the one-shot wake scheduler (`crates/deskd/src/schedule.rs`) with
+suspend/resume and timezone watchers, and writes `org.gnome.desktop.interface color-scheme` only
+when the effective scheme changes.
 
 ## Crash protection
 

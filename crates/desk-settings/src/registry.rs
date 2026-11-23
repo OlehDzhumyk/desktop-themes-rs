@@ -38,6 +38,7 @@ pub static FEATURE_APP: Feature = Feature {
 pub static FEATURES: &[&Feature] = &[
     &FEATURE_CLIPBOARD,
     &crate::mixer::FEATURE_MIXER,
+    &crate::appearance::FEATURE_APPEARANCE,
     &crate::logo_menu::FEATURE_LOGO_MENU,
     &crate::lockscreen::FEATURE_LOCKSCREEN,
     &FEATURE_APP,
@@ -115,6 +116,7 @@ pub static DESK: Schema = Schema {
         ("clipboard", CLIPBOARD_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
+        ("appearance", crate::appearance::APPEARANCE_SCHEMA),
         ("logo-menu", crate::logo_menu::LOGO_MENU_SCHEMA),
     ],
 };
@@ -362,6 +364,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &CLIPBOARD,
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
+    &crate::appearance::APPEARANCE,
     &crate::logo_menu::LOGO_MENU,
 ];
 
@@ -501,6 +504,7 @@ pub static PAGE_CREDITS: Page = Page {
 pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
     &crate::mixer::PAGE_MIXER,
+    &crate::appearance::PAGE_APPEARANCE,
     &crate::logo_menu::PAGE_LOGO_MENU,
     &crate::lockscreen::PAGE_LOCKSCREEN,
     &PAGE_SHORTCUTS,
