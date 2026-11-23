@@ -6,6 +6,8 @@ mod card;
 mod credits;
 mod features;
 mod preview;
+mod search;
+mod system;
 mod window;
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -53,6 +55,22 @@ const CSS: &str = r#"
 .busy-veil { background: alpha(black, 0.35); border-radius: 14px 14px 0 0; }
 .module-chip { font-size: 0.85em; }
 flowboxchild { border-radius: 14px; padding: 0; }
+.sidebar-section-header {
+  font-weight: bold;
+  font-size: 0.82em;
+  opacity: 0.65;
+  padding: 12px 12px 4px 12px;
+}
+.search-highlight {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--accent-bg-color) 15%, transparent);
+  transition: background-color 300ms ease, outline-color 300ms ease;
+}
+.search-highlight-static {
+  outline: 2px solid var(--accent-bg-color);
+  outline-offset: -2px;
+}
 "#;
 
 /// Перезапустити вікно після виходу з циклу (дія `app.restart`, напр. після зміни мови).

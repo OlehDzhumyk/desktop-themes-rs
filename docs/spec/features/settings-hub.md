@@ -9,10 +9,7 @@ holds settings (principle 1); its pages are built from the **settings registry**
 
 ## Status
 
-**Partial.** Implemented on `main`: the window with «Теми», «Змішати», «Функції» (clipboard page, credits). Stage 1.5 (in review: the settings
-registry in `crates/desk-settings`, English source strings, Ukrainian `po/uk.po`, language override, `--page general`, generated
-`docs/settings.md`). **Planned** (stage 2 and later): renaming to «Робочий стіл», the sidebar of all feature pages, search, per-page reset, shortcut
-overrides, the quick-settings and launcher entries. Origin badge: *Original*.
+**Implemented.** On `main`: the «Desktop» («Робочий стіл») window with `adw::NavigationSplitView` sidebar (Appearance: Themes, Mix; Features: all registry feature pages; Application: Keyboard shortcuts, General, System; About: Credits), `Ctrl+F` header search across English and translated labels/descriptions/titles with row highlight, per-page «Reset page», inline System doctor/baseline/«Reset all», editable `Kind::StrList` rows (`excluded-apps`, `hide-apps`), quick-settings and `.desktop` entries, and `--page ID` (including legacy `--page features`). Remaining small gaps: live language reload without window restart (`G-HUB-4`) and pages for still-planned features (`G-HUB-5`). Origin badge: *Original*.
 
 ## Reference behaviour
 
