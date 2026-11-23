@@ -927,11 +927,12 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             dconf::write(EXT_KEY, &dconf::fmt_strv(&en))?;
             let ok = match &shell {
                 Some(sh) => {
-                    let infos = sh.settle(std::slice::from_ref(&b.uuid), Duration::from_secs(4));
-                    std::thread::sleep(Duration::from_millis(500));
-                    let st_now = sh.ext_info(&b.uuid).map(|i| i.state);
-                    let _ = infos;
-                    st_now == Some(ExtState::Active)
+                    let infos = sh.settle_targets(
+                        std::slice::from_ref(&b.uuid),
+                        &[],
+                        Duration::from_secs(4),
+                    );
+                    infos.get(&b.uuid).cloned().flatten().map(|i| i.state) == Some(ExtState::Active)
                 }
                 None => true, // перевіриться при вході
             };

@@ -130,7 +130,8 @@ impl Backend {
         }
     }
 
-    pub fn reset(&self, keys: &[String]) {
+    /// See [`reset`]; false when it fell back to one `dconf reset` per key.
+    pub fn reset(&self, keys: &[String]) -> bool {
         match self {
             Backend::Cli => reset(keys),
             #[cfg(test)]
@@ -139,6 +140,7 @@ impl Backend {
                 for k in keys {
                     db.data.remove(k);
                 }
+                true
             }
         }
     }
@@ -238,15 +240,17 @@ pub fn load(d: &Settings) -> Result<()> {
 }
 
 /// Resets keys. Many keys go to the dconf writer as one change (one D-Bus call instead of a
-/// `dconf reset` process per key); if that is not possible, key by key.
-pub fn reset(keys: &[String]) {
+/// `dconf reset` process per key); if that is not possible, key by key. False when it had to
+/// fall back to one process per key (for the apply log).
+pub fn reset(keys: &[String]) -> bool {
     not_in_tests();
     if keys.len() > 1 && reset_batch(keys).is_ok() {
-        return;
+        return true;
     }
     for k in keys {
         let _ = run("dconf", &["reset", k], None);
     }
+    keys.len() <= 1
 }
 
 /// One `ca.desrt.dconf.Writer.Change` with every key set to "nothing" (what `dconf reset` sends
@@ -276,6 +280,23 @@ fn reset_batch(keys: &[String]) -> Result<()> {
         &(bytes,),
     ))?;
     Ok(())
+}
+
+/// Returns once the dconf writer has handled every change sent to it before this call (an
+/// empty change: the writer works through its queue in order). Errors are ignored: it only
+/// orders, nothing depends on its result.
+pub fn writer_barrier() {
+    let Some(db) = user_db_name() else { return };
+    let Some(conn) = crate::shell::session() else {
+        return;
+    };
+    let _ = zbus::block_on(conn.call_method(
+        Some("ca.desrt.dconf"),
+        format!("/ca/desrt/dconf/Writer/{db}").as_str(),
+        Some("ca.desrt.dconf.Writer"),
+        "Change",
+        &(Vec::<u8>::new(),),
+    ));
 }
 
 /// A dconf key path: starts with `/`, does not end with `/`, no `//`.

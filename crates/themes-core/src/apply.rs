@@ -429,6 +429,10 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
         },
     )?;
     let live_shell = ctx.shell();
+    // for the apply log: the resets went as one change; the shell confirmed the dconf change
+    // before extensions were toggled (None: no wait was needed)
+    let mut reset_batched = true;
+    let mut settled: Option<bool> = None;
     let mut steps = || -> Result<()> {
         // 0. files generated from tokens (content-hashed cache) and their links; before dconf,
         // so the shell theme exists when user-theme reads its new name
@@ -457,25 +461,36 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
 
         // 1. dconf
         txn::step(ctx, &mut st, Step::Dconf)?;
-        ctx.dconf.reset(&dplan.resets);
+        // GNOME Shell 51.1 workaround (docs/architecture.md, "Applying a theme"): the shell must
+        // have processed the new keys before an extension is turned off, so the change
+        // notification is watched from before the write
+        let settle_keys: Vec<String> = if dplan.writes.is_empty() {
+            dplan.resets.clone()
+        } else {
+            dplan.writes.keys().cloned().collect()
+        };
+        let watch = live_shell
+            .as_ref()
+            .filter(|_| ext_changed && !settle_keys.is_empty())
+            .and_then(Shell::watch_dconf);
+        reset_batched = ctx.dconf.reset(&dplan.resets);
         ctx.dconf.load(&dplan.writes)?;
-        // 2. розширення. Спершу даємо оболонці обробити зміни налаштувань: якщо сповіщення про
-        // зміну org.gnome.desktop.interface надійде в момент вимкнення розширення з годинником,
+        // 2. розширення. Спершу оболонка обробляє зміни налаштувань: якщо сповіщення про зміну
+        // org.gnome.desktop.interface надійде в момент вимкнення розширення з годинником,
         // GNOME Shell 51.1 падає (SIGSEGV у gnome-desktop update_clock); до того ж нові
         // розширення одразу читають свої ключі.
         txn::step(ctx, &mut st, Step::Extensions)?;
-        if live_shell.is_some()
-            && ext_changed
-            && !(dplan.writes.is_empty() && dplan.resets.is_empty())
-        {
-            std::thread::sleep(Duration::from_millis(1200));
+        if let (Some(sh), Some(w)) = (&live_shell, watch) {
+            settled = Some(sh.after_dconf_change(w, &settle_keys, SHELL_SETTLE_LIMIT));
         }
         for (key, new, def) in [
             (EXT_KEY, &new_en, &default_en),
             (DIS_KEY, &new_dis, &default_dis),
         ] {
             match ext_action(key, new, &baseline, def) {
-                ExtAction::Reset => ctx.dconf.reset(&[key.to_string()]),
+                ExtAction::Reset => {
+                    ctx.dconf.reset(&[key.to_string()]);
+                }
                 ExtAction::Write(v) => {
                     if cur.get(key) != Some(&v) {
                         ctx.dconf.write(key, &v)?
@@ -559,11 +574,11 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     txn::commit(ctx, &mut st)?;
 
     // 7. живе оновлення оболонки
-    if let Some(shell) = live_shell {
+    if let Some(shell) = &live_shell {
         res.shell_running = true;
         live_check(
             ctx,
-            &shell,
+            shell,
             &new_en,
             &added,
             &removed,
@@ -577,15 +592,22 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
             && has_shell_theme
             && !added.iter().any(|u| u.starts_with("user-theme@"))
         {
-            crate::shell::reload_user_theme(&shell, "");
+            crate::shell::reload_user_theme(shell, "");
         }
     }
     // 8. прибирання після того, як розширення відпрацювали (вони інколи пишуть ключі при вимкненні)
     if full_reset {
         ctx.dconf.reset(&crate::shortcuts::override_paths());
     }
-    if res.shell_running && ext_changed {
-        std::thread::sleep(Duration::from_millis(1500));
+    // extensions that were turned off may write keys while shutting down: their writes reach
+    // dconf before the cleanup reads it (the states settled in live_check; this orders the
+    // shell's pending writes before the dump)
+    if res.shell_running
+        && ext_changed
+        && let Some(sh) = &live_shell
+    {
+        let _ = sh.version();
+        dconf::writer_barrier();
     }
     let purge: Vec<String> = if full_reset && purge_ext_state {
         theme_exts
@@ -604,7 +626,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
         ctx,
         &format!(
             // формат apply.log, його розбирає crash.rs
-            "apply {id} modules={} (було: {}) keys_changed={} resets={} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}", // i18n-ok
+            "apply {id} modules={} (було: {}) keys_changed={} resets={}{} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}{}", // i18n-ok
             affected
                 .iter()
                 .map(|m| m.id())
@@ -613,6 +635,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
             fmt_sel(&prev_sel),
             res.changed_keys.len(),
             res.resets_effective,
+            if reset_batched { "" } else { "/per-key" },
             if new_en.is_empty() {
                 "-".into()
             } else {
@@ -624,6 +647,11 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
             res.tokens_ms,
             res.live,
             res.relogin,
+            match settled {
+                Some(true) => " shell-settle=ok",
+                Some(false) => " shell-settle=timeout",
+                None => "",
+            },
             if res.warnings.is_empty() {
                 String::new()
             } else {
@@ -633,6 +661,10 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     );
     Ok(res)
 }
+
+/// Upper bound of the wait for the shell to process a dconf change (the GNOME Shell 51.1
+/// workaround); past it the apply goes on.
+const SHELL_SETTLE_LIMIT: Duration = Duration::from_secs(3);
 
 pub fn fmt_sel(sel: &BTreeMap<Module, String>) -> String {
     if sel.is_empty() {
