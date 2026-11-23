@@ -88,7 +88,9 @@ Empty-result text: «Нічого не знайдено за «<query>»».
 3. If `paste-on-select` is on, **after 120 ms** (time for the focus to return) it sends `Shift+Insert`,
    or `Ctrl+Shift+Insert` when the focused client's input purpose is `TERMINAL`. With `paste-on-select`
    off the item is only put on the clipboard.
-4. Re-capture of our own clipboard write is harmless: the same content is a duplicate and only bumps.
+4. Our own clipboard write is captured with `application/x-desk-internal` added to the offered
+   types, and deskd skips it (`Activate` already moved the item up).
+5. The bridge pastes only content from a deskd it verified (see Privacy & security).
 
 Only the plain-text flavour of text is stored; pasting an item gives plain text (rich formatting,
 HTML and file lists are not kept).
@@ -99,18 +101,31 @@ The shell's `Meta.Selection::owner-changed` for the clipboard selection triggers
 **serialised**: a change while reading schedules exactly one more read afterwards, so a burst of
 copies records the first read and the latest value; values overwritten before they could be read are
 not recorded. Order of types: `text/plain;charset=utf-8`, `UTF8_STRING`, `text/plain`, `STRING`, then (if
-images are on) `image/png`, `jpeg`, `jpg`, `gif`, `webp`, `svg+xml`; the first type that the source
-offers and returns non-empty is stored. Text wins when a source offers both. `UTF8_STRING` is stored as
+images are on) `image/png`, `jpeg`, `jpg`, `gif`, `webp`; the first type that the source
+offers and returns non-empty is stored. Text wins when a source offers both. SVG is never read
+(the shell would render it with a vector renderer in its own process). `UTF8_STRING` is stored as
 UTF-8 text (works around gnome-shell issue 8233). The focused window's WM class at read time is passed
 to deskd as the source application.
 
 ### Engine rules (deskd, binding)
 
 * Skipped (silently, `Push` returns 0): feature disabled; private mode; **any** offered type equal
-  to `x-kde-passwordManagerHint` or `application/x-nspasteboard-concealed-type` (case-insensitive,
-  and the bridge does not even read the content); source application in `excluded-apps` (case-insensitive
-  exact match of WM class or app id); empty content; text of only whitespace; text larger than
-  **256 KiB**; an image when images are off or larger than `image-max-kb`; any other MIME type.
+  to a password-manager hint (case-insensitive, and the bridge does not even read the content):
+  `x-kde-passwordManagerHint` (KeePassXC, KWalletManager, Firefox's password manager on Linux),
+  `org.nspasteboard.ConcealedType`, `org.nspasteboard.TransientType`,
+  `application/x-nspasteboard-concealed-type` (nspasteboard.org convention),
+  `ExcludeClipboardContentFromMonitorProcessing` (Windows opt-out, set by Chromium-based apps);
+  the bridge's own paste (`application/x-desk-internal` offered); source application in
+  `excluded-apps` (case-insensitive exact match of WM class or app id); empty content; text of
+  only whitespace; text larger than **256 KiB**; an image when images are off or larger than
+  `image-max-kb`; an image that is not PNG, JPEG, GIF or WebP **by its first bytes** (the shell's
+  loader goes by content, so a mislabelled SVG is refused too); any other MIME type.
+* **Probable secrets** without a hint (Bitwarden and 1Password on Linux set none today): a text of
+  10..64 characters without whitespace, with letters, digits and a third class (another case or
+  symbols), at least 3 bits of entropy per character, and not a URL, path, e-mail address or UUID.
+  It is recorded (it can be pasted) but kept **in memory only**: never written to `history.json`,
+  and removed 120 s after its last copy. Pinning it is the user's choice to keep it: the expiry
+  goes and it is saved like any item. Copying it again restarts the 120 s.
 * **Duplicates** (same kind and same bytes) are not added again: the existing item moves to the top
   with a new time; its pin is kept.
 * **Trimming:** after each add or unpin, the oldest *unpinned* items beyond `history-size` are
@@ -120,6 +135,9 @@ to deskd as the source application.
   історію» removes everything, after a confirmation («Буде видалено всі записи, зокрема закріплені.
   Це не можна скасувати.»).
 * Ids are unique, never reused within a store.
+* `history.json` is not trusted: entries whose image name is not 16 hex digits plus `.png`,
+  `.jpg`, `.gif` or `.webp`, and text entries with an image name, are dropped at load; no other name
+  is ever joined onto a path.
 * Storage: text history in `~/.local/share/deskd/clipboard/history.json` (dir 0700, file 0600,
   written atomically via temp file + rename, debounced: 2 s after the last change, at most 10 s after
   the first, and flushed on SIGTERM/SIGINT/SIGHUP so a logout loses nothing) when `persist` is on; images in
@@ -179,8 +197,20 @@ The window page `--page clipboard` shows History, Privacy, "How to open" and a d
 * Secrets: hinted content and password-manager windows are never read or stored. Not a guarantee for
   content that carries no hint (a password copied from a web page): the user must use private mode;
   the spec's job is to make that one click away (tile switch, window switch).
-* D-Bus is the session bus; any process of the user can call deskd. History is as private as the user's
-  session; sandboxed apps cannot reach it unless granted the bus name.
+* D-Bus trust ([ADR 0008](../../adr/0008-deskd-serves-content-to-trusted-callers.md)): `Push`,
+  `List`, `Get`, `Activate`, `Pin`, `Delete`, `Clear` and setting `Private` are served only to the
+  owner of `org.gnome.Shell` and our own binaries (deskd, `themes`), running as the same user with
+  the same root directory; Flatpak and other sandboxed apps get `AccessDenied` even with
+  session-bus access or a `--talk-name` for our name. `Count`, `Enabled`, `Private` (read) and the
+  `Changed` signal stay open (no content).
+* deskd's bus name is not replaceable (only the development mode `deskd --replace` is), and the
+  bridge checks that the owner is the installed deskd (same user and root, executable = the file
+  of deskd's D-Bus activation file or `~/.local/bin/deskd`) before it pushes anything or pastes
+  anything it returns; a refused owner is logged once.
+* `persist` stays on by default: with the hints, `excluded-apps`, the probable-secret rule (memory
+  only) and the 0600 file, the remaining risk is a secret copied from an app with no hint that the
+  heuristic misses; private mode is one click away. Revisit if a default-off history proves better
+  in practice.
 * Logs must never contain item text (today they do not).
 
 ## Edge cases
@@ -194,6 +224,10 @@ The window page `--page clipboard` shows History, Privacy, "How to open" and a d
 | HTML / rich text | recorded as plain text only |
 | File copied in Files | not recorded as a file (no `text/uri-list` support); a text form, if offered, is recorded |
 | Password manager hint | not read, not stored, no trace in the list or in logs |
+| Unhinted password/token (e.g. from Bitwarden) | recorded in memory only, gone after 120 s, never on disk (unless pinned) |
+| A sandboxed app or `gdbus` calls `List` | `AccessDenied`; the refusal is logged once with the caller's pid, never the content |
+| A process owns `io.github.OlehDzhumyk.Desk` before deskd | the bridge refuses it: nothing is pushed or pasted, one warning in the shell log |
+| A copied SVG, or SVG bytes labelled `image/png` | not recorded |
 | Password manager as the focused window | skipped by `excluded-apps` |
 | Private mode on | nothing recorded; existing items can still be browsed and pasted; the tile says so |
 | Rapid copies (several per second) | no crash, no duplicate rows, the latest value is always recorded; intermediate values may be lost (documented above) |
@@ -296,6 +330,16 @@ fine); deskd <= 20 MB resident after 200 pushes; capture adds no polling (event-
 * AC-CLIP-19: Given `color-scheme` is `prefer-light`, When the panel opens, Then text/background
   contrast is >= 4.5:1 (target, G-CLIP-3).
 * AC-CLIP-20: Given `Super+V` is pressed twice quickly, Then the panel is closed (toggle), never doubled.
+* AC-CLIP-21: Given deskd runs, When a process that is neither the shell nor our binary calls `List`,
+  `Get`, `Activate` or `Push`, Then it gets `AccessDenied` and the history is unchanged
+  (e2e `test_trust.py`).
+* AC-CLIP-22: Given deskd owns its name, When another process requests it with `REPLACE_EXISTING`,
+  Then the request fails and deskd keeps recording; Given another process owns the name before
+  deskd, Then the bridge sends it nothing (e2e `test_trust.py`).
+* AC-CLIP-23: Given `history.json` names an image `../../x`, When deskd loads it, Then the entry is
+  dropped and no file outside the images directory is read or deleted.
+* AC-CLIP-24: Given a text such as `hR7#kq2!Lm9z` is copied, Then it is listed, is absent from
+  `history.json`, and is gone 120 s later unless pinned.
 
 ## Open questions
 

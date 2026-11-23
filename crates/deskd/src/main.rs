@@ -11,6 +11,7 @@ mod panic_policy;
 mod persist;
 mod service;
 mod settings;
+mod trust;
 
 use std::sync::{Arc, Mutex, OnceLock};
 
@@ -29,7 +30,7 @@ fn usage() {
     println!(
         "{}",
         tr!(
-            "deskd {version} — desktop features service (D-Bus {name})\n\nUsage: deskd [--replace]\n  --replace   take the bus name over from a running deskd\n  --version",
+            "deskd {version} — desktop features service (D-Bus {name})\n\nUsage: deskd [--replace]\n  --replace   development: take the bus name over from a deskd started with --replace, and let the next one take it\n  --version",
             version = env!("CARGO_PKG_VERSION"),
             name = BUS_NAME
         )
@@ -140,10 +141,12 @@ fn main() {
             persist::MAX_WAIT,
         )
     };
+    let gate = trust::Gate::new(Arc::new(trust::Trust::installed()));
     let clip = ClipboardIface {
         eng: eng.clone(),
         saver: saver.clone(),
         set_private: settings::set_private_async,
+        gate: gate.clone(),
     };
     let desk = Desk {
         features: features(),
@@ -179,24 +182,16 @@ fn main() {
     let mixer = Arc::new(Mixer::new(graph, notifier, Some(store)));
     let mixer_iface = mixer::service::MixerIface {
         mixer: mixer.clone(),
+        gate,
     };
     let conn = zbus::block_on(async {
-        let mut flags = zbus::fdo::RequestNameFlags::ALLOW_REPLACEMENT;
-        if replace {
-            flags |= zbus::fdo::RequestNameFlags::REPLACE_EXISTING;
-        }
         let conn = zbus::connection::Builder::session()
             .serve_at(DESK_PATH, desk)
             .serve_at(CLIPBOARD_PATH, clip)
             .serve_at(MIXER_PATH, mixer_iface)
             .build()
             .await?;
-        let reply = conn
-            .request_name_with_flags(BUS_NAME, flags | zbus::fdo::RequestNameFlags::DO_NOT_QUEUE)
-            .await?;
-        if matches!(reply, zbus::fdo::RequestNameReply::Exists) {
-            return Err(zbus::Error::NameTaken);
-        }
+        service::own_name(&conn, replace).await?;
         Ok::<_, zbus::Error>(conn)
     });
     let conn = match conn {
@@ -258,6 +253,18 @@ fn main() {
                 }
                 _ => {}
             }
+        });
+    }
+
+    // probable secrets live in memory for a short time only (clipboard::SECRET_TTL)
+    {
+        let eng = eng.clone();
+        let conn = conn.clone();
+        glib::timeout_add_seconds_local(15, move || {
+            if service::lock(&eng).expire(service::now()) {
+                emit_changed(&conn);
+            }
+            glib::ControlFlow::Continue
         });
     }
 

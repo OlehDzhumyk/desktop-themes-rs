@@ -107,7 +107,7 @@ user's machine, not committed.
 toolbox run -c desktop-themes-build cargo test                 # all crates
 toolbox run -c desktop-themes-build cargo build --release
 toolbox run -c desktop-themes-build sh -c 'cd bridge && npm ci && npm run typecheck && npm run lint && npm run build'
-tools/headless/clipboard-test.sh windows11 Super+v /tmp/shots  # isolated headless end-to-end test
+just e2e                                       # GNOME Shell end-to-end tests in a container
 tools/integration-test.sh target/release/themes   # CAUTION: writes your real dconf; run in a VM/spare session
 ```
 

@@ -87,7 +87,6 @@ your real session is read for writing:
 cargo build -p deskd
 (cd bridge && npm ci && npm run build)
 export HS_TOOLBOX=themes-dev        # toolbox that has dbus-daemon; HS_TOOLBOX=none inside a container
-tools/headless/clipboard-test.sh windows11 Super+v /tmp/shots     # end-to-end clipboard test
 tools/headless/start.sh --theme macos --ext bridge/build/desk-bridge@desktop-themes-rs
 tools/headless/run.sh dconf dump /     # run any command inside the isolated session
 tools/headless/stop.sh
@@ -163,7 +162,6 @@ toolbox create --image localhost/desktop-themes-dev themes-dev
 just check-changed     # while iterating: only what you changed vs origin/main
 just check             # everything CI checks (fmt and clippy have known findings for now)
 just privacy           # personal or machine-specific strings in tracked files
-just headless          # clipboard end-to-end test in the isolated headless shell
 just install-hooks     # pre-commit: gitleaks, rustfmt of staged files, privacy check
 tools/install-dev-tools.sh   # pinned cargo-nextest + ast-grep into ~/.local/bin
 ```

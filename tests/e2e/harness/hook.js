@@ -209,6 +209,35 @@ export async function panelItems() {
     return panel.items.map(i => i.text);
 }
 
+// ---- deskd through the bridge: deskd serves history only to the shell (ADR 0008), so the tests
+// read it the way the bridge does
+function clipClient() {
+    const c = bridge()?._clipboard?.client;
+    if (!c)
+        throw new Error('the bridge has no clipboard client');
+    return c;
+}
+
+/** Texts of the history, newest first (deskd's List called by the bridge). */
+export async function clipTexts() {
+    return (await clipClient().list('', 0)).map(i => i.text);
+}
+
+/** Push a text through the bridge's client: {ok, id} or {ok: false, error}. */
+export async function clipPush(text) {
+    try {
+        const id = await clipClient().push('text/plain;charset=utf-8', new TextEncoder().encode(text), [], '');
+        return {ok: true, id};
+    } catch (e) {
+        return {ok: false, error: String(e?.message ?? e)};
+    }
+}
+
+/** Whether the bridge verified the current owner of io.github.OlehDzhumyk.Desk. */
+export function clipTrusted() {
+    return clipClient().trusted;
+}
+
 // ---- leak tracker. While tracking, every GObject created and every signal handler / main-loop
 // source added with `fragment` (a path part such as the extension uuid) in the JS stack is
 // recorded. leaks() then reports what is still alive:

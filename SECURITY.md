@@ -24,6 +24,14 @@ desktop-themes-rs runs entirely as the logged-in user. Things we treat as securi
   recording content that should be excluded (password-manager hints, excluded apps, private mode),
   weak file permissions on `~/.local/share/deskd/` or `$XDG_RUNTIME_DIR/deskd/`, other local users
   or sandboxed apps reaching the D-Bus interface in a way the design does not intend.
+  The design ([ADR 0008](docs/adr/0008-deskd-serves-content-to-trusted-callers.md)): clipboard
+  content, history changes and the mixer are served only to GNOME Shell and our own binaries
+  running as the same user outside a sandbox; Flatpak and other sandboxed apps are refused even
+  with session-bus access; deskd's bus name cannot be taken over, and the shell bridge sends and
+  pastes nothing unless the name's owner is the installed deskd. A way around any of this is in
+  scope. Unsandboxed programs of the same user are not a boundary we can hold (they can read the
+  history files or attach to the shell directly); bypasses that need only such a program are
+  hardening, not vulnerabilities.
 * **The theme manager**: a theme (including a downloaded one) that can run code other than the
   documented `apps/hooks/apply|revert` hooks, writes outside the documented locations, or
   escapes path expansion; unsafe handling of `state.json`, backups or the lock file.
