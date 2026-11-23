@@ -23,6 +23,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Emoji and symbols (`emoji`) | In Windows 11 and macOS |
 | Colour picker (`color-picker`) | In Windows 11 (PowerToys) and macOS (Digital Color Meter) |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
+| On-screen displays (`osd`) | In Windows 11 and macOS |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
 | Focus (`focus`) | Available in Windows 11 and macOS |
 | Logo menu (`logo-menu`) | From macOS |
@@ -106,6 +107,17 @@ Path `/io/github/OlehDzhumyk/Desk/mixer/`.
 | `hide-apps` | string list | `[]` |  | Hidden applications | Applications never listed in the mixer (app id or program name) | mixer | list on `--page mixer` |
 | `mixer-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | mixer | shortcut row on `--page shortcuts` |
 
+## `io.github.OlehDzhumyk.Desk.Osd`
+
+Path `/io/github/OlehDzhumyk/Desk/osd/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Themed on-screen displays | Off, or with the default skin, the stock GNOME Shell OSD is used and the bridge does not touch Main.osdWindowManager. | osd | switch on `--page osd` |
+| `show-percentage` | boolean | `true` |  | Show the percentage | The number next to the level bar; high contrast always shows it | osd | switch on `--page osd` |
+| `timeout-ms` | unsigned | `1500` | 500…4000 (step 100) | Hide after (ms) | A repeated key press restarts this one timer; it does not open a second OSD. | osd | spin button on `--page osd` |
+| `position` | choice | `'skin-default'` | `skin-default`, `bottom-center`, `center`, `top-right` | Position | Where on the monitor with the pointer the display appears | osd | drop-down on `--page osd` |
+
 ## `io.github.OlehDzhumyk.Desk.Appearance`
 
 Path `/io/github/OlehDzhumyk/Desk/appearance/`.
@@ -187,6 +199,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `emoji` | Emoji and symbols | Picker, How to open |
 | `color-picker` | Colour picker | Picker, History, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
+| `osd` | On-screen displays | Display, Style |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |
 | `focus` | Focus | State, Options, Focus sessions |
 | `logo-menu` | Logo menu | Top bar |

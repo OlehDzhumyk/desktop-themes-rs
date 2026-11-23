@@ -666,6 +666,98 @@ impl MixerSettings {
     }
 }
 
+/// Values of `io.github.OlehDzhumyk.Desk.Osd` `position`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Position {
+    #[default]
+    SkinDefault,
+    BottomCenter,
+    Center,
+    TopRight,
+}
+
+impl Position {
+    pub const ALL: [Position; 4] = [
+        Position::SkinDefault,
+        Position::BottomCenter,
+        Position::Center,
+        Position::TopRight,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Position::SkinDefault => "skin-default",
+            Position::BottomCenter => "bottom-center",
+            Position::Center => "center",
+            Position::TopRight => "top-right",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "skin-default" => Position::SkinDefault,
+            "bottom-center" => Position::BottomCenter,
+            "center" => Position::Center,
+            "top-right" => Position::TopRight,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Osd` at `/io/github/OlehDzhumyk/Desk/osd/`.
+#[derive(Clone, Debug)]
+pub struct OsdSettings(pub gio::Settings);
+
+impl OsdSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Osd";
+    pub const ENABLED: &'static str = "enabled";
+    pub const SHOW_PERCENTAGE: &'static str = "show-percentage";
+    pub const TIMEOUT_MS: &'static str = "timeout-ms";
+    pub const POSITION: &'static str = "position";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Draw the volume and brightness OSD in the style of the skin
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Show the level as a number
+    pub fn show_percentage(&self) -> bool {
+        self.0.boolean(Self::SHOW_PERCENTAGE)
+    }
+
+    pub fn set_show_percentage(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SHOW_PERCENTAGE, v)
+    }
+
+    /// Milliseconds after the last change before the OSD hides
+    pub fn timeout_ms(&self) -> u32 {
+        self.0.uint(Self::TIMEOUT_MS)
+    }
+
+    pub fn set_timeout_ms(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::TIMEOUT_MS, v)
+    }
+
+    /// Position of the OSD on the monitor
+    pub fn position(&self) -> Position {
+        Position::parse(&self.0.string(Self::POSITION))
+    }
+
+    pub fn set_position(&self, v: Position) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::POSITION, v.as_str())
+    }
+}
+
 /// Values of `io.github.OlehDzhumyk.Desk.Appearance` `mode`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Mode {

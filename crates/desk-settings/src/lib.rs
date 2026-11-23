@@ -14,6 +14,7 @@ pub mod lockscreen;
 pub mod logo_menu;
 pub mod mixer;
 pub mod model;
+pub mod osd;
 pub mod registry;
 pub mod shortcuts;
 pub mod stable_hash;
@@ -31,6 +32,7 @@ pub use lockscreen::*;
 pub use logo_menu::*;
 pub use mixer::*;
 pub use model::*;
+pub use osd::*;
 pub use registry::*;
 
 /// Every schema of the registry: ours ([`SCHEMAS`]) and those of the repository's extensions
