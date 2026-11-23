@@ -143,7 +143,31 @@ pub(crate) fn rollback(ctx: &Ctx, st: &mut State) -> Vec<String> {
         }
     }
     if p.began(Step::Dconf) || p.began(Step::Extensions) {
-        note(ctx.dconf.restore(&p.dconf_before), &mut w);
+        // like the apply itself (GNOME Shell 51.1 workaround): theme keys first, the extension
+        // list only after the shell has processed them
+        let is_ext = |k: &String| k == crate::EXT_KEY || k == crate::DIS_KEY;
+        let (ext, keys): (BTreeMap<_, _>, BTreeMap<_, _>) = p
+            .dconf_before
+            .clone()
+            .into_iter()
+            .partition(|(k, _)| is_ext(k));
+        let shell = ctx.shell();
+        let watch = shell.as_ref().and_then(crate::shell::Shell::watch_dconf);
+        let changed: Vec<String> = match ctx.dconf.dump() {
+            Ok(now) => keys
+                .iter()
+                .filter(|(k, v)| now.get(*k) != v.as_ref())
+                .map(|(k, _)| k.clone())
+                .collect(),
+            Err(_) => keys.keys().cloned().collect(),
+        };
+        note(ctx.dconf.restore(&keys), &mut w);
+        if let (Some(sh), Some(watch)) = (&shell, watch)
+            && !changed.is_empty()
+        {
+            sh.after_dconf_change(watch, &changed, std::time::Duration::from_secs(3));
+        }
+        note(ctx.dconf.restore(&ext), &mut w);
     }
     if p.began(Step::Tokens) {
         for m in [Module::Look, Module::Apps] {

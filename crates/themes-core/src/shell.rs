@@ -271,7 +271,7 @@ impl Shell {
         timeout: Duration,
         done: impl Fn(&HashMap<String, Option<ExtInfo>>) -> bool,
     ) -> HashMap<String, Option<ExtInfo>> {
-        let deadline = Instant::now() + timeout;
+        let alarm = Alarm::new(Instant::now() + timeout);
         // subscribed before the first read: a change between the read and the wait is not lost
         let mut changes = self.signals(
             "type='signal',sender='org.gnome.Shell',interface='org.gnome.Shell.Extensions',\
@@ -288,7 +288,7 @@ impl Shell {
             let Some(stream) = changes.as_mut() else {
                 return infos; // no subscription: nothing to wait on
             };
-            if until(deadline, next_message(stream)).flatten().is_none() {
+            if alarm.run(next_message(stream)).flatten().is_none() {
                 return infos;
             }
         }
@@ -311,10 +311,10 @@ impl Shell {
         keys: &[String],
         timeout: Duration,
     ) -> bool {
-        let deadline = Instant::now() + timeout;
+        let alarm = Alarm::new(Instant::now() + timeout);
         let mut stream = watch.0;
         let seen = loop {
-            match until(deadline, next_message(&mut stream)).flatten() {
+            match alarm.run(next_message(&mut stream)).flatten() {
                 Some(m) => {
                     let covers = m
                         .body()
@@ -359,42 +359,53 @@ async fn next_message(stream: &mut zbus::MessageStream) -> Option<zbus::Message>
         .and_then(|r| r.ok())
 }
 
-/// Runs `fut` to completion or until `deadline`, whichever comes first (`None`: time is up).
-/// The alarm is a sleeping helper thread that wakes the future; nothing polls.
-pub(crate) fn until<T>(deadline: Instant, fut: impl std::future::Future<Output = T>) -> Option<T> {
-    use std::sync::atomic::{AtomicBool, Ordering};
-    use std::sync::{Arc, Mutex};
-    use std::task::{Poll, Waker};
-    struct Alarm {
-        fired: AtomicBool,
-        waker: Mutex<Option<Waker>>,
-    }
-    let alarm = Arc::new(Alarm {
-        fired: AtomicBool::new(false),
-        waker: Mutex::new(None),
-    });
-    {
-        let alarm = alarm.clone();
+/// A deadline that wakes whatever waits on it: one sleeping helper thread per deadline, so
+/// waits on signals need no polling. [`Alarm::run`] can be called many times.
+pub(crate) struct Alarm {
+    inner: std::sync::Arc<AlarmInner>,
+}
+
+struct AlarmInner {
+    fired: std::sync::atomic::AtomicBool,
+    waker: std::sync::Mutex<Option<std::task::Waker>>,
+}
+
+impl Alarm {
+    pub(crate) fn new(deadline: Instant) -> Alarm {
+        use std::sync::atomic::Ordering;
+        let inner = std::sync::Arc::new(AlarmInner {
+            fired: std::sync::atomic::AtomicBool::new(false),
+            waker: std::sync::Mutex::new(None),
+        });
         let left = deadline.saturating_duration_since(Instant::now());
+        let i = inner.clone();
         std::thread::spawn(move || {
             std::thread::sleep(left);
-            alarm.fired.store(true, Ordering::SeqCst);
-            if let Some(w) = alarm.waker.lock().unwrap_or_else(|p| p.into_inner()).take() {
+            i.fired.store(true, Ordering::SeqCst);
+            if let Some(w) = i.waker.lock().unwrap_or_else(|p| p.into_inner()).take() {
                 w.wake();
             }
         });
+        Alarm { inner }
     }
-    let mut fut = std::pin::pin!(fut);
-    zbus::block_on(std::future::poll_fn(|cx| {
-        if let Poll::Ready(v) = fut.as_mut().poll(cx) {
-            return Poll::Ready(Some(v));
-        }
-        *alarm.waker.lock().unwrap_or_else(|p| p.into_inner()) = Some(cx.waker().clone());
-        if alarm.fired.load(Ordering::SeqCst) {
-            return Poll::Ready(None);
-        }
-        Poll::Pending
-    }))
+
+    /// Runs `fut` to completion or until the deadline, whichever comes first (`None`: time is
+    /// up).
+    pub(crate) fn run<T>(&self, fut: impl std::future::Future<Output = T>) -> Option<T> {
+        use std::sync::atomic::Ordering;
+        use std::task::Poll;
+        let mut fut = std::pin::pin!(fut);
+        zbus::block_on(std::future::poll_fn(|cx| {
+            if let Poll::Ready(v) = fut.as_mut().poll(cx) {
+                return Poll::Ready(Some(v));
+            }
+            *self.inner.waker.lock().unwrap_or_else(|p| p.into_inner()) = Some(cx.waker().clone());
+            if self.inner.fired.load(Ordering::SeqCst) {
+                return Poll::Ready(None);
+            }
+            Poll::Pending
+        }))
+    }
 }
 
 pub(crate) fn session() -> Option<Connection> {
@@ -471,10 +482,12 @@ mod tests {
     }
 
     #[test]
-    fn until_returns_ready_values_and_gives_up_at_the_deadline() {
-        let soon = Instant::now() + Duration::from_secs(3600);
-        assert_eq!(until(soon, async { 7 }), Some(7));
+    fn alarm_returns_ready_values_and_gives_up_at_the_deadline() {
+        let later = Alarm::new(Instant::now() + Duration::from_secs(3600));
+        assert_eq!(later.run(async { 7 }), Some(7));
+        assert_eq!(later.run(async { 8 }), Some(8));
         // a future that never completes, with a deadline already passed
-        assert_eq!(until(Instant::now(), std::future::pending::<()>()), None);
+        let passed = Alarm::new(Instant::now());
+        assert_eq!(passed.run(std::future::pending::<()>()), None);
     }
 }

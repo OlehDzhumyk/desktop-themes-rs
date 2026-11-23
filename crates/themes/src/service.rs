@@ -128,9 +128,11 @@ impl Service {
                 .map_err(|e| zbus::fdo::Error::Failed(e.0))
         })
         .await??;
+        // the state file monitor may have announced it already
         let map = current_map(&self.ctx);
-        self.act.announce(&map);
-        let _ = Service::changed(emitter, map).await;
+        if self.act.announce(&map) {
+            let _ = Service::changed(emitter, map).await;
+        }
         // автовідкат через ~5 с, поза викликом (сигнал Changed, якщо щось вимкнено)
         if res.shell_running && res.extensions_changed {
             let ctx = self.ctx.clone();
