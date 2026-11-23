@@ -45,6 +45,13 @@ pub fn fnv1a64(parts: &[&[u8]]) -> u64 {
     h.finish()
 }
 
+/// Hash of one byte string, without the separator byte of [`fnv1a64`]: plain FNV-1a over `data`.
+/// This is the form of the generated-file cache keys (`theme-tokens`); it differs from
+/// `fnv1a64(&[data])`, so the two must not be swapped.
+pub fn fnv1a64_bytes(data: &[u8]) -> u64 {
+    Fnv1a64::new().write(data).finish()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -64,5 +71,21 @@ mod tests {
     fn parts_are_separated() {
         assert_ne!(fnv1a64(&[b"ab", b"c"]), fnv1a64(&[b"a", b"bc"]));
         assert_eq!(fnv1a64(&[b"x", b"y"]), fnv1a64(&[b"x", b"y"]));
+    }
+
+    /// Fixed reference values of the two entry points. The clipboard history (`history.json`,
+    /// format v2) stores `fnv1a64(&[kind, data])` and the token cache stores `fnv1a64_bytes`:
+    /// changing any of these values silently orphans or duplicates stored entries.
+    #[test]
+    fn persisted_values_never_change() {
+        assert_eq!(fnv1a64_bytes(b""), 0xcbf2_9ce4_8422_2325);
+        assert_eq!(fnv1a64_bytes(b"foobar"), 0x8594_4171_f739_67e8);
+        assert_eq!(fnv1a64(&[b"text", b"hello"]), 0x3205_3331_eadc_33f6);
+        assert_eq!(
+            fnv1a64(&[b"image", b"\x89PNG\r\n\x1a\n"]),
+            0x1cb0_05f7_92e5_0891
+        );
+        assert_eq!(fnv1a64(&[b"ab", b"c"]), 0xad22_872f_536e_4705);
+        assert_eq!(fnv1a64(&[b"a", b"bc"]), 0x4018_01fc_84f3_ca79);
     }
 }

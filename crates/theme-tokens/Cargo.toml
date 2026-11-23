@@ -11,6 +11,7 @@ repository.workspace = true
 name = "theme_tokens"
 
 [dependencies]
+desk-settings.workspace = true
 serde.workspace = true
 toml = { version = "1.2.2", default-features = false, features = ["parse", "display", "serde", "std"] }
 
