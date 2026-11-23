@@ -199,8 +199,8 @@ Silverblue has no compilers on the host. `scripts/lib.sh` runs build steps insid
 packages: `git curl unzip sassc glib2-devel gtk-update-icon-cache gcc pkgconf-pkg-config gtk4-devel
 libadwaita-devel pipewire-devel clang-devel rust cargo python3-numpy python3-scipy python3-soundfile python3-pillow nodejs npm gettext`
 (npm builds the TypeScript bridge; its dev dependencies are pinned in `bridge/package-lock.json`).
-The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.89 or newer is required
-(edition 2024, let chains); `bootstrap.sh --rustup` installs a toolchain with rustup if the
+The toolbox shares `$HOME`, so artifacts land in the real home. Rust 1.100 or newer is required
+(`rust-version` in `Cargo.toml`: the release Fedora 45 ships); `bootstrap.sh --rustup` installs a toolchain with rustup if the
 distribution's is older.
 
 ## Testing

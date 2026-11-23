@@ -27,13 +27,13 @@ jobs:
     name: rustfmt + clippy
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: |
           dnf install -y --setopt=install_weak_deps=False \
             git gcc pkgconf-pkg-config glib2-devel gtk4-devel libadwaita-devel pipewire-devel clang-devel \
-            rust cargo rustfmt clippy
+            rust cargo rustfmt clippy python3
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -67,12 +67,17 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           cat clippy.log
           exit $rc
+      - name: No orphan .rs files (not reachable from a module tree)
+        run: |
+          # The container runs as root on a checkout owned by another uid: let git read it.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          tools/check-orphan-rs.sh
 
   rust-test:
     name: cargo test
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: |
@@ -104,7 +109,7 @@ jobs:
     name: cargo deny (licences, advisories)
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: dnf install -y --setopt=install_weak_deps=False git cargo cargo-deny
@@ -118,7 +123,7 @@ jobs:
     name: desk-bridge (tsc, eslint, build)
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     defaults:
       run:
         working-directory: bridge
@@ -143,7 +148,7 @@ jobs:
     name: shellcheck, schemas, desktop file, D-Bus XML
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
       - name: Install packages
         run: |
@@ -159,6 +164,8 @@ jobs:
           files=$(git ls-files -z | xargs -0 grep -IlE '^#!.*(ba)?sh' || true)
           test -n "$files" || { echo "no shell scripts found (git ls-files failed?)"; exit 1; }
           echo "$files" | tr '\n' '\0' | xargs -0 shellcheck --severity=warning
+      - name: rust-version equals the pinned toolchain
+        run: tools/check-rust-version.sh
       - name: Claude Code guard hook (table test)
         run: .claude/hooks/guard.test.sh
       - name: GSettings schema (strict)
@@ -219,7 +226,7 @@ jobs:
         with:
           persist-credentials: false
       - name: actionlint
-        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
 
   docs:
     name: docs links (offline)

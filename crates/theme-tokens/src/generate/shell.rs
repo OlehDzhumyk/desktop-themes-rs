@@ -37,6 +37,10 @@ fn shadow(sh: &Shadow) -> String {
     )
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "renders one CSS document from the tokens, section after section"
+)]
 pub fn css(t: &Tokens, theme_id: &str) -> String {
     let s = t.shell_scheme();
     let c = t.colors(s);

@@ -12,6 +12,9 @@ repository.workspace = true
 name = "themes"
 path = "src/main.rs"
 
+[lints]
+workspace = true
+
 [dependencies]
 adw.workspace = true
 clap.workspace = true

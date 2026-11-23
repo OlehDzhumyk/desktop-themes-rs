@@ -74,17 +74,23 @@ if step build; then
       set -e
       export PATH="$HOME/.cargo/bin:$PATH"
       minor=$(rustc --version 2>/dev/null | sed -E "s/^rustc 1\.([0-9]+).*/\1/")
-      if ! [ "${minor:-0}" -ge 88 ] 2>/dev/null; then
+      want=$(sed -nE "s/^rust-version = \"1\.([0-9]+)\".*/\1/p" "$1/Cargo.toml")
+      if ! [ "${minor:-0}" -ge "$want" ] 2>/dev/null; then
         if [ "$2" = 1 ]; then
-          curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
+          # rustup-init pinned in versions.sh and verified; no `curl | sh`
+          init=$(mktemp)
+          curl -fsSL --retry 3 -o "$init" "$3"
+          echo "$4  $init" | sha256sum --check --status || { echo "error: rustup-init does not match the pinned checksum" >&2; rm -f "$init"; exit 1; }
+          chmod +x "$init" && "$init" -y --profile minimal
+          rm -f "$init"
           export PATH="$HOME/.cargo/bin:$PATH"
         else
-          echo "error: Rust >= 1.89 is required (found: $(rustc --version 2>&1)). Re-run with --rustup." >&2; exit 1
+          echo "error: Rust >= 1.$want is required (found: $(rustc --version 2>&1)). Re-run with --rustup." >&2; exit 1
         fi
       fi
       cd "$1" && cargo build --release --locked
       cd "$1/bridge" && npm ci --no-audit --no-fund && npm run build
-    ' _ "$REPO" "$RUSTUP"
+    ' _ "$REPO" "$RUSTUP" "$RUSTUP_INIT_URL" "$RUSTUP_INIT_SHA256"
   fi
 fi
 

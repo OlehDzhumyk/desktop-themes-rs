@@ -11,6 +11,9 @@ repository.workspace = true
 name = "deskd"
 path = "src/main.rs"
 
+[lints]
+workspace = true
+
 [dependencies]
 futures-util = { version = "0.3.34", default-features = false }
 gio.workspace = true

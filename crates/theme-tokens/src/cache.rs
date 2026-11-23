@@ -16,14 +16,8 @@ use crate::load::Loaded;
 pub const GENERATOR_VERSION: u32 = 1;
 const STAMP: &str = ".stamp";
 
-pub fn fnv1a64(data: &[u8]) -> u64 {
-    let mut h: u64 = 0xcbf29ce484222325;
-    for b in data {
-        h ^= *b as u64;
-        h = h.wrapping_mul(0x100000001b3);
-    }
-    h
-}
+/// FNV-1a 64 of `data`: the one implementation lives in `desk_settings::stable_hash`.
+pub use desk_settings::stable_hash::fnv1a64_bytes as fnv1a64;
 
 pub fn cache_key(l: &Loaded, tg: &Target) -> String {
     let o = Outputs::for_target(&l.tokens, tg);
@@ -114,8 +108,7 @@ pub fn materialize(l: &Loaded, tg: &Target, force: bool) -> io::Result<Materiali
     std::fs::create_dir_all(parent)?;
     let name = dir
         .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_default();
+        .map_or_default(|n| n.to_string_lossy().into_owned());
     let tmp = parent.join(format!(".{name}.tmp-{}", std::process::id()));
     if tmp.exists() {
         std::fs::remove_dir_all(&tmp)?;

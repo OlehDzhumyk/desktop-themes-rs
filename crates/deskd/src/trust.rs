@@ -167,7 +167,7 @@ impl Trust {
 
     /// Ok if the sender of `hdr` may use content methods; `AccessDenied` otherwise.
     pub async fn check(&self, conn: &zbus::Connection, hdr: &Header<'_>) -> zbus::fdo::Result<()> {
-        let member = hdr.member().map(|m| m.as_str()).unwrap_or("?");
+        let member = hdr.member().map_or("?", |m| m.as_str());
         let Some(sender) = hdr.sender() else {
             return Err(denied(member, "no sender"));
         };

@@ -362,8 +362,7 @@ pub fn reset(ctx: &Ctx, id: &str) -> Result<Vec<Conflict>> {
     let row = status(ctx, &cur)
         .into_iter()
         .find(|r| r.id == sc.id)
-        .map(|r| r.theme_default)
-        .unwrap_or_default();
+        .map_or_default(|r| r.theme_default);
     dconf::write(&dconf_path(sc.key), &dconf::fmt_strv(&row))?;
     Ok(conflicts_for(&effective(&cur), id, &row))
 }

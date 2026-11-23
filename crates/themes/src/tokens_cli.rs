@@ -226,9 +226,11 @@ fn read_rgb(path: &Path) -> Result<Vec<u8>, Error> {
             error = e
         ))
     })?;
-    let (w, h) = (pb.width() as usize, pb.height() as usize);
-    let n = pb.n_channels() as usize;
-    let stride = pb.rowstride() as usize;
+    // pixbuf sizes are never negative; a bad value becomes 0 and the loops below do nothing
+    let us = |v: i32| usize::try_from(v).unwrap_or(0);
+    let (w, h) = (us(pb.width()), us(pb.height()));
+    let n = us(pb.n_channels());
+    let stride = us(pb.rowstride());
     let bytes = pb.read_pixel_bytes();
     let data: &[u8] = &bytes;
     let mut rgb = Vec::with_capacity(w * h * 3);
@@ -299,8 +301,7 @@ fn from_image(
                     "Theme from the palette of the image {file}",
                     file = abs
                         .file_name()
-                        .map(|f| f.to_string_lossy().into_owned())
-                        .unwrap_or_default()
+                        .map_or_default(|f| f.to_string_lossy().into_owned())
                 ),
             ),
         ],

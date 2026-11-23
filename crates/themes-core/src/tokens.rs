@@ -67,8 +67,7 @@ pub fn layers(theme: &Theme) -> Vec<theme_tokens::Layer> {
             let text = std::fs::read_to_string(&p).ok()?;
             let id = d
                 .file_name()
-                .map(|n| n.to_string_lossy().into_owned())
-                .unwrap_or_default();
+                .map_or_default(|n| n.to_string_lossy().into_owned());
             Some((format!("{id}/{TOKENS_FILE}"), text))
         })
         .collect()
@@ -115,8 +114,7 @@ pub fn keys_for(theme: &Theme, module: Module, handmade_shell: bool) -> Keys {
     theme_tokens::keys(&l.tokens, &target(theme, handmade_shell))
         .into_iter()
         .find(|(k, _)| module_of(*k) == module)
-        .map(|(_, v)| v)
-        .unwrap_or_default()
+        .map_or_default(|(_, v)| v)
 }
 
 /// Which artefacts the theme's tokens produce (all false without valid tokens).

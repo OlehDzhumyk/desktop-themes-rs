@@ -62,6 +62,14 @@ impl Debounce {
     }
 }
 
+/// A panic inside `save` must not end the saving thread: no later change would reach the disk
+/// (and `flush` would wait for nobody). Log it and carry on with the next change.
+fn run_save(save: &impl Fn()) {
+    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(save)).is_err() {
+        eprintln!("deskd: saving the history panicked; trying again at the next change");
+    }
+}
+
 enum Msg {
     Touch,
     Flush(Sender<()>),
@@ -87,7 +95,7 @@ impl Saver {
                         Ok(m) => Some(m),
                         Err(RecvTimeoutError::Timeout) => {
                             if d.take_due(Instant::now()) {
-                                save();
+                                run_save(&save);
                             }
                             continue;
                         }
@@ -98,13 +106,13 @@ impl Saver {
                     Some(Msg::Touch) => d.touch(Instant::now()),
                     Some(Msg::Flush(ack)) => {
                         if d.take_now() {
-                            save();
+                            run_save(&save);
                         }
                         let _ = ack.send(());
                     }
                     None => {
                         if d.take_now() {
-                            save();
+                            run_save(&save);
                         }
                         break;
                     }

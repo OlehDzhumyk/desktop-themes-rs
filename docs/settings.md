@@ -43,6 +43,7 @@ Path `/io/github/OlehDzhumyk/Desk/clipboard/`.
 | `history-size` | unsigned | `50` | 5…500 (step 5) | History size | How many unpinned items to keep | clipboard | spin button on `--page clipboard` |
 | `images` | boolean | `true` |  | Images | Also record copied images | clipboard | switch on `--page clipboard` |
 | `image-max-kb` | unsigned | `8192` | 64…65536 (step 1024) | Largest image, KiB | Bigger images are not recorded | clipboard | spin button on `--page clipboard` |
+| `image-budget-mb` | unsigned | `256` | 16…4096 (step 16) | Image budget, MiB | Images wait in $XDG_RUNTIME_DIR (memory), so their total is capped; nothing is written when that directory is nearly full. | clipboard | spin button on `--page clipboard` |
 | `persist` | boolean | `true` |  | Keep between sessions | Stored in ~/.local/share/deskd/clipboard (mode 0600). | clipboard | switch on `--page clipboard` |
 | `persist-images` | boolean | `false` |  | Keep images between sessions | Off by default: images live only in $XDG_RUNTIME_DIR while the session runs. | clipboard | switch on `--page clipboard` |
 | `private-mode` | boolean | `false` |  | Private mode | Temporarily record nothing | clipboard | switch on `--page clipboard` |

@@ -69,7 +69,7 @@ basediff
 
 echo "== 5. змішування: look=macos, behavior=windows11"
 $B apply macos --only look --no-verify | tail -2 | sed 's/^/  | /'
-$B apply windows11 --module behavior --no-verify | tail -2 | sed 's/^/  | /'
+$B apply windows11 --module behavior --no-verify --yes | tail -2 | sed 's/^/  | /'
 $B current | sed 's/^/  | /'
 cur=$($B current --json | python3 -c 'import json,sys;m=json.load(sys.stdin)["modules"];print(m.get("look"),m.get("behavior"),m.get("sounds"),m.get("apps"))')
 [ "$cur" = "macos windows11 fedora fedora" ] && ok "вибір модулів: $cur" || bad "вибір модулів: $cur"

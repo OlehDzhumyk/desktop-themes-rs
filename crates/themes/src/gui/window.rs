@@ -147,6 +147,10 @@ fn find_toasts(w: &adw::ApplicationWindow) -> Option<adw::ToastOverlay> {
 }
 
 impl ThemesWindow {
+    #[allow(
+        clippy::too_many_lines,
+        reason = "builds the main window, one widget tree"
+    )]
     pub fn build(
         app: &adw::Application,
         opts: GuiOptions,
@@ -334,7 +338,9 @@ impl ThemesWindow {
             this.flow.connect_child_activated(move |_, child| {
                 let Some(t) = w.upgrade() else { return };
                 let idx = child.index();
-                let card = t.cards.borrow().get(idx as usize).cloned();
+                let card = usize::try_from(idx)
+                    .ok()
+                    .and_then(|i| t.cards.borrow().get(i).cloned());
                 if let Some(c) = card {
                     t.apply(c.info.id.clone(), vec![]);
                 }
@@ -467,8 +473,7 @@ impl ThemesWindow {
                 let Some(t) = w.upgrade() else { return };
                 let n = f
                     .basename()
-                    .map(|b| b.to_string_lossy().into_owned())
-                    .unwrap_or_default();
+                    .map_or_default(|b| b.to_string_lossy().into_owned());
                 if only_state && n != "current" && n != "state.json" {
                     return;
                 }
@@ -534,7 +539,7 @@ impl ThemesWindow {
                         format!(
                             "{} — {}",
                             m.label().to_lowercase(),
-                            st.source(*m).map(name_of).unwrap_or("—".into())
+                            st.source(*m).map_or("—".into(), name_of)
                         )
                     })
                     .collect();
@@ -579,7 +584,10 @@ impl ThemesWindow {
             let cur = st
                 .source(m)
                 .and_then(|s| infos.iter().position(|t| t.id == s));
-            row.set_selected(cur.map(|i| i as u32).unwrap_or(gtk::INVALID_LIST_POSITION));
+            row.set_selected(
+                cur.and_then(|i| u32::try_from(i).ok())
+                    .unwrap_or(gtk::INVALID_LIST_POSITION),
+            );
             let w = Rc::downgrade(self);
             row.connect_selected_notify(move |r| {
                 let Some(t) = w.upgrade() else { return };
@@ -614,7 +622,7 @@ impl ThemesWindow {
     pub fn apply(self: &Rc<Self>, id: String, modules: Vec<Module>) {
         let info = self.themes.borrow().iter().find(|t| t.id == id).cloned();
         let Some(info) = info.filter(|i| i.experimental) else {
-            self.apply_now(id, modules);
+            self.confirm_commands(id, modules);
             return;
         };
         let dlg = adw::AlertDialog::builder()
@@ -632,7 +640,7 @@ impl ThemesWindow {
         let t = self.clone();
         dlg.connect_response(None, move |_, r| {
             if r == "apply" {
-                t.apply_now(id.clone(), modules.clone());
+                t.confirm_commands(id.clone(), modules.clone());
             } else {
                 // повернути вибір у «Змішати» до поточного стану
                 let t = t.clone();
@@ -640,6 +648,62 @@ impl ThemesWindow {
             }
         });
         dlg.present(Some(&self.win));
+    }
+
+    /// Ключі теми, що запускають команди (скорочення, термінал, автозапуск): перший раз показати
+    /// їх у діалозі й застосувати лише після згоди (S-5). Згода запам'ятовується для ключа й команди.
+    fn confirm_commands(self: &Rc<Self>, id: String, modules: Vec<Module>) {
+        if self.busy.get() {
+            return;
+        }
+        let t = self.clone();
+        glib::spawn_future_local(async move {
+            let ctx = t.ctx.clone();
+            let (id2, mods) = (id.clone(), modules.clone());
+            let plan = gio::spawn_blocking(move || {
+                themes_core::apply::apply_opts(&ctx, &id2, &mods, true, true)
+                    .map(|r| (r.name, themes_core::commands::pending(&ctx, &r.writes)))
+            })
+            .await;
+            // a failed dry run: apply_now meets the same error and reports it
+            let Ok(Ok((name, pending))) = plan else {
+                t.apply_now(id, modules);
+                return;
+            };
+            if pending.is_empty() {
+                t.apply_now(id, modules);
+                return;
+            }
+            let list: Vec<String> = pending
+                .iter()
+                .map(|c| format!("{} = {}", c.key, c.value))
+                .collect();
+            let dlg = adw::AlertDialog::builder()
+                .heading(tr!("Allow “{name}” to run commands?", name = name))
+                .body(tr!(
+                    "This theme sets keys that make the desktop run programs:\n\n{list}",
+                    list = list.join("\n")
+                ))
+                .default_response("cancel")
+                .close_response("cancel")
+                .build();
+            dlg.add_response("cancel", &tr!("Cancel"));
+            dlg.add_response("apply", &tr!("Allow and apply"));
+            dlg.set_response_appearance("apply", adw::ResponseAppearance::Destructive);
+            let t2 = t.clone();
+            dlg.connect_response(None, move |_, r| {
+                if r == "apply" {
+                    if let Err(e) = themes_core::commands::approve(&t2.ctx, &pending) {
+                        t2.toast(&tr!("Error: {error}", error = e), 10);
+                    }
+                    t2.apply_now(id.clone(), modules.clone());
+                } else {
+                    let t = t2.clone();
+                    glib::spawn_future_local(async move { t.reload().await });
+                }
+            });
+            dlg.present(Some(&t.win));
+        });
     }
 
     fn apply_now(self: &Rc<Self>, id: String, modules: Vec<Module>) {

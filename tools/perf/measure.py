@@ -243,10 +243,10 @@ def measure_cli(a):
            "current_ms": run("current", n=10), "version_ms": run("--version", n=20)}
     out["apply_dry_run_ms"] = run("apply", "macos", "--dry-run", n=5)
     # real applies, into the private dconf database; the first one also takes the baseline snapshot
-    out["apply_first_ms"] = run("apply", "macos", "--no-verify", warm=False)
+    out["apply_first_ms"] = run("apply", "macos", "--no-verify", "--yes", warm=False)
     seq = []
     for t in ("windows11", "macos", "fedora") * 2:
-        seq.append(run("apply", t, "--no-verify", warm=False)["p50"])
+        seq.append(run("apply", t, "--no-verify", "--yes", warm=False)["p50"])
     out["apply_no_verify_ms"] = summary(seq, 1)
     out["reset_ms"] = run("reset", "--no-verify", warm=False)
     return out

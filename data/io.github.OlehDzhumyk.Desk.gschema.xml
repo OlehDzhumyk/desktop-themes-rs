@@ -53,6 +53,12 @@
       <summary>Largest image recorded, in KiB</summary>
       <description>Bigger images are not recorded</description>
     </key>
+    <key name="image-budget-mb" type="u">
+      <range min="16" max="4096"/>
+      <default>256</default>
+      <summary>Total size of the images in the history, in MiB (oldest images are dropped first)</summary>
+      <description>Images wait in $XDG_RUNTIME_DIR (memory), so their total is capped; nothing is written when that directory is nearly full.</description>
+    </key>
     <key name="persist" type="b">
       <default>true</default>
       <summary>Keep text history across sessions</summary>

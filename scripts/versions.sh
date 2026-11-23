@@ -32,21 +32,26 @@ CASCADIA_URL=https://github.com/microsoft/cascadia-code/releases/download/v2407.
 CASCADIA_SHA256=e67a68ee3386db63f48b9054bd196ea752bc6a4ebb4df35adce6733da50c8474
 
 # --- GNOME Shell extensions from extensions.gnome.org, pinned by version tag (shell 51) ---
-# uuid  version-tag  (human version)
+# uuid  version-tag  (human version)  sha256 of the downloaded ZIP (verified before it is unpacked).
+# To update one: tools/ego-pin.sh UUID  prints the new line.
 EGO_EXTENSIONS=(
-  "user-theme@gnome-shell-extensions.gcampax.github.com 75038 v78"
-  "appindicatorsupport@rgcjonas.gmail.com 75340 v66"
-  "blur-my-shell@aunetx 78246 v78"
-  "dash-to-dock@micxgx.gmail.com 76105 v110"
-  "logomenu@aryan_k 75631 v45"
-  "compiz-alike-magic-lamp-effect@hermes83.github.com 76122 v25"
-  "spotlight@nin 75194 v15"
-  "dash-to-panel@jderose9.github.com 75054 v74"
-  "arcmenu@arcmenu.com 75483 v74"
-  "tilingshell@ferrarodomenico.com 76684 v77"
-  "gtk4-ding@smedius.gitlab.com 78597 v148"
+  "user-theme@gnome-shell-extensions.gcampax.github.com 75038 v78 f5e8b7104f2385ac8f7df7fa151ced9d25ed84cfa80ea9dd56329f372001fa07"
+  "appindicatorsupport@rgcjonas.gmail.com 75340 v66 94fe0ef32b84f184fee0ce2bb0edca7020a99e48210c43bbfc0c884a5c4660de"
+  "blur-my-shell@aunetx 78246 v78 065d53b27dff3bbdd867deeab0316c030da7702c8c313c2a734d0eb05cf4f4a7"
+  "dash-to-dock@micxgx.gmail.com 76105 v110 b05003e79835a35451e94931539ba1977f2a7a93b652a4fc6b7be60a77c18ae1"
+  "logomenu@aryan_k 75631 v45 78e6507d9aa033a17e7e2997ac5a1190b327b97ba019a313f1a9285854753ed2"
+  "compiz-alike-magic-lamp-effect@hermes83.github.com 76122 v25 a3a445a0f0329b581fec6edd2c33f143eec9b267cbb9b028bb6d7bff990cc420"
+  "spotlight@nin 75194 v15 783862968f999b51eaa4fd10ca2e4747f309d64efa45db7fa580a884b2a214cd"
+  "dash-to-panel@jderose9.github.com 75054 v74 8989c892f9795948e4490f47dc092218e42d771a6fec3dd44431cb48700ac2e5"
+  "arcmenu@arcmenu.com 75483 v74 ef414c90dcb5f2b0c6ccb5f8e59fd9963c584789d3d8d26740ddb731100c4b40"
+  "tilingshell@ferrarodomenico.com 76684 v77 17ab42f990d9b55f66009f50089ca172c62d206b03d0534ac5d9b63cf44e1cd1"
+  "gtk4-ding@smedius.gitlab.com 78597 v148 c695a52a8719209daa2c9e83e510e36618dbe201c357a58d8b2d6d5a5aadfd22"
 )
 # Not on extensions.gnome.org: installed from the upstream repository (subdirectory of the repo).
 LIQUID_GLASS_URL=https://github.com/ryohsuke1231/liquid-glass.git
 LIQUID_GLASS_SHA=9ec82ed088104ef8d2a3a2a5d9101272a68e84b1
 LIQUID_GLASS_UUID=liquid-glass@thinkingcoding1231.gmail.com
+
+# --- rustup (only for `scripts/bootstrap.sh --rustup`): the rustup-init binary, verified by SHA-256 ---
+RUSTUP_INIT_URL=https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init
+RUSTUP_INIT_SHA256=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55

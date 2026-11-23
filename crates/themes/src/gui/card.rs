@@ -38,6 +38,7 @@ pub struct ThemeCard {
 }
 
 impl ThemeCard {
+    #[allow(clippy::too_many_lines, reason = "builds one widget tree")]
     pub fn new(info: ThemeInfo) -> ThemeCard {
         let root = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)

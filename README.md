@@ -63,8 +63,8 @@ themes doctor --fix
 themes gui
 ```
 
-Requirements: GNOME Shell 51 (the extensions and shell themes are pinned for it; `--latest` in
-`install-extensions.sh` tries other versions), toolbox, flatpak (optional), network access for the
+Requirements: GNOME Shell 51 (the extensions and shell themes are pinned for it, with checksums; for
+another version pin new builds with `tools/ego-pin.sh`), toolbox, flatpak (optional), network access for the
 upstream downloads.
 
 ## Repository layout
@@ -97,6 +97,7 @@ user's machine, not committed.
 * [docs/features.md](docs/features.md): desktop features (clipboard history), skins, privacy
 * [docs/settings.md](docs/settings.md): every setting (generated from the settings registry)
 * [docs/i18n.md](docs/i18n.md): translations and the language setting
+* [docs/maintainer.md](docs/maintainer.md): releases, CI, build environment, pinned versions, known workarounds
 * [docs/spec/](docs/spec/README.md): functional specifications of every feature (behaviour, acceptance criteria, status)
 * [docs/README.uk.md](docs/README.uk.md): full user guide in Ukrainian
 

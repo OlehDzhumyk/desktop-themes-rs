@@ -1326,6 +1326,7 @@ dependencies = [
 name = "theme-tokens"
 version = "0.3.0"
 dependencies = [
+ "desk-settings",
  "insta",
  "serde",
  "toml",

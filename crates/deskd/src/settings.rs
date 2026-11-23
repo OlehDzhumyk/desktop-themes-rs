@@ -20,6 +20,7 @@ pub fn read_config(s: &ClipboardSettings) -> Config {
         history_size: s.history_size().max(1) as usize,
         images: s.images(),
         image_max_bytes: s.image_max_kb() as usize * 1024,
+        image_budget_bytes: s.image_budget_mb() as usize * 1024 * 1024,
         persist: s.persist(),
         persist_images: s.persist_images(),
         private: s.private_mode(),
