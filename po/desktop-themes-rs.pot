@@ -3900,6 +3900,42 @@ msgstr ""
 msgid "{row}, muted"
 msgstr ""
 
+#: bridge/src/osd/popup.ts:57
+msgid "Microphone muted"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:57
+msgid "Microphone on"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:63
+msgid "Volume muted"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:65
+msgid "Volume {level} percent"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:67
+msgid "Microphone {level} percent"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:69
+msgid "Keyboard backlight {level} percent"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:71
+msgid "Brightness {level} percent"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:73
+msgid "Level {level} percent"
+msgstr ""
+
+#: bridge/src/osd/popup.ts:74 bridge/src/osd/popup.ts:119
+msgid "above 100 %"
+msgstr ""
+
 #: bridge/src/quickSettings.ts:74 bridge/src/quickSettings.ts:75
 #: bridge/src/quickSettings.ts:163 bridge/src/quickSettings.ts:197
 #: bridge/src/quickSettings.ts:228 bridge/src/quickSettings.ts:230

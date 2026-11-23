@@ -17,6 +17,7 @@ import {EmojiFeature} from './emoji/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
 import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
+import {OsdFeature} from './osd/feature.js';
 import type {Skin} from './accentPicker.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
@@ -27,6 +28,7 @@ const EMOJI_SCHEMA = 'io.github.OlehDzhumyk.Desk.Emoji';
 const LOGO_MENU_SCHEMA = 'io.github.OlehDzhumyk.Desk.LogoMenu';
 const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
 const FOCUS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Focus';
+const OSD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Osd';
 
 export default class DeskBridge extends Extension {
     private _settings: Gio.Settings | null = null;
@@ -42,6 +44,8 @@ export default class DeskBridge extends Extension {
     private _logoMenuSettings: Gio.Settings | null = null;
     private _focus: FocusFeature | null = null;
     private _focusSettings: Gio.Settings | null = null;
+    private _osd: OsdFeature | null = null;
+    private _osdSettings: Gio.Settings | null = null;
     private _appearanceSettings: Gio.Settings | null = null;
     private _skinId = 0;
     private _langId = 0;
@@ -69,6 +73,11 @@ export default class DeskBridge extends Extension {
         this._logoMenuSettings = this._schema(LOGO_MENU_SCHEMA);
         this._focusSettings = this._schema(FOCUS_SCHEMA);
         this._appearanceSettings = this._schema(APPEARANCE_SCHEMA);
+        try {
+            this._osdSettings = this._schema(OSD_SCHEMA);
+        } catch (e) {
+            console.warn(`desk-bridge: on-screen displays are unavailable: ${String(e)}`);
+        }
         initI18n(this, settings.get_string('language'));
         this._build(clipSettings);
         this._skinId = settings.connect('changed::skin', () => { this._applySkin(); });
@@ -125,10 +134,20 @@ export default class DeskBridge extends Extension {
         } catch (e) {
             console.warn(`desk-bridge: focus modes are unavailable: ${String(e)}`);
         }
+        if (this._osdSettings) {
+            try {
+                this._osd = new OsdFeature(this._osdSettings, this._skin());
+            } catch (e) {
+                // the stock GNOME OSD stays in use
+                console.warn(`desk-bridge: on-screen displays are unavailable: ${String(e)}`);
+            }
+        }
         this._applySkin();
     }
 
     private _teardown(): void {
+        this._osd?.destroy();
+        this._osd = null;
         this._focus?.destroy();
         this._focus = null;
         this._indicator?.setClipboard(null);
@@ -160,6 +179,7 @@ export default class DeskBridge extends Extension {
         this._logoMenu?.setSkin(skin);
         this._indicator?.setSkin(skin);
         this._focus?.setSkin(skin);
+        this._osd?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
     }
 
@@ -177,6 +197,7 @@ export default class DeskBridge extends Extension {
         this._mixerSettings = null;
         this._logoMenuSettings = null;
         this._focusSettings = null;
+        this._osdSettings = null;
         this._appearanceSettings = null;
     }
 }

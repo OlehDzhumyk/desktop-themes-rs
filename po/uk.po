@@ -462,6 +462,42 @@ msgstr "{app}: гучність {percent} %"
 msgid "{row}, muted"
 msgstr "{row}, без звуку"
 
+#: bridge/src/osd/popup.ts:57
+msgid "Microphone muted"
+msgstr "Мікрофон вимкнено"
+
+#: bridge/src/osd/popup.ts:57
+msgid "Microphone on"
+msgstr "Мікрофон увімкнено"
+
+#: bridge/src/osd/popup.ts:63
+msgid "Volume muted"
+msgstr "Звук вимкнено"
+
+#: bridge/src/osd/popup.ts:65
+msgid "Volume {level} percent"
+msgstr "Гучність {level} %"
+
+#: bridge/src/osd/popup.ts:67
+msgid "Microphone {level} percent"
+msgstr "Мікрофон {level} %"
+
+#: bridge/src/osd/popup.ts:69
+msgid "Keyboard backlight {level} percent"
+msgstr "Підсвічування клавіатури {level} %"
+
+#: bridge/src/osd/popup.ts:71
+msgid "Brightness {level} percent"
+msgstr "Яскравість {level} %"
+
+#: bridge/src/osd/popup.ts:73
+msgid "Level {level} percent"
+msgstr "Рівень {level} %"
+
+#: bridge/src/osd/popup.ts:74 bridge/src/osd/popup.ts:119
+msgid "above 100 %"
+msgstr "понад 100 %"
+
 #: bridge/src/quickSettings.ts:74 bridge/src/quickSettings.ts:75
 #: bridge/src/quickSettings.ts:163 bridge/src/quickSettings.ts:197
 #: bridge/src/quickSettings.ts:228 bridge/src/quickSettings.ts:230
