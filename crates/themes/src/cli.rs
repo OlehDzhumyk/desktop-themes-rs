@@ -47,9 +47,10 @@ const H25: &str = n_("Window size, e.g. 1180x780");
 const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
 const H28: &str = n_("Design tokens (tokens.toml): check, generate, a theme from a wallpaper");
 const H26: &str = n_(
-    "Page: themes | mix | features | clipboard | mixer | lockscreen | logo-menu | shortcuts | general | system | credits",
+    "Page: themes | mix | features | clipboard | mixer | focus | lockscreen | logo-menu | shortcuts | general | system | credits",
 );
 const H29: &str = n_("Keyboard shortcuts of the features (the theme gives the default)");
+const H30: &str = n_("Focus modes: do not disturb, schedules, focus sessions");
 
 #[derive(Parser)]
 #[command(
@@ -135,6 +136,11 @@ enum Cmd {
     Shortcut {
         #[command(subcommand)]
         cmd: crate::shortcut_cli::ShortcutCmd,
+    },
+    #[command(about = H30)]
+    Focus {
+        #[command(subcommand)]
+        cmd: crate::focus_cli::FocusCmd,
     },
     #[command(about = H28)]
     Tokens {
@@ -244,6 +250,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
     match cmd {
         Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
         Cmd::Shortcut { cmd } => crate::shortcut_cli::exec(ctx, cmd, json),
+        Cmd::Focus { cmd } => crate::focus_cli::exec(cmd, json),
         Cmd::List => {
             let st = State::load(ctx);
             let look = st.source(Module::Look).map(String::from);

@@ -461,12 +461,17 @@ fn action_row(
             });
             dlg.present(Some(row));
         }
+        "focus-modes" => super::focus::modes_dialog(row, &toasts),
+        "focus-stop" => super::focus::stop(row, &toasts),
         other => eprintln!("themes: unknown settings action {other}"),
     });
     row
 }
 
 fn status_row(id: &'static str, label: &str) -> adw::ActionRow {
+    if id == "focus" {
+        return super::focus::status_row(&t(label));
+    }
     let row = adw::ActionRow::builder()
         .title(t(label))
         .subtitle(tr!("checking…"))

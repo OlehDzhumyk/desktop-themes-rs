@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 mod cli;
+mod focus_cli;
 mod gui;
 mod service;
 mod shortcut_cli;

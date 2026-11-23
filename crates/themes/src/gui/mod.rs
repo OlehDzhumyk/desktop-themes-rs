@@ -5,6 +5,7 @@ mod a11y;
 mod card;
 mod credits;
 mod features;
+mod focus;
 mod preview;
 mod search;
 mod system;
