@@ -11,12 +11,14 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {ClipboardFeature} from './clipboard/feature.js';
+import {EmojiFeature} from './emoji/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
 import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
 const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
+const EMOJI_SCHEMA = 'io.github.OlehDzhumyk.Desk.Emoji';
 const LOGO_MENU_SCHEMA = 'io.github.OlehDzhumyk.Desk.LogoMenu';
 const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
 
@@ -24,6 +26,8 @@ export default class DeskBridge extends Extension {
     private _settings: Gio.Settings | null = null;
     private _indicator: InstanceType<typeof DeskIndicator> | null = null;
     private _clipboard: ClipboardFeature | null = null;
+    private _emoji: EmojiFeature | null = null;
+    private _emojiSettings: Gio.Settings | null = null;
     private _mixer: MixerFeature | null = null;
     private _mixerSettings: Gio.Settings | null = null;
     private _logoMenu: LogoMenuFeature | null = null;
@@ -48,6 +52,7 @@ export default class DeskBridge extends Extension {
         const settings = this._schema('io.github.OlehDzhumyk.Desk');
         const clipSettings = this._schema(CLIPBOARD_SCHEMA);
         this._settings = settings;
+        this._emojiSettings = this._schema(EMOJI_SCHEMA);
         this._mixerSettings = this._schema(MIXER_SCHEMA);
         this._logoMenuSettings = this._schema(LOGO_MENU_SCHEMA);
         initI18n(this, settings.get_string('language'));
@@ -70,6 +75,13 @@ export default class DeskBridge extends Extension {
         quickSettings.addExternalIndicator(this._indicator);
         this._clipboard = new ClipboardFeature(this.path, clipSettings, this._skin(),
             () => { launchGui('clipboard'); });
+        if (this._emojiSettings) {
+            try {
+                this._emoji = new EmojiFeature(this._emojiSettings, this._skin(), this._clipboard);
+            } catch (e) {
+                console.warn(`desk-bridge: the emoji picker is unavailable: ${String(e)}`);
+            }
+        }
         if (this._mixerSettings) {
             try {
                 this._mixer = new MixerFeature(this.path, this._mixerSettings, this._skin(),
@@ -91,6 +103,8 @@ export default class DeskBridge extends Extension {
 
     private _teardown(): void {
         this._indicator?.setClipboard(null);
+        this._emoji?.destroy();
+        this._emoji = null;
         this._clipboard?.destroy();
         this._clipboard = null;
         this._mixer?.destroy();
@@ -109,6 +123,7 @@ export default class DeskBridge extends Extension {
     private _applySkin(): void {
         const skin = this._skin();
         this._clipboard?.setSkin(skin);
+        this._emoji?.setSkin(skin);
         this._mixer?.setSkin(skin);
         this._logoMenu?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
@@ -123,6 +138,7 @@ export default class DeskBridge extends Extension {
         this._langId = 0;
         this._teardown();
         this._settings = null;
+        this._emojiSettings = null;
         this._mixerSettings = null;
         this._logoMenuSettings = null;
     }

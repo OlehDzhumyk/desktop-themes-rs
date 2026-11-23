@@ -213,3 +213,82 @@
 
 /* ------------------------------------------------------------------ logo menu (macos top bar) */
 .desk-logo-menu-icon { icon-size: 16px; }
+
+/* ------------------------------------------------------------------ emoji and symbol picker */
+.desk-emoji-panel {
+  width: 26em;
+  max-height: 29em;
+  padding: 10px;
+  font-size: 10pt;
+}
+.desk-emoji-panel.desk-skin-macos {
+  border-radius: 16px;
+  background-color: rgba(38,38,42,0.94);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.48);
+  font-family: Inter, Cantarell, sans-serif;
+}
+.desk-light.desk-emoji-panel.desk-skin-macos {
+  background-color: rgba(246,246,248,0.96);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.22);
+}
+.desk-emoji-body { spacing: 8px; }
+.desk-skin-windows11 .desk-emoji-body { padding: 8px 10px 2px 10px; }
+.desk-emoji-search {
+  border-radius: 8px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background-color: rgba(255,255,255,0.07);
+}
+.desk-light .desk-emoji-search {
+  border-color: rgba(0,0,0,0.12);
+  background-color: rgba(0,0,0,0.04);
+}
+.desk-emoji-cats { spacing: 2px; }
+.desk-emoji-cat {
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 11pt;
+  border-bottom: 2px solid transparent;
+}
+.desk-emoji-cat:hover, .desk-emoji-cat:focus { background-color: rgba(255,255,255,0.08); }
+.desk-light .desk-emoji-cat:hover, .desk-light .desk-emoji-cat:focus { background-color: rgba(0,0,0,0.06); }
+.desk-emoji-cat.active { border-bottom-color: #60cdff; background-color: rgba(255,255,255,0.08); }
+.desk-light .desk-emoji-cat.active { background-color: rgba(0,0,0,0.07); }
+.desk-emoji-scroll { max-height: 20em; }
+.desk-emoji-grid { spacing: 4px; }
+.desk-emoji-row { spacing: 4px; }
+.desk-emoji-cell {
+  min-width: 2.4em;
+  min-height: 2.4em;
+  padding: 4px;
+  border-radius: 6px;
+  font-size: 14pt;
+  border: 1px solid transparent;
+}
+.desk-emoji-cell-wide {
+  min-width: 7.4em;
+  font-size: 9.5pt;
+  padding: 6px 8px;
+}
+.desk-emoji-cell:hover { background-color: rgba(255,255,255,0.08); }
+.desk-light .desk-emoji-cell:hover { background-color: rgba(0,0,0,0.06); }
+.desk-emoji-cell:selected, .desk-emoji-cell:focus {
+  background-color: rgba(96,205,255,0.22);
+  border-color: #60cdff;
+}
+.desk-hc .desk-emoji-cell:selected, .desk-hc .desk-emoji-cell:focus {
+  border: 2px solid currentColor;
+}
+.desk-emoji-empty { padding: 1.6em 1em; text-align: center; color: rgba(255,255,255,0.6); }
+.desk-light .desk-emoji-empty { color: rgba(0,0,0,0.55); }
+.desk-accent-blue   .desk-emoji-cat.active, .desk-accent-blue   .desk-emoji-cell:selected { border-color: #3584e4; }
+.desk-accent-teal   .desk-emoji-cat.active, .desk-accent-teal   .desk-emoji-cell:selected { border-color: #2190a4; }
+.desk-accent-green  .desk-emoji-cat.active, .desk-accent-green  .desk-emoji-cell:selected { border-color: #3a944a; }
+.desk-accent-yellow .desk-emoji-cat.active, .desk-accent-yellow .desk-emoji-cell:selected { border-color: #c88800; }
+.desk-accent-orange .desk-emoji-cat.active, .desk-accent-orange .desk-emoji-cell:selected { border-color: #ed5b00; }
+.desk-accent-red    .desk-emoji-cat.active, .desk-accent-red    .desk-emoji-cell:selected { border-color: #e62d42; }
+.desk-accent-pink   .desk-emoji-cat.active, .desk-accent-pink   .desk-emoji-cell:selected { border-color: #d56199; }
+.desk-accent-purple .desk-emoji-cat.active, .desk-accent-purple .desk-emoji-cell:selected { border-color: #9141ac; }
+.desk-accent-slate  .desk-emoji-cat.active, .desk-accent-slate  .desk-emoji-cell:selected { border-color: #6f8396; }

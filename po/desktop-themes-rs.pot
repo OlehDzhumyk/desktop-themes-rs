@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 15:21+0000\n"
+"POT-Creation-Date: 2026-11-23 15:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,6 +119,122 @@ msgstr ""
 
 #: crates/desk-settings/src/appearance.rs:174
 msgid "Fixed schedule"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:13 crates/desk-settings/src/emoji.rs:188
+msgid "Emoji and symbols"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:14
+msgid "In Windows 11 and macOS"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:41
+msgid "Emoji and symbol picker"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:42
+msgid ""
+"Open a keyboard-first panel to search and insert emoji, symbols and text "
+"faces"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:52 crates/desk-settings/src/mixer.rs:139
+#: crates/desk-settings/src/registry.rs:264
+msgid "Keyboard shortcut"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:72
+msgid "Default (yellow)"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:76
+msgid "Light tone"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:80
+msgid "Medium-light tone"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:84
+msgid "Medium tone"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:88
+msgid "Medium-dark tone"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:92
+msgid "Dark tone"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:96
+msgid "Default skin tone"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:97
+msgid "Applied to person and hand emoji when inserted"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:112
+msgid "Remember recent picks"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:114
+msgid ""
+"Keep the last 36 picked emoji and symbols for quick access; turning it off "
+"clears them"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:128
+msgid "Follow the active skin"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:132
+msgid "Always close"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:136
+msgid "Keep open"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:140
+msgid "After inserting an item"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:141
+msgid "Windows 11 stays open by default; macOS and Fedora close after one pick"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:168 crates/desk-settings/src/emoji.rs:180
+msgid "Open the emoji and symbol picker"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:189
+msgid ""
+"Emoji, symbols and text faces: Win+. in Windows 11, Ctrl+Super+Space in macOS"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:191
+msgid ""
+"A keyboard-first picker for emoji, Unicode symbols and text faces, "
+"searchable in Ukrainian and English with recents and skin tones. The deskd "
+"service provides the offline dataset; the shell bridge draws the picker in "
+"the style of the current theme."
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:201
+msgid "Picker"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:211 crates/desk-settings/src/mixer.rs:215
+#: crates/desk-settings/src/registry.rs:438
+msgid "How to open"
+msgstr ""
+
+#: crates/desk-settings/src/emoji.rs:212 crates/desk-settings/src/mixer.rs:216
+#: crates/desk-settings/src/registry.rs:439
+msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr ""
 
 #: crates/desk-settings/src/lockscreen.rs:19
@@ -439,11 +555,6 @@ msgstr ""
 msgid "Applications never listed in the mixer (app id or program name)"
 msgstr ""
 
-#: crates/desk-settings/src/mixer.rs:139
-#: crates/desk-settings/src/registry.rs:262
-msgid "Keyboard shortcut"
-msgstr ""
-
 #: crates/desk-settings/src/mixer.rs:171 crates/desk-settings/src/mixer.rs:183
 msgid "Open the volume mixer"
 msgstr ""
@@ -464,225 +575,215 @@ msgstr ""
 msgid "Mixer"
 msgstr ""
 
-#: crates/desk-settings/src/mixer.rs:215
-#: crates/desk-settings/src/registry.rs:427
-msgid "How to open"
-msgstr ""
-
-#: crates/desk-settings/src/mixer.rs:216
-#: crates/desk-settings/src/registry.rs:428
-msgid "The shortcut is set on the «Keyboard shortcuts» page."
-msgstr ""
-
 #: crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:391
+#: crates/desk-settings/src/registry.rs:402
 msgid "Clipboard"
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:383
+#: crates/desk-settings/src/registry.rs:394
 msgid "Application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:57
+#: crates/desk-settings/src/registry.rs:58
 msgid "simple menu (and a toggle in quick settings)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:61
+#: crates/desk-settings/src/registry.rs:62
 msgid "macOS-style panel (centred, with search)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:65
+#: crates/desk-settings/src/registry.rs:66
 msgid "Windows 11-style Win+V panel (next to the cursor)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:69
+#: crates/desk-settings/src/registry.rs:70
 msgid "Panel style"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:87
+#: crates/desk-settings/src/registry.rs:88
 msgid "System default"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:100
-#: crates/desk-settings/src/registry.rs:459
+#: crates/desk-settings/src/registry.rs:101
+#: crates/desk-settings/src/registry.rs:470
 msgid "Language"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:101
+#: crates/desk-settings/src/registry.rs:102
 msgid "Language of the window, the command line and the shell panels"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:150
+#: crates/desk-settings/src/registry.rs:152
 msgid "Record history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:151
+#: crates/desk-settings/src/registry.rs:153
 msgid "Turn off to disable the feature completely"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:164
+#: crates/desk-settings/src/registry.rs:166
 msgid "History size"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:165
+#: crates/desk-settings/src/registry.rs:167
 msgid "How many unpinned items to keep"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:176
+#: crates/desk-settings/src/registry.rs:178
 msgid "Images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:177
+#: crates/desk-settings/src/registry.rs:179
 msgid "Also record copied images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:190
+#: crates/desk-settings/src/registry.rs:192
 msgid "Largest image, KiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:191
+#: crates/desk-settings/src/registry.rs:193
 msgid "Bigger images are not recorded"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:208
+#: crates/desk-settings/src/registry.rs:210
 msgid "Image budget, MiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:209
+#: crates/desk-settings/src/registry.rs:211
 msgid "When images take more space, the oldest are dropped"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:222
+#: crates/desk-settings/src/registry.rs:224
 msgid "Keep between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:223
+#: crates/desk-settings/src/registry.rs:225
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:234
+#: crates/desk-settings/src/registry.rs:236
 msgid "Keep images between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:235
+#: crates/desk-settings/src/registry.rs:237
 msgid "Otherwise images live only until you log out"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:243
+#: crates/desk-settings/src/registry.rs:245
 msgid "Private mode"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:244
+#: crates/desk-settings/src/registry.rs:246
 msgid "Temporarily record nothing"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:251
+#: crates/desk-settings/src/registry.rs:253
 msgid "Paste the chosen item"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:252
+#: crates/desk-settings/src/registry.rs:254
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:297
+#: crates/desk-settings/src/registry.rs:299
 msgid "Excluded applications"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:332
-#: crates/desk-settings/src/registry.rs:344
+#: crates/desk-settings/src/registry.rs:334
+#: crates/desk-settings/src/registry.rs:346
 msgid "Open the clipboard panel"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:375
+#: crates/desk-settings/src/registry.rs:386
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:382
-#: crates/desk-settings/src/registry.rs:478
+#: crates/desk-settings/src/registry.rs:393
+#: crates/desk-settings/src/registry.rs:489
 msgid "Features"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:384
+#: crates/desk-settings/src/registry.rs:395
 msgid "About the project"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:392
+#: crates/desk-settings/src/registry.rs:403
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:394
+#: crates/desk-settings/src/registry.rs:405
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
 "theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:403
+#: crates/desk-settings/src/registry.rs:414
 msgid "History"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:415
+#: crates/desk-settings/src/registry.rs:426
 msgid "Privacy"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:417
+#: crates/desk-settings/src/registry.rs:428
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:433
+#: crates/desk-settings/src/registry.rs:444
 msgid "deskd service"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:442
+#: crates/desk-settings/src/registry.rs:453
 msgid "Clear history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:451
+#: crates/desk-settings/src/registry.rs:462
 msgid "General"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:452
+#: crates/desk-settings/src/registry.rs:463
 msgid "Language of the application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:453
+#: crates/desk-settings/src/registry.rs:464
 msgid "Settings of the Themes application itself."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:460
+#: crates/desk-settings/src/registry.rs:471
 msgid "The change takes effect after the window is restarted."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:467
+#: crates/desk-settings/src/registry.rs:478
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:468
+#: crates/desk-settings/src/registry.rs:479
 msgid "All shortcuts of the features in one place"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:470
+#: crates/desk-settings/src/registry.rs:481
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
 "refused."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:489
+#: crates/desk-settings/src/registry.rs:501
 msgid "Credits"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:490
+#: crates/desk-settings/src/registry.rs:502
 msgid "Projects the themes and features are based on, and their licences"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:492
+#: crates/desk-settings/src/registry.rs:504
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "
@@ -699,7 +800,7 @@ msgstr ""
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/main.rs:37
+#: crates/deskd/src/main.rs:39
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -710,14 +811,14 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:124
+#: crates/deskd/src/main.rs:130
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:243 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:263 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -2644,7 +2745,7 @@ msgid "Clipboard settings"
 msgstr ""
 
 #: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:134
-#: bridge/src/clipboard/winFlyout.ts:61
+#: bridge/src/clipboard/winFlyout.ts:79
 msgid "Clipboard history"
 msgstr ""
 
@@ -2664,7 +2765,7 @@ msgstr ""
 msgid "pin"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:137
+#: bridge/src/clipboard/listPanel.ts:137 bridge/src/emoji/panel.ts:296
 msgid "Nothing found for “{query}”"
 msgstr ""
 
@@ -2704,46 +2805,110 @@ msgstr ""
 msgid "{text}, pinned"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:45
+#: bridge/src/clipboard/winFlyout.ts:61
 msgid "Emoji"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:45
-msgid "Emoji: coming later"
-msgstr ""
-
-#: bridge/src/clipboard/winFlyout.ts:46
+#: bridge/src/clipboard/winFlyout.ts:62
 msgid "Symbols"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:46
-msgid "Symbols: coming later"
-msgstr ""
-
-#: bridge/src/clipboard/winFlyout.ts:52
+#: bridge/src/clipboard/winFlyout.ts:70
 msgid "Clear all"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:114
+#: bridge/src/clipboard/winFlyout.ts:223
 msgid "Private mode is on: copies are not kept."
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:115
+#: bridge/src/clipboard/winFlyout.ts:224
 msgid ""
 "Copied items will show up here.\n"
 "Press Ctrl+C to copy."
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:140 bridge/src/clipboard/winFlyout.ts:148
+#: bridge/src/clipboard/winFlyout.ts:249 bridge/src/clipboard/winFlyout.ts:257
 msgid "Pin"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:140 bridge/src/clipboard/winFlyout.ts:148
+#: bridge/src/clipboard/winFlyout.ts:249 bridge/src/clipboard/winFlyout.ts:257
 msgid "Unpin"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:143
+#: bridge/src/clipboard/winFlyout.ts:252
 msgid "More"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:28
+msgid "Recents"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:29
+msgid "Smileys"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:30
+msgid "People"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:31
+msgid "Animals and nature"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:32
+msgid "Food and drink"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:33
+msgid "Travel and places"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:34
+msgid "Activities"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:35
+msgid "Objects"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:36
+msgid "Emoji symbols"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:37
+msgid "Flags"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:41
+msgid "Arrows"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:42
+msgid "Math"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:43
+msgid "Currency"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:44
+msgid "Punctuation"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:45
+msgid "Text faces"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:89
+msgid "Search emoji and symbols…"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:93
+msgid "Search emoji and symbols"
+msgstr ""
+
+#: bridge/src/emoji/panel.ts:297
+msgid "No recent picks yet"
 msgstr ""
 
 #: bridge/src/logoMenu/actions.ts:76

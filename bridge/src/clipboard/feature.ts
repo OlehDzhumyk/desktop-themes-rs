@@ -8,11 +8,12 @@ import Shell from 'gi://Shell';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {ClipboardClient, type ClipItem} from '../dbus.js';
+import type {EmojiPickHost} from '../emoji/panel.js';
 import {ListPanel} from './listPanel.js';
 import {type ClipboardPanel, type PanelHost, logError} from './panel.js';
 import {Paster} from './paste.js';
 import {ClipboardWatcher} from './watcher.js';
-import {WinFlyout} from './winFlyout.js';
+import {type FlyoutTab, WinFlyout} from './winFlyout.js';
 
 export const SHORTCUT_KEY = 'toggle-shortcut';
 
@@ -22,6 +23,7 @@ export class ClipboardFeature implements PanelHost {
     private _watcher: ClipboardWatcher;
     private _paster: Paster;
     private _panel: ClipboardPanel | null = null;
+    private _emojiHost: EmojiPickHost | null = null;
     private _skin = '';
     private _bound = false;
     private _settingsIds: number[] = [];
@@ -59,8 +61,38 @@ export class ClipboardFeature implements PanelHost {
             return;
         this._panel?.destroy();
         this._skin = skin;
-        this._panel = skin === 'windows11' ? new WinFlyout(this)
-            : new ListPanel(this, skin === 'macos' ? 'macos' : 'default');
+        if (skin === 'windows11') {
+            const flyout = new WinFlyout(this);
+            flyout.setEmojiHost(this._emojiHost);
+            this._panel = flyout;
+        } else {
+            this._panel = new ListPanel(this, skin === 'macos' ? 'macos' : 'default');
+        }
+    }
+
+    /** Mark the next clipboard change as internal (used by EmojiInserter so history skips it). */
+    expectOwnContent(): void {
+        this._watcher.expectOwnContent();
+    }
+
+    /** Connect the emoji picker to the Windows 11 unified flyout's Emoji and Symbols tabs. */
+    setEmojiHost(host: EmojiPickHost | null): void {
+        this._emojiHost = host;
+        if (this._panel instanceof WinFlyout)
+            this._panel.setEmojiHost(host);
+    }
+
+    /** Open the Windows 11 flyout on a given tab; returns false when another skin is active. */
+    openTab(tab: FlyoutTab): boolean {
+        if (!(this._panel instanceof WinFlyout))
+            return false;
+        this._panel.openTab(tab);
+        return true;
+    }
+
+    /** Close the clipboard/unified flyout if currently open. */
+    closePanel(): void {
+        this._panel?.close();
     }
 
     get skin(): string {
@@ -68,7 +100,10 @@ export class ClipboardFeature implements PanelHost {
     }
 
     toggle(): void {
-        this._panel?.toggle();
+        if (this._panel instanceof WinFlyout)
+            this._panel.openTab('clipboard');
+        else
+            this._panel?.toggle();
     }
 
     private _bind(): void {

@@ -20,6 +20,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Feature | Origin |
 |---|---|
 | Clipboard (`clipboard`) | Available in Windows 11 and macOS; Based on Clipboard Indicator (MIT) |
+| Emoji and symbols (`emoji`) | In Windows 11 and macOS |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
 | Logo menu (`logo-menu`) | From macOS |
@@ -53,6 +54,18 @@ Path `/io/github/OlehDzhumyk/Desk/clipboard/`.
 | `toggle-shortcut` | shortcut list | `['<Shift><Super>v']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Super+V for Windows 11, Shift+Super+V for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts clipboard-toggle replaces it and is re-applied after every theme apply. Change it in the window (Keyboard shortcuts) or with `themes shortcut`. | clipboard | shortcut row on `--page shortcuts` |
 | `excluded-apps` | string list | `['org.keepassxc.KeePassXC', 'KeePassXC', 'keepassxc', 'Bitwarden', 'bitwarden', 'com.bitwarden.desktop', '1Password', '1password', 'org.gnome.World.Secrets', 'secrets', 'org.gnome.seahorse.Application', 'Seahorse', 'proton-pass', 'Proton Pass', 'me.proton.Pass']` |  | Excluded applications | Applications whose copies are never recorded (WM class or app id) | clipboard | — (gsettings only) |
 
+## `io.github.OlehDzhumyk.Desk.Emoji`
+
+Path `/io/github/OlehDzhumyk/Desk/emoji/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Emoji and symbol picker | Open a keyboard-first panel to search and insert emoji, symbols and text faces | emoji | switch on `--page emoji` |
+| `emoji-shortcut` | shortcut list | `['<Super>period']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Super+. and Super+; for Windows 11, Ctrl+Super+Space for macOS, Super+. for Fedora); an override in io.github.OlehDzhumyk.Desk.Shortcuts emoji-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | emoji | shortcut row on `--page shortcuts` |
+| `skin-tone` | choice | `'none'` | `none`, `light`, `medium-light`, `medium`, `medium-dark`, `dark` | Default skin tone | Applied to person and hand emoji when inserted | emoji | drop-down on `--page emoji` |
+| `remember-recents` | boolean | `true` |  | Remember recent picks | Stored in ~/.local/share/deskd/emoji.json (mode 0600, last 36 picked). Turning it off clears the list and deletes the file. | emoji | switch on `--page emoji` |
+| `close-after-insert` | choice | `'skin'` | `skin`, `always`, `never` | After inserting an item | 'skin': windows11 stays open while macos and default close; 'always': close in every skin; 'never': keep open until dismissed. | emoji | drop-down on `--page emoji` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -60,6 +73,7 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | Key | Type | Default | Range / choices | Label | Description | Feature | Window |
 |---|---|---|---|---|---|---|---|
 | `clipboard-toggle` | shortcut list | `[]` |  | Open the clipboard panel | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | clipboard | shortcut row on `--page shortcuts` |
+| `emoji-toggle` | shortcut list | `[]` |  | Open the emoji and symbol picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | emoji | shortcut row on `--page shortcuts` |
 | `mixer-open` | shortcut list | `[]` |  | Open the volume mixer | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | mixer | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
@@ -131,6 +145,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | Id | Label | Feature | Key in force | Override |
 |---|---|---|---|---|
 | `clipboard-toggle` | Open the clipboard panel | clipboard | `/io/github/OlehDzhumyk/Desk/clipboard/toggle-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/clipboard-toggle` |
+| `emoji-toggle` | Open the emoji and symbol picker | emoji | `/io/github/OlehDzhumyk/Desk/emoji/emoji-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/emoji-toggle` |
 | `mixer-open` | Open the volume mixer | mixer | `/io/github/OlehDzhumyk/Desk/mixer/mixer-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/mixer-open` |
 
 ## Pages of the window
@@ -138,6 +153,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | Page | Title | Groups |
 |---|---|---|
 | `clipboard` | Clipboard | History, Privacy, How to open, (actions) |
+| `emoji` | Emoji and symbols | Picker, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule |
 | `logo-menu` | Logo menu | Top bar |
