@@ -102,7 +102,7 @@ fn summary(m: &Value) -> String {
         parts.push(tr!("sounds muted"));
     }
     if let Some(a) = m["allowed_apps"].as_array().filter(|a| !a.is_empty()) {
-        parts.push(tr!("{count} apps allowed", count = a.len()));
+        parts.push(tr!("allowed apps: {count}", count = a.len()));
     }
     if let Some(s) = m["schedule"].as_object() {
         let days: Vec<&str> = s["days"]

@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 15:21+0000\n"
+"POT-Creation-Date: 2026-11-23 15:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,14 +121,91 @@ msgstr ""
 msgid "Fixed schedule"
 msgstr ""
 
-#: crates/desk-settings/src/lockscreen.rs:19
-#: crates/desk-settings/src/lockscreen.rs:368
-msgid "Lock screen"
+#: crates/desk-settings/src/focus.rs:12 crates/desk-settings/src/focus.rs:109
+#: crates/desk-settings/src/focus.rs:127
+msgid "Focus"
 msgstr ""
 
+#: crates/desk-settings/src/focus.rs:13
 #: crates/desk-settings/src/lockscreen.rs:20
 #: crates/desk-settings/src/registry.rs:24
 msgid "Available in Windows 11 and macOS"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:20 crates/themes/src/gui/focus.rs:124
+msgid "Focus modes"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:21
+msgid "Turn off to stop all schedules and end the active mode"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:33
+msgid "Active mode"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:48
+msgid "Summary when a mode ends"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:49
+msgid "Tell how many notifications arrived while the mode was on"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:66
+msgid "Focus session, minutes"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:67
+msgid "Length of a focus session (Windows 11 style)"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:84
+msgid "Break after a session, minutes"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:85
+msgid "0: no break"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:110
+msgid "Do not disturb, focus modes and schedules"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:112
+msgid ""
+"Hide notification banners on demand or on a schedule. Notifications are not "
+"lost: they stay in the notification list. Critical ones (such as a low "
+"battery) always show. Ending a mode restores what it changed."
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:122
+msgid "State"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:131
+msgid "Start or edit modes…"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:136
+msgid "End focus"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:142
+msgid "Options"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:147
+msgid "Focus sessions"
+msgstr ""
+
+#: crates/desk-settings/src/focus.rs:148
+msgid "Started from the quick settings tile with the Windows 11 style."
+msgstr ""
+
+#: crates/desk-settings/src/lockscreen.rs:19
+#: crates/desk-settings/src/lockscreen.rs:368
+msgid "Lock screen"
 msgstr ""
 
 #: crates/desk-settings/src/lockscreen.rs:99
@@ -440,7 +517,7 @@ msgid "Applications never listed in the mixer (app id or program name)"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:139
-#: crates/desk-settings/src/registry.rs:262
+#: crates/desk-settings/src/registry.rs:264
 msgid "Keyboard shortcut"
 msgstr ""
 
@@ -465,224 +542,224 @@ msgid "Mixer"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:215
-#: crates/desk-settings/src/registry.rs:427
+#: crates/desk-settings/src/registry.rs:430
 msgid "How to open"
 msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:216
-#: crates/desk-settings/src/registry.rs:428
+#: crates/desk-settings/src/registry.rs:431
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:391
+#: crates/desk-settings/src/registry.rs:394
 msgid "Clipboard"
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:383
+#: crates/desk-settings/src/registry.rs:386
 msgid "Application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:57
+#: crates/desk-settings/src/registry.rs:58
 msgid "simple menu (and a toggle in quick settings)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:61
+#: crates/desk-settings/src/registry.rs:62
 msgid "macOS-style panel (centred, with search)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:65
+#: crates/desk-settings/src/registry.rs:66
 msgid "Windows 11-style Win+V panel (next to the cursor)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:69
+#: crates/desk-settings/src/registry.rs:70
 msgid "Panel style"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:87
+#: crates/desk-settings/src/registry.rs:88
 msgid "System default"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:100
-#: crates/desk-settings/src/registry.rs:459
+#: crates/desk-settings/src/registry.rs:101
+#: crates/desk-settings/src/registry.rs:462
 msgid "Language"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:101
+#: crates/desk-settings/src/registry.rs:102
 msgid "Language of the window, the command line and the shell panels"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:150
+#: crates/desk-settings/src/registry.rs:152
 msgid "Record history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:151
+#: crates/desk-settings/src/registry.rs:153
 msgid "Turn off to disable the feature completely"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:164
+#: crates/desk-settings/src/registry.rs:166
 msgid "History size"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:165
+#: crates/desk-settings/src/registry.rs:167
 msgid "How many unpinned items to keep"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:176
+#: crates/desk-settings/src/registry.rs:178
 msgid "Images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:177
+#: crates/desk-settings/src/registry.rs:179
 msgid "Also record copied images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:190
+#: crates/desk-settings/src/registry.rs:192
 msgid "Largest image, KiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:191
+#: crates/desk-settings/src/registry.rs:193
 msgid "Bigger images are not recorded"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:208
+#: crates/desk-settings/src/registry.rs:210
 msgid "Image budget, MiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:209
+#: crates/desk-settings/src/registry.rs:211
 msgid "When images take more space, the oldest are dropped"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:222
+#: crates/desk-settings/src/registry.rs:224
 msgid "Keep between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:223
+#: crates/desk-settings/src/registry.rs:225
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:234
+#: crates/desk-settings/src/registry.rs:236
 msgid "Keep images between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:235
+#: crates/desk-settings/src/registry.rs:237
 msgid "Otherwise images live only until you log out"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:243
+#: crates/desk-settings/src/registry.rs:245
 msgid "Private mode"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:244
+#: crates/desk-settings/src/registry.rs:246
 msgid "Temporarily record nothing"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:251
+#: crates/desk-settings/src/registry.rs:253
 msgid "Paste the chosen item"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:252
+#: crates/desk-settings/src/registry.rs:254
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:297
+#: crates/desk-settings/src/registry.rs:299
 msgid "Excluded applications"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:332
-#: crates/desk-settings/src/registry.rs:344
+#: crates/desk-settings/src/registry.rs:334
+#: crates/desk-settings/src/registry.rs:346
 msgid "Open the clipboard panel"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:375
+#: crates/desk-settings/src/registry.rs:378
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:382
-#: crates/desk-settings/src/registry.rs:478
+#: crates/desk-settings/src/registry.rs:385
+#: crates/desk-settings/src/registry.rs:481
 msgid "Features"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:384
+#: crates/desk-settings/src/registry.rs:387
 msgid "About the project"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:392
+#: crates/desk-settings/src/registry.rs:395
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:394
+#: crates/desk-settings/src/registry.rs:397
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
 "theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:403
+#: crates/desk-settings/src/registry.rs:406
 msgid "History"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:415
+#: crates/desk-settings/src/registry.rs:418
 msgid "Privacy"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:417
+#: crates/desk-settings/src/registry.rs:420
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:433
+#: crates/desk-settings/src/registry.rs:436
 msgid "deskd service"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:442
+#: crates/desk-settings/src/registry.rs:445
 msgid "Clear history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:451
+#: crates/desk-settings/src/registry.rs:454
 msgid "General"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:452
+#: crates/desk-settings/src/registry.rs:455
 msgid "Language of the application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:453
+#: crates/desk-settings/src/registry.rs:456
 msgid "Settings of the Themes application itself."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:460
+#: crates/desk-settings/src/registry.rs:463
 msgid "The change takes effect after the window is restarted."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:467
+#: crates/desk-settings/src/registry.rs:470
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:468
+#: crates/desk-settings/src/registry.rs:471
 msgid "All shortcuts of the features in one place"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:470
+#: crates/desk-settings/src/registry.rs:473
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
 "refused."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:489
+#: crates/desk-settings/src/registry.rs:492
 msgid "Credits"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:490
+#: crates/desk-settings/src/registry.rs:493
 msgid "Projects the themes and features are based on, and their licences"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:492
+#: crates/desk-settings/src/registry.rs:495
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "
@@ -699,7 +776,19 @@ msgstr ""
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/main.rs:37
+#: crates/deskd/src/focus/model.rs:186
+msgid "Do not disturb"
+msgstr ""
+
+#: crates/deskd/src/focus/model.rs:192
+msgid "Work"
+msgstr ""
+
+#: crates/deskd/src/focus/model.rs:198
+msgid "Sleep"
+msgstr ""
+
+#: crates/deskd/src/main.rs:39
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -710,14 +799,14 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:124
+#: crates/deskd/src/main.rs:127
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
 msgstr ""
 
-#: crates/deskd/src/main.rs:243 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:292 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -945,172 +1034,183 @@ msgid ""
 "--user restart deskd"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:482
+#: crates/themes-core/src/doctor.rs:429
+#, rust-format
+msgid "focus mode “{name}” is on (end it with: themes focus stop)"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:436
+msgid ""
+"notification banners are off (do not disturb) and no focus mode is active; "
+"turn do not disturb off in the notification list if this is not intended"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:528
 #, rust-format
 msgid "compiled the GSettings schemas of {what}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:486
+#: crates/themes-core/src/doctor.rs:532
 msgid "gschemas.compiled is missing"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:487
+#: crates/themes-core/src/doctor.rs:533
 msgid "gschemas.compiled is older than the schema files"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:488
+#: crates/themes-core/src/doctor.rs:534
 #, rust-format
 msgid "gschemas.compiled does not contain {schema}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:494
+#: crates/themes-core/src/doctor.rs:540
 #, rust-format
 msgid "{what}: {why} (themes doctor --fix runs glib-compile-schemas)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:532
+#: crates/themes-core/src/doctor.rs:578
 #, rust-format
 msgid "the GSettings schema {schema} is not installed (run data/install.sh)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:561
+#: crates/themes-core/src/doctor.rs:607
 #, rust-format
 msgid "the extension {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:581
+#: crates/themes-core/src/doctor.rs:627
 #, rust-format
 msgid ""
 "{key} holds a value that is not allowed ({why}); it is ignored (gsettings "
 "reset or change it in the window)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:625
+#: crates/themes-core/src/doctor.rs:671
 #, rust-format
 msgid "generated the token files of the theme “{theme}”"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:633
+#: crates/themes-core/src/doctor.rs:679
 #, rust-format
 msgid ""
 "the files generated from tokens.toml of the theme “{theme}” are missing or "
 "out of date (themes doctor --fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:651
+#: crates/themes-core/src/doctor.rs:697
 #, rust-format
 msgid "updated {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:686
+#: crates/themes-core/src/doctor.rs:732
 #, rust-format
 msgid ""
 "theme “{theme}” has been removed; switch to “{replacement}” (themes doctor --"
 "fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:695
+#: crates/themes-core/src/doctor.rs:741
 #, rust-format
 msgid "switched retired theme “{theme}” to “{replacement}”"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:710
+#: crates/themes-core/src/doctor.rs:756
 #, rust-format
 msgid ""
 "extension {uuid} is no longer used by any bundled theme (themes doctor --fix "
 "turns it off)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:715
+#: crates/themes-core/src/doctor.rs:761
 #, rust-format
 msgid ""
 "extension {uuid} is still installed but no longer used by any bundled theme; "
 "you may remove it"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:728
+#: crates/themes-core/src/doctor.rs:774
 #, rust-format
 msgid "turned off retired extension {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:799
+#: crates/themes-core/src/doctor.rs:845
 #, rust-format
 msgid "journal: {line}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:869
+#: crates/themes-core/src/doctor.rs:915
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:898
+#: crates/themes-core/src/doctor.rs:944
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:900
+#: crates/themes-core/src/doctor.rs:946
 msgid "error (ERROR)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:922
+#: crates/themes-core/src/doctor.rs:968
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:930
+#: crates/themes-core/src/doctor.rs:976
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:942
+#: crates/themes-core/src/doctor.rs:988
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:959
+#: crates/themes-core/src/doctor.rs:1005
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
 "is not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:967
+#: crates/themes-core/src/doctor.rs:1013
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:987
+#: crates/themes-core/src/doctor.rs:1034
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1028
+#: crates/themes-core/src/doctor.rs:1075
 #, rust-format
 msgid "turned off {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1086
+#: crates/themes-core/src/doctor.rs:1133
 #, rust-format
 msgid "turned on {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1120
+#: crates/themes-core/src/doctor.rs:1167
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1125
+#: crates/themes-core/src/doctor.rs:1172
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:481
+#: crates/themes-core/src/doctor.rs:1181 crates/themes/src/cli.rs:488
 #: crates/themes/src/gui/window.rs:1348
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1137
+#: crates/themes-core/src/doctor.rs:1184
 msgid "Themes: system check"
 msgstr ""
 
@@ -1520,117 +1620,121 @@ msgstr ""
 
 #: crates/themes/src/cli.rs:50
 msgid ""
-"Page: themes | mix | features | clipboard | mixer | lockscreen | logo-menu | "
-"shortcuts | general | system | credits"
+"Page: themes | mix | features | clipboard | mixer | focus | lockscreen | "
+"logo-menu | shortcuts | general | system | credits"
 msgstr ""
 
 #: crates/themes/src/cli.rs:52
 msgid "Keyboard shortcuts of the features (the theme gives the default)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:223 crates/themes/src/gui/window.rs:1099
+#: crates/themes/src/cli.rs:53
+msgid "Focus modes: do not disturb, schedules, focus sessions"
+msgstr ""
+
+#: crates/themes/src/cli.rs:229 crates/themes/src/gui/window.rs:1099
 #: crates/themes/src/gui/window.rs:1134 crates/themes/src/gui/window.rs:1246
 #: crates/themes/src/gui/window.rs:1281
 #, rust-format
 msgid "Error: {error}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:294
+#: crates/themes/src/cli.rs:301
 #, rust-format
 msgid "active: {modules}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:309
+#: crates/themes/src/cli.rs:316
 msgid "(unknown: no theme has been applied yet)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:322
+#: crates/themes/src/cli.rs:329
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:386
+#: crates/themes/src/cli.rs:393
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
 "extensions {extensions}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:396 crates/themes/src/cli.rs:795
+#: crates/themes/src/cli.rs:403 crates/themes/src/cli.rs:802
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:138
 #, rust-format
 msgid "warning: {text}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:409
+#: crates/themes/src/cli.rs:416
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:428
+#: crates/themes/src/cli.rs:435
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:431
+#: crates/themes/src/cli.rs:438
 msgid "Extensions are already on."
 msgstr ""
 
-#: crates/themes/src/cli.rs:449 crates/themes/src/gui/system.rs:141
+#: crates/themes/src/cli.rs:456 crates/themes/src/gui/system.rs:141
 #: crates/themes/src/gui/window.rs:1325
 msgid "running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:451 crates/themes/src/gui/system.rs:143
+#: crates/themes/src/cli.rs:458 crates/themes/src/gui/system.rs:143
 #: crates/themes/src/gui/window.rs:1327
 msgid "not running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:456
+#: crates/themes/src/cli.rs:463
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:459 crates/themes/src/gui/system.rs:149
+#: crates/themes/src/cli.rs:466 crates/themes/src/gui/system.rs:149
 #: crates/themes/src/gui/window.rs:1334
 msgid "No problems found."
 msgstr ""
 
-#: crates/themes/src/cli.rs:471
+#: crates/themes/src/cli.rs:478
 msgid "fix with: themes doctor --fix"
 msgstr ""
 
-#: crates/themes/src/cli.rs:478
+#: crates/themes/src/cli.rs:485
 #, rust-format
 msgid "fixed: {what}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:519
+#: crates/themes/src/cli.rs:526
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:526
+#: crates/themes/src/cli.rs:533
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr ""
 
-#: crates/themes/src/cli.rs:532 crates/themes/src/cli.rs:593
+#: crates/themes/src/cli.rs:539 crates/themes/src/cli.rs:600
 msgid "Cancelled: the theme was not applied."
 msgstr ""
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:540
+#: crates/themes/src/cli.rs:547
 msgid "Apply it anyway? [y/N]"
 msgstr ""
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:546
+#: crates/themes/src/cli.rs:553
 msgid "y|yes"
 msgstr ""
 
-#: crates/themes/src/cli.rs:579
+#: crates/themes/src/cli.rs:586
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -1638,145 +1742,283 @@ msgid ""
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:587
+#: crates/themes/src/cli.rs:594
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
 "{list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:610
+#: crates/themes/src/cli.rs:617
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
 "unless approved before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:618
+#: crates/themes/src/cli.rs:625
 msgid "  (approved)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:641
+#: crates/themes/src/cli.rs:648
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:659
+#: crates/themes/src/cli.rs:666
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:691
+#: crates/themes/src/cli.rs:698
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 
-#: crates/themes/src/cli.rs:697
+#: crates/themes/src/cli.rs:704
 #, rust-format
 msgid "Write ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:703
+#: crates/themes/src/cli.rs:710
 #, rust-format
 msgid "Reset ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:712
+#: crates/themes/src/cli.rs:719
 #, rust-format
 msgid "Extensions: {list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:736
+#: crates/themes/src/cli.rs:743
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr ""
 
-#: crates/themes/src/cli.rs:745
+#: crates/themes/src/cli.rs:752
 msgid "before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:748
+#: crates/themes/src/cli.rs:755
 msgid "now:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:750
+#: crates/themes/src/cli.rs:757
 msgid "dconf keys changed:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:752
+#: crates/themes/src/cli.rs:759
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:757
+#: crates/themes/src/cli.rs:764
 msgid "extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:763
+#: crates/themes/src/cli.rs:770
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:770
+#: crates/themes/src/cli.rs:777
 msgid "GTK links:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:777
+#: crates/themes/src/cli.rs:784
 msgid "cleaned up after extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:782
+#: crates/themes/src/cli.rs:789
 msgid "hooks:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:800
+#: crates/themes/src/cli.rs:807
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
 msgstr ""
 
-#: crates/themes/src/cli.rs:806
+#: crates/themes/src/cli.rs:813
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
 "them on: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes/src/cli.rs:812
+#: crates/themes/src/cli.rs:819
 msgid "You MUST log out and log in again:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:820
+#: crates/themes/src/cli.rs:827
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:835
+#: crates/themes/src/cli.rs:842
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:843
+#: crates/themes/src/cli.rs:850
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:851
+#: crates/themes/src/cli.rs:858
 msgid "cache up to date"
 msgstr ""
 
-#: crates/themes/src/cli.rs:852
+#: crates/themes/src/cli.rs:859
 msgid "generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:853
+#: crates/themes/src/cli.rs:860
 msgid "will be generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:858
+#: crates/themes/src/cli.rs:865
 #, rust-format
 msgid "link: {path}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:13
+msgid "Show the focus state and the next scheduled start"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:14
+msgid "List the focus modes"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:15
+msgid "Start a focus mode (until you end it, or for a time)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:16
+msgid "Mode id, see `themes focus list`"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:17
+msgid "For how long, e.g. 30m, 2h, 1h30m"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:18
+msgid "Until a time of day (HH:MM, today or tomorrow)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:19
+msgid "Start a focus session: do not disturb for some minutes, then a break"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:20
+msgid "Minutes (default: the session-length setting)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:21
+msgid "End the active focus mode"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:22
+msgid "Add or change a focus mode"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:23
+msgid "Delete a custom focus mode"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:24
+msgid "Display name"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:25
+msgid "Hide notification banners (true or false)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:26
+msgid "Mute event sounds (true or false)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:27
+msgid "App id whose banners still show (repeat; replaces the list)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:28
+msgid "Schedule days, e.g. mon,tue,wed,thu,fri"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:29
+msgid "Schedule start (HH:MM)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:30
+msgid "Schedule end (HH:MM; earlier than the start means the next morning)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:31
+msgid "Remove the schedule"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:32
+msgid "Allow no apps (clear the list)"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:108
+#, rust-format
+msgid "Focus session until {time}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:110
+#, rust-format
+msgid "Focus: {mode} until {time}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:114
+#, rust-format
+msgid "Focus: {mode}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:118
+#, rust-format
+msgid "Break until {time}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:122
+#, rust-format
+msgid "Focus is off; {mode} starts at {time}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:127 crates/themes/src/focus_cli.rs:314
+#: crates/themes/src/gui/focus.rs:89
+msgid "Focus is off"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:179
+#, rust-format
+msgid "deskd focus service: {error}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:208 crates/themes/src/gui/focus.rs:99
+msgid "banners hidden"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:211 crates/themes/src/gui/focus.rs:102
+msgid "sounds muted"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:222
+#, rust-format
+msgid "allowed: {apps}"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:294
+#, rust-format
+msgid "invalid duration “{value}”"
+msgstr ""
+
+#: crates/themes/src/focus_cli.rs:297
+#, rust-format
+msgid "invalid time “{value}”"
 msgstr ""
 
 #: crates/themes/src/gui/card.rs:77 crates/themes/src/gui/card.rs:261
@@ -1902,8 +2144,8 @@ msgstr ""
 msgid "All items will be deleted, pinned ones too. This cannot be undone."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:452 crates/themes/src/gui/features.rs:504
-#: crates/themes/src/gui/features.rs:741 crates/themes/src/gui/system.rs:251
+#: crates/themes/src/gui/features.rs:452 crates/themes/src/gui/features.rs:509
+#: crates/themes/src/gui/features.rs:746 crates/themes/src/gui/system.rs:251
 #: crates/themes/src/gui/window.rs:1034 crates/themes/src/gui/window.rs:1092
 #: crates/themes/src/gui/window.rs:1211 crates/themes/src/gui/window.rs:1271
 #: crates/themes/src/gui/window.rs:1403
@@ -1914,106 +2156,200 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:472
+#: crates/themes/src/gui/features.rs:477 crates/themes/src/gui/focus.rs:47
 msgid "checking…"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:488
+#: crates/themes/src/gui/features.rs:493
 #, rust-format
 msgid "running; items in the history: {count}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:489
+#: crates/themes/src/gui/features.rs:494 crates/themes/src/gui/focus.rs:37
 #, rust-format
 msgid "unavailable: {error}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:490
+#: crates/themes/src/gui/features.rs:495 crates/themes/src/gui/focus.rs:25
 msgid "unavailable"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:501
+#: crates/themes/src/gui/features.rs:506
 msgid "Press the new shortcut. Esc cancels, Backspace turns the shortcut off."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:542
+#: crates/themes/src/gui/features.rs:547
 msgid "Change"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:547
+#: crates/themes/src/gui/features.rs:552
 msgid "Reset to the theme default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:553
+#: crates/themes/src/gui/features.rs:558
 #, rust-format
 msgid "Reset {name} to the theme default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:557
+#: crates/themes/src/gui/features.rs:562
 #, rust-format
 msgid "Change the shortcut: {name}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:576
+#: crates/themes/src/gui/features.rs:581
 #, rust-format
 msgid "Your choice (theme default: {accels})"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:579
+#: crates/themes/src/gui/features.rs:584
 msgid "Theme default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:580
+#: crates/themes/src/gui/features.rs:585
 msgid "Standard default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:613
+#: crates/themes/src/gui/features.rs:618
 #, rust-format
 msgid "Refused: {conflict}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:699
+#: crates/themes/src/gui/features.rs:704
 #, rust-format
 msgid "Open the website of {name}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:725
+#: crates/themes/src/gui/features.rs:730
 msgid "Reset page"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:734
+#: crates/themes/src/gui/features.rs:739
 #, rust-format
 msgid "Reset “{page}” to defaults?"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:736
+#: crates/themes/src/gui/features.rs:741
 msgid "All settings on this page will return to their default values."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:742 crates/themes/src/gui/system.rs:231
+#: crates/themes/src/gui/features.rs:747 crates/themes/src/gui/system.rs:231
 msgid "Reset"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:769
+#: crates/themes/src/gui/features.rs:774
 #, rust-format
 msgid "Page “{page}” reset to defaults"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:810
+#: crates/themes/src/gui/features.rs:815
 msgid "Settings unavailable"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:812
+#: crates/themes/src/gui/features.rs:817
 #, rust-format
 msgid "The GSettings schema {schema} is not installed. Run data/install.sh."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:834
+#: crates/themes/src/gui/features.rs:839
 msgid "The language changes after a restart"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:835
+#: crates/themes/src/gui/features.rs:840
 msgid "Restart"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:105
+#, rust-format
+msgid "allowed apps: {count}"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:131
+msgid ""
+"Start a mode until you end it, or edit what it hides and when it starts by "
+"itself."
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:138 crates/themes/src/gui/focus.rs:140
+msgid "Add a mode"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:210
+msgid "Start"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:215
+#, rust-format
+msgid "Start {mode}"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:221
+msgid "Edit"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:225
+#, rust-format
+msgid "Edit {mode}"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1272
+msgid "Delete"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:258
+#, rust-format
+msgid "Delete {mode}"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:304
+msgid "New focus mode"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:306
+msgid "Edit focus mode"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:312
+msgid "Name"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:317
+msgid "Hide notification banners"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:318
+msgid "Critical notifications always show"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:322
+msgid "Mute event sounds"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:326
+msgid "Allowed apps (app ids, comma-separated)"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:339
+msgid "Schedule"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:342
+msgid "Start by itself"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:346
+msgid "Days (mon, tue, wed, thu, fri, sat, sun)"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:348
+msgid "From (HH:MM)"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:349
+msgid "To (HH:MM)"
+msgstr ""
+
+#: crates/themes/src/gui/focus.rs:367 crates/themes/src/gui/window.rs:1212
+msgid "Save"
 msgstr ""
 
 #: crates/themes/src/gui/search.rs:11
@@ -2371,10 +2707,6 @@ msgid ""
 "and the GTK files will be saved as a new theme."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1212
-msgid "Save"
-msgstr ""
-
 #: crates/themes/src/gui/window.rs:1245
 #, rust-format
 msgid "Theme “{name}” saved"
@@ -2393,10 +2725,6 @@ msgstr ""
 msgid ""
 "The theme folder will be moved to “trash” in the themes root; you can "
 "restore it by hand."
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:1272
-msgid "Delete"
 msgstr ""
 
 #: crates/themes/src/gui/window.rs:1280
@@ -2746,6 +3074,55 @@ msgstr ""
 msgid "More"
 msgstr ""
 
+#: bridge/src/focus/feature.ts:54 bridge/src/focus/feature.ts:238
+#: bridge/src/focus/feature.ts:294
+msgid "Unavailable"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:211
+msgid "Missed notifications: {count}"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:241
+msgid "{minutes} min left"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:243
+msgid "{mode} until {time}"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:245
+msgid "Break: {minutes} min left"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:300
+msgid "{mode}, on"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:305
+msgid "Do not disturb for 1 hour"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:308
+msgid "Do not disturb until tomorrow morning"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:312
+msgid "Focus session"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:314
+msgid "{minutes} minutes"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:323
+msgid "Focus settings…"
+msgstr ""
+
+#: bridge/src/focus/feature.ts:334
+msgid "Focus session ended"
+msgstr ""
+
 #: bridge/src/logoMenu/actions.ts:76
 msgid "this window"
 msgstr ""
@@ -2776,10 +3153,6 @@ msgstr ""
 
 #: bridge/src/logoMenu/feature.ts:75
 msgid "Force Quit…"
-msgstr ""
-
-#: bridge/src/logoMenu/feature.ts:77
-msgid "Sleep"
 msgstr ""
 
 #: bridge/src/logoMenu/feature.ts:78
