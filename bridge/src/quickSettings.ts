@@ -58,7 +58,7 @@ function destroyMenu(toggle: QuickMenuToggle): void {
 const ThemesToggle = GObject.registerClass(
 class ThemesToggle extends QuickMenuToggle {
     declare private _section: PopupMenu.PopupMenuSection;
-    declare private _client: ThemesClient;
+    declare private _client: ThemesClient | null;
     declare private _busy: boolean;
     /** Destroyed, by disable() or by the shell tearing the stage down at logout (from C, so no
      * JS destroy() override runs then); async work that finishes later must not touch it. */
@@ -77,10 +77,10 @@ class ThemesToggle extends QuickMenuToggle {
         this.connect('clicked', () => { this.menu.open(); });
         this._busy = false;
         this._destroyed = false;
-        this._client = new ThemesClient(() => void this._refresh());
+        this._client = null;
         this.connect('destroy', () => {
             this._destroyed = true;
-            this._client.destroy();
+            this._client?.destroy();
             destroyMenu(this);
         });
         this.menu.connect('open-state-changed', (_m: unknown, open: boolean) => {
@@ -88,6 +88,12 @@ class ThemesToggle extends QuickMenuToggle {
                 void this._refresh();
             return undefined;
         });
+    }
+
+    /** The service client needs the extension directory (its interface XML), handed over right
+     * after construction (see ClipboardToggle.attach). */
+    attach(extDir: string): void {
+        this._client = new ThemesClient(extDir, () => void this._refresh());
         void this._refresh();
     }
 
@@ -97,6 +103,8 @@ class ThemesToggle extends QuickMenuToggle {
     }
 
     async _refresh(): Promise<void> {
+        if (!this._client)
+            return;
         try {
             const [themes, current] = await this._client.listAndCurrent();
             if (!this._gone())
@@ -136,10 +144,21 @@ class ThemesToggle extends QuickMenuToggle {
     }
 
     async _apply(id: string, name: string): Promise<void> {
-        if (this._busy)
+        const client = this._client;
+        if (this._busy || !client)
             return;
         this._busy = true;
-        const warning = (await this._client.experimental())[id];
+        // fail closed: when the service cannot say whether the theme is experimental, nothing
+        // is applied (ADR 0006)
+        let warning: string | undefined;
+        try {
+            warning = (await client.experimental())[id];
+        } catch (e) {
+            this._busy = false;
+            if (!this._gone())
+                Main.notifyError(_('Theme'), fmt(_('Could not apply “{name}”: {error}'), {name, error: errorText(e)}));
+            return;
+        }
         if (this._gone())
             return;
         if (warning !== undefined) {
@@ -153,7 +172,7 @@ class ThemesToggle extends QuickMenuToggle {
         }
         this.subtitle = fmt(_('applying “{name}”…'), {name});
         try {
-            const [relogin, message, warnings] = await this._client.apply(id);
+            const [relogin, message, warnings] = await client.apply(id, warning !== undefined);
             if (relogin)
                 Main.notify(_('Theme'), message);
             else if (warnings.length)
@@ -276,11 +295,18 @@ class ClipboardToggle extends QuickMenuToggle {
 export const DeskIndicator = GObject.registerClass(
 class DeskIndicator extends SystemIndicator {
     declare private _clipToggle: InstanceType<typeof ClipboardToggle> | null;
+    declare private _themes: InstanceType<typeof ThemesToggle>;
 
     constructor() {
         super();
-        this.quickSettingsItems.push(new ThemesToggle());
+        this._themes = new ThemesToggle();
+        this.quickSettingsItems.push(this._themes);
         this._clipToggle = null;
+    }
+
+    /** Hands the extension directory to the items that read interface XML from it. */
+    attach(extDir: string): void {
+        this._themes.attach(extDir);
     }
 
     /** The clipboard toggle exists only with the default skin. */
