@@ -2,11 +2,12 @@
 //! Головне вікно: сітка тем, сторінка «Змішати», меню, діалоги.
 
 use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::Duration;
 
 use adw::prelude::*;
-use desk_settings::tr;
+use desk_settings::{Section, tr};
 use gtk::{gio, glib};
 use themes_core::Ctx;
 use themes_core::modules::Module;
@@ -14,7 +15,9 @@ use themes_core::state::State;
 use themes_core::theme::all_themes;
 
 use super::GuiOptions;
+use super::a11y;
 use super::card::{ThemeCard, ThemeInfo};
+use super::search::{self, SearchHit};
 
 /// What a window action does: the window and the action's parameter.
 type ActionHandler = Box<dyn Fn(&Rc<ThemesWindow>, Option<&glib::Variant>)>;
@@ -22,18 +25,28 @@ type ActionHandler = Box<dyn Fn(&Rc<ThemesWindow>, Option<&glib::Variant>)>;
 pub struct ThemesWindow {
     ctx: Ctx,
     pub win: adw::ApplicationWindow,
-    title: adw::WindowTitle,
+    content_title: adw::WindowTitle,
+    content_page: adw::NavigationPage,
+    content_stack: gtk::Stack,
+    split: adw::NavigationSplitView,
+    nav_list: gtk::ListBox,
+    search_bar: gtk::SearchBar,
+    search_entry: gtk::SearchEntry,
+    save_btn: gtk::Button,
     flow: gtk::FlowBox,
     main_stack: gtk::Stack,
     status: adw::StatusPage,
     toasts: adw::ToastOverlay,
-    view: adw::ViewStack,
     banner: adw::Banner,
     mix_group: adw::PreferencesGroup,
     mix_rows: RefCell<Vec<(Module, adw::ComboRow)>>,
     mix_guard: Cell<bool>,
     cards: RefCell<Vec<ThemeCard>>,
     themes: RefCell<Vec<ThemeInfo>>,
+    themes_subtitle: RefCell<String>,
+    page_titles: HashMap<String, String>,
+    targets: HashMap<String, HashMap<String, gtk::Widget>>,
+    nav_rows: HashMap<String, gtk::ListBoxRow>,
     busy: Cell<bool>,
     reload_id: RefCell<Option<glib::SourceId>>,
     monitors: RefCell<Vec<gio::FileMonitor>>,
@@ -98,7 +111,7 @@ pub fn add_app_actions(app: &adw::Application) {
         "about",
         Box::new(|app| {
             let d = adw::AboutDialog::builder()
-                .application_name(tr!("Themes"))
+                .application_name(tr!("Desktop"))
                 .application_icon("preferences-desktop-appearance")
                 .developer_name("OlehDzhumyk")
                 .version(env!("CARGO_PKG_VERSION"))
@@ -142,15 +155,307 @@ fn spawn_flatpak(app: &adw::Application, id: &str, label: &str) {
 }
 
 fn find_toasts(w: &adw::ApplicationWindow) -> Option<adw::ToastOverlay> {
-    let tv = w.content()?.downcast::<adw::ToolbarView>().ok()?;
-    tv.content()?.downcast::<adw::ToastOverlay>().ok()
+    w.content()?.downcast::<adw::ToastOverlay>().ok()
+}
+
+fn translate_str(s: &str) -> String {
+    if s.is_empty() {
+        String::new()
+    } else {
+        desk_settings::i18n::gettext(s)
+    }
+}
+
+fn build_menu() -> gio::Menu {
+    let menu = gio::Menu::new();
+    let s1 = gio::Menu::new();
+    s1.append(
+        Some(&tr!("Configure extensions")),
+        Some("app.extension-manager"),
+    );
+    s1.append(Some(&tr!("Advanced settings")), Some("app.refine"));
+    s1.append(
+        Some(&tr!("Open the themes folder")),
+        Some("app.open-folder"),
+    );
+    let s2 = gio::Menu::new();
+    s2.append(Some(&tr!("Check the system")), Some("win.doctor"));
+    s2.append(Some(&tr!("Reset to the standard look")), Some("win.reset"));
+    s2.append(Some(&tr!("Reload the list")), Some("win.reload"));
+    let s3 = gio::Menu::new();
+    s3.append(Some(&tr!("About Desktop")), Some("app.about"));
+    menu.append_section(None, &s1);
+    menu.append_section(None, &s2);
+    menu.append_section(None, &s3);
+    menu
+}
+
+fn build_themes_page(ctx: &Ctx) -> (gtk::Stack, gtk::FlowBox, adw::StatusPage) {
+    let flow = gtk::FlowBox::builder()
+        .selection_mode(gtk::SelectionMode::None)
+        .homogeneous(true)
+        .min_children_per_line(1)
+        .max_children_per_line(4)
+        .column_spacing(20)
+        .row_spacing(20)
+        .valign(gtk::Align::Start)
+        .margin_top(24)
+        .margin_bottom(24)
+        .margin_start(24)
+        .margin_end(24)
+        .build();
+    let status = adw::StatusPage::builder()
+        .icon_name("preferences-desktop-appearance-symbolic")
+        .title(tr!("No themes found"))
+        .description(tr!(
+            "Add theme folders to {path}",
+            path = ctx.themes.display()
+        ))
+        .build();
+    let clamp = adw::Clamp::builder()
+        .maximum_size(1600)
+        .tightening_threshold(1600)
+        .child(&flow)
+        .build();
+    let scroller = gtk::ScrolledWindow::builder()
+        .child(&clamp)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .build();
+    let main_stack = gtk::Stack::new();
+    main_stack.add_named(&scroller, Some("grid"));
+    main_stack.add_named(&status, Some("empty"));
+    main_stack.set_vexpand(true);
+    (main_stack, flow, status)
+}
+
+fn build_mix_page() -> (adw::PreferencesPage, adw::PreferencesGroup) {
+    let mix_page = adw::PreferencesPage::builder()
+        .description(tr!(
+            "Take single modules from different themes: for example the macOS look with Windows 11 behaviour. A change is applied at once."
+        ))
+        .build();
+    let mix_group = adw::PreferencesGroup::builder()
+        .title(tr!("Modules"))
+        .build();
+    mix_page.add(&mix_group);
+    let mix_tools = adw::PreferencesGroup::new();
+    let reset_row = adw::ButtonRow::builder()
+        .title(tr!("Reset everything to the standard look"))
+        .action_name("win.reset")
+        .build();
+    reset_row.add_css_class("destructive-action");
+    mix_tools.add(&reset_row);
+    mix_page.add(&mix_tools);
+    (mix_page, mix_group)
+}
+
+fn add_sidebar_section(list: &gtk::ListBox, title: &str) {
+    let lbl = gtk::Label::builder().label(title).xalign(0.0).build();
+    lbl.add_css_class("sidebar-section-header");
+    let row = gtk::ListBoxRow::builder()
+        .child(&lbl)
+        .selectable(false)
+        .activatable(false)
+        .focusable(false)
+        .build();
+    list.append(&row);
+}
+
+fn add_sidebar_item(list: &gtk::ListBox, id: &str, title: &str, icon: &str) -> gtk::ListBoxRow {
+    let hbox = gtk::Box::builder()
+        .orientation(gtk::Orientation::Horizontal)
+        .spacing(12)
+        .margin_top(6)
+        .margin_bottom(6)
+        .margin_start(6)
+        .margin_end(6)
+        .build();
+    hbox.append(&gtk::Image::from_icon_name(icon));
+    let lbl = gtk::Label::builder()
+        .label(title)
+        .xalign(0.0)
+        .ellipsize(gtk::pango::EllipsizeMode::End)
+        .build();
+    hbox.append(&lbl);
+    let row = gtk::ListBoxRow::builder().child(&hbox).build();
+    row.set_widget_name(id);
+    list.append(&row);
+    row
+}
+
+struct SidebarPane {
+    page: adw::NavigationPage,
+    nav_list: gtk::ListBox,
+    search_bar: gtk::SearchBar,
+    search_entry: gtk::SearchEntry,
+    sidebar_stack: gtk::Stack,
+    search_list: gtk::ListBox,
+}
+
+fn build_sidebar_pane() -> SidebarPane {
+    let toolbar = adw::ToolbarView::new();
+    let header = adw::HeaderBar::new();
+
+    let search_btn = gtk::ToggleButton::builder()
+        .icon_name("system-search-symbolic")
+        .tooltip_text(tr!("Search settings (Ctrl+F)"))
+        .build();
+    a11y::label(&search_btn, &tr!("Search settings"));
+    header.pack_start(&search_btn);
+
+    let menu = build_menu();
+    header.pack_end(
+        &gtk::MenuButton::builder()
+            .icon_name("open-menu-symbolic")
+            .menu_model(&menu)
+            .primary(true)
+            .tooltip_text(tr!("Main menu"))
+            .build(),
+    );
+    toolbar.add_top_bar(&header);
+
+    let search_entry = gtk::SearchEntry::builder()
+        .placeholder_text(tr!("Search settings…"))
+        .hexpand(true)
+        .build();
+    a11y::label(&search_entry, &tr!("Search settings"));
+    let search_bar = gtk::SearchBar::builder()
+        .child(&search_entry)
+        .show_close_button(false)
+        .build();
+    search_bar.connect_entry(&search_entry);
+    search_btn
+        .bind_property("active", &search_bar, "search-mode-enabled")
+        .bidirectional()
+        .sync_create()
+        .build();
+    toolbar.add_top_bar(&search_bar);
+
+    let nav_list = gtk::ListBox::builder()
+        .selection_mode(gtk::SelectionMode::Single)
+        .build();
+    nav_list.add_css_class("navigation-sidebar");
+    let nav_scroll = gtk::ScrolledWindow::builder()
+        .child(&nav_list)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .build();
+
+    let search_list = gtk::ListBox::builder()
+        .selection_mode(gtk::SelectionMode::None)
+        .build();
+    search_list.add_css_class("navigation-sidebar");
+    let search_scroll = gtk::ScrolledWindow::builder()
+        .child(&search_list)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .build();
+    let search_empty = adw::StatusPage::builder()
+        .icon_name("system-search-symbolic")
+        .title(tr!("No results"))
+        .description(tr!("Try a different search term"))
+        .build();
+
+    let sidebar_stack = gtk::Stack::new();
+    sidebar_stack.add_named(&nav_scroll, Some("nav"));
+    sidebar_stack.add_named(&search_scroll, Some("search"));
+    sidebar_stack.add_named(&search_empty, Some("search-empty"));
+    sidebar_stack.set_visible_child_name("nav");
+    toolbar.set_content(Some(&sidebar_stack));
+
+    let page = adw::NavigationPage::builder()
+        .title(tr!("Desktop"))
+        .child(&toolbar)
+        .build();
+
+    SidebarPane {
+        page,
+        nav_list,
+        search_bar,
+        search_entry,
+        sidebar_stack,
+        search_list,
+    }
+}
+
+struct RegisteredPages {
+    page_titles: HashMap<String, String>,
+    targets: HashMap<String, HashMap<String, gtk::Widget>>,
+    nav_rows: HashMap<String, gtk::ListBoxRow>,
+}
+
+fn populate_pages(
+    ctx: &Ctx,
+    toasts: &adw::ToastOverlay,
+    nav_list: &gtk::ListBox,
+    content_stack: &gtk::Stack,
+    themes_widget: &gtk::Stack,
+    mix_page: &adw::PreferencesPage,
+) -> RegisteredPages {
+    let mut page_titles = HashMap::new();
+    let mut targets = HashMap::new();
+    let mut nav_rows = HashMap::new();
+
+    // Appearance section: Themes, Mix
+    add_sidebar_section(nav_list, &tr!("Appearance"));
+    for (id, title, icon) in [
+        ("themes", tr!("Themes"), "view-grid-symbolic"),
+        ("mix", tr!("Mix"), "view-dual-symbolic"),
+    ] {
+        let row = add_sidebar_item(nav_list, id, &title, icon);
+        nav_rows.insert(id.to_string(), row);
+        page_titles.insert(id.to_string(), title);
+    }
+    content_stack.add_named(themes_widget, Some("themes"));
+    content_stack.add_named(mix_page, Some("mix"));
+
+    // Registry sections: Features, Application (+ System), About
+    for section in [Section::Features, Section::App, Section::About] {
+        let pages: Vec<&'static desk_settings::Page> = desk_settings::PAGES
+            .iter()
+            .copied()
+            .filter(|p| p.section == section)
+            .collect();
+        if pages.is_empty() && section != Section::App {
+            continue;
+        }
+        add_sidebar_section(nav_list, &translate_str(section.title()));
+        for p in pages {
+            let title = translate_str(p.title);
+            let row = add_sidebar_item(nav_list, p.id, &title, p.icon);
+            nav_rows.insert(p.id.to_string(), row);
+            page_titles.insert(p.id.to_string(), title);
+            let built = super::features::build_page(p, toasts);
+            content_stack.add_named(&built.page, Some(p.id));
+            targets.insert(p.id.to_string(), built.targets);
+        }
+        if section == Section::App {
+            let sys_title = tr!("System");
+            let row = add_sidebar_item(nav_list, "system", &sys_title, "emblem-system-symbolic");
+            nav_rows.insert("system".to_string(), row);
+            page_titles.insert("system".to_string(), sys_title);
+            let sys_page = super::system::build_page(ctx, toasts);
+            content_stack.add_named(&sys_page, Some("system"));
+        }
+    }
+
+    RegisteredPages {
+        page_titles,
+        targets,
+        nav_rows,
+    }
+}
+
+fn resolve_initial_page(req: Option<&str>) -> &str {
+    match req {
+        None | Some("themes") => "themes",
+        Some("mix") => "mix",
+        Some("system") => "system",
+        Some("features") => super::features::first_feature_page_id().unwrap_or("themes"),
+        Some(id) if desk_settings::page(id).is_some() => id,
+        _ => "themes",
+    }
 }
 
 impl ThemesWindow {
-    #[allow(
-        clippy::too_many_lines,
-        reason = "builds the main window, one widget tree"
-    )]
     pub fn build(
         app: &adw::Application,
         opts: GuiOptions,
@@ -159,21 +464,19 @@ impl ThemesWindow {
         let ctx = Ctx::from_env();
         let win = adw::ApplicationWindow::builder()
             .application(app)
-            .title(tr!("Themes"))
+            .title(tr!("Desktop"))
             .default_width(opts.size.0)
             .default_height(opts.size.1)
             .build();
-        let toolbar = adw::ToolbarView::new();
-        let header = adw::HeaderBar::new();
-        let view = adw::ViewStack::new();
-        let switcher = adw::ViewSwitcher::builder()
-            .stack(&view)
-            .policy(adw::ViewSwitcherPolicy::Wide)
-            .build();
-        header.set_title_widget(Some(&switcher));
-        let title = adw::WindowTitle::new(&tr!("Themes"), "");
 
-        let save = gtk::Button::builder()
+        let toasts = adw::ToastOverlay::new();
+        let sidebar = build_sidebar_pane();
+
+        let content_toolbar = adw::ToolbarView::new();
+        let content_header = adw::HeaderBar::new();
+        let content_title = adw::WindowTitle::new(&tr!("Themes"), "");
+        content_header.set_title_widget(Some(&content_title));
+        let save_btn = gtk::Button::builder()
             .child(
                 &adw::ButtonContent::builder()
                     .icon_name("document-save-symbolic")
@@ -183,159 +486,100 @@ impl ThemesWindow {
             .tooltip_text(tr!("Save the current look as a theme"))
             .action_name("win.snapshot")
             .build();
-        header.pack_start(&save);
+        content_header.pack_end(&save_btn);
+        content_toolbar.add_top_bar(&content_header);
 
-        let menu = gio::Menu::new();
-        let s1 = gio::Menu::new();
-        s1.append(
-            Some(&tr!("Configure extensions")),
-            Some("app.extension-manager"),
-        );
-        s1.append(Some(&tr!("Advanced settings")), Some("app.refine"));
-        s1.append(
-            Some(&tr!("Open the themes folder")),
-            Some("app.open-folder"),
-        );
-        let s2 = gio::Menu::new();
-        s2.append(Some(&tr!("Check the system")), Some("win.doctor"));
-        s2.append(Some(&tr!("Reset to the standard look")), Some("win.reset"));
-        s2.append(Some(&tr!("Reload the list")), Some("win.reload"));
-        let s3 = gio::Menu::new();
-        s3.append(Some(&tr!("About Themes")), Some("app.about"));
-        menu.append_section(None, &s1);
-        menu.append_section(None, &s2);
-        menu.append_section(None, &s3);
-        header.pack_end(
-            &gtk::MenuButton::builder()
-                .icon_name("open-menu-symbolic")
-                .menu_model(&menu)
-                .primary(true)
-                .tooltip_text(tr!("Main menu"))
-                .build(),
-        );
-        toolbar.add_top_bar(&header);
-        // GNOME вимкнув розширення після збою оболонки (disable-user-extensions)
         let banner = adw::Banner::builder()
             .title(tr!("GNOME turned extensions off after a shell crash"))
             .button_label(tr!("Turn on…"))
             .action_name("win.enable-extensions")
             .revealed(themes_core::crash::user_extensions_disabled())
             .build();
-        toolbar.add_top_bar(&banner);
-        let toasts = adw::ToastOverlay::new();
+        content_toolbar.add_top_bar(&banner);
 
-        // сторінка «Теми»
-        let flow = gtk::FlowBox::builder()
-            .selection_mode(gtk::SelectionMode::None)
-            .homogeneous(true)
-            .min_children_per_line(1)
-            .max_children_per_line(4)
-            .column_spacing(20)
-            .row_spacing(20)
-            .valign(gtk::Align::Start)
-            .margin_top(24)
-            .margin_bottom(24)
-            .margin_start(24)
-            .margin_end(24)
+        let content_stack = gtk::Stack::builder()
+            .transition_type(gtk::StackTransitionType::Crossfade)
             .build();
-        let status = adw::StatusPage::builder()
-            .icon_name("preferences-desktop-appearance-symbolic")
-            .title(tr!("No themes found"))
-            .description(tr!(
-                "Add theme folders to {path}",
-                path = ctx.themes.display()
-            ))
-            .build();
-        let clamp = adw::Clamp::builder()
-            .maximum_size(1600)
-            .tightening_threshold(1600)
-            .child(&flow)
-            .build();
-        let scroller = gtk::ScrolledWindow::builder()
-            .child(&clamp)
-            .hscrollbar_policy(gtk::PolicyType::Never)
-            .build();
-        let main_stack = gtk::Stack::new();
-        main_stack.add_named(&scroller, Some("grid"));
-        main_stack.add_named(&status, Some("empty"));
-        let themes_page = gtk::Box::builder()
-            .orientation(gtk::Orientation::Vertical)
-            .build();
-        title.set_margin_top(10);
-        themes_page.append(&title);
-        main_stack.set_vexpand(true);
-        themes_page.append(&main_stack);
-        view.add_titled_with_icon(
-            &themes_page,
-            Some("themes"),
-            &tr!("Themes"),
-            "view-grid-symbolic",
+        let (main_stack, flow, status) = build_themes_page(&ctx);
+        let (mix_page, mix_group) = build_mix_page();
+        let reg = populate_pages(
+            &ctx,
+            &toasts,
+            &sidebar.nav_list,
+            &content_stack,
+            &main_stack,
+            &mix_page,
         );
+        content_toolbar.set_content(Some(&content_stack));
 
-        // сторінка «Змішати»
-        let mix_page = adw::PreferencesPage::builder()
-            .description(tr!(
-                "Take single modules from different themes: for example the macOS look with Windows 11 behaviour. A change is applied at once."
-            ))
+        let content_page = adw::NavigationPage::builder()
+            .title(tr!("Themes"))
+            .child(&content_toolbar)
             .build();
-        let mix_group = adw::PreferencesGroup::builder()
-            .title(tr!("Modules"))
-            .build();
-        mix_page.add(&mix_group);
-        let mix_tools = adw::PreferencesGroup::new();
-        let reset_row = adw::ButtonRow::builder()
-            .title(tr!("Reset everything to the standard look"))
-            .action_name("win.reset")
-            .build();
-        reset_row.add_css_class("destructive-action");
-        mix_tools.add(&reset_row);
-        mix_page.add(&mix_tools);
-        view.add_titled_with_icon(&mix_page, Some("mix"), &tr!("Mix"), "view-dual-symbolic");
-        // сторінка «Функції» (буфер обміну, подяки)
-        let feature_page = opts
-            .page
-            .as_deref()
-            .filter(|p| super::features::page_ids().any(|id| id == *p));
-        let features = super::features::build(&toasts, feature_page);
-        view.add_titled_with_icon(
-            &features,
-            Some("features"),
-            &tr!("Features"),
-            "starred-symbolic",
-        );
-        match opts.page.as_deref() {
-            Some("mix") => view.set_visible_child_name("mix"),
-            Some("features") => view.set_visible_child_name("features"),
-            Some(_) if feature_page.is_some() => view.set_visible_child_name("features"),
-            _ => {}
-        }
 
-        toasts.set_child(Some(&view));
-        toolbar.set_content(Some(&toasts));
-        win.set_content(Some(&toolbar));
+        let split = adw::NavigationSplitView::builder()
+            .min_sidebar_width(220.0)
+            .max_sidebar_width(280.0)
+            .sidebar_width_fraction(0.24)
+            .sidebar(&sidebar.page)
+            .content(&content_page)
+            .build();
+        let bp = adw::Breakpoint::new(adw::BreakpointCondition::new_length(
+            adw::BreakpointConditionLengthType::MaxWidth,
+            680.0,
+            adw::LengthUnit::Sp,
+        ));
+        bp.add_setter(&split, "collapsed", Some(&true.to_value()));
+        win.add_breakpoint(bp);
+
+        toasts.set_child(Some(&split));
+        win.set_content(Some(&toasts));
 
         let this = Rc::new(ThemesWindow {
             ctx,
             win: win.clone(),
-            title,
+            content_title,
+            content_page,
+            content_stack,
+            split,
+            nav_list: sidebar.nav_list,
+            search_bar: sidebar.search_bar,
+            search_entry: sidebar.search_entry,
+            save_btn,
             flow,
             main_stack,
             status,
             toasts,
-            view,
             banner,
             mix_group,
             mix_rows: RefCell::new(vec![]),
             mix_guard: Cell::new(false),
             cards: RefCell::new(vec![]),
             themes: RefCell::new(vec![]),
+            themes_subtitle: RefCell::new(String::new()),
+            page_titles: reg.page_titles,
+            targets: reg.targets,
+            nav_rows: reg.nav_rows,
             busy: Cell::new(false),
             reload_id: RefCell::new(None),
             monitors: RefCell::new(vec![]),
         });
+        this.connect_sidebar_and_search(sidebar.sidebar_stack, sidebar.search_list);
+        this.select_page(resolve_initial_page(opts.page.as_deref()), None);
+        this.connect_window_signals(app, opts, exit);
+        win.present();
+        this
+    }
+
+    fn connect_window_signals(
+        self: &Rc<Self>,
+        app: &adw::Application,
+        opts: GuiOptions,
+        exit: Rc<Cell<i32>>,
+    ) {
         {
-            let w = Rc::downgrade(&this);
-            this.flow.connect_child_activated(move |_, child| {
+            let w = Rc::downgrade(self);
+            self.flow.connect_child_activated(move |_, child| {
                 let Some(t) = w.upgrade() else { return };
                 let idx = child.index();
                 let card = usize::try_from(idx)
@@ -346,18 +590,18 @@ impl ThemesWindow {
                 }
             });
         }
-        this.add_actions(app);
-        this.watch();
+        self.add_actions(app);
+        self.watch();
         {
-            // вікно тримає сильне посилання на стан до закриття
-            let keep = RefCell::new(Some(this.clone()));
-            win.connect_close_request(move |_| {
+            // window keeps a strong reference to state until closed
+            let keep = RefCell::new(Some(self.clone()));
+            self.win.connect_close_request(move |_| {
                 keep.borrow_mut().take();
                 glib::Propagation::Proceed
             });
         }
         {
-            let w = Rc::downgrade(&this);
+            let w = Rc::downgrade(self);
             adw::StyleManager::default().connect_dark_notify(move |sm| {
                 if let Some(t) = w.upgrade() {
                     let dark = sm.is_dark();
@@ -368,7 +612,7 @@ impl ThemesWindow {
                 }
             });
         }
-        let t2 = this.clone();
+        let t2 = self.clone();
         glib::spawn_future_local(async move {
             t2.reload().await;
             if let Some(path) = opts.screenshot.clone() {
@@ -385,8 +629,144 @@ impl ThemesWindow {
                 }
             }
         });
-        win.present();
-        this
+    }
+
+    fn select_page(&self, id: &str, target_id: Option<&str>) {
+        let resolved = if self.page_titles.contains_key(id) {
+            id
+        } else {
+            "themes"
+        };
+        self.content_stack.set_visible_child_name(resolved);
+        let title = self.page_titles.get(resolved).map_or("", String::as_str);
+        self.content_title.set_title(title);
+        self.content_page.set_title(title);
+        if resolved == "themes" {
+            self.content_title
+                .set_subtitle(&self.themes_subtitle.borrow());
+        } else {
+            self.content_title.set_subtitle("");
+        }
+        self.save_btn
+            .set_visible(resolved == "themes" || resolved == "mix");
+        if let Some(row) = self.nav_rows.get(resolved)
+            && self.nav_list.selected_row().as_ref() != Some(row)
+        {
+            self.nav_list.select_row(Some(row));
+        }
+        self.split.set_show_content(true);
+        if let Some(tid) = target_id
+            && let Some(widget) = self.targets.get(resolved).and_then(|m| m.get(tid))
+        {
+            super::features::highlight_widget(widget);
+        }
+    }
+
+    fn connect_sidebar_and_search(
+        self: &Rc<Self>,
+        sidebar_stack: gtk::Stack,
+        search_list: gtk::ListBox,
+    ) {
+        {
+            let w = Rc::downgrade(self);
+            self.nav_list.connect_row_selected(move |_, row| {
+                let Some(t) = w.upgrade() else { return };
+                let Some(row) = row else { return };
+                let id = row.widget_name();
+                if !id.is_empty() && t.page_titles.contains_key(id.as_str()) {
+                    t.select_page(&id, None);
+                }
+            });
+        }
+
+        let current_hits: Rc<RefCell<Vec<SearchHit>>> = Rc::new(RefCell::new(Vec::new()));
+        {
+            let hits_ref = current_hits.clone();
+            let sidebar_stack = sidebar_stack.clone();
+            let search_list = search_list.clone();
+            self.search_entry.connect_search_changed(move |entry| {
+                let query = entry.text();
+                if query.trim().is_empty() {
+                    hits_ref.borrow_mut().clear();
+                    sidebar_stack.set_visible_child_name("nav");
+                    return;
+                }
+                while let Some(child) = search_list.first_child() {
+                    search_list.remove(&child);
+                }
+                let hits = search::search(&query);
+                if hits.is_empty() {
+                    hits_ref.borrow_mut().clear();
+                    sidebar_stack.set_visible_child_name("search-empty");
+                    return;
+                }
+                for hit in &hits {
+                    let vbox = gtk::Box::builder()
+                        .orientation(gtk::Orientation::Vertical)
+                        .spacing(2)
+                        .margin_top(6)
+                        .margin_bottom(6)
+                        .margin_start(6)
+                        .margin_end(6)
+                        .build();
+                    let title = gtk::Label::builder()
+                        .label(&hit.title)
+                        .xalign(0.0)
+                        .ellipsize(gtk::pango::EllipsizeMode::End)
+                        .build();
+                    vbox.append(&title);
+                    if !hit.subtitle.is_empty() {
+                        let sub = gtk::Label::builder()
+                            .label(&hit.subtitle)
+                            .xalign(0.0)
+                            .ellipsize(gtk::pango::EllipsizeMode::End)
+                            .build();
+                        sub.add_css_class("caption");
+                        sub.add_css_class("dim-label");
+                        vbox.append(&sub);
+                    }
+                    let row = gtk::ListBoxRow::builder().child(&vbox).build();
+                    search_list.append(&row);
+                }
+                *hits_ref.borrow_mut() = hits;
+                sidebar_stack.set_visible_child_name("search");
+            });
+        }
+        {
+            let w = Rc::downgrade(self);
+            let hits_ref = current_hits.clone();
+            search_list.connect_row_activated(move |_, row| {
+                let Some(t) = w.upgrade() else { return };
+                let Ok(idx) = usize::try_from(row.index()) else {
+                    return;
+                };
+                let hit = hits_ref.borrow().get(idx).cloned();
+                if let Some(hit) = hit {
+                    t.select_page(hit.page_id, hit.target_id.as_deref());
+                }
+            });
+        }
+        {
+            let w = Rc::downgrade(self);
+            let hits_ref = current_hits;
+            self.search_entry.connect_activate(move |_| {
+                let Some(t) = w.upgrade() else { return };
+                let first = hits_ref.borrow().first().cloned();
+                if let Some(hit) = first {
+                    t.select_page(hit.page_id, hit.target_id.as_deref());
+                }
+            });
+        }
+        {
+            let entry = self.search_entry.clone();
+            self.search_bar
+                .connect_search_mode_enabled_notify(move |bar| {
+                    if !bar.is_search_mode() {
+                        entry.set_text("");
+                        sidebar_stack.set_visible_child_name("nav");
+                    }
+                });
+        }
     }
 
     fn add_actions(self: &Rc<Self>, app: &adw::Application) {
@@ -454,8 +834,23 @@ impl ThemesWindow {
                 }
             }),
         );
+        add(
+            "search",
+            None,
+            Box::new(|t, _| {
+                let next = !t.search_bar.is_search_mode();
+                t.search_bar.set_search_mode(next);
+                if next {
+                    t.split.set_show_content(false);
+                    t.search_entry.grab_focus();
+                }
+            }),
+        );
+        add("close", None, Box::new(|t, _| t.win.close()));
         app.set_accels_for_action("win.reload", &["F5", "<Control>r"]);
         app.set_accels_for_action("win.snapshot", &["<Control>s"]);
+        app.set_accels_for_action("win.search", &["<Control>f"]);
+        app.set_accels_for_action("win.close", &["<Control>w"]);
     }
 
     fn watch(self: &Rc<Self>) {
@@ -547,8 +942,10 @@ impl ThemesWindow {
             }
             _ => tr!("No theme applied yet"),
         };
-        self.title.set_subtitle(&subtitle);
-        self.title.set_title("");
+        *self.themes_subtitle.borrow_mut() = subtitle.clone();
+        if self.content_stack.visible_child_name().as_deref() == Some("themes") {
+            self.content_title.set_subtitle(&subtitle);
+        }
         self.main_stack
             .set_visible_child_name(if infos.is_empty() { "empty" } else { "grid" });
         self.rebuild_mix(&infos, &st);
@@ -1055,7 +1452,6 @@ impl ThemesWindow {
         }
         tex.save_to_png(path).map_err(|e| e.to_string())?;
         let _ = &self.status;
-        let _ = &self.view;
         Ok(())
     }
 }

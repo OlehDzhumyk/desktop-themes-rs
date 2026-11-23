@@ -124,12 +124,12 @@ pub static MIXER_HIDE_APPS: Key = Key {
     name: "hide-apps",
     kind: Kind::StrList { default: &[] },
     label: n_("Hidden applications"),
-    description: "",
+    description: n_("Applications never listed in the mixer (app id or program name)"),
     summary: "Application keys (app id or program name) never listed in the mixer",
     doc: "",
     feature: "mixer",
-    widget: Widget::Hidden,
-    sensitive_if: None,
+    widget: Widget::Edit,
+    sensitive_if: Some("enabled"),
 };
 
 pub static MIXER_SHORTCUT: Key = Key {
@@ -208,6 +208,7 @@ pub static PAGE_MIXER: Page = Page {
                 Item::Key(&MIXER_SHOW_SILENT),
                 Item::Key(&MIXER_REMEMBER),
                 Item::Key(&MIXER_VOLUME_STEP),
+                Item::Key(&MIXER_HIDE_APPS),
             ],
         },
         Group {

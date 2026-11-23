@@ -41,13 +41,14 @@ const H21: &str = n_("Do not send notifications");
 const H22: &str = n_(
     "Turn the extensions back on that GNOME turned off after a shell crash (disable-user-extensions). Do it only after removing the cause of the crash.",
 );
-const H23: &str = n_("Open the Themes window");
+const H23: &str = n_("Open the Desktop window");
 const H24: &str = n_("Save a screenshot of the window as PNG and exit");
 const H25: &str = n_("Window size, e.g. 1180x780");
 const H27: &str = n_("Confirm applying an experimental theme (for scripts)");
 const H28: &str = n_("Design tokens (tokens.toml): check, generate, a theme from a wallpaper");
-const H26: &str =
-    n_("Page: themes | mix | features | clipboard | logo-menu | shortcuts | general | credits");
+const H26: &str = n_(
+    "Page: themes | mix | features | clipboard | mixer | lockscreen | logo-menu | shortcuts | general | system | credits",
+);
 const H29: &str = n_("Keyboard shortcuts of the features (the theme gives the default)");
 
 #[derive(Parser)]

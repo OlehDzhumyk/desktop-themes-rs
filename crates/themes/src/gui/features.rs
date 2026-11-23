@@ -6,7 +6,10 @@
 //! Налаштування належать deskd (GSettings `io.github.OlehDzhumyk.Desk*`): сторінки лише прив'язують
 //! до них віджети, тож немає окремого вікна налаштувань і дублювання.
 
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
+use std::time::Duration;
 
 use adw::prelude::*;
 use desk_proto::ClipboardProxy;
@@ -15,6 +18,7 @@ use gtk::{gdk, gio, glib};
 
 use super::a11y;
 use super::credits::{self, Section as CreditsSection};
+use super::search;
 
 fn t(s: &str) -> String {
     if s.is_empty() {
@@ -24,21 +28,43 @@ fn t(s: &str) -> String {
     }
 }
 
-/// Підсторінка з власним заголовком (кнопка «Назад» і назва).
-fn subpage(title: &str, tag: &str, child: &impl IsA<gtk::Widget>) -> adw::NavigationPage {
-    let tv = adw::ToolbarView::new();
-    let hb = adw::HeaderBar::builder()
-        .show_end_title_buttons(false)
-        .show_start_title_buttons(false)
-        .build();
-    hb.add_css_class("flat");
-    tv.add_top_bar(&hb);
-    tv.set_content(Some(child));
-    adw::NavigationPage::builder()
-        .title(title)
-        .tag(tag)
-        .child(&tv)
-        .build()
+/// Built preference page along with its searchable row targets (`target_id` -> widget).
+pub struct BuiltPage {
+    pub page: adw::PreferencesPage,
+    pub targets: HashMap<String, gtk::Widget>,
+}
+
+/// Highlight a row briefly after jumping to it from search (static outline when animations are off).
+pub fn highlight_widget(w: &gtk::Widget) {
+    let animated =
+        gtk::Settings::default().is_none_or(|s| s.property::<bool>("gtk-enable-animations"));
+    let cls = if animated {
+        "search-highlight"
+    } else {
+        "search-highlight-static"
+    };
+    w.grab_focus();
+    w.add_css_class(cls);
+    let weak = w.downgrade();
+    glib::timeout_add_local_once(Duration::from_millis(1500), move || {
+        if let Some(w) = weak.upgrade() {
+            w.remove_css_class(cls);
+        }
+    });
+}
+
+/// Reset all editable GSettings keys across every installed registry schema to their defaults.
+pub fn reset_all_settings() {
+    for sc in desk_settings::all_schemas() {
+        let Some(s) = schema(sc.id) else {
+            continue;
+        };
+        for k in sc.keys {
+            if k.widget == Widget::Edit {
+                s.reset(k.name);
+            }
+        }
+    }
 }
 
 /// The settings of a registry schema: ours come from the user's schema directory, those of an
@@ -218,6 +244,85 @@ fn colour_row(k: &'static Key, s: &gio::Settings, desc: &str) -> adw::EntryRow {
     r
 }
 
+/// Editable string-list row (`Kind::StrList`): expander listing current items with remove buttons
+/// and an entry row to add a new item, writing directly to GSettings.
+fn str_list_row(k: &'static Key, s: &gio::Settings, desc: &str) -> adw::ExpanderRow {
+    let exp = adw::ExpanderRow::builder().title(t(k.label)).build();
+    if !desc.is_empty() {
+        exp.set_subtitle(desc);
+    }
+    let entry = adw::EntryRow::builder()
+        .title(tr!("Add item"))
+        .show_apply_button(true)
+        .build();
+    a11y::label(&entry, &tr!("Add item to {name}", name = t(k.label)));
+    {
+        let settings = s.clone();
+        entry.connect_apply(move |e| {
+            let text = e.text().trim().to_string();
+            if text.is_empty() {
+                return;
+            }
+            let mut items: Vec<String> = settings
+                .strv(k.name)
+                .iter()
+                .map(|x| x.to_string())
+                .collect();
+            if !items.iter().any(|x| x == &text) {
+                items.push(text);
+                let refs: Vec<&str> = items.iter().map(String::as_str).collect();
+                let _ = settings.set_strv(k.name, refs.as_slice());
+            }
+            e.set_text("");
+        });
+    }
+    exp.add_row(&entry);
+
+    let item_rows: Rc<RefCell<Vec<adw::ActionRow>>> = Rc::new(RefCell::new(Vec::new()));
+    let rebuild = {
+        let exp = exp.clone();
+        let settings = s.clone();
+        let item_rows = item_rows.clone();
+        move || {
+            for old in item_rows.borrow_mut().drain(..) {
+                exp.remove(&old);
+            }
+            let mut rows = item_rows.borrow_mut();
+            for item in settings.strv(k.name) {
+                let value = item.to_string();
+                let row = adw::ActionRow::builder()
+                    .title(glib::markup_escape_text(&value).as_str())
+                    .build();
+                let remove = gtk::Button::builder()
+                    .icon_name("list-remove-symbolic")
+                    .valign(gtk::Align::Center)
+                    .tooltip_text(tr!("Remove"))
+                    .build();
+                remove.add_css_class("flat");
+                a11y::label(&remove, &tr!("Remove {item}", item = value));
+                let settings2 = settings.clone();
+                let target = value.clone();
+                remove.connect_clicked(move |_| {
+                    let next: Vec<String> = settings2
+                        .strv(k.name)
+                        .iter()
+                        .map(|x| x.to_string())
+                        .filter(|x| x != &target)
+                        .collect();
+                    let refs: Vec<&str> = next.iter().map(String::as_str).collect();
+                    let _ = settings2.set_strv(k.name, refs.as_slice());
+                });
+                row.add_suffix(&remove);
+                exp.add_row(&row);
+                rows.push(row);
+            }
+        }
+    };
+    rebuild();
+    s.connect_changed(Some(k.name), move |_, _| rebuild());
+    exp
+}
+
 fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
     let desc = t(k.description);
     match &k.kind {
@@ -287,8 +392,9 @@ fn edit_row(k: &'static Key, s: &gio::Settings) -> gtk::Widget {
             }
             r.upcast()
         }
-        // списки рядків і скорочення поки не редагуються у вікні
-        Kind::StrList { .. } | Kind::Accel { .. } => display_row(k, s).upcast(),
+        Kind::StrList { .. } => str_list_row(k, s, &desc).upcast(),
+        // shortcuts are edited on the Keyboard shortcuts page via Item::Shortcut
+        Kind::Accel { .. } => display_row(k, s).upcast(),
     }
 }
 
@@ -426,7 +532,7 @@ fn capture_shortcut(parent: &impl IsA<gtk::Widget>, title: &str, done: impl Fn(S
 fn shortcut_row(
     sc: &'static desk_settings::Shortcut,
     toasts: &adw::ToastOverlay,
-) -> adw::ActionRow {
+) -> (adw::ActionRow, Rc<dyn Fn()>) {
     use desk_settings::shortcuts::Source;
     let ctx = themes_core::Ctx::from_env();
     let row = adw::ActionRow::builder().title(t(sc.label)).build();
@@ -478,7 +584,7 @@ fn shortcut_row(
     };
     refresh();
 
-    let refresh = std::rc::Rc::new(refresh);
+    let refresh: Rc<dyn Fn()> = Rc::new(refresh);
     {
         let (refresh, toasts, ctx) = (refresh.clone(), toasts.clone(), ctx.clone());
         reset.connect_clicked(move |_| {
@@ -494,7 +600,7 @@ fn shortcut_row(
         });
     }
     {
-        let toasts = toasts.clone();
+        let (refresh, toasts) = (refresh.clone(), toasts.clone());
         change.connect_clicked(move |b| {
             let (refresh, toasts, ctx) = (refresh.clone(), toasts.clone(), ctx.clone());
             capture_shortcut(b, &t(sc.label), move |accel| {
@@ -514,13 +620,15 @@ fn shortcut_row(
             });
         });
     }
-    row
+    (row, refresh)
 }
 
 fn settings_group(
     g: &Group,
     settings: &HashMap<&'static str, gio::Settings>,
     toasts: &adw::ToastOverlay,
+    targets: &mut HashMap<String, gtk::Widget>,
+    refreshers: &mut Vec<Rc<dyn Fn()>>,
 ) -> Option<adw::PreferencesGroup> {
     let pg = adw::PreferencesGroup::new();
     if !g.title.is_empty() {
@@ -532,14 +640,26 @@ fn settings_group(
     let mut any = false;
     for item in g.items {
         let w: Option<gtk::Widget> = match item {
-            Item::Key(k) => settings.get(k.schema).and_then(|s| key_row(k, s)),
+            Item::Key(k) => {
+                let row = settings.get(k.schema).and_then(|s| key_row(k, s));
+                if let Some(ref w) = row {
+                    targets.insert(search::key_target_id(k.schema, k.name), w.clone());
+                }
+                row
+            }
             Item::Action {
                 id,
                 label,
                 destructive,
             } => Some(action_row(id, label, *destructive, toasts).upcast()),
             Item::Status { id, label } => Some(status_row(id, label).upcast()),
-            Item::Shortcut(sc) => Some(shortcut_row(sc, toasts).upcast()),
+            Item::Shortcut(sc) => {
+                let (row, refresh) = shortcut_row(sc, toasts);
+                let w: gtk::Widget = row.upcast();
+                targets.insert(search::shortcut_target_id(sc.id), w.clone());
+                refreshers.push(refresh);
+                Some(w)
+            }
         };
         if let Some(w) = w {
             pg.add(&w);
@@ -590,11 +710,79 @@ fn credits_groups(page: &adw::PreferencesPage) {
     }
 }
 
-/// Сторінка з реєстру.
-fn build_page(p: &'static Page, toasts: &adw::ToastOverlay) -> adw::NavigationPage {
+fn reset_page_group(
+    p: &'static Page,
+    settings: &HashMap<&'static str, gio::Settings>,
+    refreshers: &[Rc<dyn Fn()>],
+    toasts: &adw::ToastOverlay,
+) -> Option<adw::PreferencesGroup> {
+    let editable_keys: Vec<&'static Key> = p.keys().filter(|k| k.widget == Widget::Edit).collect();
+    let shortcuts: Vec<&'static desk_settings::Shortcut> = p.shortcuts().collect();
+    if editable_keys.is_empty() && shortcuts.is_empty() {
+        return None;
+    }
+    let group = adw::PreferencesGroup::new();
+    let row = adw::ButtonRow::builder().title(tr!("Reset page")).build();
+    row.add_css_class("destructive-action");
+
+    let settings = settings.clone();
+    let refreshers: Vec<Rc<dyn Fn()>> = refreshers.to_vec();
+    let toasts = toasts.clone();
+    row.connect_activated(move |row| {
+        let title = t(p.title);
+        let dlg = adw::AlertDialog::builder()
+            .heading(tr!("Reset “{page}” to defaults?", page = title))
+            .body(tr!(
+                "All settings on this page will return to their default values."
+            ))
+            .default_response("cancel")
+            .close_response("cancel")
+            .build();
+        dlg.add_response("cancel", &tr!("Cancel"));
+        dlg.add_response("reset", &tr!("Reset"));
+        dlg.set_response_appearance("reset", adw::ResponseAppearance::Destructive);
+
+        let settings = settings.clone();
+        let editable_keys = editable_keys.clone();
+        let shortcuts = shortcuts.clone();
+        let refreshers = refreshers.clone();
+        let toasts = toasts.clone();
+        dlg.connect_response(None, move |_, resp| {
+            if resp != "reset" {
+                return;
+            }
+            for k in &editable_keys {
+                if let Some(s) = settings.get(k.schema) {
+                    s.reset(k.name);
+                }
+            }
+            if !shortcuts.is_empty() {
+                let ctx = themes_core::Ctx::from_env();
+                for sc in &shortcuts {
+                    let _ = themes_core::shortcuts::reset(&ctx, sc.id);
+                }
+                for refresh in &refreshers {
+                    refresh();
+                }
+            }
+            toasts.add_toast(adw::Toast::new(&tr!(
+                "Page “{page}” reset to defaults",
+                page = t(p.title)
+            )));
+        });
+        dlg.present(Some(row));
+    });
+    group.add(&row);
+    Some(group)
+}
+
+/// Build a single registry page for the hub's content stack.
+pub fn build_page(p: &'static Page, toasts: &adw::ToastOverlay) -> BuiltPage {
     let page = adw::PreferencesPage::builder()
         .description(t(p.description))
         .build();
+    let mut targets = HashMap::new();
+    let mut refreshers = Vec::new();
     if let Some(f) = p.feature
         && !f.origins.is_empty()
     {
@@ -628,9 +816,14 @@ fn build_page(p: &'static Page, toasts: &adw::ToastOverlay) -> adw::NavigationPa
                 );
             } else {
                 for g in p.groups {
-                    if let Some(pg) = settings_group(g, &settings, toasts) {
+                    if let Some(pg) =
+                        settings_group(g, &settings, toasts, &mut targets, &mut refreshers)
+                    {
                         page.add(&pg);
                     }
+                }
+                if let Some(reset_grp) = reset_page_group(p, &settings, &refreshers, toasts) {
+                    page.add(&reset_grp);
                 }
                 if p.keys().any(|k| std::ptr::eq(k, &desk_settings::LANGUAGE))
                     && let Some(s) = settings.get(desk_settings::DESK_SCHEMA)
@@ -646,63 +839,21 @@ fn build_page(p: &'static Page, toasts: &adw::ToastOverlay) -> adw::NavigationPa
                         toasts.add_toast(toast);
                     });
                 }
-                // тримати об'єкти налаштувань живими разом зі сторінкою
+                // keep settings objects alive alongside the page
                 page.connect_destroy(move |_| {
                     let _ = &settings;
                 });
             }
         }
     }
-    subpage(&t(p.title), p.id, &page)
+    BuiltPage { page, targets }
 }
 
-/// Сторінка «Функції» (навігація: список сторінок → сторінка). `open` — id сторінки з реєстру.
-pub fn build(toasts: &adw::ToastOverlay, open: Option<&str>) -> adw::NavigationView {
-    let nav = adw::NavigationView::new();
-    let root = adw::PreferencesPage::builder()
-        .description(t(desk_settings::ROOT_DESCRIPTION))
-        .build();
-    for section in [Section::Features, Section::App, Section::About] {
-        let pages: Vec<&'static Page> = desk_settings::PAGES
-            .iter()
-            .copied()
-            .filter(|p| p.section == section)
-            .collect();
-        if pages.is_empty() {
-            continue;
-        }
-        let g = adw::PreferencesGroup::builder()
-            .title(t(section.title()))
-            .build();
-        for p in pages {
-            let row = adw::ActionRow::builder()
-                .title(t(p.title))
-                .subtitle(t(p.subtitle))
-                .activatable(true)
-                .build();
-            row.add_prefix(&gtk::Image::from_icon_name(p.icon));
-            row.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
-            let nav2 = nav.clone();
-            let toasts = toasts.clone();
-            row.connect_activated(move |_| nav2.push(&build_page(p, &toasts)));
-            g.add(&row);
-        }
-        root.add(&g);
-    }
-    nav.add(
-        &adw::NavigationPage::builder()
-            .title(tr!("Features"))
-            .tag("features")
-            .child(&root)
-            .build(),
-    );
-    if let Some(p) = open.and_then(desk_settings::page) {
-        nav.push(&build_page(p, toasts));
-    }
-    nav
-}
-
-/// Ідентифікатори сторінок для `themes gui --page`.
-pub fn page_ids() -> impl Iterator<Item = &'static str> {
-    desk_settings::PAGES.iter().map(|p| p.id)
+/// First page in the Features section (target for legacy `--page features`).
+pub fn first_feature_page_id() -> Option<&'static str> {
+    desk_settings::PAGES
+        .iter()
+        .copied()
+        .find(|p| p.section == Section::Features)
+        .map(|p| p.id)
 }

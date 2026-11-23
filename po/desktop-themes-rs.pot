@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 14:48+0000\n"
+"POT-Creation-Date: 2026-11-23 15:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -332,6 +332,10 @@ msgstr ""
 msgid "Hidden applications"
 msgstr ""
 
+#: crates/desk-settings/src/mixer.rs:127
+msgid "Applications never listed in the mixer (app id or program name)"
+msgstr ""
+
 #: crates/desk-settings/src/mixer.rs:139
 #: crates/desk-settings/src/registry.rs:260
 msgid "Keyboard shortcut"
@@ -357,12 +361,12 @@ msgstr ""
 msgid "Mixer"
 msgstr ""
 
-#: crates/desk-settings/src/mixer.rs:214
+#: crates/desk-settings/src/mixer.rs:215
 #: crates/desk-settings/src/registry.rs:424
 msgid "How to open"
 msgstr ""
 
-#: crates/desk-settings/src/mixer.rs:215
+#: crates/desk-settings/src/mixer.rs:216
 #: crates/desk-settings/src/registry.rs:425
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr ""
@@ -496,7 +500,6 @@ msgstr ""
 
 #: crates/desk-settings/src/registry.rs:379
 #: crates/desk-settings/src/registry.rs:475
-#: crates/themes/src/gui/features.rs:694 crates/themes/src/gui/window.rs:303
 msgid "Features"
 msgstr ""
 
@@ -998,8 +1001,8 @@ msgstr ""
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:480
-#: crates/themes/src/gui/window.rs:951
+#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:481
+#: crates/themes/src/gui/window.rs:1348
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr ""
@@ -1133,9 +1136,9 @@ msgstr ""
 msgid "no baseline-* found in {path}"
 msgstr ""
 
-#: crates/themes-core/src/shell.rs:485 crates/themes/src/gui/window.rs:101
-#: crates/themes/src/gui/window.rs:162 crates/themes/src/gui/window.rs:174
-#: crates/themes/src/gui/window.rs:271
+#: crates/themes-core/src/shell.rs:485 crates/themes/src/gui/search.rs:10
+#: crates/themes/src/gui/window.rs:400 crates/themes/src/gui/window.rs:477
+#: crates/themes/src/gui/window.rs:516
 msgid "Themes"
 msgstr ""
 
@@ -1393,7 +1396,7 @@ msgid ""
 msgstr ""
 
 #: crates/themes/src/cli.rs:44
-msgid "Open the Themes window"
+msgid "Open the Desktop window"
 msgstr ""
 
 #: crates/themes/src/cli.rs:45
@@ -1414,114 +1417,117 @@ msgstr ""
 
 #: crates/themes/src/cli.rs:50
 msgid ""
-"Page: themes | mix | features | clipboard | logo-menu | shortcuts | general "
-"| credits"
+"Page: themes | mix | features | clipboard | mixer | lockscreen | logo-menu | "
+"shortcuts | general | system | credits"
 msgstr ""
 
-#: crates/themes/src/cli.rs:51
+#: crates/themes/src/cli.rs:52
 msgid "Keyboard shortcuts of the features (the theme gives the default)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:222 crates/themes/src/gui/window.rs:702
-#: crates/themes/src/gui/window.rs:737 crates/themes/src/gui/window.rs:849
-#: crates/themes/src/gui/window.rs:884
+#: crates/themes/src/cli.rs:223 crates/themes/src/gui/window.rs:1099
+#: crates/themes/src/gui/window.rs:1134 crates/themes/src/gui/window.rs:1246
+#: crates/themes/src/gui/window.rs:1281
 #, rust-format
 msgid "Error: {error}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:293
+#: crates/themes/src/cli.rs:294
 #, rust-format
 msgid "active: {modules}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:308
+#: crates/themes/src/cli.rs:309
 msgid "(unknown: no theme has been applied yet)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:321
+#: crates/themes/src/cli.rs:322
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:385
+#: crates/themes/src/cli.rs:386
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
 "extensions {extensions}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:395 crates/themes/src/cli.rs:794
+#: crates/themes/src/cli.rs:396 crates/themes/src/cli.rs:795
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:138
 #, rust-format
 msgid "warning: {text}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:408
+#: crates/themes/src/cli.rs:409
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:427
+#: crates/themes/src/cli.rs:428
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:430
+#: crates/themes/src/cli.rs:431
 msgid "Extensions are already on."
 msgstr ""
 
-#: crates/themes/src/cli.rs:448 crates/themes/src/gui/window.rs:928
+#: crates/themes/src/cli.rs:449 crates/themes/src/gui/system.rs:141
+#: crates/themes/src/gui/window.rs:1325
 msgid "running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:450 crates/themes/src/gui/window.rs:930
+#: crates/themes/src/cli.rs:451 crates/themes/src/gui/system.rs:143
+#: crates/themes/src/gui/window.rs:1327
 msgid "not running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:455
+#: crates/themes/src/cli.rs:456
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:458 crates/themes/src/gui/window.rs:937
+#: crates/themes/src/cli.rs:459 crates/themes/src/gui/system.rs:149
+#: crates/themes/src/gui/window.rs:1334
 msgid "No problems found."
 msgstr ""
 
-#: crates/themes/src/cli.rs:470
+#: crates/themes/src/cli.rs:471
 msgid "fix with: themes doctor --fix"
 msgstr ""
 
-#: crates/themes/src/cli.rs:477
+#: crates/themes/src/cli.rs:478
 #, rust-format
 msgid "fixed: {what}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:518
+#: crates/themes/src/cli.rs:519
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:525
+#: crates/themes/src/cli.rs:526
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr ""
 
-#: crates/themes/src/cli.rs:531 crates/themes/src/cli.rs:592
+#: crates/themes/src/cli.rs:532 crates/themes/src/cli.rs:593
 msgid "Cancelled: the theme was not applied."
 msgstr ""
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:539
+#: crates/themes/src/cli.rs:540
 msgid "Apply it anyway? [y/N]"
 msgstr ""
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:545
+#: crates/themes/src/cli.rs:546
 msgid "y|yes"
 msgstr ""
 
-#: crates/themes/src/cli.rs:578
+#: crates/themes/src/cli.rs:579
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -1529,143 +1535,143 @@ msgid ""
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:586
+#: crates/themes/src/cli.rs:587
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
 "{list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:609
+#: crates/themes/src/cli.rs:610
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
 "unless approved before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:617
+#: crates/themes/src/cli.rs:618
 msgid "  (approved)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:640
+#: crates/themes/src/cli.rs:641
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:658
+#: crates/themes/src/cli.rs:659
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:690
+#: crates/themes/src/cli.rs:691
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 
-#: crates/themes/src/cli.rs:696
+#: crates/themes/src/cli.rs:697
 #, rust-format
 msgid "Write ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:702
+#: crates/themes/src/cli.rs:703
 #, rust-format
 msgid "Reset ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:711
+#: crates/themes/src/cli.rs:712
 #, rust-format
 msgid "Extensions: {list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:735
+#: crates/themes/src/cli.rs:736
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr ""
 
-#: crates/themes/src/cli.rs:744
+#: crates/themes/src/cli.rs:745
 msgid "before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:747
+#: crates/themes/src/cli.rs:748
 msgid "now:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:749
+#: crates/themes/src/cli.rs:750
 msgid "dconf keys changed:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:751
+#: crates/themes/src/cli.rs:752
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:756
+#: crates/themes/src/cli.rs:757
 msgid "extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:762
+#: crates/themes/src/cli.rs:763
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:769
+#: crates/themes/src/cli.rs:770
 msgid "GTK links:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:776
+#: crates/themes/src/cli.rs:777
 msgid "cleaned up after extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:781
+#: crates/themes/src/cli.rs:782
 msgid "hooks:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:799
+#: crates/themes/src/cli.rs:800
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
 msgstr ""
 
-#: crates/themes/src/cli.rs:805
+#: crates/themes/src/cli.rs:806
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
 "them on: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes/src/cli.rs:811
+#: crates/themes/src/cli.rs:812
 msgid "You MUST log out and log in again:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:819
+#: crates/themes/src/cli.rs:820
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:834
+#: crates/themes/src/cli.rs:835
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:842
+#: crates/themes/src/cli.rs:843
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:850
+#: crates/themes/src/cli.rs:851
 msgid "cache up to date"
 msgstr ""
 
-#: crates/themes/src/cli.rs:851
+#: crates/themes/src/cli.rs:852
 msgid "generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:852
+#: crates/themes/src/cli.rs:853
 msgid "will be generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:857
+#: crates/themes/src/cli.rs:858
 #, rust-format
 msgid "link: {path}"
 msgstr ""
@@ -1733,145 +1739,327 @@ msgstr ""
 msgid "Theme {name}, {state}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:80
+#: crates/themes/src/gui/features.rs:106
 #, rust-format
 msgid "Based on {project} ({licence})"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:97
+#: crates/themes/src/gui/features.rs:123
 msgid "Origin of the feature"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:117 crates/themes/src/shortcut_cli.rs:40
+#: crates/themes/src/gui/features.rs:143 crates/themes/src/shortcut_cli.rs:40
 msgid "none"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:149
+#: crates/themes/src/gui/features.rs:175
 msgid "on"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:151
+#: crates/themes/src/gui/features.rs:177
 msgid "off"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:319
+#: crates/themes/src/gui/features.rs:255
+msgid "Add item"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:258
+#, rust-format
+msgid "Add item to {name}"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:299
+msgid "Remove"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:302
+#, rust-format
+msgid "Remove {item}"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:425
 msgid "Clipboard history cleared"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:320
+#: crates/themes/src/gui/features.rs:426
 #, rust-format
 msgid "Could not clear the history: {error}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:321
+#: crates/themes/src/gui/features.rs:427
 msgid "Could not clear the history"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:341
+#: crates/themes/src/gui/features.rs:447
 msgid "Clear the clipboard history?"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:343
+#: crates/themes/src/gui/features.rs:449
 msgid "All items will be deleted, pinned ones too. This cannot be undone."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:346 crates/themes/src/gui/features.rs:398
-#: crates/themes/src/gui/window.rs:637 crates/themes/src/gui/window.rs:695
-#: crates/themes/src/gui/window.rs:814 crates/themes/src/gui/window.rs:874
-#: crates/themes/src/gui/window.rs:1006
+#: crates/themes/src/gui/features.rs:452 crates/themes/src/gui/features.rs:504
+#: crates/themes/src/gui/features.rs:741 crates/themes/src/gui/system.rs:251
+#: crates/themes/src/gui/window.rs:1034 crates/themes/src/gui/window.rs:1092
+#: crates/themes/src/gui/window.rs:1211 crates/themes/src/gui/window.rs:1271
+#: crates/themes/src/gui/window.rs:1403
 msgid "Cancel"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:346
+#: crates/themes/src/gui/features.rs:452
 msgid "Clear"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:366
+#: crates/themes/src/gui/features.rs:472
 msgid "checking…"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:382
+#: crates/themes/src/gui/features.rs:488
 #, rust-format
 msgid "running; items in the history: {count}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:383
+#: crates/themes/src/gui/features.rs:489
 #, rust-format
 msgid "unavailable: {error}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:384
+#: crates/themes/src/gui/features.rs:490
 msgid "unavailable"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:395
+#: crates/themes/src/gui/features.rs:501
 msgid "Press the new shortcut. Esc cancels, Backspace turns the shortcut off."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:436
+#: crates/themes/src/gui/features.rs:542
 msgid "Change"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:441
+#: crates/themes/src/gui/features.rs:547
 msgid "Reset to the theme default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:447
+#: crates/themes/src/gui/features.rs:553
 #, rust-format
 msgid "Reset {name} to the theme default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:451
+#: crates/themes/src/gui/features.rs:557
 #, rust-format
 msgid "Change the shortcut: {name}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:470
+#: crates/themes/src/gui/features.rs:576
 #, rust-format
 msgid "Your choice (theme default: {accels})"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:473
+#: crates/themes/src/gui/features.rs:579
 msgid "Theme default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:474
+#: crates/themes/src/gui/features.rs:580
 msgid "Standard default"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:507
+#: crates/themes/src/gui/features.rs:613
 #, rust-format
 msgid "Refused: {conflict}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:579
+#: crates/themes/src/gui/features.rs:699
 #, rust-format
 msgid "Open the website of {name}"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:622
+#: crates/themes/src/gui/features.rs:725
+msgid "Reset page"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:734
+#, rust-format
+msgid "Reset “{page}” to defaults?"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:736
+msgid "All settings on this page will return to their default values."
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:742 crates/themes/src/gui/system.rs:231
+msgid "Reset"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:769
+#, rust-format
+msgid "Page “{page}” reset to defaults"
+msgstr ""
+
+#: crates/themes/src/gui/features.rs:810
 msgid "Settings unavailable"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:624
+#: crates/themes/src/gui/features.rs:812
 #, rust-format
 msgid "The GSettings schema {schema} is not installed. Run data/install.sh."
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:641
+#: crates/themes/src/gui/features.rs:834
 msgid "The language changes after a restart"
 msgstr ""
 
-#: crates/themes/src/gui/features.rs:642
+#: crates/themes/src/gui/features.rs:835
 msgid "Restart"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:92
+#: crates/themes/src/gui/search.rs:11
+msgid "Switch the look of the GNOME desktop"
+msgstr ""
+
+#: crates/themes/src/gui/search.rs:15 crates/themes/src/gui/window.rs:401
+msgid "Mix"
+msgstr ""
+
+#: crates/themes/src/gui/search.rs:16
+msgid "Combine modules from different themes"
+msgstr ""
+
+#: crates/themes/src/gui/search.rs:20 crates/themes/src/gui/window.rs:431
+msgid "System"
+msgstr ""
+
+#: crates/themes/src/gui/search.rs:21
+msgid "System check, reset and baseline information"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:19
+msgid ""
+"System health check, baseline snapshot information, and full reset to "
+"defaults."
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:36
+msgid "System check"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:38
+msgid ""
+"Check GNOME Shell extensions, themes, icons, sounds and GSettings schemas."
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:42
+msgid "Status"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:43
+msgid "Not checked yet"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:45
+msgid "Check now"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:46
+msgid "Fix issues"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:54 crates/themes/src/gui/window.rs:1355
+msgid "Check results"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:71 crates/themes/src/gui/window.rs:1293
+msgid "Fixing…"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:73 crates/themes/src/gui/window.rs:1295
+msgid "Checking the system…"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:103 crates/themes/src/gui/window.rs:1316
+#, rust-format
+msgid "Check failed: {error}"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:108
+msgid "Check failed"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:138 crates/themes/src/gui/window.rs:1322
+#, rust-format
+msgid "GNOME Shell {version} ({state}), extensions checked: {count}."
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:153
+#, rust-format
+msgid "Problems found: {count}"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:178
+#, rust-format
+msgid "Fixed: {what}"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:186
+#, rust-format
+msgid "Turned on again: {uuid}"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:200
+msgid "Baseline"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:204
+msgid "Not created yet (created on the first theme apply)"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:208
+msgid "Baseline snapshot"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:215
+msgid "Themes directory"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:222
+msgid "Managed keys"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:233
+msgid ""
+"Restore the standard Fedora look and reset all feature settings to their "
+"defaults."
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:236 crates/themes/src/gui/system.rs:252
+msgid "Reset all"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:243
+msgid "Reset everything to defaults?"
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:245
+msgid ""
+"This restores the standard Fedora theme and resets all Desktop feature "
+"settings and keyboard shortcut overrides to their defaults."
+msgstr ""
+
+#: crates/themes/src/gui/system.rs:267
+msgid "All settings reset to defaults"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:105
 #, rust-format
 msgid "Could not open the folder: {error}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:106
+#: crates/themes/src/gui/window.rs:114 crates/themes/src/gui/window.rs:365
+#: crates/themes/src/gui/window.rs:467
+msgid "Desktop"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:119
 msgid ""
 "Switches the look of the GNOME desktop: Fedora, macOS, Windows 11 and your "
 "own themes. Every theme consists of modules (look, behaviour, sounds, apps) "
@@ -1882,129 +2070,149 @@ msgid ""
 "extensions."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:111
+#: crates/themes/src/gui/window.rs:124
 msgid "translator-credits"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:137
+#: crates/themes/src/gui/window.rs:150
 #, rust-format
 msgid "Could not start {app}: {error}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:180
-msgid "Save as theme"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:183 crates/themes/src/gui/window.rs:806
-msgid "Save the current look as a theme"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:191
+#: crates/themes/src/gui/window.rs:173
 msgid "Configure extensions"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:194
+#: crates/themes/src/gui/window.rs:176
 msgid "Advanced settings"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:196
+#: crates/themes/src/gui/window.rs:178
 msgid "Open the themes folder"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:200
+#: crates/themes/src/gui/window.rs:182
 msgid "Check the system"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:201
+#: crates/themes/src/gui/window.rs:183
 msgid "Reset to the standard look"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:202
+#: crates/themes/src/gui/window.rs:184
 msgid "Reload the list"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:204
-msgid "About Themes"
+#: crates/themes/src/gui/window.rs:186
+msgid "About Desktop"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:213
-msgid "Main menu"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:219
-msgid "GNOME turned extensions off after a shell crash"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:220
-msgid "Turn on…"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:243
+#: crates/themes/src/gui/window.rs:209
 msgid "No themes found"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:245
+#: crates/themes/src/gui/window.rs:211
 #, rust-format
 msgid "Add theme folders to {path}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:278
+#: crates/themes/src/gui/window.rs:234
 msgid ""
 "Take single modules from different themes: for example the macOS look with "
 "Windows 11 behaviour. A change is applied at once."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:282
+#: crates/themes/src/gui/window.rs:238
 msgid "Modules"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:287
+#: crates/themes/src/gui/window.rs:243
 msgid "Reset everything to the standard look"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:293
-msgid "Mix"
+#: crates/themes/src/gui/window.rs:301
+msgid "Search settings (Ctrl+F)"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:453
+#: crates/themes/src/gui/window.rs:303 crates/themes/src/gui/window.rs:321
+msgid "Search settings"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:312
+msgid "Main menu"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:318
+msgid "Search settings…"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:353
+msgid "No results"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:354
+msgid "Try a different search term"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:398
+msgid "Appearance"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:483
+msgid "Save as theme"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:486 crates/themes/src/gui/window.rs:1203
+msgid "Save the current look as a theme"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:493
+msgid "GNOME turned extensions off after a shell crash"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:494
+msgid "Turn on…"
+msgstr ""
+
+#: crates/themes/src/gui/window.rs:833
 #, rust-format
 msgid "Could not log out: {error}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:534
+#: crates/themes/src/gui/window.rs:929
 #, rust-format
 msgid "Active theme: {name}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:546
+#: crates/themes/src/gui/window.rs:941
 #, rust-format
 msgid "Mixed: {parts}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:548
+#: crates/themes/src/gui/window.rs:943
 msgid "No theme applied yet"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:573
+#: crates/themes/src/gui/window.rs:970
 #, rust-format
 msgid "{name} (standard)"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:630
+#: crates/themes/src/gui/window.rs:1027
 #, rust-format
 msgid "Apply the experimental theme “{name}”?"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:638
+#: crates/themes/src/gui/window.rs:1035
 msgid "Apply anyway"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:687
+#: crates/themes/src/gui/window.rs:1084
 #, rust-format
 msgid "Allow “{name}” to run commands?"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:689 crates/themes/src/service.rs:137
+#: crates/themes/src/gui/window.rs:1086 crates/themes/src/service.rs:137
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"
@@ -2012,154 +2220,132 @@ msgid ""
 "{list}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:696
+#: crates/themes/src/gui/window.rs:1093
 msgid "Allow and apply"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:742
+#: crates/themes/src/gui/window.rs:1139
 msgid "Error: the apply thread crashed"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:747 crates/themes/src/service.rs:186
+#: crates/themes/src/gui/window.rs:1144 crates/themes/src/service.rs:186
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:751
+#: crates/themes/src/gui/window.rs:1148
 #, rust-format
 msgid "“{modules}” from the theme “{name}” applied"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:758
+#: crates/themes/src/gui/window.rs:1155
 #, rust-format
 msgid " (warnings: {count})"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:763
+#: crates/themes/src/gui/window.rs:1160
 #, rust-format
 msgid "{what}. Some shell changes start working after you log in again"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:768
+#: crates/themes/src/gui/window.rs:1165
 msgid "Log out"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:771
+#: crates/themes/src/gui/window.rs:1168
 #, rust-format
 msgid "{what} live"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:789
+#: crates/themes/src/gui/window.rs:1186
 #, rust-format
 msgid "Extensions with errors turned off: {list}"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:802 crates/themes/src/gui/window.rs:816
+#: crates/themes/src/gui/window.rs:1199 crates/themes/src/gui/window.rs:1213
 msgid "Theme name"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:808
+#: crates/themes/src/gui/window.rs:1205
 msgid ""
 "The current settings (look, behaviour, sounds, apps), the enabled extensions "
 "and the GTK files will be saved as a new theme."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:815
+#: crates/themes/src/gui/window.rs:1212
 msgid "Save"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:848
+#: crates/themes/src/gui/window.rs:1245
 #, rust-format
 msgid "Theme “{name}” saved"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:850
+#: crates/themes/src/gui/window.rs:1247
 msgid "Saving failed"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:867
+#: crates/themes/src/gui/window.rs:1264
 #, rust-format
 msgid "Delete the theme “{name}”?"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:869
+#: crates/themes/src/gui/window.rs:1266
 msgid ""
 "The theme folder will be moved to “trash” in the themes root; you can "
 "restore it by hand."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:875
+#: crates/themes/src/gui/window.rs:1272
 msgid "Delete"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:883
+#: crates/themes/src/gui/window.rs:1280
 #, rust-format
 msgid "Theme “{name}” deleted"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:896
-msgid "Fixing…"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:898
-msgid "Checking the system…"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:919
-#, rust-format
-msgid "Check failed: {error}"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:925
-#, rust-format
-msgid "GNOME Shell {version} ({state}), extensions checked: {count}."
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:956
+#: crates/themes/src/gui/window.rs:1353
 msgid "The system is fine"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:958
-msgid "Check results"
-msgstr ""
-
-#: crates/themes/src/gui/window.rs:963
+#: crates/themes/src/gui/window.rs:1360
 msgid "Close"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:965
+#: crates/themes/src/gui/window.rs:1362
 msgid "Fix"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:993
+#: crates/themes/src/gui/window.rs:1390
 msgid ""
 "After a GNOME Shell crash the system turned all extensions off (disable-user-"
 "extensions), so the themes work without them now."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1002
+#: crates/themes/src/gui/window.rs:1399
 msgid ""
 "If the crash happens again, GNOME turns the extensions off again. It is "
 "safer to switch to the standard theme first."
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1005
+#: crates/themes/src/gui/window.rs:1402
 msgid "Turn extensions on?"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1011
+#: crates/themes/src/gui/window.rs:1408
 msgid "Switch to “Fedora” and turn on"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1014
+#: crates/themes/src/gui/window.rs:1411
 msgid "Turn on"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1021
+#: crates/themes/src/gui/window.rs:1418
 msgid "Extensions turned on again"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1025
+#: crates/themes/src/gui/window.rs:1422
 #, rust-format
 msgid "Failed: {error}"
 msgstr ""
@@ -2563,10 +2749,6 @@ msgstr ""
 
 #: bridge/src/mixer/rows.ts:174
 msgid "{row}, muted"
-msgstr ""
-
-#: bridge/src/quickSettings.ts:44
-msgid "Desktop"
 msgstr ""
 
 #: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
