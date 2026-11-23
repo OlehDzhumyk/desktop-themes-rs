@@ -55,14 +55,16 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture
 def make_shell(request):
-    """make_shell(skin=None, extensions=(UUID,), dconf='') -> a started Session."""
+    """make_shell(skin=None, extensions=(UUID,), dconf='', before_shell=None) -> a started Session.
+    before_shell(session) runs once the private bus is up, before GNOME Shell starts."""
     sessions = []
     base = request.node.name.replace('/', '_').replace('[', '-').replace(']', '')
 
-    def make(skin=None, extensions=(UUID,), dconf='', check_errors=True):
+    def make(skin=None, extensions=(UUID,), dconf='', check_errors=True, before_shell=None):
         name = base if not sessions else f'{base}-{len(sessions)}'
         extra = (skin_dconf(skin) + '\n' if skin else '') + dconf
-        s = Session(WORK / name, OUT, name, extensions=extensions, dconf=extra)
+        s = Session(WORK / name, OUT, name, extensions=extensions, dconf=extra,
+                    before_shell=before_shell)
         s.check_errors = check_errors
         sessions.append(s)
         return s.start()
@@ -92,11 +94,12 @@ class Clipboard:
         self.shell = shell
 
     def call(self, method, args, rtype):
+        """A call from the test process itself: a foreign client, which deskd refuses content."""
         return self.shell.call(DESK, CLIP_PATH, CLIP_IFACE, method, args, rtype).unpack()
 
     def texts(self):
-        (items,) = self.call('List', GLib.Variant('(su)', ('', 0)), '(a(tssssbxt))')
-        return [i[2] for i in items]
+        """The history as the bridge reads it (deskd serves it to the shell only, ADR 0008)."""
+        return self.shell.hook('clipTexts')
 
     def copy_and_wait(self, text, procs):
         """wl-copy `text` (kept running in the foreground, it owns the selection) and wait for
