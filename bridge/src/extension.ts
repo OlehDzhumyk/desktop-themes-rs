@@ -61,6 +61,7 @@ export default class DeskBridge extends Extension {
         if (!quickSettings)
             throw new Error('desk-bridge: the quick settings panel is not available');
         this._indicator = new DeskIndicator();
+        this._indicator.attach(this.path);
         quickSettings.addExternalIndicator(this._indicator);
         this._clipboard = new ClipboardFeature(this.path, clipSettings, this._skin(),
             () => { launchGui('clipboard'); });

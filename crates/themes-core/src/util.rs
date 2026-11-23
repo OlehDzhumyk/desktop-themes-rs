@@ -111,6 +111,7 @@ pub struct Out {
 pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
     let mut c = Command::new(cmd);
     desk_settings::i18n::restore_child_env(&mut c);
+    child_bus_env(&mut c);
     c.args(args).stdout(Stdio::piped()).stderr(Stdio::piped());
     c.stdin(if input.is_some() {
         Stdio::piped()
@@ -124,11 +125,26 @@ pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
             error = e
         ))
     })?;
-    if let Some(inp) = input {
-        let mut stdin = child.stdin.take().expect("stdin");
-        stdin.write_all(inp.as_bytes())?;
-    }
+    // stdin is written by its own thread while this one reads stdout/stderr: a child that
+    // fills its output pipe before reading all of its input would otherwise deadlock both
+    let writer = match (input, child.stdin.take()) {
+        (Some(inp), Some(mut stdin)) => {
+            let data = inp.to_owned();
+            Some(std::thread::spawn(move || stdin.write_all(data.as_bytes())))
+        }
+        (Some(_), None) => return Err(Error(tr!("no stdin for {command}", command = cmd))),
+        _ => None,
+    };
     let o = child.wait_with_output()?;
+    if let Some(w) = writer {
+        match w.join() {
+            Ok(Ok(())) => {}
+            // the child exited without reading everything: its exit status tells the rest
+            Ok(Err(e)) if e.kind() == std::io::ErrorKind::BrokenPipe => {}
+            Ok(Err(e)) => return Err(e.into()),
+            Err(_) => return Err(Error(tr!("no stdin for {command}", command = cmd))),
+        }
+    }
     Ok(Out {
         ok: o.status.success(),
         stdout: String::from_utf8_lossy(&o.stdout).into_owned(),
@@ -153,15 +169,35 @@ pub fn which(cmd: &str) -> bool {
         .is_some_and(|p| std::env::split_paths(&p).any(|d| d.join(cmd).is_file()))
 }
 
-/// Якщо змінна DBUS_SESSION_BUS_ADDRESS не задана (наприклад, з SSH), беремо /run/user/UID/bus.
-pub fn ensure_bus() {
-    if std::env::var_os("DBUS_SESSION_BUS_ADDRESS").is_none() {
-        let uid = unsafe_getuid();
-        let p = format!("/run/user/{uid}/bus");
-        if Path::new(&p).exists() {
-            // SAFETY: викликається на початку main, до створення потоків.
-            unsafe { std::env::set_var("DBUS_SESSION_BUS_ADDRESS", format!("unix:path={p}")) };
-        }
+/// The session bus address to use when `DBUS_SESSION_BUS_ADDRESS` is not set (e.g. over SSH):
+/// `unix:path=/run/user/UID/bus` if that socket exists. `None` when the variable is set (then
+/// everything already finds the bus) or there is no socket.
+pub fn fallback_bus_address() -> Option<String> {
+    if std::env::var_os("DBUS_SESSION_BUS_ADDRESS").is_some() {
+        return None;
+    }
+    let p = format!("/run/user/{}/bus", unsafe_getuid());
+    Path::new(&p).exists().then(|| format!("unix:path={p}"))
+}
+
+/// Gives child processes the session bus when `DBUS_SESSION_BUS_ADDRESS` is not set. The library
+/// never changes its own environment (that is not thread-safe); it passes the address explicitly.
+pub fn child_bus_env(c: &mut Command) {
+    if let Some(a) = fallback_bus_address() {
+        c.env("DBUS_SESSION_BUS_ADDRESS", a);
+    }
+}
+
+/// Sets `DBUS_SESSION_BUS_ADDRESS` from [`fallback_bus_address`] for this process, so GIO
+/// (GSettings, the dconf backend) and zbus find the bus.
+///
+/// # Safety
+/// Call it only at the start of `main`, before any thread exists (GIO, GTK and zbus start
+/// threads): `set_var` races with every `getenv` of other threads.
+pub unsafe fn init_bus_env() {
+    if let Some(a) = fallback_bus_address() {
+        // SAFETY: the caller guarantees that no other thread runs yet.
+        unsafe { std::env::set_var("DBUS_SESSION_BUS_ADDRESS", a) };
     }
 }
 

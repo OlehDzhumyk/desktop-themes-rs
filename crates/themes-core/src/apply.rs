@@ -16,6 +16,7 @@ use crate::plan::{self, DconfInput, ExtInput};
 use crate::shell::{ExtState, Shell};
 use crate::state::{BrokenExtension, State};
 use crate::theme::{self, Theme, all_themes, get_theme};
+use crate::txn::{self, Step};
 use crate::util::{log, now};
 use crate::{DIS_KEY, EXT_KEY, PERMANENT_EXTENSIONS, SHELL_THEME_KEY, gtklinks, hooks};
 
@@ -99,37 +100,75 @@ fn installed(ctx: &Ctx, uuid: &str) -> bool {
     ctx.extension_path(uuid).is_some()
 }
 
-/// Застосувати тему `id` до модулів `modules` (порожньо = усі).
-pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], dry_run: bool) -> Result<ApplyResult> {
-    apply_opts(ctx, id, modules, dry_run, true)
+/// How [`apply`] works.
+#[derive(Clone, Copy, Debug)]
+pub struct Options {
+    /// Plan only: nothing changes.
+    pub dry_run: bool,
+    /// При повному скиданні (fedora для всіх модулів) прибрати власні налаштування розширень
+    /// тем, яких немає в baseline.
+    pub purge_ext_state: bool,
+    /// The user explicitly confirmed an experimental theme (ADR 0006). Without it such a theme
+    /// is refused (a dry run is allowed).
+    pub confirmed: bool,
 }
 
-/// `purge_ext_state`: при повному скиданні (fedora для всіх модулів) прибрати власні
-/// налаштування розширень тем, яких немає в baseline.
+impl Default for Options {
+    fn default() -> Self {
+        Options {
+            dry_run: false,
+            purge_ext_state: true,
+            confirmed: false,
+        }
+    }
+}
+
+/// Why an experimental theme was not applied (no confirmation).
+pub fn experimental_refusal(t: &Theme) -> String {
+    tr!(
+        "“{name}” is an experimental theme and is applied only after an explicit confirmation: {warning}",
+        name = t.name(),
+        warning = t.warning()
+    )
+}
+
+/// Застосувати тему `id` до модулів `modules` (порожньо = усі).
+///
+/// Transactional: the steps with side effects are journaled in `state.json` (see [`crate::txn`]);
+/// when one fails, the steps done so far are undone and the old selection stays.
 #[allow(
     clippy::too_many_lines,
-    reason = "the apply transaction as one function; the transactional-apply rework (R-1, R-2) restructures it"
+    reason = "plan, journal and steps of one transaction; the steps share many locals"
 )]
-pub fn apply_opts(
-    ctx: &Ctx,
-    id: &str,
-    modules: &[Module],
-    dry_run: bool,
-    purge_ext_state: bool,
-) -> Result<ApplyResult> {
+pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<ApplyResult> {
+    let dry_run = opts.dry_run;
+    let purge_ext_state = opts.purge_ext_state;
     let target = get_theme(ctx, id)?;
+    if target.experimental() && !opts.confirmed && !dry_run {
+        return Err(Error(experimental_refusal(&target)));
+    }
     let affected: Vec<Module> = if modules.is_empty() {
         Module::ALL.to_vec()
     } else {
         modules.to_vec()
     };
-    crate::util::ensure_bus();
     let _lock = Lock::acquire(ctx)?;
     let baseline = dconf::parse_file(&ctx.baseline_dir()?.join("full.dconf"))?;
     let mut st = State::load(ctx);
-    let themes = all_themes(ctx);
-    let cur = dconf::dump()?;
     let mut warnings = Vec::new();
+    // an earlier apply was interrupted: finish it first (a dry run only reports it)
+    match &st.pending {
+        Some(p) if dry_run => warnings.push(crate::txn::describe(p)),
+        Some(_) => {
+            if let Some(r) = crate::txn::recover_locked(ctx, &mut st)? {
+                warnings.push(r.message());
+                warnings.extend(r.warnings);
+            }
+        }
+        None => {}
+    }
+    let themes = all_themes(ctx);
+    let cur = ctx.dconf.dump()?;
 
     // новий вибір джерел
     let prev_sel = st.modules.clone();
@@ -329,58 +368,11 @@ pub fn apply_opts(
                 );
             }
         }
-        res.shell_running = Shell::connect().is_some();
+        res.shell_running = ctx.shell().is_some();
+        res.warnings = warnings;
         return Ok(res);
     }
 
-    // 0. files generated from tokens (content-hashed cache) and their links; before dconf, so
-    // the shell theme exists when user-theme reads its new name
-    let t0 = std::time::Instant::now();
-    for t in &token_themes {
-        res.generated
-            .extend(crate::tokens::materialize(t, false)?.0);
-    }
-    for m in [Module::Look, Module::Apps] {
-        if !affected.contains(&m) {
-            continue;
-        }
-        crate::tokens::unlink_module(&mut st, m, &mut warnings);
-        if let Some(t) = sel.get(&m).and_then(|s| theme_of(s)) {
-            res.token_links.extend(crate::tokens::link_module(
-                ctx,
-                &mut st,
-                m,
-                &t,
-                &mut warnings,
-            )?);
-        }
-    }
-    res.tokens_ms = t0.elapsed().as_secs_f64() * 1000.0;
-
-    // 1. dconf
-    dconf::reset(&dplan.resets);
-    dconf::load(&dplan.writes)?;
-    // 2. розширення. Спершу даємо оболонці обробити зміни налаштувань: якщо сповіщення про зміну
-    // org.gnome.desktop.interface надійде в момент вимкнення розширення з годинником, GNOME Shell 51.1
-    // падає (SIGSEGV у gnome-desktop update_clock); до того ж нові розширення одразу читають свої ключі.
-    let live_shell = Shell::connect();
-    if live_shell.is_some() && ext_changed && !(dplan.writes.is_empty() && dplan.resets.is_empty())
-    {
-        std::thread::sleep(Duration::from_millis(1200));
-    }
-    for (key, new, def) in [
-        (EXT_KEY, &new_en, &default_en),
-        (DIS_KEY, &new_dis, &default_dis),
-    ] {
-        match ext_action(key, new, &baseline, def) {
-            ExtAction::Reset => dconf::reset(&[key.to_string()]),
-            ExtAction::Write(v) => {
-                if cur.get(key) != Some(&v) {
-                    dconf::write(key, &v)?
-                }
-            }
-        }
-    }
     for u in &target_exts {
         if !installed(ctx, u) {
             warnings.push(tr!("extension {uuid} is not installed", uuid = u));
@@ -392,56 +384,196 @@ pub fn apply_opts(
             ));
         }
     }
-    // 3–4. GTK і flatpak — частина «вигляду»
-    if look {
-        gtklinks::unlink_all(&mut st, &mut warnings)?;
-        res.gtk_links = gtklinks::link_theme(ctx, &mut st, &target)?;
-        crate::flatpak::remove(&mut st, &mut warnings)?;
-        res.flatpak_lines = crate::flatpak::apply(ctx, &mut st, &target, &mut warnings)?;
-        st.applied_extensions = target.extensions();
+
+    // Intent journal: from here on every step is recorded before it runs. An error undoes the
+    // steps begun so far (txn::rollback); a crash leaves the record for txn::recover.
+    let mut dconf_before: BTreeMap<String, Option<String>> = BTreeMap::new();
+    for k in dplan
+        .writes
+        .keys()
+        .chain(dplan.resets.iter())
+        .map(String::as_str)
+        .chain([EXT_KEY, DIS_KEY])
+    {
+        dconf_before.insert(k.to_string(), cur.get(k).cloned());
     }
-    // 5. хуки програм
-    if affected.contains(&Module::Apps) {
-        let new_src = id;
-        let prev_hook = st.hooks_applied.clone();
-        if let Some(prev) = prev_hook.as_deref().filter(|p| *p != new_src) {
-            if let Some(pt) = theme_of(prev) {
-                match hooks::run_hook(ctx, &pt, "revert", Some(prev), Some(new_src)) {
-                    Some(Ok(())) => res.hooks.push(format!("{prev}/revert")),
-                    Some(Err(e)) => warnings.push(e),
-                    None => {}
+    let new_module_keys: BTreeMap<Module, Vec<String>> = affected
+        .iter()
+        .map(|m| {
+            (
+                *m,
+                targets
+                    .get(m)
+                    .map_or_default(|t| t.keys().cloned().collect()),
+            )
+        })
+        .collect();
+    txn::begin(
+        ctx,
+        &mut st,
+        txn::Pending {
+            theme: id.into(),
+            modules: affected.clone(),
+            started: now("%Y-%m-%d %H:%M:%S"),
+            prev_modules: prev_sel.clone(),
+            new_modules: sel.clone(),
+            new_module_keys,
+            new_extensions: look.then(|| target.extensions()),
+            dconf_before,
+            begun: vec![],
+        },
+    )?;
+    let live_shell = ctx.shell();
+    // for the apply log: the resets went as one change; the shell confirmed the dconf change
+    // before extensions were toggled (None: no wait was needed)
+    let mut reset_batched = true;
+    let mut settled: Option<bool> = None;
+    let mut steps = || -> Result<()> {
+        // 0. files generated from tokens (content-hashed cache) and their links; before dconf,
+        // so the shell theme exists when user-theme reads its new name
+        txn::step(ctx, &mut st, Step::Tokens)?;
+        let t0 = std::time::Instant::now();
+        for t in &token_themes {
+            res.generated
+                .extend(crate::tokens::materialize(t, false)?.0);
+        }
+        for m in [Module::Look, Module::Apps] {
+            if !affected.contains(&m) {
+                continue;
+            }
+            crate::tokens::unlink_module(&mut st, m, &mut warnings);
+            if let Some(t) = sel.get(&m).and_then(|s| theme_of(s)) {
+                res.token_links.extend(crate::tokens::link_module(
+                    ctx,
+                    &mut st,
+                    m,
+                    &t,
+                    &mut warnings,
+                )?);
+            }
+        }
+        res.tokens_ms = t0.elapsed().as_secs_f64() * 1000.0;
+
+        // 1. dconf
+        txn::step(ctx, &mut st, Step::Dconf)?;
+        // GNOME Shell 51.1 workaround (docs/architecture.md, "Applying a theme"): the shell must
+        // have processed the new keys before an extension is turned off, so the change
+        // notification is watched from before the write
+        let settle_keys: Vec<String> = if dplan.writes.is_empty() {
+            dplan.resets.clone()
+        } else {
+            dplan.writes.keys().cloned().collect()
+        };
+        let watch = live_shell
+            .as_ref()
+            .filter(|_| ext_changed && !settle_keys.is_empty())
+            .and_then(Shell::watch_dconf);
+        reset_batched = ctx.dconf.reset(&dplan.resets);
+        ctx.dconf.load(&dplan.writes)?;
+        // 2. розширення. Спершу оболонка обробляє зміни налаштувань: якщо сповіщення про зміну
+        // org.gnome.desktop.interface надійде в момент вимкнення розширення з годинником,
+        // GNOME Shell 51.1 падає (SIGSEGV у gnome-desktop update_clock); до того ж нові
+        // розширення одразу читають свої ключі.
+        txn::step(ctx, &mut st, Step::Extensions)?;
+        if let (Some(sh), Some(w)) = (&live_shell, watch) {
+            settled = Some(sh.after_dconf_change(w, &settle_keys, SHELL_SETTLE_LIMIT));
+        }
+        for (key, new, def) in [
+            (EXT_KEY, &new_en, &default_en),
+            (DIS_KEY, &new_dis, &default_dis),
+        ] {
+            match ext_action(key, new, &baseline, def) {
+                ExtAction::Reset => {
+                    ctx.dconf.reset(&[key.to_string()]);
+                }
+                ExtAction::Write(v) => {
+                    if cur.get(key) != Some(&v) {
+                        ctx.dconf.write(key, &v)?
+                    }
                 }
             }
-            st.hooks_applied = None;
         }
-        let prev_apps = prev_sel.get(&Module::Apps).map(String::as_str);
-        match hooks::run_hook(ctx, &target, "apply", prev_apps, None) {
-            Some(Ok(())) => {
-                res.hooks.push(format!("{new_src}/apply"));
-                st.hooks_applied = Some(new_src.to_string());
+        // 3–4. GTK і flatpak — частина «вигляду»
+        if look {
+            txn::step(ctx, &mut st, Step::Gtk)?;
+            gtklinks::unlink_all(ctx, &mut st, &mut warnings)?;
+            res.gtk_links = gtklinks::link_theme(ctx, &mut st, &target)?;
+            txn::step(ctx, &mut st, Step::Flatpak)?;
+            crate::flatpak::remove(&mut st, &mut warnings)?;
+            st.save(ctx)?;
+            res.flatpak_lines = crate::flatpak::apply(ctx, &mut st, &target, &mut warnings)?;
+        }
+        // 5. хуки програм (їх не відкотити: після цього кроку відновлення завершує apply)
+        if affected.contains(&Module::Apps) {
+            txn::step(ctx, &mut st, Step::Hooks)?;
+            let new_src = id;
+            let prev_hook = st.hooks_applied.clone();
+            if let Some(prev) = prev_hook.as_deref().filter(|p| *p != new_src) {
+                if let Some(pt) = theme_of(prev) {
+                    match hooks::run_hook(ctx, &pt, "revert", Some(prev), Some(new_src)) {
+                        Some(Ok(())) => res.hooks.push(format!("{prev}/revert")),
+                        Some(Err(e)) => warnings.push(e),
+                        None => {}
+                    }
+                }
+                st.hooks_applied = None;
+                st.save(ctx)?;
             }
-            Some(Err(e)) => warnings.push(e),
-            None => {}
+            let prev_apps = prev_sel.get(&Module::Apps).map(String::as_str);
+            match hooks::run_hook(ctx, &target, "apply", prev_apps, None) {
+                Some(Ok(())) => {
+                    res.hooks.push(format!("{new_src}/apply"));
+                    st.hooks_applied = Some(new_src.to_string());
+                }
+                Some(Err(e)) => warnings.push(e),
+                None => {}
+            }
         }
-    }
-    // 6. стан
-    for m in &affected {
-        st.module_keys.insert(
-            *m,
-            targets
-                .get(m)
-                .map_or_default(|t| t.keys().cloned().collect()),
+        Ok(())
+    };
+    if let Err(e) = steps() {
+        let rec = txn::recover_locked(ctx, &mut st)?;
+        let completed = rec.as_ref().is_some_and(|r| r.completed);
+        let problems = rec.map_or_default(|r| r.warnings);
+        log(
+            ctx,
+            &format!(
+                "apply {id} failed: {} completed={completed} rollback-problems={}", // i18n-ok
+                e.0,
+                problems.join("; ")
+            ),
         );
+        let mut msg = if completed {
+            tr!(
+                "applying “{theme}” hit an error after its hooks ran, so it was completed: {error}",
+                theme = id,
+                error = e.0
+            )
+        } else {
+            tr!(
+                "could not apply “{theme}”: {error}. The changes were rolled back.",
+                theme = id,
+                error = e.0
+            )
+        };
+        if !problems.is_empty() {
+            msg.push('\n');
+            msg.push_str(&tr!(
+                "Not everything could be undone: {problems}",
+                problems = problems.join("; ")
+            ));
+        }
+        return Err(Error(msg));
     }
-    st.modules = sel.clone();
-    st.save(ctx)?;
+    // 6. стан: новий вибір, керовані ключі й розширення теми — одним записом
+    txn::commit(ctx, &mut st)?;
 
     // 7. живе оновлення оболонки
-    if let Some(shell) = live_shell {
+    if let Some(shell) = &live_shell {
         res.shell_running = true;
         live_check(
             ctx,
-            &shell,
+            shell,
             &new_en,
             &added,
             &removed,
@@ -455,15 +587,22 @@ pub fn apply_opts(
             && has_shell_theme
             && !added.iter().any(|u| u.starts_with("user-theme@"))
         {
-            crate::shell::reload_user_theme(&shell, "");
+            crate::shell::reload_user_theme(shell, "");
         }
     }
     // 8. прибирання після того, як розширення відпрацювали (вони інколи пишуть ключі при вимкненні)
     if full_reset {
-        crate::shortcuts::clear_all();
+        ctx.dconf.reset(&crate::shortcuts::override_paths());
     }
-    if res.shell_running && ext_changed {
-        std::thread::sleep(Duration::from_millis(1500));
+    // extensions that were turned off may write keys while shutting down: their writes reach
+    // dconf before the cleanup reads it (the states settled in live_check; this orders the
+    // shell's pending writes before the dump)
+    if res.shell_running
+        && ext_changed
+        && let Some(sh) = &live_shell
+    {
+        let _ = sh.version();
+        dconf::writer_barrier();
     }
     let purge: Vec<String> = if full_reset && purge_ext_state {
         theme_exts
@@ -482,7 +621,7 @@ pub fn apply_opts(
         ctx,
         &format!(
             // формат apply.log, його розбирає crash.rs
-            "apply {id} modules={} (було: {}) keys_changed={} resets={} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}", // i18n-ok
+            "apply {id} modules={} (було: {}) keys_changed={} resets={}{} ext={} gtk_links={} flatpak={} tokens={}/{:.1}ms live={} relogin={}{}{}", // i18n-ok
             affected
                 .iter()
                 .map(|m| m.id())
@@ -491,6 +630,7 @@ pub fn apply_opts(
             fmt_sel(&prev_sel),
             res.changed_keys.len(),
             res.resets_effective,
+            if reset_batched { "" } else { "/per-key" },
             if new_en.is_empty() {
                 "-".into()
             } else {
@@ -502,6 +642,11 @@ pub fn apply_opts(
             res.tokens_ms,
             res.live,
             res.relogin,
+            match settled {
+                Some(true) => " shell-settle=ok",
+                Some(false) => " shell-settle=timeout",
+                None => "",
+            },
             if res.warnings.is_empty() {
                 String::new()
             } else {
@@ -511,6 +656,10 @@ pub fn apply_opts(
     );
     Ok(res)
 }
+
+/// Upper bound of the wait for the shell to process a dconf change (the GNOME Shell 51.1
+/// workaround); past it the apply goes on.
+const SHELL_SETTLE_LIMIT: Duration = Duration::from_secs(3);
 
 pub fn fmt_sel(sel: &BTreeMap<Module, String>) -> String {
     if sel.is_empty() {
@@ -622,10 +771,10 @@ fn live_check(
 /// Автовідкат: через ~5 с після живого застосування вимикає розширення, що перейшли в ERROR.
 pub fn verify_live(ctx: &Ctx, wait: Duration) -> Result<Vec<(String, String)>> {
     std::thread::sleep(wait);
-    let Some(shell) = Shell::connect() else {
+    let Some(shell) = ctx.shell() else {
         return Ok(vec![]);
     };
-    let cur = dconf::dump()?;
+    let cur = ctx.dconf.dump()?;
     let (cur_en, ..) = ext_lists(&cur);
     let mut bad = Vec::new();
     for u in &cur_en {
@@ -653,7 +802,7 @@ pub fn disable_broken(ctx: &Ctx, shell: &Shell, bad: &[(String, String)], why: &
     let _lock = Lock::acquire(ctx)?;
     let mut st = State::load(ctx);
     let ver = shell.version().unwrap_or_default();
-    let cur = dconf::dump()?;
+    let cur = ctx.dconf.dump()?;
     let (cur_en, ..) = ext_lists(&cur);
     let uuids: BTreeSet<&String> = bad.iter().map(|(u, _)| u).collect();
     let new_en: Vec<String> = cur_en
@@ -661,7 +810,7 @@ pub fn disable_broken(ctx: &Ctx, shell: &Shell, bad: &[(String, String)], why: &
         .filter(|u| !uuids.contains(u))
         .cloned()
         .collect();
-    dconf::write(EXT_KEY, &dconf::fmt_strv(&new_en))?;
+    ctx.dconf.write(EXT_KEY, &dconf::fmt_strv(&new_en))?;
     for (u, reason) in bad {
         if !st.is_broken(u) {
             st.broken_extensions.push(BrokenExtension {
@@ -794,16 +943,18 @@ fn cleanup(
     purge: &[String],
 ) -> Vec<String> {
     let mut fixed = Vec::new();
-    let Ok(cur) = dconf::dump() else { return fixed };
+    let Ok(cur) = ctx.dconf.dump() else {
+        return fixed;
+    };
     for (k, d) in desired {
         match d {
             Some(v) if cur.get(k) != Some(v) => {
-                if dconf::write(k, v).is_ok() {
+                if ctx.dconf.write(k, v).is_ok() {
                     fixed.push(k.clone());
                 }
             }
             None if cur.contains_key(k) => {
-                dconf::reset(std::slice::from_ref(k));
+                ctx.dconf.reset(std::slice::from_ref(k));
                 fixed.push(k.clone());
             }
             _ => {}
@@ -828,7 +979,7 @@ fn cleanup(
             continue;
         };
         if val == def {
-            dconf::reset(std::slice::from_ref(k));
+            ctx.dconf.reset(std::slice::from_ref(k));
             fixed.push(k.clone());
         }
     }
@@ -836,7 +987,7 @@ fn cleanup(
         for dir in extension_dconf_dirs(ctx, uuid) {
             let in_baseline = baseline.keys().any(|k| k.starts_with(&dir));
             if !in_baseline && cur.keys().any(|k| k.starts_with(&dir)) {
-                let _ = crate::util::run("dconf", &["reset", "-f", &dir], None);
+                ctx.dconf.reset_dir(&dir);
                 fixed.push(dir);
             }
         }

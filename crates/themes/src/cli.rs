@@ -7,7 +7,7 @@ use clap::{CommandFactory, FromArgMatches, Parser, Subcommand};
 use desk_settings::i18n::gettext;
 use desk_settings::{n_, tr};
 use serde_json::json;
-use themes_core::apply::{ApplyResult, apply_opts, delete, verify_live};
+use themes_core::apply::{ApplyResult, Options, apply, delete, verify_live};
 use themes_core::doctor::{DoctorOptions, doctor};
 use themes_core::modules::Module;
 use themes_core::state::State;
@@ -211,7 +211,6 @@ pub fn run(args: Vec<String>) -> i32 {
             return if e.use_stderr() { 2 } else { 0 };
         }
     };
-    themes_core::util::ensure_bus();
     let ctx = Ctx::from_env();
     match exec(&ctx, cli.cmd, cli.json) {
         Ok(code) => code,
@@ -339,7 +338,14 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             if !dry_run {
                 confirm_commands(ctx, &id, &mods, yes, json)?;
             }
-            do_apply(ctx, &id, &mods, dry_run, no_verify, true, json)
+            // past this point the user confirmed (prompt or --yes); the library still refuses an
+            // experimental theme without it (ADR 0006)
+            let opts = Options {
+                dry_run,
+                purge_ext_state: true,
+                confirmed: true,
+            };
+            do_apply(ctx, &id, &mods, &opts, no_verify, json)
         }
         Cmd::Reset {
             only,
@@ -348,13 +354,17 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             keep_extension_settings,
         } => {
             let mods = modules_arg(only.as_deref(), &[])?;
+            let opts = Options {
+                dry_run,
+                purge_ext_state: !keep_extension_settings,
+                confirmed: false,
+            };
             do_apply(
                 ctx,
                 themes_core::BUILTIN_THEME,
                 &mods,
-                dry_run,
+                &opts,
                 no_verify,
-                !keep_extension_settings,
                 json,
             )
         }
@@ -545,7 +555,11 @@ fn confirm_commands(
     json: bool,
 ) -> Result<(), Error> {
     use std::io::IsTerminal;
-    let plan = apply_opts(ctx, id, mods, true, true)?;
+    let dry = Options {
+        dry_run: true,
+        ..Default::default()
+    };
+    let plan = apply(ctx, id, mods, &dry)?;
     let pending = themes_core::commands::pending(ctx, &plan.writes);
     if pending.is_empty() {
         return Ok(());
@@ -609,13 +623,12 @@ fn do_apply(
     ctx: &Ctx,
     id: &str,
     mods: &[Module],
-    dry_run: bool,
+    opts: &Options,
     no_verify: bool,
-    purge: bool,
     json: bool,
 ) -> Result<i32, Error> {
-    let mut r = apply_opts(ctx, id, mods, dry_run, purge)?;
-    if !dry_run
+    let mut r = apply(ctx, id, mods, opts)?;
+    if !opts.dry_run
         && !no_verify
         && r.shell_running
         && r.extensions_changed
@@ -634,7 +647,7 @@ fn do_apply(
         out_json(&r);
     } else {
         print_apply(&r);
-        if dry_run {
+        if opts.dry_run {
             print_commands(ctx, &r);
             if let Ok(t) = themes_core::theme::get_theme(ctx, id) {
                 for (line, why) in t.flatpak_refused() {

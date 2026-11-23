@@ -12,7 +12,6 @@
 //!   `~/.local/share/themes/desktop-themes-<id>` (look module) and the Ptyxis palette as
 //!   `~/.local/share/org.gnome.Ptyxis/palettes/desktop-themes-<id>.palette` (apps module).
 
-use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
@@ -240,7 +239,6 @@ pub fn link_module(
     warnings: &mut Vec<String>,
 ) -> Result<Vec<String>> {
     let mut made = Vec::new();
-    let mut rec: BTreeMap<String, String> = BTreeMap::new();
     for (dest, src) in links_for(ctx, theme, module) {
         if lexists(&dest) {
             let ours = std::fs::read_link(&dest).is_ok_and(|t| t == src);
@@ -257,11 +255,12 @@ pub fn link_module(
             std::fs::create_dir_all(p)?;
         }
         std::os::unix::fs::symlink(&src, &dest)?;
-        rec.insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
+        st.token_links
+            .entry(module)
+            .or_default()
+            .insert(dest.to_string_lossy().into(), src.to_string_lossy().into());
+        st.save(ctx)?;
         made.push(dest.to_string_lossy().into_owned());
-    }
-    if !rec.is_empty() {
-        st.token_links.insert(module, rec);
     }
     Ok(made)
 }
@@ -384,7 +383,7 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
         std::fs::write(root.join(".cache/tk/gtk4/gtk.css"), "/* v2 */").unwrap();
         assert_eq!(crate::gtklinks::refresh_copies(&mut st, &mut w).len(), 1);
         assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* v2 */");
-        crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
+        crate::gtklinks::unlink_all(&ctx, &mut st, &mut w).unwrap();
         assert_eq!(
             std::fs::read_to_string(&css).unwrap(),
             "/* mine */",
@@ -396,7 +395,7 @@ palette = ["#2b2638", "#f07a8f", "#7fd4a0", "#ecc27a", "#8aa8f5", "#c99af2", "#7
         std::fs::remove_file(&css).unwrap();
         crate::gtklinks::link_theme(&ctx, &mut st, &th).unwrap();
         std::fs::write(&css, "/* edited */").unwrap();
-        crate::gtklinks::unlink_all(&mut st, &mut w).unwrap();
+        crate::gtklinks::unlink_all(&ctx, &mut st, &mut w).unwrap();
         assert_eq!(std::fs::read_to_string(&css).unwrap(), "/* edited */");
         assert!(w.iter().any(|m| m.contains("by hand")), "{w:?}");
 
