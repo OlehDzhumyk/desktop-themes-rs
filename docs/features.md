@@ -134,6 +134,24 @@ Skins:
 All three follow the light/dark scheme, the GNOME accent colour and high contrast (outlines). The fades last 80 ms and
 do not run with reduced motion. The shortcut works only in the normal session mode, never on the lock screen.
 
+## On-screen displays
+
+| | |
+|---|---|
+| Shows | the volume, mute, microphone, brightness and keyboard backlight changes that GNOME Shell reports to `Main.osdWindowManager` (`show`, `showOne`, `showAll`): symbolic icon, level bar, number (`show-percentage`; always with high contrast) |
+| Above 100 % | the part above 100 % has its own colour, a marker at 100 % and the words «понад 100 %»; the number stays visible |
+| Where | the monitor with the pointer (the primary one as a fallback); `position`: `skin-default`, `bottom-center`, `center`, `top-right` |
+| Timing | hides `timeout-ms` (1500) after the last change; a repeat updates the same OSD and restarts its one timer; fade 120 ms in, 150 ms out, none with reduced motion |
+| Input | click-through (`reactive: false`), never takes the focus, not in the window list |
+| Accessibility | the surface has the notification role; its name says the kind and the value («Гучність 40 %», «Мікрофон вимкнено») |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Osd`: `enabled`, `show-percentage`, `timeout-ms`, `position` |
+
+Skins:
+
+* **windows11**: compact acrylic bar at the bottom centre above the panel: icon, horizontal bar in the accent colour, number.
+* **macos**: translucent square in the centre with a large icon over a smooth bar; a pill at `bottom-center` or `top-right`.
+* **default**: GNOME's own OSD; the bridge does not touch `Main.osdWindowManager`. The same with `enabled` off, or when another extension has already replaced its methods (one warning in the log).
+
 ## Automatic light/dark
 
 | | |

@@ -21,6 +21,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Skin-aware on-screen displays (stage 3): with the `windows11` and `macos` skins the bridge draws
+  the volume, mute, microphone, brightness and keyboard backlight OSD itself (Windows 11: acrylic
+  bar at the bottom centre; macOS: translucent centred square or a pill), click-through, with a
+  distinct segment, marker and text above 100 %, high-contrast outline and number, reduced-motion
+  support and a polite screen-reader announcement. Settings `io.github.OlehDzhumyk.Desk.Osd`
+  (`enabled`, `show-percentage`, `timeout-ms`, `position`) and an «Екранні індикатори» page in the
+  window. With the `default` skin, `enabled` off or a manager another extension patched, GNOME's
+  own OSD stays untouched; skin switch and `disable()` restore it exactly.
 - Colour picker engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.ColorPicker` at
   `/io/github/OlehDzhumyk/Desk/ColorPicker` (`Record`, `List`, `Remove`, `Clear`, `Format`,
   `Contrast`, signal `Changed`), formatting with `theme_tokens::picker` and keeping the newest

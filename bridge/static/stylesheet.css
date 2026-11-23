@@ -427,3 +427,81 @@
 .desk-light.desk-color-toast { color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14); }
 .desk-light.desk-color-toast.desk-skin-windows11 { background-color: #f3f3f3; }
 .desk-hc.desk-color-toast { border: 2px solid currentColor; }
+
+/* ------------------------------------------------------------------ on-screen displays (osd/popup.ts)
+   Click-through, one at a time. windows11: acrylic bar (icon, bar, number). macos: translucent
+   square (.desk-osd-square, icon above the bar) or pill (.desk-osd-row). The part above 100 %
+   (.desk-osd-over) has its own colour, a marker at 100 % and the words «above 100 %».
+   .desk-hc: solid outline, opaque surface, the number is always shown (set in code). */
+.desk-osd { font-size: 10.5pt; color: #f2f2f2; }
+.desk-osd-row { spacing: 12px; }
+.desk-osd-square { spacing: 14px; }
+.desk-osd-values { spacing: 10px; }
+.desk-osd-icon { icon-size: 18px; }
+.desk-osd-square .desk-osd-icon { icon-size: 56px; }
+.desk-osd-track { height: 4px; border-radius: 2px; background-color: rgba(255,255,255,0.28); }
+.desk-osd-fill, .desk-osd-over { height: 4px; border-radius: 2px; }
+.desk-osd-fill { background-color: #60cdff; }
+.desk-osd-over { background-color: #ffb454; }
+.desk-osd-marker { width: 2px; height: 4px; background-color: #f2f2f2; }
+.desk-osd-number { min-width: 2.2em; text-align: right; font-feature-settings: "tnum"; }
+.desk-osd-over-text, .desk-osd-text { font-size: 9pt; }
+
+.desk-osd.desk-skin-windows11 {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background-color: rgba(44,44,44,0.94);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.desk-osd.desk-skin-macos {
+  padding: 10px 16px;
+  border-radius: 18px;
+  background-color: rgba(40,40,40,0.82);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.desk-osd.desk-skin-macos.desk-osd-square { padding: 22px 22px 18px 22px; border-radius: 20px; min-width: 9.5em; }
+.desk-skin-macos .desk-osd-track { height: 6px; border-radius: 3px; }
+.desk-skin-macos .desk-osd-fill, .desk-skin-macos .desk-osd-over { height: 6px; border-radius: 3px; }
+.desk-skin-macos .desk-osd-marker { height: 6px; }
+.desk-skin-macos .desk-osd-fill { background-color: #f2f2f2; }
+
+.desk-osd.desk-light { color: #1c1c1c; }
+.desk-osd.desk-light.desk-skin-windows11 { background-color: rgba(249,249,249,0.95); border-color: rgba(0,0,0,0.08); }
+.desk-osd.desk-light.desk-skin-macos { background-color: rgba(246,246,246,0.85); border-color: rgba(0,0,0,0.1); }
+.desk-light .desk-osd-track { background-color: rgba(0,0,0,0.22); }
+.desk-light .desk-osd-marker { background-color: #1c1c1c; }
+.desk-light.desk-skin-windows11 .desk-osd-fill { background-color: #005fb8; }
+.desk-light.desk-skin-macos .desk-osd-fill { background-color: #1c1c1c; }
+.desk-light .desk-osd-over { background-color: #b45309; }
+
+.desk-accent-blue.desk-skin-windows11   .desk-osd-fill { background-color: #3584e4; }
+.desk-accent-teal.desk-skin-windows11   .desk-osd-fill { background-color: #2190a4; }
+.desk-accent-green.desk-skin-windows11  .desk-osd-fill { background-color: #3a944a; }
+.desk-accent-yellow.desk-skin-windows11 .desk-osd-fill { background-color: #c88800; }
+.desk-accent-orange.desk-skin-windows11 .desk-osd-fill { background-color: #ed5b00; }
+.desk-accent-red.desk-skin-windows11    .desk-osd-fill { background-color: #e62d42; }
+.desk-accent-pink.desk-skin-windows11   .desk-osd-fill { background-color: #d56199; }
+.desk-accent-purple.desk-skin-windows11 .desk-osd-fill { background-color: #9141ac; }
+.desk-accent-slate.desk-skin-windows11  .desk-osd-fill { background-color: #6f8396; }
+
+.desk-osd.desk-hc.desk-skin-windows11, .desk-osd.desk-hc.desk-skin-macos {
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: none;
+}
+.desk-osd.desk-hc.desk-light.desk-skin-windows11, .desk-osd.desk-hc.desk-light.desk-skin-macos {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+.desk-osd.desk-hc .desk-osd-track { background-color: transparent; border: 1px solid #fff; }
+.desk-osd.desk-hc .desk-osd-fill { background-color: #fff; }
+.desk-osd.desk-hc .desk-osd-over { background-color: #ffd60a; }
+.desk-osd.desk-hc .desk-osd-marker { background-color: #ff4f4f; }
+.desk-osd.desk-hc.desk-light .desk-osd-track { border-color: #000; }
+.desk-osd.desk-hc.desk-light .desk-osd-fill { background-color: #000; }
+.desk-osd.desk-hc.desk-light .desk-osd-over { background-color: #8a4b00; }
+.desk-osd.desk-hc.desk-light .desk-osd-marker { background-color: #c00000; }

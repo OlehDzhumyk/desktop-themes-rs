@@ -30,6 +30,7 @@
     <child name="color-picker" schema="io.github.OlehDzhumyk.Desk.ColorPicker"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
+    <child name="osd" schema="io.github.OlehDzhumyk.Desk.Osd"/>
     <child name="appearance" schema="io.github.OlehDzhumyk.Desk.Appearance"/>
     <child name="focus" schema="io.github.OlehDzhumyk.Desk.Focus"/>
     <child name="logo-menu" schema="io.github.OlehDzhumyk.Desk.LogoMenu"/>
@@ -243,6 +244,36 @@
       <default>[]</default>
       <summary>Shortcut that opens the volume mixer (in force)</summary>
       <description>The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global.</description>
+    </key>
+  </schema>
+
+  <schema id="io.github.OlehDzhumyk.Desk.Osd" path="/io/github/OlehDzhumyk/Desk/osd/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Draw the volume and brightness OSD in the style of the skin</summary>
+      <description>Off, or with the default skin, the stock GNOME Shell OSD is used and the bridge does not touch Main.osdWindowManager.</description>
+    </key>
+    <key name="show-percentage" type="b">
+      <default>true</default>
+      <summary>Show the level as a number</summary>
+      <description>The number next to the level bar; high contrast always shows it</description>
+    </key>
+    <key name="timeout-ms" type="u">
+      <range min="500" max="4000"/>
+      <default>1500</default>
+      <summary>Milliseconds after the last change before the OSD hides</summary>
+      <description>A repeated key press restarts this one timer; it does not open a second OSD.</description>
+    </key>
+    <key name="position" type="s">
+      <choices>
+        <choice value="skin-default"/>
+        <choice value="bottom-center"/>
+        <choice value="center"/>
+        <choice value="top-right"/>
+      </choices>
+      <default>'skin-default'</default>
+      <summary>Position of the OSD on the monitor</summary>
+      <description>Where on the monitor with the pointer the display appears</description>
     </key>
   </schema>
 

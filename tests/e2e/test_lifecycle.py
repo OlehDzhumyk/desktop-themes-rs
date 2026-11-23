@@ -23,6 +23,8 @@ def exercise(shell, shortcut):
     for skin in ('macos', 'windows11', 'default'):
         shell.dconf_write(SKIN_KEY, f"'{skin}'")
         shell.hook('waitBridge', 'skin', skin)
+        if skin != 'default':
+            shell.hook('osdShowVolume', 0.4)  # the skinned OSD: actor, hide timer
     for lang in ('uk', 'system'):
         shell.dconf_write(LANG_KEY, f"'{lang}'")
         shell.hook('waitBridge', 'language', lang)

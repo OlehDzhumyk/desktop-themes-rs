@@ -135,6 +135,80 @@ export function bridgeState() {
     };
 }
 
+// ---- the skin-aware OSD (bridge/src/osd)
+const OSD_METHODS = ['show', 'showOne', 'showAll', 'hideAll'];
+
+/** Which osdWindowManager methods are own (patched) properties, and the bridge OSD's state. */
+export function osdState() {
+    const m = Main.osdWindowManager;
+    const popup = bridge()?._osd?._popup ?? null;
+    const a = popup?.actor ?? null;
+    const count = [];
+    const walk = actor => {
+        for (const c of actor.get_children()) {
+            if (c.has_style_class_name?.('desk-osd'))
+                count.push(c);
+            walk(c);
+        }
+    };
+    walk(global.stage);
+    return {
+        patched: OSD_METHODS.filter(n => Object.prototype.hasOwnProperty.call(m, n)),
+        actors: count.length,
+        visible: Boolean(a?.visible),
+        classes: a?.get_style_class_name() ?? '',
+        reactive: a?.reactive ?? null,
+        number: popup?._number?.visible ? popup._number.text : null,
+        over: Boolean(popup?._over?.visible),
+        timer: popup?._hideId ?? 0,
+        name: a?.accessible_name ?? '',
+    };
+}
+
+/** What the shell's volume slider does on a key press: showAll(icon, label, level, maxLevel). */
+export function osdShowVolume(level, maxLevel = 1) {
+    Main.osdWindowManager.showAll(new Gio.ThemedIcon({name: 'audio-volume-medium-symbolic'}), null, level, maxLevel);
+    return osdState();
+}
+
+/** Resolve once osdState().patched is non-empty (true) or empty (false), checked after every
+ * change of the OSD settings and the skin (one idle later, after the bridge's own handler). */
+export function waitOsd(patched, timeoutMs = 10000) {
+    const b = bridge();
+    const objs = [b?._settings, b?._osdSettings].filter(o => o);
+    return new Promise((resolve, reject) => {
+        const ids = [];
+        let timer = 0;
+        const finish = ok => {
+            ids.forEach(([o, id]) => o.disconnect(id));
+            if (timer)
+                GLib.source_remove(timer);
+            if (ok)
+                resolve(osdState());
+            else
+                reject(new Error(`osd patched is ${JSON.stringify(osdState().patched)}`));
+        };
+        const check = () => {
+            if ((osdState().patched.length > 0) === patched)
+                finish(true);
+        };
+        for (const o of objs) {
+            ids.push([o, o.connect('changed', () => {
+                GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                    check();
+                    return GLib.SOURCE_REMOVE;
+                });
+            })]);
+        }
+        timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeoutMs, () => {
+            timer = 0;
+            finish(false);
+            return GLib.SOURCE_REMOVE;
+        });
+        check();
+    });
+}
+
 // ---- the accent control of the «Theme» quick settings menu (accentPicker.ts)
 function accentItems() {
     return bridge()?._indicator?._themes?._accentSection?._getMenuItems() ?? [];
