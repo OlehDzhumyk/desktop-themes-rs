@@ -160,10 +160,10 @@ loads the same files at runtime).
 | `Pin(t id, b pinned)`, `Delete(t id)`, `Clear(b keep_pinned)` | |
 | property `Private b` (rw), `Enabled b`, `Count u`; signal `Changed()` | |
 
-```sh
-gdbus call --session -d io.github.OlehDzhumyk.Desk -o /io/github/OlehDzhumyk/Desk/Clipboard \
-  -m io.github.OlehDzhumyk.Desk.Clipboard.List "" 5
-```
+Only GNOME Shell (the owner of `org.gnome.Shell`) and our own binaries, outside any sandbox, may
+call the content methods (all but the properties): others get `AccessDenied`, `gdbus`/`busctl`
+included. The bus name is not replaceable, and the bridge talks only to a deskd it verified.
+[ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md).
 
 `/io/github/OlehDzhumyk/Desk/Mixer`, interface `io.github.OlehDzhumyk.Desk.Mixer` (volumes on the cubic
 slider scale, 1.0 = 100 %):

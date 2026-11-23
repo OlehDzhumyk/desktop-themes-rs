@@ -125,6 +125,13 @@ Over-amplification follows `org.gnome.desktop.sound allow-volume-above-100-perce
 Reads names and icons of applications that are playing audio (local). No audio samples are read in v1. Remembered
 routing stores app ids and device names in `~/.local/share/deskd/` (0600). No network.
 
+Application names and media titles (what the user watches or listens to) are mildly sensitive, and
+`SetMute`/`SetDefault` could unmute or switch the microphone. So every Mixer method is served only to
+GNOME Shell and our own binaries outside a sandbox; the properties (`Version`, `Available`, default
+device ids) and the `Changed` signal stay open ([ADR 0008](../../adr/0008-deskd-serves-content-to-trusted-callers.md)).
+Sandboxed apps that have PipeWire or PulseAudio access see the audio graph through that access
+anyway; deskd adds nothing to it.
+
 ## Edge cases
 
 * Bluetooth device in the headset profile (low quality) vs A2DP: switching profile is out of scope; show the

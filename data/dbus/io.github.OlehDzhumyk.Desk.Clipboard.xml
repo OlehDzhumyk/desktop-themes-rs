@@ -1,6 +1,9 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Clipboard history engine of deskd. The shell bridge (desk-bridge@desktop-themes-rs) feeds
-     clipboard contents in with Push() and renders the items it gets from List(). -->
+     clipboard contents in with Push() and renders the items it gets from List().
+     Access (ADR 0008): every method and setting Private answer AccessDenied unless the caller is
+     the owner of org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any
+     sandbox. The properties and the Changed signal are open. -->
 <node>
   <interface name="io.github.OlehDzhumyk.Desk.Clipboard">
     <!-- A new clipboard owner appeared. mime: the type `data` is in (text/plain;charset=utf-8,

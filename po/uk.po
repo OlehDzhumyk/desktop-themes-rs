@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-22 21:24+0000\n"
+"POT-Creation-Date: 2026-11-23 10:02+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -28,7 +28,7 @@ msgstr "Пошук у буфері обміну"
 msgid "Clipboard settings"
 msgstr "Налаштування буфера обміну"
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:131
+#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:134
 #: bridge/src/clipboard/winFlyout.ts:61
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
@@ -193,53 +193,53 @@ msgstr "{row}, без звуку"
 msgid "Desktop"
 msgstr "Робочий стіл"
 
-#: bridge/src/quickSettings.ts:55 bridge/src/quickSettings.ts:56
-#: bridge/src/quickSettings.ts:93 bridge/src/quickSettings.ts:129
-#: bridge/src/quickSettings.ts:131 bridge/src/quickSettings.ts:133
+#: bridge/src/quickSettings.ts:68 bridge/src/quickSettings.ts:69
+#: bridge/src/quickSettings.ts:120 bridge/src/quickSettings.ts:158
+#: bridge/src/quickSettings.ts:160 bridge/src/quickSettings.ts:162
 msgid "Theme"
 msgstr "Тема"
 
-#: bridge/src/quickSettings.ts:60
+#: bridge/src/quickSettings.ts:73
 msgid "Open “Desktop”…"
 msgstr "Відкрити «Робочий стіл»…"
 
-#: bridge/src/quickSettings.ts:80
+#: bridge/src/quickSettings.ts:107
 msgid "service unavailable"
 msgstr "служба недоступна"
 
-#: bridge/src/quickSettings.ts:92
+#: bridge/src/quickSettings.ts:119
 msgid "{name} (mixed)"
 msgstr "{name} (змішано)"
 
-#: bridge/src/quickSettings.ts:102
+#: bridge/src/quickSettings.ts:129
 msgid "{count} of {total} modules active"
 msgstr "активних модулів: {count} з {total}"
 
-#: bridge/src/quickSettings.ts:104
+#: bridge/src/quickSettings.ts:131
 msgid "{name}: modules {modules}"
 msgstr "{name}: модулі {modules}"
 
-#: bridge/src/quickSettings.ts:125
+#: bridge/src/quickSettings.ts:154
 msgid "applying “{name}”…"
 msgstr "застосування «{name}»…"
 
-#: bridge/src/quickSettings.ts:133
+#: bridge/src/quickSettings.ts:162
 msgid "Could not apply “{name}”: {error}"
 msgstr "Не вдалося застосувати «{name}»: {error}"
 
-#: bridge/src/quickSettings.ts:172
+#: bridge/src/quickSettings.ts:207
 msgid "Clipboard settings…"
 msgstr "Налаштування буфера обміну…"
 
-#: bridge/src/quickSettings.ts:199
+#: bridge/src/quickSettings.ts:234
 msgid "private mode"
 msgstr "приватний режим"
 
-#: bridge/src/quickSettings.ts:213
+#: bridge/src/quickSettings.ts:255
 msgid "deskd is unavailable"
 msgstr "deskd недоступний"
 
-#: bridge/src/quickSettings.ts:217
+#: bridge/src/quickSettings.ts:261
 msgid "The history is empty"
 msgstr "Історія порожня"
 
@@ -785,32 +785,34 @@ msgstr ""
 "CREDITS.md; ліцензії — ті, що вказали автори (перевіряйте файл LICENSE у "
 "їхніх сховищах)."
 
-#: crates/deskd/src/clipboard.rs:149
+#: crates/deskd/src/clipboard.rs:246
 #, rust-format
 msgid "{format} image {width}×{height}"
 msgstr "Зображення {format} {width}×{height}"
 
-#: crates/deskd/src/clipboard.rs:154
+#: crates/deskd/src/clipboard.rs:251
 #, rust-format
 msgid "{format} image"
 msgstr "Зображення {format}"
 
-#: crates/deskd/src/main.rs:31
+#: crates/deskd/src/main.rs:32
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
 "\n"
 "Usage: deskd [--replace]\n"
-"  --replace   take the bus name over from a running deskd\n"
+"  --replace   development: take the bus name over from a deskd started with "
+"--replace, and let the next one take it\n"
 "  --version"
 msgstr ""
 "deskd {version} — служба функцій робочого столу (D-Bus {name})\n"
 "\n"
 "Використання: deskd [--replace]\n"
-"  --replace   забрати назву на шині в запущеного deskd\n"
+"  --replace   розробка: забрати назву на шині в deskd, запущеного з --replace, "
+"і дозволити наступному забрати її\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:114
+#: crates/deskd/src/main.rs:115
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
@@ -819,7 +821,7 @@ msgstr ""
 "схему {schema} не встановлено (data/install.sh), працюю з типовими "
 "налаштуваннями"
 
-#: crates/deskd/src/main.rs:203 crates/themes/src/service.rs:234
+#: crates/deskd/src/main.rs:198 crates/themes/src/service.rs:234
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
