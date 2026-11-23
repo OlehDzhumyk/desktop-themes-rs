@@ -14,10 +14,31 @@ use serde::{Deserialize, Serialize};
 
 /// Найбільший текстовий запис, який зберігається (довший текст обрізати не можна — пропускаємо).
 pub const MAX_TEXT_BYTES: usize = 256 * 1024;
-/// Типи, якими менеджери паролів позначають секрети (KDE/KeePassXC, macOS-сумісні).
-pub const SECRET_HINTS: [&str; 2] = [
+/// Types that mark a secret (or content that must not be recorded): any of them in the offered
+/// list skips the copy. `x-kde-passwordManagerHint` is set by KeePassXC, KWalletManager and
+/// Firefox's password manager on Linux; the `org.nspasteboard` names (and their old MIME-style
+/// spelling) come from the nspasteboard.org convention of macOS tools, which cross-platform apps
+/// reuse; `ExcludeClipboardContentFromMonitorProcessing` is the Windows clipboard-history opt-out
+/// that Chromium-based apps set. Keep in sync with `SECRET_HINTS` in bridge/src/clipboard/watcher.ts.
+pub const SECRET_HINTS: [&str; 5] = [
     "x-kde-passwordManagerHint",
     "application/x-nspasteboard-concealed-type",
+    "org.nspasteboard.ConcealedType",
+    "org.nspasteboard.TransientType",
+    "ExcludeClipboardContentFromMonitorProcessing",
+];
+/// How long a text that looks like a secret ([`looks_secret`]) stays in the history (seconds).
+/// It is never written to disk.
+pub const SECRET_TTL: i64 = 120;
+/// Image types that are recorded, with their file extension. Only raster formats whose bytes
+/// start with a known signature ([`sniff`]): the shell renders the files, and SVG (or anything a
+/// loader would parse as SVG) would run a vector renderer inside the shell process (S-9).
+const IMAGE_TYPES: [(&str, &str); 5] = [
+    ("image/png", "png"),
+    ("image/jpeg", "jpg"),
+    ("image/jpg", "jpg"),
+    ("image/gif", "gif"),
+    ("image/webp", "webp"),
 ];
 /// 2: `hash` is FNV-1a (1: `DefaultHasher`, recomputed on load).
 const STORE_VERSION: u32 = 2;
@@ -63,6 +84,9 @@ pub struct Entry {
     pub time: i64,
     pub size: u64,
     pub hash: u64,
+    /// A probable secret: removed at this unix time, never saved. Pinning clears it.
+    #[serde(skip)]
+    pub expires: Option<i64>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -75,6 +99,8 @@ pub enum Skip {
     TooLarge,
     ImagesOff,
     Unsupported,
+    /// Our own paste coming back ([`desk_proto::INTERNAL_MIME`] offered).
+    Internal,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -113,17 +139,88 @@ fn hash_of(mime_kind: &str, data: &[u8]) -> u64 {
     desk_settings::stable_hash::fnv1a64(&[mime_kind.as_bytes(), data])
 }
 
-fn image_ext(mime: &str) -> &'static str {
-    match mime {
-        "image/png" => "png",
-        "image/jpeg" | "image/jpg" => "jpg",
-        "image/gif" => "gif",
-        "image/webp" => "webp",
-        "image/svg+xml" => "svg",
-        "image/bmp" => "bmp",
-        "image/tiff" => "tiff",
-        _ => "img",
+fn image_ext(mime: &str) -> Option<&'static str> {
+    IMAGE_TYPES
+        .iter()
+        .find(|(m, _)| m.eq_ignore_ascii_case(mime))
+        .map(|(_, e)| *e)
+}
+
+/// The bytes are of the type the extension names (the shell's image loader goes by content).
+fn sniff(ext: &str, data: &[u8]) -> bool {
+    match ext {
+        "png" => data.starts_with(b"\x89PNG\r\n\x1a\n"),
+        "jpg" => data.starts_with(&[0xff, 0xd8, 0xff]),
+        "gif" => data.starts_with(b"GIF87a") || data.starts_with(b"GIF89a"),
+        "webp" => data.len() >= 12 && data.starts_with(b"RIFF") && &data[8..12] == b"WEBP",
+        _ => false,
     }
+}
+
+/// An image file name deskd itself made: 16 hex digits of the content hash and a known
+/// extension. Names read from history.json are checked against it before they touch a path (S-8).
+pub fn valid_image_name(name: &str) -> bool {
+    let Some((stem, ext)) = name.split_once('.') else {
+        return false;
+    };
+    stem.len() == 16
+        && stem.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+        && IMAGE_TYPES.iter().any(|(_, e)| *e == ext)
+}
+
+/// Shannon entropy of the characters, in bits per character.
+fn entropy(t: &str) -> f64 {
+    let mut counts = std::collections::HashMap::<char, u32>::new();
+    for c in t.chars() {
+        *counts.entry(c).or_default() += 1;
+    }
+    let n = t.chars().count() as f64;
+    counts
+        .values()
+        .map(|&k| {
+            let p = f64::from(k) / n;
+            -p * p.log2()
+        })
+        .sum()
+}
+
+fn is_uuid(t: &str) -> bool {
+    let parts: Vec<&str> = t.split('-').collect();
+    parts.iter().map(|p| p.len()).eq([8, 4, 4, 4, 12])
+        && parts
+            .iter()
+            .all(|p| p.bytes().all(|b| b.is_ascii_hexdigit()))
+}
+
+/// Text that looks like a password or a token copied without a hint: one short word (10..=64
+/// characters, no whitespace) of letters and digits plus a third character class (another
+/// letter case or symbols), with high entropy (>= 3 bits per character); URLs, paths, e-mail
+/// addresses and UUIDs are not. Conservative on purpose: such text is still recorded, it only
+/// stays in memory for [`SECRET_TTL`] and is never written to disk.
+pub fn looks_secret(text: &str) -> bool {
+    let t = text.trim();
+    let n = t.chars().count();
+    if !(10..=64).contains(&n) || t.chars().any(char::is_whitespace) {
+        return false;
+    }
+    if t.contains("://") || t.starts_with(['/', '~', '.']) || is_uuid(t) {
+        return false;
+    }
+    if let Some((user, domain)) = t.split_once('@')
+        && !user.is_empty()
+        && domain.contains('.')
+        && !domain.contains('@')
+        && t.chars()
+            .all(|c| c.is_alphanumeric() || "._%+-@".contains(c))
+    {
+        return false;
+    }
+    let lower = t.chars().any(char::is_lowercase);
+    let upper = t.chars().any(char::is_uppercase);
+    let digit = t.chars().any(|c| c.is_ascii_digit());
+    let other = t.chars().any(|c| !c.is_alphanumeric());
+    let classes = [lower, upper, digit, other].iter().filter(|b| **b).count();
+    (lower || upper) && digit && classes >= 3 && entropy(t) >= 3.0
 }
 
 /// Розміри PNG/GIF із заголовка (без декодування).
@@ -142,7 +239,7 @@ pub fn image_size(data: &[u8]) -> Option<(u32, u32)> {
 }
 
 fn image_label(mime: &str, data: &[u8]) -> String {
-    let fmt = image_ext(mime).to_uppercase();
+    let fmt = image_ext(mime).unwrap_or("img").to_uppercase();
     match image_size(data) {
         // TRANSLATORS: description of a copied image in the clipboard history, e.g. "PNG image 640×480"
         Some((w, h)) => tr!(
@@ -229,7 +326,7 @@ impl Engine {
     }
 
     pub fn image_path(&self, e: &Entry) -> Option<PathBuf> {
-        if e.image.is_empty() {
+        if !valid_image_name(&e.image) {
             return None;
         }
         [true, false]
@@ -281,6 +378,12 @@ impl Engine {
         {
             return Some(Skip::Sensitive);
         }
+        if offered
+            .iter()
+            .any(|m| m.eq_ignore_ascii_case(desk_proto::INTERNAL_MIME))
+        {
+            return Some(Skip::Internal);
+        }
         let app = app.trim();
         if !app.is_empty()
             && self
@@ -301,12 +404,15 @@ impl Engine {
             if String::from_utf8_lossy(data).trim().is_empty() {
                 return Some(Skip::Empty);
             }
-        } else if mime.starts_with("image/") {
+        } else if let Some(ext) = image_ext(mime) {
             if !self.cfg.images {
                 return Some(Skip::ImagesOff);
             }
             if data.len() > self.cfg.image_max_bytes {
                 return Some(Skip::TooLarge);
+            }
+            if !sniff(ext, data) {
+                return Some(Skip::Unsupported);
             }
         } else {
             return Some(Skip::Unsupported);
@@ -329,6 +435,8 @@ impl Engine {
         let is_text = is_text_mime(mime);
         let k = if is_text { kind::TEXT } else { kind::IMAGE };
         let hash = hash_of(k, data);
+        let expires =
+            (is_text && looks_secret(&String::from_utf8_lossy(data))).then_some(now + SECRET_TTL);
         if let Some(pos) = self
             .items
             .iter()
@@ -336,6 +444,9 @@ impl Engine {
         {
             let mut e = self.items.remove(pos);
             e.time = now;
+            if !e.pinned {
+                e.expires = expires;
+            }
             let id = e.id;
             self.items.insert(0, e);
             return Pushed::Bumped(id);
@@ -356,11 +467,12 @@ impl Engine {
             time: now,
             size: data.len() as u64,
             hash,
+            expires,
         };
         if is_text {
             e.text = String::from_utf8_lossy(data).into_owned();
         } else {
-            let name = format!("{hash:016x}.{}", image_ext(mime));
+            let name = format!("{hash:016x}.{}", image_ext(mime).unwrap_or("img"));
             let dir = self.images_dir(self.cfg.persist && self.cfg.persist_images);
             if ensure_private_dir(&dir)
                 .and_then(|_| write_private(&dir.join(&name), data))
@@ -454,16 +566,33 @@ impl Engine {
         Some(out)
     }
 
+    /// Pin or unpin. Pinning is the user's choice to keep an item: a probable secret then loses
+    /// its expiry and is saved like any other item.
     pub fn pin(&mut self, id: u64, pinned: bool) -> bool {
         let Some(e) = self.items.iter_mut().find(|e| e.id == id) else {
             return false;
         };
         let changed = e.pinned != pinned;
         e.pinned = pinned;
+        if pinned {
+            e.expires = None;
+        }
         if !pinned {
             self.trim();
         }
         changed
+    }
+
+    /// Remove the probable secrets whose time is over. Returns whether any went.
+    pub fn expire(&mut self, now: i64) -> bool {
+        let (gone, keep): (Vec<Entry>, Vec<Entry>) = std::mem::take(&mut self.items)
+            .into_iter()
+            .partition(|e| e.expires.is_some_and(|t| t <= now));
+        self.items = keep;
+        for e in &gone {
+            self.remove_image_file(e);
+        }
+        !gone.is_empty()
     }
 
     pub fn delete(&mut self, id: u64) -> bool {
@@ -527,6 +656,7 @@ impl Engine {
         let items: Vec<Entry> = self
             .items
             .iter()
+            .filter(|e| e.expires.is_none())
             .filter(|e| e.kind == kind::TEXT || self.cfg.persist_images)
             .cloned()
             .collect();
@@ -561,11 +691,22 @@ impl Engine {
             return;
         };
         self.next_id = store.next_id.max(1);
+        let before = store.items.len();
         self.items = store
             .items
             .into_iter()
-            .filter(|e| e.kind == kind::TEXT || self.image_path(e).is_some())
+            .filter(|e| match e.kind.as_str() {
+                kind::TEXT => e.image.is_empty(),
+                kind::IMAGE => self.image_path(e).is_some(),
+                _ => false,
+            })
             .collect();
+        if self.items.len() < before {
+            eprintln!(
+                "deskd: dropped {} history entries with a missing or invalid image file",
+                before - self.items.len()
+            );
+        }
         if store.version < 2 {
             self.rehash();
         }
@@ -813,5 +954,162 @@ mod tests {
         assert_eq!(image_size(&png(3, 7)), Some((3, 7)));
         assert_eq!(image_size(b"GIF89a\x02\x00\x05\x00"), Some((2, 5)));
         assert_eq!(image_size(b"nope"), None);
+    }
+
+    /// S-8: names in a tampered history.json never reach a path; text entries carry no image.
+    #[test]
+    fn load_drops_untrusted_image_names() {
+        let cfg = Config {
+            persist_images: true,
+            ..Config::default()
+        };
+        let (_, d) = engine("s8", cfg.clone());
+        let data = d.join("data");
+        std::fs::create_dir_all(data.join("images")).unwrap();
+        let good = "0123456789abcdef.png";
+        std::fs::write(data.join("images").join(good), png(1, 1)).unwrap();
+        // a file outside the images directory that a crafted name would point at
+        std::fs::write(d.join("victim"), b"keep").unwrap();
+        let entry = |id: u64, kind: &str, image: &str| {
+            format!(
+                r#"{{"id":{id},"kind":"{kind}","mime":"image/png","text":"t{id}","image":"{image}","pinned":true,"time":1,"size":1,"hash":{id}}}"#
+            )
+        };
+        let items = [
+            entry(1, "image", good),
+            entry(2, "image", "../../victim"),
+            entry(3, "image", "/etc/passwd"),
+            entry(4, "image", "0123456789ABCDEF.png"),
+            entry(5, "image", "0123456789abcdef.svg"),
+            entry(6, "text", "../../victim"),
+            entry(7, "other", ""),
+        ];
+        let store = format!(
+            r#"{{"version":2,"next_id":8,"items":[{}]}}"#,
+            items.join(",")
+        );
+        std::fs::write(data.join("history.json"), store).unwrap();
+        let mut e = Engine::new(cfg, data, d.join("run"));
+        e.load();
+        let ids: Vec<u64> = e.list("", 0).iter().map(|i| i.id).collect();
+        assert_eq!(ids, [1]);
+        assert!(e.get(2).is_none());
+        assert!(!e.delete(2));
+        assert!(d.join("victim").exists());
+        for (name, ok) in [
+            (good, true),
+            ("0123456789abcdef.jpg", true),
+            ("0123456789abcdef.webp", true),
+            ("0123456789abcdef", false),
+            ("0123456789abcde.png", false),
+            ("0123456789abcdefg.png", false),
+            ("../123456789abcdef.png", false),
+            ("0123456789abcdef.png/..", false),
+            ("", false),
+        ] {
+            assert_eq!(valid_image_name(name), ok, "{name}");
+        }
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    /// S-9: SVG is not recorded, and neither is anything whose bytes do not match its type.
+    #[test]
+    fn only_sniffed_raster_images() {
+        let (mut e, d) = engine("s9", Config::default());
+        let svg = br#"<svg xmlns="http://www.w3.org/2000/svg"/>"#;
+        for (mime, data) in [
+            ("image/svg+xml", svg.as_slice()),
+            ("image/png", svg.as_slice()),
+            ("image/jpeg", b"\x89PNG\r\n\x1a\n".as_slice()),
+            ("image/bmp", b"BM\0\0".as_slice()),
+        ] {
+            assert_eq!(
+                e.push(mime, data, &[], "", 1),
+                Pushed::Skipped(Skip::Unsupported),
+                "{mime}"
+            );
+        }
+        let jpeg = [0xff, 0xd8, 0xff, 0xe0, 0, 0x10];
+        assert!(matches!(
+            e.push("image/jpeg", &jpeg, &[], "", 1),
+            Pushed::Added(_)
+        ));
+        let webp = b"RIFF\x10\0\0\0WEBPVP8 ";
+        assert!(matches!(
+            e.push("image/webp", webp, &[], "", 1),
+            Pushed::Added(_)
+        ));
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    #[test]
+    fn secret_heuristic() {
+        for t in [
+            "hR7#kq2!Lm9z",
+            "Tr0ub4dor&3xyz",
+            "ghp_x9A2bLq7Zr4TmW1cVd8EoPk3Ny6sHu0F",
+            "sk-proj-4fT9xQ2mZ7",
+            "  aB3dE5gH7jK9  ",
+        ] {
+            assert!(looks_secret(t), "{t}");
+        }
+        for t in [
+            "hello world 123",
+            "password",
+            "abc123",
+            "getConnectionCredentials",
+            "8991754",
+            "0123456789abcdef0123456789abcdef01234567",
+            "550e8400-e29b-41d4-a716-446655440000",
+            "https://example.org/a?b=C1",
+            "/home/user/Docs/File1.txt",
+            "John.Doe1@Example.com",
+            "aaaaaaaaaaaaA1",
+            "Привіт, Світ",
+        ] {
+            assert!(!looks_secret(t), "{t}");
+        }
+    }
+
+    /// A probable secret: recorded, never saved, gone after SECRET_TTL; pinning keeps it.
+    #[test]
+    fn probable_secrets_are_memory_only() {
+        let (mut e, d) = engine("ttl", Config::default());
+        assert_eq!(e.push(T, b"plain text", &[], "", 100), Pushed::Added(1));
+        assert_eq!(e.push(T, b"hR7#kq2!Lm9z", &[], "", 100), Pushed::Added(2));
+        assert_eq!(e.push(T, b"Tr0ub4dor&3xyz", &[], "", 100), Pushed::Added(3));
+        e.save().unwrap();
+        let saved = std::fs::read_to_string(d.join("data/history.json")).unwrap();
+        assert!(saved.contains("plain text"));
+        assert!(!saved.contains("hR7#kq2!Lm9z") && !saved.contains("Tr0ub4dor"));
+        assert!(e.pin(3, true));
+        assert!(!e.expire(100 + SECRET_TTL - 1));
+        assert!(e.expire(100 + SECRET_TTL));
+        let ids: Vec<u64> = e.list("", 0).iter().map(|i| i.id).collect();
+        assert_eq!(ids, [3, 1]);
+        e.save().unwrap();
+        let saved = std::fs::read_to_string(d.join("data/history.json")).unwrap();
+        assert!(saved.contains("Tr0ub4dor"), "pinned: saved");
+        let _ = std::fs::remove_dir_all(d);
+    }
+
+    #[test]
+    fn hints_and_own_pastes_are_skipped() {
+        let (mut e, d) = engine("hints", Config::default());
+        for hint in SECRET_HINTS {
+            let offered = vec![T.to_string(), hint.to_ascii_lowercase()];
+            assert_eq!(
+                e.push(T, b"x", &offered, "", 1),
+                Pushed::Skipped(Skip::Sensitive),
+                "{hint}"
+            );
+        }
+        let ours = vec![T.to_string(), desk_proto::INTERNAL_MIME.to_string()];
+        assert_eq!(
+            e.push(T, b"x", &ours, "", 1),
+            Pushed::Skipped(Skip::Internal)
+        );
+        assert!(e.is_empty());
+        let _ = std::fs::remove_dir_all(d);
     }
 }
