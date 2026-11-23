@@ -4,7 +4,7 @@
   <id>io.github.OlehDzhumyk.Themes</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
-  <name>Themes</name>
+  <name>Desktop</name>
   <summary>Switch and mix the look of the GNOME desktop</summary>
   <description>
     <p>Switches the whole look of GNOME between Fedora, macOS, macOS Liquid Glass and Windows 11, and lets you mix modules: the macOS look with Windows 11 keyboard behaviour, for example.</p>

@@ -139,6 +139,7 @@
     <key name="hide-apps" type="as">
       <default>[]</default>
       <summary>Application keys (app id or program name) never listed in the mixer</summary>
+      <description>Applications never listed in the mixer (app id or program name)</description>
     </key>
     <key name="mixer-shortcut" type="as">
       <default>[]</default>

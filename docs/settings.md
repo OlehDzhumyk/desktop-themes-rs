@@ -73,7 +73,7 @@ Path `/io/github/OlehDzhumyk/Desk/mixer/`.
 | `show-silent-apps` | boolean | `false` |  | Show silent applications | Also list applications that keep a sound stream open without playing | mixer | switch on `--page mixer` |
 | `remember-app-volume` | boolean | `false` |  | Remember application volume | Stored in ~/.local/share/deskd/mixer/apps.json (mode 0600): application ids with a volume and a mute flag. Turning it off forgets them and deletes the file. | mixer | switch on `--page mixer` |
 | `volume-step` | unsigned | `5` | 1…20 (step 1) | Volume step, % | How much an arrow key changes a slider (Shift: 1 %) | mixer | spin button on `--page mixer` |
-| `hide-apps` | string list | `[]` |  | Hidden applications | Application keys (app id or program name) never listed in the mixer | mixer | — (gsettings only) |
+| `hide-apps` | string list | `[]` |  | Hidden applications | Applications never listed in the mixer (app id or program name) | mixer | list on `--page mixer` |
 | `mixer-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Ctrl+Super+V for Windows 11; none for macOS and Fedora, which have no such key); an override in io.github.OlehDzhumyk.Desk.Shortcuts mixer-open replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | mixer | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Appearance`
