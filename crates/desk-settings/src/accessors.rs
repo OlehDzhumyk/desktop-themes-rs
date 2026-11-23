@@ -230,6 +230,151 @@ impl ClipboardSettings {
     }
 }
 
+/// Values of `io.github.OlehDzhumyk.Desk.Emoji` `skin-tone`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SkinTone {
+    #[default]
+    None,
+    Light,
+    MediumLight,
+    Medium,
+    MediumDark,
+    Dark,
+}
+
+impl SkinTone {
+    pub const ALL: [SkinTone; 6] = [
+        SkinTone::None,
+        SkinTone::Light,
+        SkinTone::MediumLight,
+        SkinTone::Medium,
+        SkinTone::MediumDark,
+        SkinTone::Dark,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            SkinTone::None => "none",
+            SkinTone::Light => "light",
+            SkinTone::MediumLight => "medium-light",
+            SkinTone::Medium => "medium",
+            SkinTone::MediumDark => "medium-dark",
+            SkinTone::Dark => "dark",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "none" => SkinTone::None,
+            "light" => SkinTone::Light,
+            "medium-light" => SkinTone::MediumLight,
+            "medium" => SkinTone::Medium,
+            "medium-dark" => SkinTone::MediumDark,
+            "dark" => SkinTone::Dark,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// Values of `io.github.OlehDzhumyk.Desk.Emoji` `close-after-insert`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CloseAfterInsert {
+    #[default]
+    Skin,
+    Always,
+    Never,
+}
+
+impl CloseAfterInsert {
+    pub const ALL: [CloseAfterInsert; 3] = [
+        CloseAfterInsert::Skin,
+        CloseAfterInsert::Always,
+        CloseAfterInsert::Never,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            CloseAfterInsert::Skin => "skin",
+            CloseAfterInsert::Always => "always",
+            CloseAfterInsert::Never => "never",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "skin" => CloseAfterInsert::Skin,
+            "always" => CloseAfterInsert::Always,
+            "never" => CloseAfterInsert::Never,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Emoji` at `/io/github/OlehDzhumyk/Desk/emoji/`.
+#[derive(Clone, Debug)]
+pub struct EmojiSettings(pub gio::Settings);
+
+impl EmojiSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Emoji";
+    pub const ENABLED: &'static str = "enabled";
+    pub const EMOJI_SHORTCUT: &'static str = "emoji-shortcut";
+    pub const SKIN_TONE: &'static str = "skin-tone";
+    pub const REMEMBER_RECENTS: &'static str = "remember-recents";
+    pub const CLOSE_AFTER_INSERT: &'static str = "close-after-insert";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable the emoji and symbol picker
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Shortcut that opens the emoji and symbol picker (in force)
+    pub fn emoji_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::EMOJI_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_emoji_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::EMOJI_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Default Fitzpatrick skin-tone modifier for person emoji
+    pub fn skin_tone(&self) -> SkinTone {
+        SkinTone::parse(&self.0.string(Self::SKIN_TONE))
+    }
+
+    pub fn set_skin_tone(&self, v: SkinTone) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::SKIN_TONE, v.as_str())
+    }
+
+    /// Keep recently picked emoji and symbols across sessions
+    pub fn remember_recents(&self) -> bool {
+        self.0.boolean(Self::REMEMBER_RECENTS)
+    }
+
+    pub fn set_remember_recents(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::REMEMBER_RECENTS, v)
+    }
+
+    /// Whether the emoji picker closes after inserting an item
+    pub fn close_after_insert(&self) -> CloseAfterInsert {
+        CloseAfterInsert::parse(&self.0.string(Self::CLOSE_AFTER_INSERT))
+    }
+
+    pub fn set_close_after_insert(&self, v: CloseAfterInsert) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::CLOSE_AFTER_INSERT, v.as_str())
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -237,6 +382,7 @@ pub struct ShortcutSettings(pub gio::Settings);
 impl ShortcutSettings {
     pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Shortcuts";
     pub const CLIPBOARD_TOGGLE: &'static str = "clipboard-toggle";
+    pub const EMOJI_TOGGLE: &'static str = "emoji-toggle";
     pub const MIXER_OPEN: &'static str = "mixer-open";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
@@ -251,6 +397,15 @@ impl ShortcutSettings {
 
     pub fn set_clipboard_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::CLIPBOARD_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the emoji and symbol picker (override)
+    pub fn emoji_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::EMOJI_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_emoji_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::EMOJI_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 
     /// Your shortcut for the volume mixer (override)
@@ -545,6 +700,69 @@ impl AppearanceSettings {
 
     pub fn set_accent_source(&self, v: AccentSource) -> Result<(), gio::glib::BoolError> {
         self.0.set_string(Self::ACCENT_SOURCE, v.as_str())
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Focus` at `/io/github/OlehDzhumyk/Desk/focus/`.
+#[derive(Clone, Debug)]
+pub struct FocusSettings(pub gio::Settings);
+
+impl FocusSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Focus";
+    pub const ENABLED: &'static str = "enabled";
+    pub const ACTIVE_MODE: &'static str = "active-mode";
+    pub const SUMMARY_ON_END: &'static str = "summary-on-end";
+    pub const SESSION_LENGTH: &'static str = "session-length";
+    pub const SESSION_BREAK: &'static str = "session-break";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Focus modes and their schedules are on
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Id of the active focus mode (written by deskd; empty: none)
+    pub fn active_mode(&self) -> String {
+        self.0.string(Self::ACTIVE_MODE).to_string()
+    }
+
+    pub fn set_active_mode(&self, v: String) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::ACTIVE_MODE, &v)
+    }
+
+    /// Show the number of missed notifications when a focus mode ends
+    pub fn summary_on_end(&self) -> bool {
+        self.0.boolean(Self::SUMMARY_ON_END)
+    }
+
+    pub fn set_summary_on_end(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SUMMARY_ON_END, v)
+    }
+
+    /// Length of a focus session, in minutes
+    pub fn session_length(&self) -> u32 {
+        self.0.uint(Self::SESSION_LENGTH)
+    }
+
+    pub fn set_session_length(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::SESSION_LENGTH, v)
+    }
+
+    /// Break after a focus session, in minutes (0: none)
+    pub fn session_break(&self) -> u32 {
+        self.0.uint(Self::SESSION_BREAK)
+    }
+
+    pub fn set_session_break(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::SESSION_BREAK, v)
     }
 }
 

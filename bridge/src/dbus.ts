@@ -11,6 +11,8 @@ import {dbusCall, ownerOf, peerOf, policyFor, untrustedReason} from './trust.js'
 export const DESK_BUS = 'io.github.OlehDzhumyk.Desk';
 export const CLIPBOARD_PATH = '/io/github/OlehDzhumyk/Desk/Clipboard';
 export const CLIPBOARD_IFACE = 'io.github.OlehDzhumyk.Desk.Clipboard';
+export const EMOJI_PATH = '/io/github/OlehDzhumyk/Desk/Emoji';
+export const EMOJI_IFACE = 'io.github.OlehDzhumyk.Desk.Emoji';
 /** Offered with the content the bridge puts on the clipboard itself (desk_proto::INTERNAL_MIME). */
 export const INTERNAL_MIME = 'application/x-desk-internal';
 export const MIXER_PATH = '/io/github/OlehDzhumyk/Desk/Mixer';

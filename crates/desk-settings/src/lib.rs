@@ -5,6 +5,8 @@
 //! the gettext helpers shared by all Rust crates ([`i18n`], [`tr!`], [`trn!`]).
 
 pub mod appearance;
+pub mod emoji;
+pub mod focus;
 pub mod generate;
 pub mod i18n;
 pub mod lockscreen;
@@ -21,6 +23,8 @@ pub mod validate;
 pub mod accessors;
 
 pub use appearance::*;
+pub use emoji::*;
+pub use focus::*;
 pub use lockscreen::*;
 pub use logo_menu::*;
 pub use mixer::*;

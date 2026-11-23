@@ -148,7 +148,8 @@ are reported by `themes doctor` and the child then stands alone):
 * `theme.conf`: `PREVIEW`/`PREVIEW_DARK` and unknown keys are inherited; `NAME`, `DESCRIPTION`,
   `INHERITS`, `EXPERIMENTAL` and `WARNING*` are not.
 
-`macos-glass` is `INHERITS=macos` plus `glass.dconf` and `+liquid-glass@...`.
+Example: `INHERITS=macos` plus one `extra.dconf` and `+<uuid>` in `extensions.txt` changes only
+those keys and that extension.
 
 ## Generated, not committed
 

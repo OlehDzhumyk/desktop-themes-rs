@@ -106,6 +106,7 @@ install_fonts() {
   fetch_file "$JETBRAINS_MONO_URL" "$JETBRAINS_MONO_SHA256" "$tmp/jetbrains-mono.zip"
   say "Cascadia Code v2407.24 (OFL-1.1), large download"
   fetch_file "$CASCADIA_URL" "$CASCADIA_SHA256" "$tmp/cascadia.zip"
+  fetch_file "$CASCADIA_LICENSE_URL" "$CASCADIA_LICENSE_SHA256" "$tmp/cascadia-OFL.txt"
   if [ "$DRY_RUN" = 1 ]; then
     note "+ unzip fonts into $FONTS_DIR/{Inter,JetBrainsMono,CascadiaCode}; fc-cache"
     return 0
@@ -116,8 +117,9 @@ install_fonts() {
   cp "$x"/inter/extras/ttf/Inter-*.ttf "$x/inter/LICENSE.txt" "$FONTS_DIR/Inter/"
   unzip -qo "$tmp/jetbrains-mono.zip" 'fonts/ttf/JetBrainsMono-*.ttf' OFL.txt -d "$x/jb"
   cp "$x"/jb/fonts/ttf/JetBrainsMono-*.ttf "$x/jb/OFL.txt" "$FONTS_DIR/JetBrainsMono/"
-  unzip -qo "$tmp/cascadia.zip" 'ttf/CascadiaCode.ttf' 'ttf/CascadiaCodeItalic.ttf' 'ttf/CascadiaMono.ttf' 'ttf/CascadiaMonoItalic.ttf' OFL.txt -d "$x/casc"
-  cp "$x"/casc/ttf/*.ttf "$x/casc/OFL.txt" "$FONTS_DIR/CascadiaCode/"
+  unzip -qo "$tmp/cascadia.zip" 'ttf/CascadiaCode.ttf' 'ttf/CascadiaCodeItalic.ttf' 'ttf/CascadiaMono.ttf' 'ttf/CascadiaMonoItalic.ttf' -d "$x/casc"
+  cp "$x"/casc/ttf/*.ttf "$FONTS_DIR/CascadiaCode/"
+  cp "$tmp/cascadia-OFL.txt" "$FONTS_DIR/CascadiaCode/OFL.txt"
   rm -rf "$x"
   have fc-cache && fc-cache -f "$FONTS_DIR" || true
 }

@@ -419,6 +419,52 @@ fn check_deskd(rep: &mut DoctorReport) {
     }
 }
 
+/// What the doctor says about focus modes: `(severity, message)`. `active`: the name of the active
+/// mode, if deskd reports one; `banners_off`: `show-banners` is false.
+fn focus_verdict(banners_off: bool, active: Option<&str>) -> Option<(&'static str, String)> {
+    match (active, banners_off) {
+        (Some(name), _) => Some((
+            "info",
+            tr!(
+                "focus mode “{name}” is on (end it with: themes focus stop)",
+                name = name
+            ),
+        )),
+        (None, true) => Some((
+            "info",
+            tr!(
+                "notification banners are off (do not disturb) and no focus mode is active; turn do not disturb off in the notification list if this is not intended"
+            ),
+        )),
+        (None, false) => None,
+    }
+}
+
+const SHOW_BANNERS_PATH: &str = "/org/gnome/desktop/notifications/show-banners";
+
+/// Focus modes: which mode deskd runs, and banners left off without one.
+fn check_focus(cur: &dconf::Settings, rep: &mut DoctorReport) {
+    let banners_off = cur.get(SHOW_BANNERS_PATH).is_some_and(|v| v == "false");
+    let active = crate::shell::session().and_then(|conn| {
+        zbus::block_on(async {
+            let dbus = zbus::fdo::DBusProxy::new(&conn).await.ok()?;
+            let owned = dbus
+                .name_has_owner(desk_proto::BUS_NAME.try_into().ok()?)
+                .await
+                .ok()?;
+            if !owned {
+                return None;
+            }
+            let p = desk_proto::focus::FocusProxy::new(&conn).await.ok()?;
+            let st = p.status().await.ok()?;
+            (!st.0.is_empty()).then_some(st.1)
+        })
+    });
+    if let Some((severity, message)) = focus_verdict(banners_off, active.as_deref()) {
+        rep.push(severity, "focus", message, None, false);
+    }
+}
+
 // ------------------------------------------------------------------ GSettings schemas
 
 const SCHEMAS_COMPILED: &str = "gschemas.compiled";
@@ -1042,6 +1088,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     check_schemas(ctx, &enabled, opt.fix, &mut rep);
     check_values(&cur, &mut rep);
     check_deskd(&mut rep);
+    check_focus(&cur, &mut rep);
     for b in &st.broken_extensions {
         rep.broken_recorded.push(b.uuid.clone());
         rep.push(
@@ -1231,6 +1278,18 @@ mod tests {
         assert_eq!(sev(true, true, Some("1.2.2")), Some("warning")); // older than this program
         assert_eq!(sev(true, false, Some("1.2.3")), None);
         assert_eq!(sev(true, true, Some("1.2.3")), None);
+    }
+
+    #[test]
+    fn focus_verdicts() {
+        assert_eq!(focus_verdict(false, None), None);
+        assert_eq!(focus_verdict(true, None).map(|x| x.0), Some("info"));
+        assert!(
+            focus_verdict(true, Some("Work"))
+                .unwrap()
+                .1
+                .contains("Work")
+        );
     }
 
     fn tmp(tag: &str) -> PathBuf {

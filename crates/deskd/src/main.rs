@@ -7,6 +7,8 @@
 
 mod appearance;
 mod clipboard;
+mod emoji;
+mod focus;
 mod mixer;
 mod panic_policy;
 mod persist;
@@ -18,7 +20,8 @@ mod trust;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use desk_proto::{
-    APPEARANCE_PATH, BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, MIXER_PATH,
+    APPEARANCE_PATH, BUS_NAME, CLIPBOARD_PATH, CLIPBOARD_SCHEMA_ID, DESK_PATH, EMOJI_PATH,
+    FOCUS_PATH, MIXER_PATH,
 };
 use desk_settings::tr;
 use gio::glib;
@@ -64,7 +67,12 @@ fn emit_changed(conn: &zbus::Connection) {
 
 /// Engines this build hosts (the `Features` property).
 fn features() -> Vec<String> {
-    let mut f = vec!["clipboard".to_string(), "appearance".to_string()];
+    let mut f = vec![
+        "clipboard".to_string(),
+        "appearance".to_string(),
+        "emoji".to_string(),
+    ];
+    f.push("focus".into());
     if cfg!(feature = "pipewire") {
         f.push("mixer".into());
     }
@@ -183,6 +191,19 @@ fn main() {
             }
         },
     );
+    let emoji_settings = settings::emoji_settings();
+    let (emoji_remember, emoji_tone) = emoji_settings
+        .as_ref()
+        .map_or((true, "none".to_string()), settings::read_emoji);
+    let emoji_eng = Arc::new(Mutex::new(emoji::EmojiEngine::new(
+        emoji::recents::Recents::default_path(),
+        emoji_remember,
+        emoji_tone,
+    )));
+    let emoji_iface = emoji::service::EmojiIface {
+        engine: emoji_eng.clone(),
+        gate: gate.clone(),
+    };
     let mixer = Arc::new(Mixer::new(graph, notifier, Some(store)));
     let mixer_iface = mixer::service::MixerIface {
         mixer: mixer.clone(),
@@ -230,7 +251,52 @@ fn main() {
     let appearance_iface = appearance::service::AppearanceIface {
         eng: appearance_eng.clone(),
         scheduler: appearance_scheduler.clone(),
+        gate: gate.clone(),
         wallpaper: wallpaper_eng.clone(),
+    };
+
+    // focus modes: state machine, reconciliation with the live keys, one-shot schedule timer
+    let focus_settings = settings::focus_settings();
+    let notifications_settings = settings::notifications_settings();
+    let sound_settings = settings::sound_settings();
+    let focus_store_path = focus::default_store_path();
+    let focus_eng: focus::Shared = Arc::new(Mutex::new(focus::FocusEngine::new(
+        focus_settings
+            .as_ref()
+            .map_or_else(Default::default, settings::read_focus),
+        focus::load_store(&focus_store_path),
+        notifications_settings
+            .as_ref()
+            .is_none_or(|s| s.boolean(settings::SHOW_BANNERS_KEY)),
+        sound_settings
+            .as_ref()
+            .is_none_or(|s| s.boolean(settings::EVENT_SOUNDS_KEY)),
+        focus_settings.as_ref().map_or_default(|s| s.active_mode()),
+        settings::FocusEffects {
+            store_path: focus_store_path,
+        },
+        focus::now_system,
+    )));
+    let focus_scheduler = schedule::Scheduler::spawn("deskd-focus", {
+        let eng = focus_eng.clone();
+        let bus = bus.clone();
+        move || {
+            let (delay, changed, ended) = {
+                let mut e = focus::lock(&eng);
+                let (delay, changed) = e.tick();
+                (delay, changed, e.take_session_ended())
+            };
+            if (changed || ended)
+                && let Some(conn) = bus.get()
+            {
+                zbus::block_on(focus::service::emit(conn, ended));
+            }
+            delay
+        }
+    });
+    let focus_iface = focus::service::FocusIface {
+        eng: focus_eng.clone(),
+        scheduler: focus_scheduler.clone(),
         gate,
     };
 
@@ -238,8 +304,10 @@ fn main() {
         let conn = zbus::connection::Builder::session()
             .serve_at(DESK_PATH, desk)
             .serve_at(CLIPBOARD_PATH, clip)
+            .serve_at(EMOJI_PATH, emoji_iface)
             .serve_at(MIXER_PATH, mixer_iface)
             .serve_at(APPEARANCE_PATH, appearance_iface)
+            .serve_at(FOCUS_PATH, focus_iface)
             .build()
             .await?;
         service::own_name(&conn, replace).await?;
@@ -341,6 +409,17 @@ fn main() {
         });
     }
 
+    if let Some(s) = &emoji_settings {
+        let eng = emoji_eng.clone();
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, key| {
+            if matches!(key, "remember-recents" | "skin-tone") {
+                let (remember, tone) = settings::read_emoji(&typed);
+                emoji::service::lock(&eng).set_config(remember, tone);
+            }
+        });
+    }
+
     if let Some(s) = &gsettings {
         let eng = eng.clone();
         let conn = conn.clone();
@@ -360,7 +439,11 @@ fn main() {
 
     {
         let sched = appearance_scheduler.clone();
-        schedule::watch_system_events(move || sched.trigger());
+        let focus_sched = focus_scheduler.clone();
+        schedule::watch_system_events(move || {
+            sched.trigger();
+            focus_sched.trigger();
+        });
     }
     // live accent from the wallpaper: GSettings signals, a 500 ms debounce, a decoding child
     let wallpaper_watch = {
@@ -409,6 +492,45 @@ fn main() {
         });
     }
 
+    if let Some(s) = &focus_settings {
+        let eng = focus_eng.clone();
+        let sched = focus_scheduler.clone();
+        let typed = s.clone();
+        s.0.connect_changed(None, move |_, key| {
+            // active-mode is deskd's own mirror of the state
+            if key != "active-mode" {
+                focus::lock(&eng).set_config(settings::read_focus(&typed));
+                sched.trigger();
+            }
+        });
+    }
+    // GNOME's own do-not-disturb switch and the sound switch: the user wins over a mode
+    for (gs, key) in [
+        (&notifications_settings, settings::SHOW_BANNERS_KEY),
+        (&sound_settings, settings::EVENT_SOUNDS_KEY),
+    ] {
+        let Some(gs) = gs else { continue };
+        let eng = focus_eng.clone();
+        let sched = focus_scheduler.clone();
+        let conn = conn.clone();
+        gs.connect_changed(Some(key), move |s, key| {
+            let on = s.boolean(key);
+            let changed = {
+                let mut e = focus::lock(&eng);
+                if key == settings::SHOW_BANNERS_KEY {
+                    e.on_external_show_banners(on)
+                } else {
+                    e.on_external_event_sounds(on)
+                }
+            };
+            if changed {
+                sched.trigger();
+                let conn = conn.clone();
+                std::thread::spawn(move || zbus::block_on(focus::service::emit(&conn, false)));
+            }
+        });
+    }
+
     // logout / `systemctl --user stop`: leave the main loop so that the pending history is written
     match Signals::new([SIGHUP, SIGINT, SIGTERM]) {
         Ok(mut signals) => {
@@ -425,12 +547,17 @@ fn main() {
     }
     main_loop.run();
     appearance_scheduler.shutdown();
+    focus_scheduler.shutdown();
     saver.flush();
     mixer.set_backend(None);
     mixer.flush();
     drop(gsettings);
+    drop(emoji_settings);
     drop(mixer_settings);
     drop(appearance_settings);
     drop(interface_settings);
+    drop(focus_settings);
+    drop(notifications_settings);
+    drop(sound_settings);
     drop(wallpaper_watch);
 }

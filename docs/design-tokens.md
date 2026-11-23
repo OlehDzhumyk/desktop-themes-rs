@@ -23,8 +23,8 @@ dependencies) and `crates/themes-core/src/tokens.rs` (integration).
   off; a `user-theme name` in the theme's dconf files switches the generated shell layer off.
   This is how `macos` and `windows11` keep WhiteSur and Fluent as their base.
 * **Inheritance.** `tokens.toml` files along the `INHERITS` chain are deep-merged: a child's key
-  replaces the parent's, tables merge, arrays (palettes) are replaced. `macos-glass` inherits the
-  macOS tokens without a file of its own.
+  replaces the parent's, tables merge, arrays (palettes) are replaced. A child without a
+  `tokens.toml` inherits its parent's tokens.
 * **Only what is set is emitted.** Every key is optional. Unset colours keep libadwaita's values,
   unset radii keep its metrics; the generated CSS redefines nothing else.
 * **Modules.** The file belongs to the look module; derived keys are routed to their modules
@@ -166,7 +166,7 @@ stylesheet rendered from it replaces the copy's content. The result lives in
 `<cache>/wallpaper-overlay/<id>/gtk.css`; `state.json` records it (`wallpaper_overlay`) with the
 theme's own generated file, which `--remove`, a new look, `themes reset` or `themes doctor --fix`
 (with the mode off) write back. Hand-made stylesheets are never replaced
-([ADR 0009](adr/0009-live-wallpaper-palette-overlay.md)).
+([ADR 0010](adr/0010-live-wallpaper-palette-overlay.md)).
 
 ## Visual checks
 

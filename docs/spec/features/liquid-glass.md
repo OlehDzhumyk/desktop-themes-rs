@@ -9,7 +9,12 @@ bundled theme that is **Experimental**: it crashed GNOME Shell 51.1 on real hard
 
 ## Status
 
-**Experimental** (stage 0). Origin badge: *Based on Liquid Glass extension (licence of the upstream
+**Removed.** `macos-glass` and the Liquid Glass extension are no longer bundled or installed;
+`themes doctor` warns while either is still active or installed and `--fix` moves the theme's
+modules to `macos` (CHANGELOG, ADR 0006 update). The confirmation for experimental themes stays
+for user-added ones. The rest of this page is the record of the former variant.
+
+Former status: **Experimental** (stage 0). Origin badge: *Based on Liquid Glass extension (licence of the upstream
 repository, to be recorded in CREDITS.md at integration)*; installed from its repository at a pinned
 commit, not from extensions.gnome.org. The theme must not be the default of anything and must never be
 applied without the user knowing.
@@ -100,10 +105,10 @@ laptop in the overview or in menu open (not measured today).
 
 ## Gaps found
 
-* **G-GLASS-1** No `EXPERIMENTAL` marker exists in the code: `theme.conf` has only prose in
+* **G-GLASS-1** *(resolved: `EXPERIMENTAL=true`, ADR 0006)* No `EXPERIMENTAL` marker exists in the code: `theme.conf` has only prose in
   `DESCRIPTION`; nothing in `crates/themes/src/cli.rs`, `gui/card.rs` or `bridge/src/quickSettings.ts`
   distinguishes it (grep for "експериментальна" finds only the theme file).
-* **G-GLASS-2** There is no confirmation in any front end ([quick-settings-theme](quick-settings-theme.md)
+* **G-GLASS-2** *(resolved: every front end asks first)* There is no confirmation in any front end ([quick-settings-theme](quick-settings-theme.md)
   G-QS-1).
 * **G-GLASS-3** Crash detection is reactive (after GNOME disables extensions); there is no proactive
   "crashed within 60 s of applying X" auto-switch to `fedora`.
@@ -128,7 +133,7 @@ laptop in the overview or in menu open (not measured today).
 
 ## Open questions
 
-1. *(Decided)* `macos-glass` stays bundled; confirmation is mandatory (above).
+1. *(Superseded)* `macos-glass` was first kept with a mandatory confirmation, then removed.
 2. Is the crash reproducible in the headless shell (software rendering) so a regression test can exist?
 3. Disable glass automatically on battery or in power-saver mode?
 4. Report upstream with a stack trace (principle 5)?

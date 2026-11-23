@@ -101,7 +101,7 @@ pub fn exec(ctx: &Ctx, cmd: TokensCmd, json: bool) -> Result<i32, Error> {
 }
 
 /// `themes tokens overlay SEED | --remove`: deskd runs it as a child process (the manager's
-/// lock and state.json stay in themes-core; ADR 0009).
+/// lock and state.json stay in themes-core; ADR 0010).
 fn overlay(ctx: &Ctx, seed: Option<&str>, remove: bool, json: bool) -> Result<i32, Error> {
     use themes_core::overlay;
     if remove || seed.is_none() {

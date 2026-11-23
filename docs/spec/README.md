@@ -49,6 +49,7 @@ UI strings are quoted in English; the shipped texts are Ukrainian and English (s
 | **Partial** | on `main`, but a part of the specified behaviour is missing |
 | **Planned** | not written yet; the spec is the brief for the implementer |
 | **Experimental** | on `main` but known to be unsafe or unfinished; off by default or clearly marked |
+| **Removed** | was shipped, then taken out; the spec stays as the record |
 
 ## Stages
 
@@ -56,13 +57,13 @@ UI strings are quoted in English; the shipped texts are Ukrainian and English (s
 |---|---|---|
 | 0 | theme manager (CLI, window, service), modules, inheritance, doctor | done |
 | 1 | `deskd` + `desk-bridge`, skins, clipboard history | done |
-| 1.5 | foundations: design tokens, settings registry, i18n and accessibility, CI and performance budgets, these specs | in progress |
-| 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | proposed |
+| 1.5 | foundations: design tokens, settings registry, i18n and accessibility, CI and performance budgets, these specs | done (follow-ups: see below) |
+| 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | implemented |
 | 3 | capture family: screenshots, annotation, recording, OCR, colour picker | proposed |
 | 4 | own search engine, Quick Look, shortcut guide, window layouts | proposed |
 | 5 | phone integration | proposed |
 
-The order of stages 2 to 5 is a proposal (see the open questions in each spec).
+The order of stages 3 to 5 is a proposal (see the open questions in each spec).
 
 ## Origin badges
 
@@ -79,7 +80,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Feature | Status | Stage | Origin badge | Spec |
 |---|---|---|---|---|
 | Theme switching, modules, mixing, inheritance, reset | Implemented | 0 | Original | [themes](features/themes.md) |
-| Token-only showcase theme `lavender` | Partial | 1.5 | Original | [themes](features/themes.md) |
+| Token-only showcase theme `lavender` | Implemented | 1.5 | Original | [themes](features/themes.md) |
 | Doctor and crash protection | Implemented | 0 | Original | [doctor](features/doctor.md) |
 | Quick settings theme menu | Implemented | 1 | Original | [quick-settings-theme](features/quick-settings-theme.md) |
 | Per-theme behaviour and keybindings | Implemented | 0 | In Windows 11 and macOS (each theme follows its system) | [behavior](features/behavior.md) |
@@ -87,12 +88,12 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Lock screen layouts | Implemented | 0 | In Windows 11 and macOS | [lock-screen](features/lock-screen.md) |
 | Clipboard history | Implemented | 1 | In Windows 11 and macOS; based on Clipboard Indicator (MIT) | [clipboard](features/clipboard.md) |
 | Spotlight-style launcher (third-party today) | Partial | 0 | Based on Spotlight by itsnin (GPL-3.0-or-later) | [search](features/search.md) |
-| Liquid Glass variant | Experimental | 0 | Based on Liquid Glass extension | [liquid-glass](features/liquid-glass.md) |
+| Liquid Glass variant (`macos-glass`) | Removed | 0 | Based on Liquid Glass extension | [liquid-glass](features/liquid-glass.md) |
 | Volume mixer and audio device switching | Implemented | 2 | From Windows, adapted for macOS | [mixer](features/mixer.md) |
-| Emoji and symbol picker | Planned | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
-| Focus modes and do-not-disturb schedules | Planned | 2 | In Windows 11 and macOS | [focus](features/focus.md) |
+| Emoji and symbol picker | Implemented | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
+| Focus modes and do-not-disturb schedules | Implemented | 2 | In Windows 11 and macOS | [focus](features/focus.md) |
 | Automatic light/dark by sunset | Implemented | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |
-| Theme from wallpaper | Partial | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
+| Theme from wallpaper | Implemented | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
 | Settings hub "Desktop" | Implemented | 2 | Original | [settings-hub](features/settings-hub.md) |
 | Screenshots, annotation, screen recording | Planned | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |
 | OCR text extractor | Planned | 3 | In Windows 11 and macOS | [ocr](features/ocr.md) |
@@ -109,7 +110,11 @@ what is intended.
 
 * A change of behaviour edits the spec in the same pull request.
 * Acceptance criteria are numbered and never renumbered; a removed one is marked *(withdrawn)*.
-* Other stage 1.5 work this tree refers to: design tokens (design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request),
-  [theme-contract](../theme-contract.md)), the settings registry (settings (`docs/settings.md`, lands with its stage 1.5 pull request),
-  [architecture](../architecture.md)), performance budgets (`tools/perf/budgets.toml`). Until those
-  land, references in the specs name their intended content.
+* Stage 1.5 documents this tree refers to: [design tokens](../design-tokens.md) and the
+  [theme contract](../theme-contract.md); the settings registry ([settings](../settings.md), generated
+  by `just gen`); [translations](../i18n.md); [testing](../testing.md); performance budgets
+  ([`tools/perf/budgets.toml`](../../tools/perf/budgets.toml), [harness](../../tools/perf/README.md)).
+* Stage 1.5 follow-ups, not blocking: the headless performance job is manual and reports only
+  (shared CI runners are too noisy to gate on); accessible names are set by hand, with no automated
+  AT-SPI audit yet; dconf is still read and written through the `dconf` tool (see
+  [architecture](../architecture.md)).

@@ -1,4 +1,4 @@
-# 0009. The live wallpaper palette is a recorded overlay in the generated gtk.css copy
+# 0010. The live wallpaper palette is a recorded overlay in the generated gtk.css copy
 
 * Status: accepted
 * Date: 2026-11-23

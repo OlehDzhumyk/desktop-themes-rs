@@ -21,6 +21,16 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Focus modes (`focus`): `deskd` hosts the focus engine (`io.github.OlehDzhumyk.Desk.Focus` at
+  `/io/github/OlehDzhumyk/Desk/Focus`) with built-in Do not disturb, Work and Sleep modes plus custom
+  ones (allowed apps, mute sounds, weekday schedules with midnight wrap), timed starts and focus
+  sessions with a break. Ending a mode, a restart or a crash restores exactly the
+  `show-banners`/`event-sounds` value it changed; turning GNOME's own do-not-disturb off ends the
+  mode ([ADR 0009](docs/adr/0009-deskd-writes-do-not-disturb-keys.md)). Entry points: a «Фокус»
+  quick settings tile and panel icon for every skin (focus sessions with a countdown in
+  `windows11`), `themes focus`, a «Фокус» page in the window, and a `themes doctor` line. Settings
+  `io.github.OlehDzhumyk.Desk.Focus` (`enabled`, `active-mode`, `summary-on-end`, `session-length`,
+  `session-break`).
 - Theme from wallpaper (stage 2): live "accent from wallpaper" in `deskd` (settings
   `accent-from-wallpaper`, `accent-source`; follows `org.gnome.desktop.background` with a 500 ms
   debounce and sets `accent-color` to the nearest GNOME named accent, decoding the image in a
@@ -33,10 +43,18 @@ All notable changes to this project are documented in this file. The format is b
 - Theme from wallpaper, live palette and skin pickers: token themes with a generated libadwaita
   stylesheet get the wallpaper seed's full light/dark palette while "accent from wallpaper" is on
   (`themes tokens overlay SEED | --remove`, run by `deskd`; recorded in `state.json`, reverted on
-  off, theme switch, `themes reset` and `themes doctor --fix`; ADR 0009). D-Bus
+  off, theme switch, `themes reset` and `themes doctor --fix`; ADR 0010). D-Bus
   `WallpaperAccent()` also returns the theme whose palette follows. The quick settings «Theme»
   menu shows a dot grid with a rainbow «From wallpaper» dot (`macos`), an «Accent colour:
   Automatic / Manual» drop-down (`windows11`) or the switch (`default`).
+- Emoji and symbol picker (`docs/spec/features/emoji.md`): offline `deskd` engine
+  (`io.github.OlehDzhumyk.Desk.Emoji`, `crates/deskd/data/emoji.tsv`) with 300+ emoji, Unicode
+  symbols and text faces searchable in English and Ukrainian, Fitzpatrick skin-tone modifiers, and
+  0600 recents persistence (`~/.local/share/deskd/emoji.json`). In `desk-bridge`, the Windows 11
+  Win+V / Win+. flyout now has live «Емодзі» and «Символи» tabs, while `macos` (`Ctrl+Super+Space`)
+  and `default` (`Super+.`) open a floating keyboard-first picker near the caret; insertion uses
+  `application/x-desk-internal` and restores the previous clipboard text so clipboard history is
+  untouched. Settings `io.github.OlehDzhumyk.Desk.Emoji` and shortcut `emoji-toggle`.
 - Automatic light/dark appearance (`auto-dark`): `deskd` now hosts the `appearance` engine
   (`io.github.OlehDzhumyk.Desk.Appearance` at `/io/github/OlehDzhumyk/Desk/Appearance`) with a
   shared one-shot wake scheduler (`crates/deskd/src/schedule.rs`) that reacts to suspend/resume
@@ -102,6 +120,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- Stage 1.5 (foundations) is done: the spec tree marks `lavender` Implemented (every generated
+  output is pinned by snapshot tests), the Stage 2 features by their own specs, and records the
+  follow-ups (report-only performance job, no automated AT-SPI audit, `dconf` tool still used).
+  Stale spec gaps fixed by the bridge i18n, the accessibility work, ADR 0006 and the settings hub
+  are marked resolved, and `macos-glass` is no longer described as bundled.
 - Release builds unwind on panic (`panic = "unwind"`, about 0.5 MB more per binary) so that `deskd`
   survives a panic in one handler or thread; `deskd.service` limits restarts to 5 in 60 seconds.
 - The minimum Rust version is 1.100 (it was 1.89 on paper but 1.92 in fact): `rust-version` equals

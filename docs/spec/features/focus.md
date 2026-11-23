@@ -8,8 +8,17 @@ mutes sounds, with named modes (Work, Sleep, Personal, custom), exceptions (apps
 
 ## Status
 
-**Planned** (stage 2). Origin badge: *In Windows 11 and macOS*. GNOME has a single "Do Not Disturb" switch
+**Implemented** (stage 2). Origin badge: *In Windows 11 and macOS*. GNOME has a single "Do Not Disturb" switch
 (`org.gnome.desktop.notifications show-banners`); everything beyond it is ours.
+
+*Decisions and gaps:* deskd writes `show-banners` and `event-sounds` itself; the bridge does not
+([ADR 0009](../../adr/0009-deskd-writes-do-not-disturb-keys.md)). Open question 1 is answered with a
+guarded wrap of GNOME's application notification policy (a private API, checked per GNOME release).
+GNOME Shell has no Windows-style notification flyout, so the `windows11` controls (do not disturb,
+focus sessions, countdown) live in the quick settings tile. Not done yet: `hide-badges` is stored but
+not enforced (GNOME shows no app badges by default), no default shortcut, no automatic rules (open
+question 2), no focus filters (open question 3). The missed-notifications summary counts the
+notifications added to the list while the mode was on.
 
 ## Reference behaviour
 

@@ -20,8 +20,8 @@ Every feature page names its origin («Є в Windows 11 і macOS», «Засно
 Skins:
 
 * **windows11**: flyout next to the text cursor (the caret rectangle the focused app reports to the
-  input method; the pointer otherwise). Tabs «Буфер обміну» / «Емодзі» / «Символи» (the last two are
-  shown disabled until a later stage), «Очистити все», cards with a pin button and «…», which reveals
+  input method; the pointer otherwise). Tabs «Буфер обміну» / «Емодзі» / «Символи» (all three live in
+  the same unified flyout), «Очистити все», cards with a pin button and «…», which reveals
   delete and pin like Windows 11.
 * **macos**: a Spotlight-like centred panel (macOS 26 style): large search field, list with
   relative times, preview of the selected item, keyboard hints.
@@ -92,6 +92,22 @@ Skins:
 * **macos**: shown on the left of the top bar (`start-here-symbolic`), replacing the third-party `logomenu@aryan_k` extension.
 * **windows11** and **default**: not shown; the standard Activities indicator is left untouched.
 
+## Emoji and symbol picker
+
+| | |
+|---|---|
+| Open | Windows 11 theme: **Super+.** or **Super+;**; macOS theme: **Ctrl+Super+Space**; Fedora: **Super+.** (`emoji-shortcut` in the theme's `desk.dconf`; override on «Keyboard shortcuts» or `themes shortcut set emoji-toggle ...`) |
+| Search | English and Ukrainian names and keywords, case-folded and apostrophe/diacritics-tolerant; ranked exact → prefix → word/keyword → substring with recents tie-break |
+| Keys | Arrows move across the grid, `Page Up/Down` jump 3 rows, `Ctrl+1..9` switch category, `Enter` inserts, `Shift+Enter` inserts and keeps open, `Esc` closes |
+| Insertion | Sets the glyph with `application/x-desk-internal` so clipboard history ignores it, sends `Shift+Insert` (`Ctrl+Shift+Insert` in terminals), then restores the previous clipboard text |
+| Skin tones | Fitzpatrick modifier (`none`, `light`, `medium-light`, `medium`, `medium-dark`, `dark`) applied to person/hand emoji (including ZWJ sequences) |
+| Storage | Last 36 picks in `~/.local/share/deskd/emoji.json` (0600); turning off `remember-recents` clears and removes the file |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Emoji`: `enabled`, `emoji-shortcut`, `skin-tone`, `remember-recents`, `close-after-insert`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `emoji-toggle` |
+
+Skins:
+
+* **windows11**: live «Емодзі» and «Символи» tabs inside the unified Win+V / Win+. flyout; stays open after insert by default.
+* **macos** and **default**: floating keyboard-first picker anchored near the text caret (pointer fallback); closes after insert by default.
 ## Automatic light/dark
 
 | | |
@@ -110,7 +126,7 @@ Skins:
 | Create a theme | `themes tokens from-image PATH --name ID` (CLI), or «Create theme from wallpaper…» on the «Appearance» page: file chooser, seed colour, light/dark preview with contrast numbers, name, then «Apply» in the toast. `--force` moves the old theme to `trash/` first |
 | Inspect an image | `themes tokens seed PATH [--json]`: seed colour, nearest GNOME accent, «almost no colour» note, light/dark core colours and their contrast; writes nothing |
 | Accent from wallpaper | setting `accent-from-wallpaper` (off by default): `deskd` follows `org.gnome.desktop.background picture-uri`/`picture-uri-dark` (GSettings signals, 500 ms debounce, no polling) and sets `org.gnome.desktop.interface accent-color` to the named accent nearest the seed. `accent-source` picks the variant (`active` follows `color-scheme`). The image is decoded in a `themes tokens seed` child process. Turning it off restores the accent in force before (unless a theme or the user changed it since); `themes doctor` shows the state |
-| Wallpaper palette | token themes whose libadwaita stylesheet is generated (e.g. `lavender`, themes from `from-image`) also get the seed's full light/dark palette: `themes tokens overlay SEED` (run by `deskd`) renders the theme's tokens with the palette on top into `~/.cache/desktop-themes/wallpaper-overlay/` and writes it into the copied `~/.config/gtk-4.0/gtk.css`. Radii, fonts, the shell layer and the terminal stay the theme's. Turning the mode off, applying another look, `themes reset` and `themes doctor --fix` (with the mode off) put the theme's own stylesheet back and delete the cache; a gtk.css you edited is never touched ([ADR 0009](adr/0009-live-wallpaper-palette-overlay.md)). Hand-made stylesheets (`macos`, `windows11`) keep accent-only |
+| Wallpaper palette | token themes whose libadwaita stylesheet is generated (e.g. `lavender`, themes from `from-image`) also get the seed's full light/dark palette: `themes tokens overlay SEED` (run by `deskd`) renders the theme's tokens with the palette on top into `~/.cache/desktop-themes/wallpaper-overlay/` and writes it into the copied `~/.config/gtk-4.0/gtk.css`. Radii, fonts, the shell layer and the terminal stay the theme's. Turning the mode off, applying another look, `themes reset` and `themes doctor --fix` (with the mode off) put the theme's own stylesheet back and delete the cache; a gtk.css you edited is never touched ([ADR 0010](adr/0010-live-wallpaper-palette-overlay.md)). Hand-made stylesheets (`macos`, `windows11`) keep accent-only |
 | Images | every gdk-pixbuf format; animated images use the first frame; slideshow XML uses its first image; images under 16×16 or fully transparent are refused |
 | Entry points | CLI (`themes tokens from-image`, `themes tokens seed`, `themes tokens overlay SEED / --remove`), window («Appearance» page: switch, source, current accent and palette, create button), quick settings («Theme» menu, per skin, below), D-Bus `WallpaperAccent()` (with the theme whose palette follows) |
 
@@ -123,3 +139,21 @@ Skins (quick settings «Theme» menu; every control writes `accent-from-wallpape
 * `windows11`: «Accent colour: Automatic / Manual» drop-down; «Automatic» turns the live mode on,
   «Manual» turns it off (the previous accent comes back).
 * `default`: the «Accent from wallpaper» switch.
+
+## Focus modes
+
+| | |
+|---|---|
+| Modes | built-in «Не турбувати» (`dnd`), «Робота» (`work`), «Режим сну» (`sleep`, also mutes event sounds) and custom ones; each has `block_banners`, `mute_sounds`, `allowed_apps` and an optional schedule (weekdays, start, end; an end before the start ends the next morning) |
+| Start | by hand until turned off, for a time or until a time of day; by schedule; or a focus session (do not disturb for N minutes, then a break). A manual start overrides schedules until it ends; the schedule that started last wins; each schedule window starts its mode once |
+| Effect | `deskd` writes `org.gnome.desktop.notifications show-banners` (and `org.gnome.desktop.sound event-sounds`); notifications stay in the notification list, critical ones always show, allowed apps keep their banners |
+| Revert | the overridden value is stored in `~/.local/share/deskd/focus.json` (0600) before the write and restored when the mode ends, after a crash or restart; turning GNOME's own do-not-disturb off ends the mode ([ADR 0009](adr/0009-deskd-writes-do-not-disturb-keys.md)) |
+| Scheduling | the shared one-shot timer of `deskd` (no polling), re-armed on resume and timezone changes |
+| Entry points | quick settings tile «Фокус», `themes focus status\|list\|start\|session\|stop\|set\|delete`, the «Фокус» page of the window, D-Bus `io.github.OlehDzhumyk.Desk.Focus`; `themes doctor` reports an active mode or banners left off without one |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Focus`: `enabled`, `active-mode` (deskd's mirror), `summary-on-end`, `session-length`, `session-break` |
+
+Skins:
+
+* **default**: a «Фокус» tile in quick settings with the mode list; a symbolic moon icon in the panel while a mode is on.
+* **macos**: the same tile (like Control Center); a crescent icon in the panel.
+* **windows11**: the tile also starts focus sessions (15/25/45/60 min) and shows the countdown; a bell-slash icon in the panel. GNOME Shell has no Windows-style notification flyout, so these controls live in the tile.

@@ -52,7 +52,7 @@ No network, no subprocess.
 
 ### The two layouts (values the themes set)
 
-| | `macos` (and inherited by `macos-glass`) | `windows11` |
+| | `macos` | `windows11` |
 |---|---|---|
 | Clock position | `center-top`, `margin-y` 110 | `bottom-left`, `margin-x` 80, `margin-y` 90 |
 | Time / date size | 128 / 26 px | 120 / 30 px |

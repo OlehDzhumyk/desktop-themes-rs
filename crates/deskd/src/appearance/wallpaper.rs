@@ -12,7 +12,7 @@
 //! since) and deletes the file. A left-over file at start-up with the setting off (deskd was
 //! stopped in between) is reverted the same way.
 //!
-//! For a token theme the libadwaita palette follows too (ADR 0009): after each accepted seed a
+//! For a token theme the libadwaita palette follows too (ADR 0010): after each accepted seed a
 //! `themes tokens overlay SEED` child puts the seed's palette into the generated `gtk.css` copy;
 //! turning the setting off (or a left-over overlay at start-up) runs `themes tokens overlay
 //! --remove`. One worker thread runs these children in order, so "off" after "on" always wins.

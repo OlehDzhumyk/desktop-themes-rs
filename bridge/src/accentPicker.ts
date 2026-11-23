@@ -99,7 +99,7 @@ function dotGrid(section: PopupMenu.PopupMenuSection, appearance: Gio.Settings,
     };
     const add = (id: string, label: string) => {
         const b = new St.Button({
-            style_class: `desk-accent-dot desk-accent-${id}`,
+            style_class: `desk-accent-dot desk-accent-dot-${id}`,
             can_focus: true, reactive: true, toggle_mode: true,
             y_align: Clutter.ActorAlign.CENTER,
             accessible_name: label,

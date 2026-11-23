@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The live wallpaper palette over a token theme (docs/spec/features/theme-from-wallpaper.md,
-//! ADR 0009).
+//! ADR 0010).
 //!
 //! While "Accent from wallpaper" is on, deskd runs `themes tokens overlay SEED`. When the look
 //! theme's libadwaita stylesheet is generated from tokens (its `gtk.css` is a copy recorded in
