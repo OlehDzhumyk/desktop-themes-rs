@@ -1353,6 +1353,7 @@ dependencies = [
  "desk-proto",
  "desk-settings",
  "gio",
+ "libc",
  "serde",
  "serde_json",
  "theme-tokens",

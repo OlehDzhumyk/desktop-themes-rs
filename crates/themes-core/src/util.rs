@@ -126,11 +126,26 @@ pub fn run(cmd: &str, args: &[&str], input: Option<&str>) -> Result<Out> {
             error = e
         ))
     })?;
-    if let Some(inp) = input {
-        let mut stdin = child.stdin.take().expect("stdin");
-        stdin.write_all(inp.as_bytes())?;
-    }
+    // stdin is written by its own thread while this one reads stdout/stderr: a child that
+    // fills its output pipe before reading all of its input would otherwise deadlock both
+    let writer = match (input, child.stdin.take()) {
+        (Some(inp), Some(mut stdin)) => {
+            let data = inp.to_owned();
+            Some(std::thread::spawn(move || stdin.write_all(data.as_bytes())))
+        }
+        (Some(_), None) => return Err(Error(tr!("no stdin for {command}", command = cmd))),
+        _ => None,
+    };
     let o = child.wait_with_output()?;
+    if let Some(w) = writer {
+        match w.join() {
+            Ok(Ok(())) => {}
+            // the child exited without reading everything: its exit status tells the rest
+            Ok(Err(e)) if e.kind() == std::io::ErrorKind::BrokenPipe => {}
+            Ok(Err(e)) => return Err(e.into()),
+            Err(_) => return Err(Error(tr!("no stdin for {command}", command = cmd))),
+        }
+    }
     Ok(Out {
         ok: o.status.success(),
         stdout: String::from_utf8_lossy(&o.stdout).into_owned(),

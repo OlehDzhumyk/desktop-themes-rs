@@ -12,6 +12,8 @@ name = "themes_core"
 
 [dependencies]
 gio.workspace = true
+# killpg for the hook time limit (already in the tree through zbus)
+libc.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 theme-tokens.workspace = true
