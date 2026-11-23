@@ -49,14 +49,35 @@ def test_theme_commands_need_yes(make_shell):
     assert 'windows11' not in (cur or {}).get('modules', {}).values()
 
 
+def _add_experimental_theme(shell, theme_id='exp-test'):
+    """Replace the read-only themes symlink with a writable directory containing symlinks to the
+    bundled themes plus a synthetic experimental theme (ADR 0006)."""
+    themes_dir = shell.themes_root / 'themes'
+    if themes_dir.is_symlink():
+        target = themes_dir.resolve()
+        themes_dir.unlink()
+        themes_dir.mkdir()
+        for entry in target.iterdir():
+            (themes_dir / entry.name).symlink_to(entry)
+    exp = themes_dir / theme_id
+    exp.mkdir()
+    (exp / 'theme.conf').write_text(
+        'NAME="Experimental Test"\n'
+        'EXPERIMENTAL=true\n'
+        'WARNING="synthetic test warning"\n'
+    )
+    return theme_id
+
+
 def test_experimental_needs_yes(make_shell):
     shell = make_shell(skin='default')
+    exp_id = _add_experimental_theme(shell)
     before = shell.dconf_read('/org/gnome/shell/enabled-extensions')
-    rc, out, err = themes(shell, 'apply', 'macos-glass')
+    rc, out, err = themes(shell, 'apply', exp_id)
     assert rc != 0, (out, err)
     assert shell.dconf_read('/org/gnome/shell/enabled-extensions') == before
     rc, cur, _ = themes(shell, 'current')
-    assert 'macos-glass' not in (cur or {}).get('modules', {}).values()
+    assert exp_id not in (cur or {}).get('modules', {}).values()
 
 
 def test_apply_live_many_times_no_shell_crash(make_shell):
@@ -86,14 +107,15 @@ def test_dbus_apply_needs_confirmation(make_shell):
     """The service refuses an experimental theme on Apply (ADR 0006); ApplyConfirmed exists for
     the confirmed case. Only the refusal is exercised with an experimental theme."""
     shell = make_shell(skin='default')
+    exp_id = _add_experimental_theme(shell)
     before = shell.dconf_read('/org/gnome/shell/enabled-extensions')
     with pytest.raises(GLib.Error) as e:
         shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Apply',
-                   GLib.Variant('(sas)', ('macos-glass', [])), '(bsas)', timeout_ms=120000)
+                   GLib.Variant('(sas)', (exp_id, [])), '(bsas)', timeout_ms=120000)
     assert 'AccessDenied' in str(e.value), e.value
     assert shell.dconf_read('/org/gnome/shell/enabled-extensions') == before
     (exp,) = shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Experimental', None, '(a{ss})').unpack()
-    assert 'macos-glass' in exp, exp
+    assert exp_id in exp, exp
     # S-5: unapproved command keys are also refused on Apply and reported by PendingCommands
     (pending,) = shell.call(
         THEMES_BUS, THEMES_PATH, THEMES_BUS, 'PendingCommands',
@@ -108,7 +130,7 @@ def test_dbus_apply_needs_confirmation(make_shell):
         GLib.Variant('(sas)', ('windows11', ['behavior'])), '(bsas)', timeout_ms=120000).unpack()
     assert not relogin
     (cur,) = shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Current', None, '(a{ss})').unpack()
-    assert cur['behavior'] == 'windows11' and 'macos-glass' not in cur.values(), cur
+    assert cur['behavior'] == 'windows11' and exp_id not in cur.values(), cur
     (pending_after,) = shell.call(
         THEMES_BUS, THEMES_PATH, THEMES_BUS, 'PendingCommands',
         GLib.Variant('(sas)', ('windows11', ['behavior'])), '(a(ss))').unpack()

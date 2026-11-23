@@ -3,7 +3,7 @@
 # Fetch the third-party look-and-feel assets from upstream at pinned revisions and install them
 # at user level (no sudo, no rpm-ostree). Nothing here is stored in the repository.
 #
-#   WhiteSur GTK + GNOME Shell theme, icons, cursors, wallpapers   (macos / macos-glass themes)
+#   WhiteSur GTK + GNOME Shell theme, icons, cursors, wallpapers   (macos theme)
 #   Fluent GTK + GNOME Shell theme, icons, cursors                  (windows11 theme)
 #   Inter, JetBrains Mono, Cascadia Code/Mono fonts
 #
@@ -116,8 +116,8 @@ install_fonts() {
   cp "$x"/inter/extras/ttf/Inter-*.ttf "$x/inter/LICENSE.txt" "$FONTS_DIR/Inter/"
   unzip -qo "$tmp/jetbrains-mono.zip" 'fonts/ttf/JetBrainsMono-*.ttf' OFL.txt -d "$x/jb"
   cp "$x"/jb/fonts/ttf/JetBrainsMono-*.ttf "$x/jb/OFL.txt" "$FONTS_DIR/JetBrainsMono/"
-  unzip -qo "$tmp/cascadia.zip" 'ttf/CascadiaCode.ttf' 'ttf/CascadiaCodeItalic.ttf' 'ttf/CascadiaMono.ttf' 'ttf/CascadiaMonoItalic.ttf' -d "$x/casc"
-  cp "$x"/casc/ttf/*.ttf "$FONTS_DIR/CascadiaCode/"
+  unzip -qo "$tmp/cascadia.zip" 'ttf/CascadiaCode.ttf' 'ttf/CascadiaCodeItalic.ttf' 'ttf/CascadiaMono.ttf' 'ttf/CascadiaMonoItalic.ttf' OFL.txt -d "$x/casc"
+  cp "$x"/casc/ttf/*.ttf "$x/casc/OFL.txt" "$FONTS_DIR/CascadiaCode/"
   rm -rf "$x"
   have fc-cache && fc-cache -f "$FONTS_DIR" || true
 }

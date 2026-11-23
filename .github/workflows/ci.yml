@@ -170,6 +170,8 @@ jobs:
         run: .claude/hooks/guard.test.sh
       - name: GSettings schema (strict)
         run: glib-compile-schemas --strict --dry-run data/
+      - name: Theme dconf keys against GSettings schemas
+        run: python3 tools/check-theme-dconf-schemas.py
       - name: Desktop file and metainfo
         # The .desktop and metainfo files are gettext templates; build them as data/install.sh does.
         run: |

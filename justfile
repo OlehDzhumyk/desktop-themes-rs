@@ -7,7 +7,7 @@ default:
     @just --list
 
 # everything CI checks, locally
-check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep orphan-rs rust-version
+check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep orphan-rs rust-version theme-schemas
 
 # fast checks for what you changed vs origin/main
 check-changed:
@@ -66,6 +66,10 @@ orphan-rs:
 # rust-version in Cargo.toml equals the toolchain CI and Fedora use (F-4), see tools/check-rust-version.sh
 rust-version:
     tools/check-rust-version.sh
+
+# theme .dconf keys exist in their GSettings schemas, see tools/check-theme-dconf-schemas.py
+theme-schemas:
+    python3 tools/check-theme-dconf-schemas.py
 
 # structural lint rules (tools/ast-grep) and their own tests
 ast-grep:

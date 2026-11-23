@@ -656,6 +656,109 @@ fn check_token_cache(ctx: &Ctx, st: &State, fix: bool, rep: &mut DoctorReport) {
     }
 }
 
+const RETIRED_THEME: &str = "macos-glass";
+const RETIRED_THEME_REPLACEMENT: &str = "macos";
+const RETIRED_WARN_EXTENSIONS: &[&str] = &[
+    "liquid-glass@thinkingcoding1231.gmail.com",
+    "clipboard-indicator@tudmotu.com",
+];
+
+/// Warn about removed bundled themes or retired extensions; `--fix` switches `macos-glass` modules
+/// to `macos` and disables any retired extension that is still enabled.
+fn check_retired_with(
+    ctx: &Ctx,
+    st: &mut State,
+    enabled: &[String],
+    fix: bool,
+    switch_theme: &dyn Fn(&[Module]) -> Result<()>,
+    disable_ext: &dyn Fn(&str) -> Result<()>,
+    rep: &mut DoctorReport,
+) {
+    let retired_mods: Vec<Module> = Module::ALL
+        .into_iter()
+        .filter(|m| st.modules.get(m).map(String::as_str) == Some(RETIRED_THEME))
+        .collect();
+    if st.current.as_deref() == Some(RETIRED_THEME) || !retired_mods.is_empty() {
+        rep.push(
+            "warning",
+            "retired-theme",
+            tr!(
+                "theme “{theme}” has been removed; switch to “{replacement}” (themes doctor --fix)",
+                theme = RETIRED_THEME,
+                replacement = RETIRED_THEME_REPLACEMENT
+            ),
+            None,
+            true,
+        );
+        if fix && switch_theme(&retired_mods).is_ok() {
+            rep.fixed.push(tr!(
+                "switched retired theme “{theme}” to “{replacement}”",
+                theme = RETIRED_THEME,
+                replacement = RETIRED_THEME_REPLACEMENT
+            ));
+            *st = State::load(ctx);
+        }
+    }
+    for &uuid in RETIRED_WARN_EXTENSIONS {
+        let is_enabled = enabled.iter().any(|u| u == uuid);
+        let is_installed = ctx.extension_path(uuid).is_some();
+        if !is_enabled && !is_installed {
+            continue;
+        }
+        let msg = if is_enabled {
+            tr!(
+                "extension {uuid} is no longer used by any bundled theme (themes doctor --fix turns it off)",
+                uuid = uuid
+            )
+        } else {
+            tr!(
+                "extension {uuid} is still installed but no longer used by any bundled theme; you may remove it",
+                uuid = uuid
+            )
+        };
+        rep.push(
+            "warning",
+            "retired-extension",
+            msg,
+            Some(uuid.to_string()),
+            is_enabled,
+        );
+        if fix && is_enabled && disable_ext(uuid).is_ok() {
+            rep.fixed
+                .push(tr!("turned off retired extension {uuid}", uuid = uuid));
+        }
+    }
+}
+
+fn check_retired(ctx: &Ctx, st: &mut State, enabled: &[String], fix: bool, rep: &mut DoctorReport) {
+    check_retired_with(
+        ctx,
+        st,
+        enabled,
+        fix,
+        &|mods| {
+            crate::apply::apply(
+                ctx,
+                RETIRED_THEME_REPLACEMENT,
+                mods,
+                &crate::apply::Options::default(),
+            )
+            .map(|_| ())
+        },
+        &|uuid| {
+            let _lock = Lock::acquire(ctx)?;
+            let cur = dconf::dump()?;
+            let (mut en, ..) = ext_lists(&cur);
+            if en.iter().any(|u| u == uuid) {
+                en.retain(|u| u != uuid);
+                dconf::write(EXT_KEY, &dconf::fmt_strv(&en))?;
+            }
+            Ok(())
+        },
+        rep,
+    );
+}
+
 /// Помилки розширень у журналі за останні 30 хвилин (поточне завантаження).
 fn check_journal(enabled: &[String], rep: &mut DoctorReport) {
     let Ok(o) = run(
@@ -869,6 +972,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     }
     check_journal(&enabled, &mut rep);
     check_crashes(ctx, &mut rep);
+    check_retired(ctx, &mut st, &enabled, opt.fix, &mut rep);
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
     check_schemas(ctx, &enabled, opt.fix, &mut rep);
@@ -1211,5 +1315,110 @@ mod tests {
         assert_eq!(rep.issues.len(), 1, "{:?}", rep.issues);
         assert_eq!(rep.issues[0].kind, "setting-value");
         assert!(rep.issues[0].message.contains("lockscreen-layout/tint"));
+    }
+
+    #[test]
+    fn retired_theme_detected_and_fixed() {
+        let r = tmp("retired-theme");
+        let ctx = Ctx::new(r.join("home"), r.join("root"));
+        let mut st = State {
+            current: Some("macos-glass".into()),
+            ..State::default()
+        };
+        st.modules.insert(Module::Look, "macos-glass".into());
+        st.modules.insert(Module::Behavior, "windows11".into());
+
+        let switched = std::cell::RefCell::new(Vec::<Module>::new());
+        let mut rep = DoctorReport::default();
+        check_retired_with(
+            &ctx,
+            &mut st,
+            &[],
+            false,
+            &|mods| {
+                switched.borrow_mut().extend_from_slice(mods);
+                Ok(())
+            },
+            &|_| Ok(()),
+            &mut rep,
+        );
+        assert_eq!(rep.issues.len(), 1, "{:?}", rep.issues);
+        assert_eq!(
+            (
+                rep.issues[0].severity,
+                rep.issues[0].kind,
+                rep.issues[0].fixable
+            ),
+            ("warning", "retired-theme", true)
+        );
+        assert!(switched.borrow().is_empty());
+
+        let mut rep = DoctorReport::default();
+        check_retired_with(
+            &ctx,
+            &mut st,
+            &[],
+            true,
+            &|mods| {
+                switched.borrow_mut().extend_from_slice(mods);
+                Ok(())
+            },
+            &|_| Ok(()),
+            &mut rep,
+        );
+        assert_eq!(*switched.borrow(), vec![Module::Look]);
+        assert_eq!(rep.fixed.len(), 1, "{:?}", rep.fixed);
+    }
+
+    #[test]
+    fn retired_extensions_detected_and_fixed() {
+        let r = tmp("retired-ext");
+        let ctx = Ctx::new(r.join("home"), r.join("root"));
+        touch(
+            &ctx.user_extensions_dir()
+                .join("liquid-glass@thinkingcoding1231.gmail.com/metadata.json"),
+            "{}",
+        );
+        let enabled = vec!["clipboard-indicator@tudmotu.com".to_string()];
+        let mut st = State::default();
+        let disabled = std::cell::RefCell::new(Vec::<String>::new());
+
+        let mut rep = DoctorReport::default();
+        check_retired_with(
+            &ctx,
+            &mut st,
+            &enabled,
+            true,
+            &|_| Ok(()),
+            &|u| {
+                disabled.borrow_mut().push(u.to_string());
+                Ok(())
+            },
+            &mut rep,
+        );
+        assert_eq!(rep.issues.len(), 2, "{:?}", rep.issues);
+        let lg = rep
+            .issues
+            .iter()
+            .find(|i| i.uuid.as_deref() == Some("liquid-glass@thinkingcoding1231.gmail.com"))
+            .unwrap();
+        assert_eq!(
+            (lg.severity, lg.kind, lg.fixable),
+            ("warning", "retired-extension", false)
+        );
+        let ci = rep
+            .issues
+            .iter()
+            .find(|i| i.uuid.as_deref() == Some("clipboard-indicator@tudmotu.com"))
+            .unwrap();
+        assert_eq!(
+            (ci.severity, ci.kind, ci.fixable),
+            ("warning", "retired-extension", true)
+        );
+        assert_eq!(
+            *disabled.borrow(),
+            vec!["clipboard-indicator@tudmotu.com".to_string()]
+        );
+        assert_eq!(rep.fixed.len(), 1, "{:?}", rep.fixed);
     }
 }

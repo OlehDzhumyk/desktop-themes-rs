@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 14:46+0000\n"
+"POT-Creation-Date: 2026-11-23 14:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -896,84 +896,115 @@ msgstr ""
 msgid "updated {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:696
+#: crates/themes-core/src/doctor.rs:686
+#, rust-format
+msgid ""
+"theme “{theme}” has been removed; switch to “{replacement}” (themes doctor --"
+"fix)"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:695
+#, rust-format
+msgid "switched retired theme “{theme}” to “{replacement}”"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:710
+#, rust-format
+msgid ""
+"extension {uuid} is no longer used by any bundled theme (themes doctor --fix "
+"turns it off)"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:715
+#, rust-format
+msgid ""
+"extension {uuid} is still installed but no longer used by any bundled theme; "
+"you may remove it"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:728
+#, rust-format
+msgid "turned off retired extension {uuid}"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:799
 #, rust-format
 msgid "journal: {line}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:766
+#: crates/themes-core/src/doctor.rs:869
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:795
+#: crates/themes-core/src/doctor.rs:898
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:797
+#: crates/themes-core/src/doctor.rs:900
 msgid "error (ERROR)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:819
+#: crates/themes-core/src/doctor.rs:922
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:827
+#: crates/themes-core/src/doctor.rs:930
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:839
+#: crates/themes-core/src/doctor.rs:942
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:856
+#: crates/themes-core/src/doctor.rs:959
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
 "is not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:864
+#: crates/themes-core/src/doctor.rs:967
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:883
+#: crates/themes-core/src/doctor.rs:987
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:924
+#: crates/themes-core/src/doctor.rs:1028
 #, rust-format
 msgid "turned off {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:982
+#: crates/themes-core/src/doctor.rs:1086
 #, rust-format
 msgid "turned on {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1016
+#: crates/themes-core/src/doctor.rs:1120
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1021
+#: crates/themes-core/src/doctor.rs:1125
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1030 crates/themes/src/cli.rs:480
+#: crates/themes-core/src/doctor.rs:1134 crates/themes/src/cli.rs:480
 #: crates/themes/src/gui/window.rs:951
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1033
+#: crates/themes-core/src/doctor.rs:1137
 msgid "Themes: system check"
 msgstr ""
 

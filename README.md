@@ -1,8 +1,7 @@
 # desktop-themes-rs
 
 A desktop theme manager for **GNOME** (developed on Fedora Silverblue, GNOME Shell 51). It switches
-the whole look of the desktop between **Fedora** (stock), **macOS**, **macOS Liquid Glass**
-(experimental: it crashed GNOME Shell 51.1 on real hardware) and **Windows 11**, and lets you **mix modules**: the macOS look with Windows 11 keyboard behaviour, for
+the whole look of the desktop between **Fedora** (stock), **macOS** and **Windows 11**, and lets you **mix modules**: the macOS look with Windows 11 keyboard behaviour, for
 example. Everything is done at user level: no sudo, no rpm-ostree layering.
 
 * `themes`: CLI, GTK 4 / libadwaita window, and a D-Bus service (Rust).
@@ -56,7 +55,6 @@ themes apply macos                   # whole theme
 themes apply macos --only look,sounds
 themes apply windows11 --module behavior
 themes apply macos --dry-run         # show what would change
-themes apply macos-glass --yes       # experimental themes ask y/N (or need --yes in scripts)
 themes reset                         # back to the baseline
 themes snapshot my-look --name "My look"   # save the current look as a theme
 themes doctor --fix
@@ -130,7 +128,7 @@ work inspired by those designs.
 ## Українською
 
 **desktop-themes-rs** — менеджер тем робочого столу GNOME (розроблено на Fedora Silverblue, GNOME
-Shell 51). Перемикає вигляд між **Fedora**, **macOS**, **macOS Liquid Glass** і **Windows 11**, а також
+Shell 51). Перемикає вигляд між **Fedora**, **macOS** і **Windows 11**, а також
 дозволяє **змішувати модулі** (вигляд, поведінка, звуки, програми): наприклад, вигляд macOS із
 поведінкою Windows 11. Усе працює на рівні користувача, без sudo й без rpm-ostree.
 

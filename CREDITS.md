@@ -35,15 +35,14 @@ Downloaded from extensions.gnome.org at the pinned version tags in `scripts/vers
 |---|---|---|
 | [User Themes](https://gitlab.gnome.org/GNOME/gnome-shell-extensions) | GNOME | GPL-2.0-or-later |
 | [AppIndicator and KStatusNotifierItem Support](https://github.com/ubuntu/gnome-shell-extension-appindicator) | Ubuntu / rgcjonas | GPL-2.0-or-later |
-| [Blur my Shell](https://github.com/aunetx/blur-my-shell) | aunetx | GPL-3.0 |
+| [Blur my Shell](https://github.com/aunetx/blur-my-shell) | aunetx | GPL-3.0-or-later |
 | [Dash to Dock](https://github.com/micheleg/dash-to-dock) | Michele Gaio et al. | GPL-2.0-or-later |
 | [Compiz alike magic lamp effect](https://github.com/hermes83/compiz-alike-magic-lamp-effect) | hermes83 | GPL-3.0-or-later |
 | [Spotlight](https://github.com/itsnin/spotlight) | itsnin | GPL-3.0-or-later |
 | [Dash to Panel](https://github.com/home-sweet-gnome/dash-to-panel) | jderose9 et al. | GPL-2.0-or-later |
-| [ArcMenu](https://gitlab.com/arcmenu/ArcMenu) | ArcMenu team | GPL-2.0-or-later |
+| [ArcMenu](https://gitlab.com/arcmenu/ArcMenu) | ArcMenu team | GPL-2.0 (version not specified) |
 | [Tiling Shell](https://github.com/domferr/tilingshell) | Domenico Ferraro | GPL-3.0-or-later |
 | [Desktop Icons NG (gtk4-ding)](https://gitlab.com/smedius/desktop-icons-ng) | Sergio Costas, Marco Trevisan, Sundeep Mediratta et al. | GPL-3.0-or-later |
-| [Liquid Glass](https://github.com/ryohsuke1231/liquid-glass) (commit `9ec82ed`, from the repository, not extensions.gnome.org) | ryohsuke1231 | MIT |
 
 ## Code adapted into this repository
 
@@ -90,7 +89,7 @@ written by the token generator follows Ptyxis' `ptyxis-palette.c`.
 
 ## Design inspiration
 
-The macOS, macOS Liquid Glass and Windows 11 themes are inspired by the look and behaviour of
+The macOS and Windows 11 themes are inspired by the look and behaviour of
 Apple's macOS and Microsoft's Windows 11. No Apple or Microsoft assets are included or downloaded:
 no logos, wallpapers, fonts or sounds. "macOS", "Apple", "Windows" and "Segoe" are trademarks of
 their respective owners; this project is not affiliated with or endorsed by them.

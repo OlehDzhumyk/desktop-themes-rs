@@ -210,5 +210,4 @@ gdbus call --session -d io.github.OlehDzhumyk.Themes -o /io/github/OlehDzhumyk/T
 (`disable-user-extensions`). «Теми» показують це банером, а `themes doctor` — помилкою з часом
 збою, темою, яка тоді була застосована, і ймовірним винуватцем. Розширення повертаються лише з
 вашої згоди: кнопка «Увімкнути…» у вікні (можна спершу перейти на «Fedora») або
-`themes doctor --enable-extensions`. Тема «macOS Liquid Glass» експериментальна: на GNOME 51.1
-вона спричиняла такі збої.
+`themes doctor --enable-extensions`.
