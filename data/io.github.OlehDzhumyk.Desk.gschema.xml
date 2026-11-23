@@ -29,6 +29,7 @@
     <child name="emoji" schema="io.github.OlehDzhumyk.Desk.Emoji"/>
     <child name="color-picker" schema="io.github.OlehDzhumyk.Desk.ColorPicker"/>
     <child name="ocr" schema="io.github.OlehDzhumyk.Desk.Ocr"/>
+    <child name="capture" schema="io.github.OlehDzhumyk.Desk.Capture"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="osd" schema="io.github.OlehDzhumyk.Desk.Osd"/>
@@ -216,6 +217,89 @@
     </key>
   </schema>
 
+  <schema id="io.github.OlehDzhumyk.Desk.Capture" path="/io/github/OlehDzhumyk/Desk/capture/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable screenshots and screen recording</summary>
+      <description>Off: the bridge binds no capture shortcut and deskd refuses to save captures.</description>
+    </key>
+    <key name="save-folder" type="s">
+      <default>''</default>
+      <summary>Folder for saved screenshots (empty = ~/Pictures/Screenshots)</summary>
+      <description>Empty: Screenshots in the XDG pictures folder (~/Pictures/Screenshots). A leading ~ is the home folder; another relative path is taken from the home folder. The folder is created when needed.</description>
+    </key>
+    <key name="copy-to-clipboard" type="b">
+      <default>true</default>
+      <summary>Copy each capture to the clipboard</summary>
+      <description>Put each screenshot on the clipboard as well as in the folder</description>
+    </key>
+    <key name="show-preview" type="b">
+      <default>true</default>
+      <summary>Show the thumbnail or notification after a capture</summary>
+      <description>The macos skin shows a floating thumbnail for 6 s, the windows11 skin a notification with an Edit button; the default skin keeps GNOME's notification.</description>
+    </key>
+    <key name="delay" type="s">
+      <choices>
+        <choice value="0"/>
+        <choice value="3"/>
+        <choice value="10"/>
+      </choices>
+      <default>'0'</default>
+      <summary>Delay before a capture, in seconds</summary>
+      <description>Wait with a visible countdown before the capture</description>
+    </key>
+    <key name="include-pointer" type="b">
+      <default>false</default>
+      <summary>Include the mouse pointer</summary>
+      <description>Include the pointer in screenshots and recordings</description>
+    </key>
+    <key name="record-format" type="s">
+      <choices>
+        <choice value="webm"/>
+        <choice value="mp4"/>
+      </choices>
+      <default>'webm'</default>
+      <summary>Container and codec of screen recordings</summary>
+      <description>Encoded by GNOME's screencast service. MP4 needs an H.264 encoder, which Fedora does not ship by default; WebM always works.</description>
+    </key>
+    <key name="record-audio" type="s">
+      <choices>
+        <choice value="none"/>
+        <choice value="system"/>
+        <choice value="mic"/>
+        <choice value="both"/>
+      </choices>
+      <default>'none'</default>
+      <summary>Audio sources of screen recordings</summary>
+      <description>Off by default; the microphone is recorded only when you choose it here</description>
+    </key>
+    <key name="annotate-after-capture" type="b">
+      <default>false</default>
+      <summary>Open the annotation editor after each capture</summary>
+      <description>Mark up each screenshot (pen, arrows, redaction, crop) before you keep it</description>
+    </key>
+    <key name="capture-region-shortcut" type="as">
+      <default>[]</default>
+      <summary>Shortcut that captures a region (in force)</summary>
+      <description>The accelerators the bridge binds. Themes write their default from desk.dconf (Windows 11: Shift+Super+S; macOS: Shift+Super+4; Fedora: none, GNOME's Print stays). An override in io.github.OlehDzhumyk.Desk.Shortcuts capture-region replaces it. The name ends in -shortcut because shell keybinding names are global.</description>
+    </key>
+    <key name="capture-screen-shortcut" type="as">
+      <default>[]</default>
+      <summary>Shortcut that captures the whole screen (in force)</summary>
+      <description>Windows 11: Super+Print; macOS: Shift+Super+3; Fedora: none, GNOME's Shift+Print stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-screen.</description>
+    </key>
+    <key name="capture-toolbar-shortcut" type="as">
+      <default>[]</default>
+      <summary>Shortcut that opens the capture toolbar (in force)</summary>
+      <description>Windows 11: Print; macOS: Shift+Super+5; Fedora: none, GNOME's screenshot UI stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-toolbar.</description>
+    </key>
+    <key name="capture-record-shortcut" type="as">
+      <default>[]</default>
+      <summary>Shortcut that starts or stops a screen recording (in force)</summary>
+      <description>Windows 11: Shift+Super+R; macOS: none (record from the Shift+Super+5 toolbar); Fedora: none, GNOME's Ctrl+Shift+Alt+R stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-record.</description>
+    </key>
+  </schema>
+
   <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
     <key name="clipboard-toggle" type="as">
       <default>[]</default>
@@ -240,6 +324,26 @@
     <key name="ocr-toggle" type="as">
       <default>[]</default>
       <summary>Your shortcut for the text extractor (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="capture-region" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for a region capture (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="capture-screen" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for a full-screen capture (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="capture-toolbar" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for the capture toolbar (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="capture-record" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for screen recording (override)</summary>
       <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
   </schema>

@@ -144,6 +144,16 @@ fn camel(s: &str) -> String {
         .collect()
 }
 
+/// The enum variant of a choice value: [`camel`], with `V` before a leading digit (`"10"` → `V10`).
+fn variant(value: &str) -> String {
+    let c = camel(value);
+    if c.starts_with(|ch: char| ch.is_ascii_digit()) {
+        format!("V{c}")
+    } else {
+        c
+    }
+}
+
 pub fn accessors_rs() -> String {
     let mut o = String::new();
     o.push_str(
@@ -164,18 +174,23 @@ pub fn accessors_rs() -> String {
                     if c.value == *default {
                         o.push_str("    #[default]\n");
                     }
-                    let _ = writeln!(o, "    {},", camel(c.value));
+                    let _ = writeln!(o, "    {},", variant(c.value));
                 }
                 o.push_str("}\n\n");
                 let _ = writeln!(o, "impl {en} {{");
                 let _ = writeln!(o, "    pub const ALL: [{en}; {}] = [", choices.len());
                 for c in *choices {
-                    let _ = writeln!(o, "        {en}::{},", camel(c.value));
+                    let _ = writeln!(o, "        {en}::{},", variant(c.value));
                 }
                 o.push_str("    ];\n\n");
                 o.push_str("    pub fn as_str(self) -> &'static str {\n        match self {\n");
                 for c in *choices {
-                    let _ = writeln!(o, "            {en}::{} => {:?},", camel(c.value), c.value);
+                    let _ = writeln!(
+                        o,
+                        "            {en}::{} => {:?},",
+                        variant(c.value),
+                        c.value
+                    );
                 }
                 o.push_str("        }\n    }\n\n");
                 o.push_str(
@@ -183,7 +198,12 @@ pub fn accessors_rs() -> String {
                 );
                 o.push_str("    pub fn parse(s: &str) -> Self {\n        match s {\n");
                 for c in *choices {
-                    let _ = writeln!(o, "            {:?} => {en}::{},", c.value, camel(c.value));
+                    let _ = writeln!(
+                        o,
+                        "            {:?} => {en}::{},",
+                        c.value,
+                        variant(c.value)
+                    );
                 }
                 o.push_str("            _ => Self::default(),\n        }\n    }\n}\n\n");
             }

@@ -17,3 +17,11 @@ color-picker-shortcut=['<Control><Shift><Super>c']
 # Text extractor (OCR): Ctrl+Shift+Super+T (macOS has no global OCR key; Cmd+Shift+T is taken by apps).
 [io/github/OlehDzhumyk/Desk/ocr]
 ocr-shortcut=['<Control><Shift><Super>t']
+
+# Screenshots: Shift+Cmd+4 region, Shift+Cmd+3 screen, Shift+Cmd+5 toolbar; recording starts from
+# the toolbar, so there is no separate record shortcut.
+[io/github/OlehDzhumyk/Desk/capture]
+capture-region-shortcut=['<Shift><Super>4']
+capture-screen-shortcut=['<Shift><Super>3']
+capture-toolbar-shortcut=['<Shift><Super>5']
+capture-record-shortcut=@as []

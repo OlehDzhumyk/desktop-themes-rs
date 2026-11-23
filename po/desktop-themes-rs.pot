@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 23:43+0000\n"
+"POT-Creation-Date: 2026-11-23 23:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -163,6 +163,184 @@ msgstr ""
 msgid "Create theme from wallpaper…"
 msgstr ""
 
+#: crates/desk-settings/src/capture.rs:13
+#: crates/desk-settings/src/capture.rs:21
+#: crates/desk-settings/src/capture.rs:359
+#: crates/desk-settings/src/capture.rs:374
+msgid "Screenshots"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:14 crates/desk-settings/src/emoji.rs:14
+#: crates/desk-settings/src/osd.rs:13
+msgid "In Windows 11 and macOS"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:22
+msgid "Capture a region or the whole screen with the shortcuts of the theme"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:34
+msgid "Save folder"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:35
+msgid "Empty: Screenshots in the Pictures folder. ~ is your home folder."
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:49
+msgid "Copy to the clipboard"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:50
+msgid "Put each screenshot on the clipboard as well as in the folder"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:62
+msgid "Show a preview"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:64
+msgid ""
+"A thumbnail (macOS style) or a notification (Windows 11 style) after a "
+"capture"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:82
+msgid "No delay"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:86
+msgid "3 seconds"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:90
+msgid "10 seconds"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:94
+msgid "Delay"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:95
+msgid "Wait with a visible countdown before the capture"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:107
+msgid "Show the mouse pointer"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:108
+msgid "Include the pointer in screenshots and recordings"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:124
+msgid "WebM (VP8)"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:128
+msgid "MP4 (H.264, when the codec is installed)"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:132
+msgid "Video format"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:133
+msgid "Screen recordings are saved in ~/Videos/Screencasts"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:150
+msgid "No sound"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:154
+msgid "System sound"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:158
+msgid "Microphone"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:162
+msgid "System sound and microphone"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:166
+msgid "Sound in recordings"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:167
+msgid "Off by default; the microphone is recorded only when you choose it here"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:179
+msgid "Open the editor after a capture"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:180
+msgid ""
+"Mark up each screenshot (pen, arrows, redaction, crop) before you keep it"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:192
+#: crates/desk-settings/src/capture.rs:208
+#: crates/desk-settings/src/capture.rs:222
+#: crates/desk-settings/src/capture.rs:236
+#: crates/desk-settings/src/color_picker.rs:133
+#: crates/desk-settings/src/emoji.rs:52 crates/desk-settings/src/mixer.rs:139
+#: crates/desk-settings/src/ocr.rs:101 crates/desk-settings/src/registry.rs:274
+msgid "Keyboard shortcut"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:251
+#: crates/desk-settings/src/capture.rs:305
+msgid "Capture a region of the screen"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:265
+#: crates/desk-settings/src/capture.rs:313
+msgid "Capture the whole screen"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:279
+#: crates/desk-settings/src/capture.rs:321
+msgid "Open the screenshot toolbar"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:293
+#: crates/desk-settings/src/capture.rs:329
+msgid "Start or stop a screen recording"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:361
+msgid ""
+"Capture, mark up and record the screen: Win+Shift+S in Windows 11, "
+"Shift+Cmd+4 in macOS"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:364
+msgid ""
+"Capture a region or the whole screen, mark the picture up with a pen, "
+"arrows, shapes and redaction, and record the screen to video. Redaction is "
+"real: the covered pixels are replaced in the saved file. Files stay in your "
+"folders; nothing is uploaded."
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:387
+msgid "Screen recording"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:395
+#: crates/desk-settings/src/color_picker.rs:212
+#: crates/desk-settings/src/emoji.rs:211 crates/desk-settings/src/mixer.rs:215
+#: crates/desk-settings/src/ocr.rs:181 crates/desk-settings/src/registry.rs:465
+msgid "How to open"
+msgstr ""
+
+#: crates/desk-settings/src/capture.rs:396
+msgid "The shortcuts are set on the «Keyboard shortcuts» page."
+msgstr ""
+
 #: crates/desk-settings/src/color_picker.rs:13
 #: crates/desk-settings/src/color_picker.rs:23
 #: crates/desk-settings/src/color_picker.rs:184
@@ -222,7 +400,7 @@ msgid "The scroll wheel and the + and - keys change it while picking"
 msgstr ""
 
 #: crates/desk-settings/src/color_picker.rs:104
-#: crates/desk-settings/src/registry.rs:174
+#: crates/desk-settings/src/registry.rs:176
 msgid "History size"
 msgstr ""
 
@@ -236,12 +414,6 @@ msgstr ""
 
 #: crates/desk-settings/src/color_picker.rs:119
 msgid "Put the picked colour on the clipboard in the chosen format"
-msgstr ""
-
-#: crates/desk-settings/src/color_picker.rs:133
-#: crates/desk-settings/src/emoji.rs:52 crates/desk-settings/src/mixer.rs:139
-#: crates/desk-settings/src/ocr.rs:101 crates/desk-settings/src/registry.rs:272
-msgid "Keyboard shortcut"
 msgstr ""
 
 #: crates/desk-settings/src/color_picker.rs:164
@@ -267,7 +439,7 @@ msgid "Picker"
 msgstr ""
 
 #: crates/desk-settings/src/color_picker.rs:207
-#: crates/desk-settings/src/registry.rs:430
+#: crates/desk-settings/src/registry.rs:441
 msgid "History"
 msgstr ""
 
@@ -275,24 +447,14 @@ msgstr ""
 msgid "Picked colours are kept only on this computer."
 msgstr ""
 
-#: crates/desk-settings/src/color_picker.rs:212
-#: crates/desk-settings/src/emoji.rs:211 crates/desk-settings/src/mixer.rs:215
-#: crates/desk-settings/src/ocr.rs:181 crates/desk-settings/src/registry.rs:454
-msgid "How to open"
-msgstr ""
-
 #: crates/desk-settings/src/color_picker.rs:213
 #: crates/desk-settings/src/emoji.rs:212 crates/desk-settings/src/mixer.rs:216
-#: crates/desk-settings/src/ocr.rs:182 crates/desk-settings/src/registry.rs:455
+#: crates/desk-settings/src/ocr.rs:182 crates/desk-settings/src/registry.rs:466
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr ""
 
 #: crates/desk-settings/src/emoji.rs:13 crates/desk-settings/src/emoji.rs:188
 msgid "Emoji and symbols"
-msgstr ""
-
-#: crates/desk-settings/src/emoji.rs:14 crates/desk-settings/src/osd.rs:13
-msgid "In Windows 11 and macOS"
 msgstr ""
 
 #: crates/desk-settings/src/emoji.rs:41
@@ -873,7 +1035,7 @@ msgid "Needs the tesseract package and its language data."
 msgstr ""
 
 #: crates/desk-settings/src/ocr.rs:176 crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:418
+#: crates/desk-settings/src/registry.rs:429
 msgid "Clipboard"
 msgstr ""
 
@@ -956,202 +1118,202 @@ msgid "The look follows the skin of the current theme."
 msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:410
+#: crates/desk-settings/src/registry.rs:421
 msgid "Application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:62
+#: crates/desk-settings/src/registry.rs:63
 msgid "simple menu (and a toggle in quick settings)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:66
+#: crates/desk-settings/src/registry.rs:67
 msgid "macOS-style panel (centred, with search)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:70
+#: crates/desk-settings/src/registry.rs:71
 msgid "Windows 11-style Win+V panel (next to the cursor)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:74
+#: crates/desk-settings/src/registry.rs:75
 msgid "Panel style"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:92
+#: crates/desk-settings/src/registry.rs:93
 msgid "System default"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:105
-#: crates/desk-settings/src/registry.rs:486
+#: crates/desk-settings/src/registry.rs:106
+#: crates/desk-settings/src/registry.rs:497
 msgid "Language"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:106
+#: crates/desk-settings/src/registry.rs:107
 msgid "Language of the window, the command line and the shell panels"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:160
+#: crates/desk-settings/src/registry.rs:162
 msgid "Record history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:161
+#: crates/desk-settings/src/registry.rs:163
 msgid "Turn off to disable the feature completely"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:175
+#: crates/desk-settings/src/registry.rs:177
 msgid "How many unpinned items to keep"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:186
+#: crates/desk-settings/src/registry.rs:188
 #: crates/themes/src/gui/wallpaper.rs:138
 msgid "Images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:187
+#: crates/desk-settings/src/registry.rs:189
 msgid "Also record copied images"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:200
+#: crates/desk-settings/src/registry.rs:202
 msgid "Largest image, KiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:201
+#: crates/desk-settings/src/registry.rs:203
 msgid "Bigger images are not recorded"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:218
+#: crates/desk-settings/src/registry.rs:220
 msgid "Image budget, MiB"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:219
+#: crates/desk-settings/src/registry.rs:221
 msgid "When images take more space, the oldest are dropped"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:232
+#: crates/desk-settings/src/registry.rs:234
 msgid "Keep between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:233
+#: crates/desk-settings/src/registry.rs:235
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:244
+#: crates/desk-settings/src/registry.rs:246
 msgid "Keep images between sessions"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:245
+#: crates/desk-settings/src/registry.rs:247
 msgid "Otherwise images live only until you log out"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:253
+#: crates/desk-settings/src/registry.rs:255
 msgid "Private mode"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:254
+#: crates/desk-settings/src/registry.rs:256
 msgid "Temporarily record nothing"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:261
+#: crates/desk-settings/src/registry.rs:263
 msgid "Paste the chosen item"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:262
+#: crates/desk-settings/src/registry.rs:264
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:307
+#: crates/desk-settings/src/registry.rs:309
 msgid "Excluded applications"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:342
-#: crates/desk-settings/src/registry.rs:354
+#: crates/desk-settings/src/registry.rs:344
+#: crates/desk-settings/src/registry.rs:356
 msgid "Open the clipboard panel"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:402
+#: crates/desk-settings/src/registry.rs:413
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:409
-#: crates/desk-settings/src/registry.rs:505
+#: crates/desk-settings/src/registry.rs:420
+#: crates/desk-settings/src/registry.rs:516
 msgid "Features"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:411
+#: crates/desk-settings/src/registry.rs:422
 msgid "About the project"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:419
+#: crates/desk-settings/src/registry.rs:430
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:421
+#: crates/desk-settings/src/registry.rs:432
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
 "theme."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:442
+#: crates/desk-settings/src/registry.rs:453
 msgid "Privacy"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:444
+#: crates/desk-settings/src/registry.rs:455
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:460
+#: crates/desk-settings/src/registry.rs:471
 msgid "deskd service"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:469
+#: crates/desk-settings/src/registry.rs:480
 msgid "Clear history"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:478
+#: crates/desk-settings/src/registry.rs:489
 msgid "General"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:479
+#: crates/desk-settings/src/registry.rs:490
 msgid "Language of the application"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:480
+#: crates/desk-settings/src/registry.rs:491
 msgid "Settings of the Themes application itself."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:487
+#: crates/desk-settings/src/registry.rs:498
 msgid "The change takes effect after the window is restarted."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:494
+#: crates/desk-settings/src/registry.rs:505
 msgid "Keyboard shortcuts"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:495
+#: crates/desk-settings/src/registry.rs:506
 msgid "All shortcuts of the features in one place"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:497
+#: crates/desk-settings/src/registry.rs:508
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
 "refused."
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:519
+#: crates/desk-settings/src/registry.rs:534
 msgid "Credits"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:520
+#: crates/desk-settings/src/registry.rs:535
 msgid "Projects the themes and features are based on, and their licences"
 msgstr ""
 
-#: crates/desk-settings/src/registry.rs:522
+#: crates/desk-settings/src/registry.rs:537
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "

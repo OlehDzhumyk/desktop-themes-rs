@@ -46,6 +46,14 @@ All notable changes to this project are documented in this file. The format is b
   `-2`, `-3` for captures in the same second, and renders the editor's annotations (redact as solid
   fill or pixelate, crop, rectangle, ellipse, line, arrow, highlighter, pen) from JSON. Redaction is
   destructive: the saved file holds only the result.
+- Screenshot settings (stage 3): schema `io.github.OlehDzhumyk.Desk.Capture` (`enabled`,
+  `save-folder`, `copy-to-clipboard`, `show-preview`, `delay`, `include-pointer`, `record-format`,
+  `record-audio`, `annotate-after-capture`, and `capture-region-shortcut`,
+  `capture-screen-shortcut`, `capture-toolbar-shortcut`, `capture-record-shortcut`), a «Знімки
+  екрана» page, and four shortcuts on the «Keyboard shortcuts» page (overrides `capture-region`,
+  `capture-screen`, `capture-toolbar`, `capture-record`). Windows 11 theme: Shift+Super+S,
+  Super+Print, Print, Shift+Super+R; macOS theme: Shift+Super+4, Shift+Super+3, Shift+Super+5;
+  Fedora keeps GNOME's own screenshot keys.
 - Colour picker engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.ColorPicker` at
   `/io/github/OlehDzhumyk/Desk/ColorPicker` (`Record`, `List`, `Remove`, `Clear`, `Format`,
   `Contrast`, signal `Changed`), formatting with `theme_tokens::picker` and keeping the newest

@@ -21,3 +21,12 @@ color-picker-shortcut=['<Shift><Super>c']
 # Text extractor (OCR): Shift+Super+T, as PowerToys Text Extractor.
 [io/github/OlehDzhumyk/Desk/ocr]
 ocr-shortcut=['<Shift><Super>t']
+
+# Screenshots: Win+Shift+S captures a region, Win+Print the screen, Print opens the toolbar,
+# Win+Shift+R records (Snipping Tool). They take Print and Shift+Super+S from GNOME's
+# show-screenshot-ui when applied, as any feature shortcut does.
+[io/github/OlehDzhumyk/Desk/capture]
+capture-region-shortcut=['<Shift><Super>s']
+capture-screen-shortcut=['<Super>Print']
+capture-toolbar-shortcut=['Print']
+capture-record-shortcut=['<Shift><Super>r']
