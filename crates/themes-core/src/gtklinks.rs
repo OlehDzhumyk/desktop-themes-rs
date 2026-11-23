@@ -125,16 +125,9 @@ pub fn unlink_all(ctx: &Ctx, st: &mut State, warnings: &mut Vec<String>) -> Resu
         st.save(ctx)?;
         restore_backup(ctx, st, &dest, warnings)?;
     }
-    // осиротілі резервні копії
-    let backups: Vec<String> = st.backups.keys().cloned().collect();
-    for dest in backups {
-        let b = st.backups[&dest].clone();
-        if !lexists(Path::new(&b)) || !lexists(Path::new(&dest)) {
-            restore_backup(ctx, st, &dest, warnings)?;
-        }
-    }
     let before = st.created_dirs.len();
-    // remove deepest subdirectories first so parent directories become empty too
+    // remove deepest subdirectories first so parent directories become empty too,
+    // before restoring backed-up user directories (such as a user's own `assets/`)
     let mut dirs = st.created_dirs.clone();
     dirs.sort_by_key(|d| std::cmp::Reverse(d.len()));
     for d in &dirs {
@@ -146,6 +139,14 @@ pub fn unlink_all(ctx: &Ctx, st: &mut State, warnings: &mut Vec<String>) -> Resu
     st.created_dirs.retain(|d| Path::new(d).exists());
     if st.created_dirs.len() != before {
         st.save(ctx)?;
+    }
+    // backed-up directories (whose replacement dirs were just cleaned up) and orphan backups
+    let backups: Vec<String> = st.backups.keys().cloned().collect();
+    for dest in backups {
+        let b = st.backups[&dest].clone();
+        if !lexists(Path::new(&b)) || !lexists(Path::new(&dest)) {
+            restore_backup(ctx, st, &dest, warnings)?;
+        }
     }
     Ok(())
 }
