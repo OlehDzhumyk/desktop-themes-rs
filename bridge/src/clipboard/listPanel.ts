@@ -9,10 +9,8 @@ import St from 'gi://St';
 
 import type {ClipItem} from '../dbus.js';
 import {_, fmt} from '../i18n.js';
-import {
-    ClipboardPanel, HORIZONTAL, VERTICAL, ago, iconButton, imageWidget, itemAccessibleName, label, oneLine,
-    type PanelHost,
-} from './panel.js';
+import {HORIZONTAL, VERTICAL, iconButton, label} from '../ui/primitives.js';
+import {ClipboardPanel, type PanelHost, ago, imageWidget, itemAccessibleName, oneLine} from './panel.js';
 
 export class ListPanel extends ClipboardPanel {
     private _entry: St.Entry;

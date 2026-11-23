@@ -10,7 +10,7 @@ import St from 'gi://St';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Spinner} from 'resource:///org/gnome/shell/ui/animation.js';
 
-import {animationsEnabled} from '../clipboard/panel.js';
+import {animationsEnabled} from '../ui/primitives.js';
 
 /** How long a result stays on screen. */
 const RESULT_SECONDS = 4;

@@ -8,7 +8,7 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {animationsEnabled, syncSystemClasses} from '../clipboard/panel.js';
+import {animationsEnabled, syncSystemClasses} from '../ui/primitives.js';
 
 const SHOW_MS = 1600;
 const FADE_MS = 80;

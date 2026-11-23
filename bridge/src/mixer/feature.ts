@@ -19,7 +19,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import type {OutputStreamSlider} from 'resource:///org/gnome/shell/ui/status/volume.js';
 
-import {animationsEnabled} from '../clipboard/panel.js';
+import {animationsEnabled} from '../ui/primitives.js';
 import {_} from '../i18n.js';
 import {errorText, outputSlider} from '../shellTypes.js';
 import {MixerClient, type MixerApp, type MixerDevice} from './client.js';

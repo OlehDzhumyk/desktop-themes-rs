@@ -16,7 +16,7 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {HORIZONTAL, VERTICAL, animationsEnabled, syncSystemClasses} from '../clipboard/panel.js';
+import {HORIZONTAL, VERTICAL, animationsEnabled, syncSystemClasses} from '../ui/primitives.js';
 import {_} from '../i18n.js';
 import {errorText, pushModal} from '../shellTypes.js';
 import {type ColorFormat, type ColorPickerClient, FORMATS, asFormat} from './client.js';

@@ -14,7 +14,7 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {HORIZONTAL, VERTICAL, animationsEnabled, syncSystemClasses} from '../clipboard/panel.js';
+import {HORIZONTAL, VERTICAL, animationsEnabled, syncSystemClasses} from '../ui/primitives.js';
 import {_, fmt} from '../i18n.js';
 
 export type OsdSkin = 'macos' | 'windows11';

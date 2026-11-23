@@ -11,10 +11,8 @@ import {
     EMOJI_CATEGORIES, EmojiGrid, type EmojiPickHost, SYMBOL_CATEGORIES,
 } from '../emoji/panel.js';
 import {_} from '../i18n.js';
-import {
-    ClipboardPanel, HORIZONTAL, VERTICAL, iconButton, imageWidget, itemAccessibleName, label, pinIcon,
-    type PanelHost,
-} from './panel.js';
+import {HORIZONTAL, VERTICAL, iconButton, label} from '../ui/primitives.js';
+import {ClipboardPanel, type PanelHost, imageWidget, itemAccessibleName, pinIcon} from './panel.js';
 
 export type FlyoutTab = 'clipboard' | 'emoji' | 'symbols';
 
