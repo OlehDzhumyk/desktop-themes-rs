@@ -425,24 +425,37 @@ mod tests {
         assert_eq!(made.len(), 1);
         // the record is on disk at once, not only in memory
         let on_disk = State::load(&f.ctx);
-        assert_eq!(on_disk.links.len(), 1);
+        assert_eq!(on_disk.gtk_copies.len(), 1);
+        assert!(on_disk.links.is_empty());
         assert_eq!(on_disk.backups.len(), 1);
         // a backup record whose file never got moved (crash between record and move) is dropped
         st.backups
             .insert("/nonexistent/gtk.css".into(), "/nonexistent/b".into());
         let mut w = vec![];
         crate::gtklinks::unlink_all(&f.ctx, &mut st, &mut w).unwrap();
-        assert!(st.backups.is_empty() && st.links.is_empty(), "{st:?}");
+        assert!(st.backups.is_empty() && st.gtk_copies.is_empty() && st.links.is_empty(), "{st:?}");
         assert_eq!(read(&f.ctx.gtk4.join("gtk.css")), "/* mine */\n");
         assert!(w.is_empty(), "{w:?}");
-        // a link the user replaced is left alone, and the backup is not forced over it
+        // a copy the user replaced is left alone, and the backup is not forced over it
         crate::gtklinks::link_theme(&f.ctx, &mut st, &t).unwrap();
         let dest = f.ctx.gtk4.join("gtk.css");
-        std::fs::remove_file(&dest).unwrap();
         std::fs::write(&dest, "/* edited */\n").unwrap();
         crate::gtklinks::unlink_all(&f.ctx, &mut st, &mut w).unwrap();
         assert_eq!(read(&dest), "/* edited */\n");
         assert_eq!(w.len(), 2, "{w:?}");
+        // legacy symlinks recorded in state.links are still removed cleanly
+        let legacy_src = f.ctx.themes.join("a/gtk4/gtk.css");
+        let legacy_dst = f.ctx.gtk4.join("legacy.css");
+        std::os::unix::fs::symlink(&legacy_src, &legacy_dst).unwrap();
+        st.links.insert(
+            legacy_dst.to_string_lossy().into(),
+            legacy_src.to_string_lossy().into(),
+        );
+        st.save(&f.ctx).unwrap();
+        let mut w2 = vec![];
+        crate::gtklinks::unlink_all(&f.ctx, &mut st, &mut w2).unwrap();
+        assert!(w2.is_empty(), "{w2:?}");
+        assert!(!legacy_dst.exists() && st.links.is_empty());
     }
 
     #[test]

@@ -21,6 +21,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Flatpak-compatible GTK copies: `themes apply` now copies all theme `gtk4/` and `gtk3/` files
+  (including `assets/` subdirectories for `macos` and `windows11`) into `~/.config/gtk-{4,3}.0`
+  instead of symlinking them, so Flatpak apps with `xdg-config/gtk-4.0:ro` can read them.
+  `themes/lavender` now ships `flatpak.conf`, and `themes doctor --fix` migrates legacy GTK
+  symlinks to copies and checks Flatpak read access to `~/.config/gtk-4.0`.
 - Focus modes (`focus`): `deskd` hosts the focus engine (`io.github.OlehDzhumyk.Desk.Focus` at
   `/io/github/OlehDzhumyk/Desk/Focus`) with built-in Do not disturb, Work and Sleep modes plus custom
   ones (allowed apps, mute sounds, weekday schedules with midnight wrap), timed starts and focus
