@@ -359,13 +359,19 @@ mod tests {
         assert_eq!(format_color(c, Format::Hsl), "hsl(210, 50%, 40%)");
         assert_eq!(format_color(c, Format::Hsv), "hsv(210, 67%, 60%)");
         assert_eq!(format_color(c, Format::Name), "#336699");
-        assert_eq!(format_color(c, Format::Gtk), "@define-color picked #336699;");
+        assert_eq!(
+            format_color(c, Format::Gtk),
+            "@define-color picked #336699;"
+        );
         assert_eq!(format_color(c, Format::Decimal), "51,102,153");
 
         // Uppercase hex check (#A1B2C3 from spec)
         let spec = Rgba::rgb(0xA1, 0xB2, 0xC3);
         assert_eq!(format_color(spec, Format::Hex), "#A1B2C3");
-        assert_eq!(format_color(spec, Format::Gtk), "@define-color picked #A1B2C3;");
+        assert_eq!(
+            format_color(spec, Format::Gtk),
+            "@define-color picked #A1B2C3;"
+        );
     }
 
     #[test]
@@ -373,13 +379,37 @@ mod tests {
         let cases = [
             (BLACK, "hsl(0, 0%, 0%)", "hsv(0, 0%, 0%)"),
             (WHITE, "hsl(0, 0%, 100%)", "hsv(0, 0%, 100%)"),
-            (Rgba::rgb(128, 128, 128), "hsl(0, 0%, 50%)", "hsv(0, 0%, 50%)"),
-            (Rgba::rgb(255, 0, 0), "hsl(0, 100%, 50%)", "hsv(0, 100%, 100%)"),
-            (Rgba::rgb(0, 255, 0), "hsl(120, 100%, 50%)", "hsv(120, 100%, 100%)"),
-            (Rgba::rgb(0, 0, 255), "hsl(240, 100%, 50%)", "hsv(240, 100%, 100%)"),
-            (Rgba::rgb(0x33, 0x66, 0x99), "hsl(210, 50%, 40%)", "hsv(210, 67%, 60%)"),
+            (
+                Rgba::rgb(128, 128, 128),
+                "hsl(0, 0%, 50%)",
+                "hsv(0, 0%, 50%)",
+            ),
+            (
+                Rgba::rgb(255, 0, 0),
+                "hsl(0, 100%, 50%)",
+                "hsv(0, 100%, 100%)",
+            ),
+            (
+                Rgba::rgb(0, 255, 0),
+                "hsl(120, 100%, 50%)",
+                "hsv(120, 100%, 100%)",
+            ),
+            (
+                Rgba::rgb(0, 0, 255),
+                "hsl(240, 100%, 50%)",
+                "hsv(240, 100%, 100%)",
+            ),
+            (
+                Rgba::rgb(0x33, 0x66, 0x99),
+                "hsl(210, 50%, 40%)",
+                "hsv(210, 67%, 60%)",
+            ),
             // Hue near 360 wraps cleanly to 0
-            (Rgba::rgb(255, 0, 1), "hsl(0, 100%, 50%)", "hsv(0, 100%, 100%)"),
+            (
+                Rgba::rgb(255, 0, 1),
+                "hsl(0, 100%, 50%)",
+                "hsv(0, 100%, 100%)",
+            ),
         ];
         for (c, hsl, hsv) in cases {
             assert_eq!(format_color(c, Format::Hsl), hsl, "{c}");
@@ -391,13 +421,25 @@ mod tests {
     fn exact_and_nearest_css_names() {
         assert_eq!(exact_css_name(BLACK), Some("black"));
         assert_eq!(exact_css_name(WHITE), Some("white"));
-        assert_eq!(exact_css_name(Rgba::rgb(0x66, 0x33, 0x99)), Some("rebeccapurple"));
-        assert_eq!(format_color(Rgba::rgb(0x66, 0x33, 0x99), Format::Name), "rebeccapurple");
+        assert_eq!(
+            exact_css_name(Rgba::rgb(0x66, 0x33, 0x99)),
+            Some("rebeccapurple")
+        );
+        assert_eq!(
+            format_color(Rgba::rgb(0x66, 0x33, 0x99), Format::Name),
+            "rebeccapurple"
+        );
         assert_eq!(exact_css_name(Rgba::rgb(0x33, 0x66, 0x99)), None);
-        assert_eq!(format_color(Rgba::rgb(0x33, 0x66, 0x99), Format::Name), "#336699");
+        assert_eq!(
+            format_color(Rgba::rgb(0x33, 0x66, 0x99), Format::Name),
+            "#336699"
+        );
 
         // Nearest matches exact entries verbatim and picks close neighbours otherwise
-        assert_eq!(nearest_css_name(Rgba::rgb(0x66, 0x33, 0x99)), "rebeccapurple");
+        assert_eq!(
+            nearest_css_name(Rgba::rgb(0x66, 0x33, 0x99)),
+            "rebeccapurple"
+        );
         assert_eq!(nearest_css_name(Rgba::rgb(254, 2, 1)), "red");
         assert_eq!(nearest_css_name(Rgba::rgb(1, 2, 1)), "black");
         assert_eq!(nearest_css_name(Rgba::rgb(253, 254, 255)), "white");
