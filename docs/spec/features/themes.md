@@ -3,7 +3,7 @@
 ## Summary
 
 The user switches the whole look of the desktop between the bundled themes (`fedora`, `macos`,
-`macos-glass`, `windows11`) and their own, or takes single **modules** (`look`, `behavior`, `sounds`,
+`windows11`, `lavender`) and their own, or takes single **modules** (`look`, `behavior`, `sounds`,
 `apps`) from different themes. Everything is done at user level (dconf, GTK symlinks, flatpak
 overrides, extensions switched live); nothing needs sudo, and everything can be undone.
 
@@ -27,8 +27,11 @@ taskbar, icons, cursors, fonts, sounds, keyboard conventions) in a GNOME session
 * A theme is a directory `<theme root>/themes/<id>/` following the [theme contract](../../theme-contract.md).
   `<id>` is `[a-z0-9][a-z0-9._-]{0,63}`. Files the manager does not know are ignored.
 * Bundled: `fedora` (built-in, stock look, cannot be deleted, is the **safe theme**), `macos`,
-  `macos-glass` (Experimental, inherits `macos`, see [liquid-glass](liquid-glass.md)), `windows11`.
-  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)); **Partial** until its generated output is complete (stage 1.5, PR in review). Further themes are the user's own (snapshots, hand-made).
+  `windows11`, `lavender`. The experimental `macos-glass` was removed; `themes doctor --fix` moves
+  its modules to `macos` (see [liquid-glass](liquid-glass.md)).
+  `lavender` is a token-only showcase theme (just `theme.conf` + `tokens.toml`, see [design tokens](../../design-tokens.md)): libadwaita CSS, the shell layer, the Ptyxis palette,
+  the wallpaper and the dconf keys are all generated, and snapshot tests pin them
+  (`crates/theme-tokens/tests/snapshots/lavender`). Further themes are the user's own (snapshots, hand-made).
 * `themes list` shows id, name, modules the theme provides, which of its modules are active, and the
   description; `*` marks the theme that provides the **look** module. `--json` gives
   `id, name, description, preview, preview_dark, active, active_modules, modules, builtin, extensions, path`.
@@ -83,7 +86,7 @@ parent's whole `settings.dconf`); `extensions.txt` lines `+uuid` add and `-uuid`
 `uuid` line makes the child list everything itself; `gtk4/`, `gtk3/`, `flatpak.conf`, `apps/hooks/*`
 come from the first theme in the chain that has them (directories are not merged); `PREVIEW`
 inherited, `NAME`/`DESCRIPTION`/`INHERITS` not. Cycles, missing parents and chains longer than 8 are
-reported by `themes doctor` and the child then stands alone. Example: `macos-glass`.
+reported by `themes doctor` and the child then stands alone. Example: a snapshot with `INHERITS=macos`.
 
 ### Reset
 
@@ -163,7 +166,8 @@ modules. Switching never relies on colour alone ("активна" badge text).
 * **G-THEMES-1** *(resolved)* `SNAPSHOT_PREFIXES` now has the skin and the clipboard shortcut
   (`/io/github/OlehDzhumyk/Desk/skin`, `.../clipboard/toggle-shortcut`); the user's shortcut overrides
   (`Desk/shortcuts/`) and other preferences are deliberately not theme data.
-* **G-THEMES-2** There is no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
+* **G-THEMES-2** *(resolved)* `EXPERIMENTAL=true` and `WARNING` in `theme.conf`; the CLI needs
+  `--yes`, the window, quick settings and D-Bus `Apply` ask first (ADR 0006). Original report: there was no `EXPERIMENTAL`/`WARNING` marker: `macos-glass` is flagged only by words in its
   description, and the CLI, the window and quick settings apply it with one click. Intended: mandatory
   confirmation, see [liquid-glass](liquid-glass.md).
 * **G-THEMES-3** *(resolved)* `themes/macos/spotlight.dconf` had a stale comment about `behavior.dconf`.
@@ -182,8 +186,8 @@ modules. Switching never relies on colour alone ("активна" badge text).
   the skin is still `macos`.
 * AC-THEMES-03: Given any installed theme, When `themes apply <id> --dry-run` runs, Then the exit code
   is 0 and dconf, `state.json`, GTK links and the enabled extensions are byte-identical afterwards.
-* AC-THEMES-04: Given `macos-glass`, When its files are listed, Then only `theme.conf`, `glass.dconf`
-  and `extensions.txt` exist and every other module file resolves from `macos`.
+* AC-THEMES-04: *(withdrawn: `macos-glass` is no longer bundled; inheritance is covered by
+  AC-THEMES-05 and AC-THEMES-06)*
 * AC-THEMES-05: Given a child with `extensions.txt` containing `-spotlight@nin`, When it is applied,
   Then the parent's list minus that uuid plus `desk-bridge@desktop-themes-rs` is enabled.
 * AC-THEMES-06: Given a theme `INHERITS` itself or a missing id, When `themes doctor` runs, Then it
@@ -196,8 +200,7 @@ modules. Switching never relies on colour alone ("активна" badge text).
 * AC-THEMES-09: Given `fedora`, When `themes delete fedora` runs, Then it fails with an error and
   nothing moves.
 * AC-THEMES-10: Given a snapshot `mine` taken while the Windows 11 skin is active, When `mine` is
-  applied later, Then the skin is `windows11` and the clipboard shortcut is `Super+V` (fails today,
-  G-THEMES-1).
+  applied later, Then the skin is `windows11` and the clipboard shortcut is `Super+V`.
 * AC-THEMES-11: Given a theme file with `$HOME` in `picture-uri`, When it is applied, Then the stored
   value contains the percent-encoded real home directory and no `$HOME`.
 * AC-THEMES-12: Given `themes list --json`, When parsed, Then every object has the fields listed above

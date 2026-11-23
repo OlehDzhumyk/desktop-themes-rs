@@ -70,7 +70,7 @@ hang); kill only processes the test spawned (`procs` fixture); keep the bridge f
 | `test_bridge.py` | enables without errors on `macos`, `windows11`, `default`; live skin switch |
 | `test_clipboard.py` | per skin: `wl-copy` → deskd history → theme shortcut opens the panel → Down + Enter pastes into a GTK window |
 | `test_shortcuts.py` | `themes shortcut set` reaches the bridge live; a taken accelerator is refused and nothing is written |
-| `test_themes.py` | `themes apply macos/windows11/fedora` live (no rollback, skin follows), `themes doctor` has no errors; `macos-glass` refused without `--yes` |
+| `test_themes.py` | `themes apply macos/windows11/fedora` live (no rollback, skin follows), `themes doctor` has no errors; a synthetic experimental theme refused without `--yes` |
 | `test_lifecycle.py` | nothing left after disable (handlers on shell objects, sources, actors, keybinding); logout with the bridge enabled or after disable leaves no GC warning or error from the bridge |
 
 Third-party extensions of the themes are not installed in the image, so `themes apply` and

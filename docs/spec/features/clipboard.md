@@ -265,12 +265,16 @@ fine); deskd <= 20 MB resident after 200 pushes; capture adds no polling (event-
   (`bridge/src/clipboard/watcher.ts`), not the owner of the selection: a copy made by a background
   process or while the shell has the focus is attributed to the wrong (or no) app, so `excluded-apps`
   cannot be relied on for those.
-* **G-CLIP-2** Windows flyout: buttons are focusable but `Tab` is not handled and the key focus stays on the
+* **G-CLIP-2** *(resolved)* `Tab`/`Shift+Tab` walk the panel's controls (`panel.ts`), the
+  `windows11` cards are focusable with focus and selection following each other, and rows carry an
+  accessible name (`itemAccessibleName`). Original report: Windows flyout: buttons are focusable but `Tab` is not handled and the key focus stays on the
   backdrop (`winFlyout.ts` `focusInitial`), so the pin, "..." and delete buttons are unreachable by
   keyboard (only `Ctrl+P`/`Delete` work); rows are `St.Button` with `can_focus: false`, no accessible
   name/role, and the selected state is only a style class (`panel.ts`). Fails the accessibility
   principle.
-* **G-CLIP-3** `bridge/static/stylesheet.css` is dark-only with fixed colours and a hard-coded accent
+* **G-CLIP-3** *(resolved)* The panel follows the colour scheme (`.desk-light`), the GNOME accent
+  (`.desk-accent-<colour>`) and high contrast (`.desk-hc`, outlines so selection never depends on
+  colour alone); sizes are in em. Original report: `bridge/static/stylesheet.css` is dark-only with fixed colours and a hard-coded accent
   `#60cdff`: no light scheme, no GNOME accent, no high contrast (principle 6). Design tokens (stage
   1.5) are expected to replace it.
 * **G-CLIP-4** The caret position reads the private `Main.inputMethod._cursorRect`
@@ -279,13 +283,14 @@ fine); deskd <= 20 MB resident after 200 pushes; capture adds no polling (event-
 * **G-CLIP-5** *(resolved)* `Entry.hash` was std `DefaultHasher`, whose algorithm Rust does not promise to
   keep. It is now FNV-1a 64 (`desk_settings::stable_hash`); store version 2, and a version 1 history has its
   hashes recomputed at load. The thumbnail cache of the window uses the same hash (old thumbnails are purged).
-* **G-CLIP-6** Windows flyout: the pin button uses the same icon for pinned and unpinned
+* **G-CLIP-6** *(resolved: outline icon for unpinned items, `pinIcon`)* Windows flyout: the pin button uses the same icon for pinned and unpinned
   (`it.pinned ? 'view-pin-symbolic' : 'view-pin-symbolic'`), the state is only a style class; `_expanded`
   keeps its index after a delete, so the next card appears expanded.
 * **G-CLIP-7** Skipped items give no feedback at all; for *too large* content a short, non-sensitive hint
   would help (not for privacy skips, which must stay silent). See open questions.
-* **G-CLIP-8** All panel strings are hard-coded Ukrainian (`panel.ts`, `listPanel.ts`, `winFlyout.ts`).
-* **G-CLIP-9** `excluded-apps` is editable only with `gsettings`; the hub should expose it (see
+* **G-CLIP-8** *(resolved)* Panel strings are English gettext ids (`_()`) with Ukrainian in
+  `po/uk.po` ([i18n](../../i18n.md)).
+* **G-CLIP-9** *(resolved: editable list row in the hub)* `excluded-apps` was editable only with `gsettings`; the hub should expose it (see
   [settings-hub](settings-hub.md)).
 
 ## Acceptance criteria

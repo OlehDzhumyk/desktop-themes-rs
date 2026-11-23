@@ -14,7 +14,7 @@ the picture as wallpaper. A second, live mode lets the accent follow the current
 
 Origin badge: *From Windows, adapted for macOS style* (Windows 11 offers an automatic accent from the wallpaper; macOS tints windows by the
 wallpaper and has a "multicolour" accent but does not derive a full theme). Algorithm: original (k-means in OKLab, see
-design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)).
+[design tokens](../../design-tokens.md)).
 
 ## Reference behaviour
 

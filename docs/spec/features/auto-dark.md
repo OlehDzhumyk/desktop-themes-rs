@@ -44,7 +44,7 @@ mode other than `manual` overrides).
   midnight. If the transition time has passed at login or resume, the correct scheme is applied immediately.
 * Applying = writing `color-scheme`; the shell, libadwaita and GTK apps follow live. Themes with explicit variants
   (`PREVIEW_DARK`, `picture-uri-dark`, GTK `gtk-dark.css`) follow automatically; the shell theme of `macos` is always dark.
-  Tokens-based themes get their light or dark palette (design-tokens (`docs/design-tokens.md`, lands with its stage 1.5 pull request)); `themes apply` is **not**
+  Tokens-based themes get their light or dark palette ([design tokens](../../design-tokens.md)); `themes apply` is **not**
   re-run, only the scheme key changes (fast, <= 100 ms).
 
 ### Manual override

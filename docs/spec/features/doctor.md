@@ -136,9 +136,9 @@ The login run is off the critical path (after `gnome-session.target`).
 * AC-DOCTOR-03: Given `disable-user-extensions=true`, When `themes doctor` runs without
   `--enable-extensions`, Then the key is still `true` afterwards and the report has the error
   `extensions-disabled`.
-* AC-DOCTOR-04: Given `disable-user-extensions=true` and a recorded crash after `apply macos-glass`,
-  When the report is shown, Then it names theme `macos-glass` and the extensions that theme added
-  as suspects.
+* AC-DOCTOR-04: Given `disable-user-extensions=true` and a recorded crash after applying a theme
+  that added extensions, When the report is shown, Then it names that theme and the extensions it
+  added as suspects.
 * AC-DOCTOR-05: Given the window with the banner, When the user chooses «Скасувати», Then the key is
   unchanged and no theme is applied.
 * AC-DOCTOR-06: Given the banner dialog with a culprit theme other than `fedora`, When the user chooses

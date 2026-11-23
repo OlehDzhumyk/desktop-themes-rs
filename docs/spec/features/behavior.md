@@ -9,8 +9,7 @@ of key owners**: one table per theme, and the rules every new shortcut must foll
 
 ## Status
 
-**Implemented** for `fedora` (returns to the baseline), `macos` and `windows11` (`macos-glass` inherits
-the `macos` module). Origin badge: *In Windows 11 and macOS* (each theme follows its system's
+**Implemented** for `fedora` (returns to the baseline), `macos` and `windows11`. Origin badge: *In Windows 11 and macOS* (each theme follows its system's
 conventions). The planned shortcuts at the end are **Planned**.
 
 ## Reference behaviour

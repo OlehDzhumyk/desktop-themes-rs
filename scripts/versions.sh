@@ -30,6 +30,9 @@ JETBRAINS_MONO_SHA256=6f6376c6ed2960ea8a963cd7387ec9d76e3f629125bc33d1fdcd7eb701
 # Large download (~150 MB), only the Cascadia Code/Mono variable TTFs are installed.
 CASCADIA_URL=https://github.com/microsoft/cascadia-code/releases/download/v2407.24/CascadiaCode-2407.24.zip
 CASCADIA_SHA256=e67a68ee3386db63f48b9054bd196ea752bc6a4ebb4df35adce6733da50c8474
+# the release zip has no licence file; take it from the same tag
+CASCADIA_LICENSE_URL=https://raw.githubusercontent.com/microsoft/cascadia-code/v2407.24/LICENSE
+CASCADIA_LICENSE_SHA256=51882cd3cdba4e16f220f44ddb08a635c38c44ea6e0975db2574f4be6f958238
 
 # --- GNOME Shell extensions from extensions.gnome.org, pinned by version tag (shell 51) ---
 # uuid  version-tag  (human version)  sha256 of the downloaded ZIP (verified before it is unpacked).
