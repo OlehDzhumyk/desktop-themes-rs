@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 23:42+0000\n"
+"POT-Creation-Date: 2026-11-23 23:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1187,7 +1187,7 @@ msgstr ""
 msgid "Sleep"
 msgstr ""
 
-#: crates/deskd/src/main.rs:44
+#: crates/deskd/src/main.rs:45
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -1198,7 +1198,7 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:98 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:101 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -3971,6 +3971,52 @@ msgstr ""
 
 #: bridge/src/mixer/rows.ts:174
 msgid "{row}, muted"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:50
+msgid "Copied text: {preview}"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:50
+msgid "No text found"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:52
+msgid "No data for language {code}: install tesseract-langpack-{code}"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:57
+msgid "Text recognition needs tesseract: install the tesseract package"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:152
+msgid "Recognising text…"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:196
+msgid "Recognition was interrupted"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:199
+msgid "The region is too large to recognise"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:202
+msgid "No language data for text recognition: {error}"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:206
+msgid "Could not recognise text: {error}"
+msgstr ""
+
+#: bridge/src/ocr/overlay.ts:53
+msgid "Select the text to copy"
+msgstr ""
+
+#: bridge/src/ocr/overlay.ts:62
+msgid ""
+"Drag over the text to copy it. Arrow keys and Enter select with the "
+"keyboard; Esc cancels."
 msgstr ""
 
 #: bridge/src/osd/popup.ts:57

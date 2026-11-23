@@ -7,9 +7,27 @@ Works on images, videos, remote desktops, PDFs rendered as pictures: anything vi
 
 ## Status
 
-**Planned** (stage 3). Origin badge: *In Windows 11 and macOS*. Engine: Tesseract (Apache-2.0), run as a
+**Implemented** (stage 3). Origin badge: *In Windows 11 and macOS*. Engine: Tesseract (Apache-2.0), run as a
 child process; language data from the distribution's `tesseract-langpack-*` packages or a user-installed
 `tessdata` directory. No bundled models.
+
+`deskd` serves `io.github.OlehDzhumyk.Desk.Ocr` (`Recognize`, `AvailableLanguages`, `IsAvailable`;
+`crates/deskd/src/ocr/`, `crates/deskd/src/engine/ocr.rs`); the bridge draws the selection, captures the
+region and copies the text (`bridge/src/ocr/`). Gaps:
+
+* **Gap:** no "Text" mode in the screenshots toolbar and no "Copy text" in the macOS thumbnail: the
+  [screenshots](screenshots.md) feature does not exist yet; only the shortcut starts OCR.
+* **Gap:** the region overlay is the text extractor's own (`bridge/src/ocr/overlay.ts`), not the
+  screenshot overlay; it covers all monitors and offers pointer drag and arrow keys.
+* **Gap:** low-contrast text is not upscaled or inverted before recognition (`crates/deskd/src/ocr/mod.rs`
+  passes the capture as is).
+* **Gap:** the `languages` setting is a free list of codes; the window does not offer only the installed
+  ones. Codes without data are named in the result toast instead (`AvailableLanguages` lists the
+  installed codes for a future picker).
+* **Gap:** the network namespace needs unprivileged user namespaces; where the kernel or a container
+  refuses them, Tesseract runs with the session network (it opens no sockets). `RLIMIT_AS` always holds.
+* **Gap:** no GNOME Shell end-to-end test yet (`tests/e2e/`); deskd is covered by unit tests with a fake
+  `tesseract`.
 
 ## Reference behaviour
 

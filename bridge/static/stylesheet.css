@@ -505,3 +505,36 @@
 .desk-osd.desk-hc.desk-light .desk-osd-fill { background-color: #000; }
 .desk-osd.desk-hc.desk-light .desk-osd-over { background-color: #8a4b00; }
 .desk-osd.desk-hc.desk-light .desk-osd-marker { background-color: #c00000; }
+
+/* ------------------------------------------------------------------ text extractor (OCR) */
+/* The region overlay: the area outside the selection is dimmed, the selection stays clear with
+   a frame. The toast is a small non-interactive label near the bottom of the monitor. */
+.desk-ocr-dim { background-color: rgba(0,0,0,0.45); }
+.desk-ocr-selection { border: 2px solid -st-accent-color; }
+.desk-ocr-hint {
+  font-size: 11pt;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #ffffff;
+  background-color: rgba(0,0,0,0.75);
+}
+.desk-ocr-toast {
+  spacing: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  color: #ffffff;
+  background-color: rgba(30,30,30,0.92);
+  font-size: 10.5pt;
+}
+.desk-ocr-toast-label { color: inherit; }
+/* windows11: PowerToys-like darker dim, light-blue frame, rounded 8 px toast */
+.desk-skin-windows11 .desk-ocr-dim { background-color: rgba(0,0,0,0.55); }
+.desk-skin-windows11 .desk-ocr-selection { border: 2px solid #60cdff; }
+.desk-ocr-toast.desk-skin-windows11 { border-radius: 8px; background-color: rgba(32,32,32,0.96); }
+/* macos: lighter dim, thin white frame, pill toast */
+.desk-skin-macos .desk-ocr-dim { background-color: rgba(0,0,0,0.3); }
+.desk-skin-macos .desk-ocr-selection { border: 1px solid rgba(255,255,255,0.95); }
+.desk-ocr-toast.desk-skin-macos { border-radius: 18px; background-color: rgba(40,40,40,0.9); }
+/* high contrast: opaque surfaces and a thick frame */
+.desk-hc .desk-ocr-selection { border: 3px solid #ffffff; }
+.desk-hc .desk-ocr-hint, .desk-ocr-toast.desk-hc { background-color: #000000; border: 2px solid #ffffff; }

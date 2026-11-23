@@ -29,6 +29,16 @@ All notable changes to this project are documented in this file. The format is b
   (`enabled`, `show-percentage`, `timeout-ms`, `position`) and an «Екранні індикатори» page in the
   window. With the `default` skin, `enabled` off or a manager another extension patched, GNOME's
   own OSD stays untouched; skin switch and `disable()` restore it exactly.
+- OCR text extractor (stage 3): select a region of the screen and its text is recognised locally
+  with Tesseract and copied to the clipboard. `deskd` hosts `io.github.OlehDzhumyk.Desk.Ocr` at
+  `/io/github/OlehDzhumyk/Desk/Ocr` (`Recognize`, `AvailableLanguages`, `IsAvailable`): one request
+  at a time, regions above `max-megapixels` refused, missing language data named with English as the
+  fallback; the child runs with `RLIMIT_AS` of 1 GiB, without network where user namespaces are
+  allowed, and its temporary image is always deleted. The bridge binds `ocr-shortcut`
+  (Shift+Super+T; Ctrl+Shift+Super+T in the macOS theme; override `ocr-toggle`), draws a dimmed
+  selection overlay (pointer or keyboard, `Esc` cancels) per skin and shows a status toast.
+  Settings `io.github.OlehDzhumyk.Desk.Ocr` (`enabled`, `languages`, `record-in-history`,
+  `keep-line-breaks`, `max-megapixels`, `ocr-shortcut`) and a «Розпізнавання тексту» page.
 - Colour picker engine (stage 3): `deskd` hosts `io.github.OlehDzhumyk.Desk.ColorPicker` at
   `/io/github/OlehDzhumyk/Desk/ColorPicker` (`Record`, `List`, `Remove`, `Clear`, `Format`,
   `Contrast`, signal `Changed`), formatting with `theme_tokens::picker` and keeping the newest

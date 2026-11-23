@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 23:42+0000\n"
+"POT-Creation-Date: 2026-11-23 23:43+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -461,6 +461,54 @@ msgstr "{app}: гучність {percent} %"
 #: bridge/src/mixer/rows.ts:174
 msgid "{row}, muted"
 msgstr "{row}, без звуку"
+
+#: bridge/src/ocr/feature.ts:50
+msgid "Copied text: {preview}"
+msgstr "Скопійовано текст: {preview}"
+
+#: bridge/src/ocr/feature.ts:50
+msgid "No text found"
+msgstr "Тексту не знайдено"
+
+#: bridge/src/ocr/feature.ts:52
+msgid "No data for language {code}: install tesseract-langpack-{code}"
+msgstr "Немає даних мови {code}: встановіть tesseract-langpack-{code}"
+
+#: bridge/src/ocr/feature.ts:57
+msgid "Text recognition needs tesseract: install the tesseract package"
+msgstr "Для розпізнавання потрібен tesseract: встановіть пакунок tesseract"
+
+#: bridge/src/ocr/feature.ts:152
+msgid "Recognising text…"
+msgstr "Розпізнавання тексту…"
+
+#: bridge/src/ocr/feature.ts:196
+msgid "Recognition was interrupted"
+msgstr "Розпізнавання перервано"
+
+#: bridge/src/ocr/feature.ts:199
+msgid "The region is too large to recognise"
+msgstr "Ділянка завелика для розпізнавання"
+
+#: bridge/src/ocr/feature.ts:202
+msgid "No language data for text recognition: {error}"
+msgstr "Немає даних мов для розпізнавання: {error}"
+
+#: bridge/src/ocr/feature.ts:206
+msgid "Could not recognise text: {error}"
+msgstr "Не вдалося розпізнати текст: {error}"
+
+#: bridge/src/ocr/overlay.ts:53
+msgid "Select the text to copy"
+msgstr "Виділіть текст, який треба скопіювати"
+
+#: bridge/src/ocr/overlay.ts:62
+msgid ""
+"Drag over the text to copy it. Arrow keys and Enter select with the "
+"keyboard; Esc cancels."
+msgstr ""
+"Виділіть текст мишею, щоб скопіювати його. Клавіші зі стрілками та Enter "
+"виділяють клавіатурою; Esc скасовує."
 
 #: bridge/src/osd/popup.ts:57
 msgid "Microphone muted"
@@ -1788,7 +1836,7 @@ msgstr "Робота"
 msgid "Sleep"
 msgstr "Режим сну"
 
-#: crates/deskd/src/main.rs:44
+#: crates/deskd/src/main.rs:45
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -1805,7 +1853,7 @@ msgstr ""
 "replace, і дозволити наступному забрати її\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:98 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:101 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
