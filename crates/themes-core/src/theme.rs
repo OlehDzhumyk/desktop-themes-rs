@@ -368,7 +368,8 @@ impl Theme {
         v
     }
 
-    pub fn flatpak_lines(&self) -> Vec<Vec<String>> {
+    /// Lines of `flatpak.conf` as arguments, allowed or not.
+    fn flatpak_conf_lines(&self) -> Vec<Vec<String>> {
         let Some(path) = self.find("flatpak.conf") else {
             return vec![];
         };
@@ -380,6 +381,21 @@ impl Theme {
             .filter(|l| !l.is_empty() && !l.starts_with('#'))
             .filter_map(|l| shlex_split(l).ok())
             .filter(|v| !v.is_empty())
+            .collect()
+    }
+
+    /// `flatpak.conf` lines that may be applied: the allowlist of `flatpak::refusal` (S-4).
+    pub fn flatpak_lines(&self) -> Vec<Vec<String>> {
+        let mut v = self.flatpak_conf_lines();
+        v.retain(|l| crate::flatpak::refusal(l).is_none());
+        v
+    }
+
+    /// Lines of `flatpak.conf` that are refused, with the reason: `(line, why)`.
+    pub fn flatpak_refused(&self) -> Vec<(String, String)> {
+        self.flatpak_conf_lines()
+            .into_iter()
+            .filter_map(|l| crate::flatpak::refusal(&l).map(|why| (l.join(" "), why)))
             .collect()
     }
 
@@ -608,7 +624,10 @@ pub(crate) mod tests {
             "[org/gnome/desktop/sound]\ntheme-name='p'\n",
         );
         write(&p.join("extensions.txt"), "a@x\nb@x\nc@x\n");
-        write(&p.join("flatpak.conf"), "--env=A=1\n");
+        write(
+            &p.join("flatpak.conf"),
+            "--env=GTK_THEME=A\n--socket=session-bus\n",
+        );
         write(&p.join("gtk4/gtk.css"), "x");
         let hook = p.join("apps/hooks/apply");
         write(&hook, "#!/bin/sh\n");
@@ -644,7 +663,12 @@ pub(crate) mod tests {
         assert_eq!(t.settings(Module::Behavior).len(), 1);
         assert_eq!(t.settings(Module::Sounds).len(), 1);
         assert_eq!(t.extensions(), vec!["a@x", "c@x", "d@x"]);
-        assert_eq!(t.flatpak_lines(), vec![vec!["--env=A=1".to_string()]]);
+        assert_eq!(
+            t.flatpak_lines(),
+            vec![vec!["--env=GTK_THEME=A".to_string()]]
+        );
+        assert_eq!(t.flatpak_refused().len(), 1);
+        assert!(t.flatpak_refused()[0].0.contains("session-bus"));
         assert_eq!(t.gtk_entries("gtk4"), vec!["gtk.css"]);
         assert_eq!(t.gtk_dir("gtk4").unwrap(), p.join("gtk4"));
         assert_eq!(t.hook("apply").unwrap(), hook);

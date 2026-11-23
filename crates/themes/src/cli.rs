@@ -332,6 +332,9 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
             if !dry_run && !yes {
                 confirm_experimental(ctx, &id, json)?;
             }
+            if !dry_run {
+                confirm_commands(ctx, &id, &mods, yes, json)?;
+            }
             do_apply(ctx, &id, &mods, dry_run, no_verify, true, json)
         }
         Cmd::Reset {
@@ -489,7 +492,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
 /// Експериментальна тема: спитати y/N у терміналі; без терміналу (скрипти, --json) — відмова, якщо
 /// не передано --yes.
 fn confirm_experimental(ctx: &Ctx, id: &str, json: bool) -> Result<(), Error> {
-    use std::io::{BufRead, IsTerminal, Write};
+    use std::io::IsTerminal;
     let t = themes_core::theme::get_theme(ctx, id)?;
     if !t.experimental() {
         return Ok(());
@@ -507,6 +510,16 @@ fn confirm_experimental(ctx: &Ctx, id: &str, json: bool) -> Result<(), Error> {
         tr!("“{name}” is an experimental theme.", name = t.name())
     );
     eprintln!("{}", t.warning());
+    if ask_yes()? {
+        Ok(())
+    } else {
+        Err(Error(tr!("Cancelled: the theme was not applied.")))
+    }
+}
+
+/// Ask "Apply it anyway? [y/N]" on the terminal; true for a yes.
+fn ask_yes() -> Result<bool, Error> {
+    use std::io::{BufRead, Write};
     // TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
     eprint!("{} ", tr!("Apply it anyway? [y/N]"));
     let _ = std::io::stderr().flush();
@@ -515,10 +528,76 @@ fn confirm_experimental(ctx: &Ctx, id: &str, json: bool) -> Result<(), Error> {
     let a = line.trim().to_lowercase();
     // TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
     let yes_words = tr!("y|yes");
-    if a == "y" || a == "yes" || yes_words.split('|').any(|w| !w.is_empty() && a == w) {
-        Ok(())
-    } else {
-        Err(Error(tr!("Cancelled: the theme was not applied.")))
+    Ok(a == "y" || a == "yes" || yes_words.split('|').any(|w| !w.is_empty() && a == w))
+}
+
+/// Dconf keys of the theme that run commands (shortcuts, terminal, autostart): the first time,
+/// list them and ask. `--yes` is the yes of scripts. A yes is remembered per key and command.
+fn confirm_commands(
+    ctx: &Ctx,
+    id: &str,
+    mods: &[Module],
+    yes: bool,
+    json: bool,
+) -> Result<(), Error> {
+    use std::io::IsTerminal;
+    let plan = apply_opts(ctx, id, mods, true, true)?;
+    let pending = themes_core::commands::pending(ctx, &plan.writes);
+    if pending.is_empty() {
+        return Ok(());
+    }
+    if !yes {
+        let list = pending
+            .iter()
+            .map(|c| format!("  {} = {}", c.key, c.value))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let interactive =
+            !json && std::io::stdin().is_terminal() && std::io::stderr().is_terminal();
+        if !interactive {
+            return Err(Error(tr!(
+                "The theme “{name}” sets keys that run commands:\n{list}\nRun it again with --yes to apply it anyway.",
+                name = plan.name,
+                list = list
+            )));
+        }
+        eprintln!(
+            "{}",
+            tr!(
+                "The theme “{name}” sets keys that run commands:\n{list}",
+                name = plan.name,
+                list = list
+            )
+        );
+        if !ask_yes()? {
+            return Err(Error(tr!("Cancelled: the theme was not applied.")));
+        }
+    }
+    themes_core::commands::approve(ctx, &pending)?;
+    Ok(())
+}
+
+/// `apply --dry-run`: the keys that run commands, and whether they are approved already.
+fn print_commands(ctx: &Ctx, r: &ApplyResult) {
+    let all = themes_core::commands::command_keys(&r.writes);
+    if all.is_empty() {
+        return;
+    }
+    let pending = themes_core::commands::pending(ctx, &r.writes);
+    println!(
+        "{}",
+        tr!(
+            "Keys that run commands ({count}); applying asks for confirmation (--yes) unless approved before:",
+            count = all.len()
+        )
+    );
+    for c in &all {
+        let mark = if pending.contains(c) {
+            String::new()
+        } else {
+            tr!("  (approved)")
+        };
+        println!("  {} = {}{mark}", c.key, c.value);
     }
 }
 
@@ -551,6 +630,21 @@ fn do_apply(
         out_json(&r);
     } else {
         print_apply(&r);
+        if dry_run {
+            print_commands(ctx, &r);
+            if let Ok(t) = themes_core::theme::get_theme(ctx, id) {
+                for (line, why) in t.flatpak_refused() {
+                    println!(
+                        "{}",
+                        tr!(
+                            "flatpak override refused: “{line}”: {why}",
+                            line = line,
+                            why = why
+                        )
+                    );
+                }
+            }
+        }
     }
     Ok(apply_exit_code(&r))
 }

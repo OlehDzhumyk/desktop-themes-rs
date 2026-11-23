@@ -179,6 +179,20 @@ fn check_assets(ctx: &Ctx, st: &State, rep: &mut DoctorReport) {
                 false,
             );
         }
+        for (line, why) in t.flatpak_refused() {
+            rep.push(
+                "warning",
+                "flatpak",
+                tr!(
+                    "theme “{theme}”: flatpak override “{line}” is refused: {why}",
+                    theme = t.id,
+                    line = line,
+                    why = why
+                ),
+                None,
+                false,
+            );
+        }
         match crate::tokens::load(&t) {
             Some(Err(e)) => {
                 for i in &e.errors {
