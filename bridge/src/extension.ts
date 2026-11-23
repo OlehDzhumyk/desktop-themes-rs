@@ -17,6 +17,7 @@ import {EmojiFeature} from './emoji/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
 import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
+import {OcrFeature} from './ocr/feature.js';
 import {OsdFeature} from './osd/feature.js';
 import type {Skin} from './accentPicker.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
@@ -28,6 +29,7 @@ const EMOJI_SCHEMA = 'io.github.OlehDzhumyk.Desk.Emoji';
 const LOGO_MENU_SCHEMA = 'io.github.OlehDzhumyk.Desk.LogoMenu';
 const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
 const FOCUS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Focus';
+const OCR_SCHEMA = 'io.github.OlehDzhumyk.Desk.Ocr';
 const OSD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Osd';
 
 export default class DeskBridge extends Extension {
@@ -38,6 +40,8 @@ export default class DeskBridge extends Extension {
     private _emojiSettings: Gio.Settings | null = null;
     private _colorPicker: ColorPickerFeature | null = null;
     private _colorPickerSettings: Gio.Settings | null = null;
+    private _ocr: OcrFeature | null = null;
+    private _ocrSettings: Gio.Settings | null = null;
     private _mixer: MixerFeature | null = null;
     private _mixerSettings: Gio.Settings | null = null;
     private _logoMenu: LogoMenuFeature | null = null;
@@ -69,6 +73,7 @@ export default class DeskBridge extends Extension {
         this._settings = settings;
         this._emojiSettings = this._schema(EMOJI_SCHEMA);
         this._colorPickerSettings = this._schema(COLOR_PICKER_SCHEMA);
+        this._ocrSettings = this._schema(OCR_SCHEMA);
         this._mixerSettings = this._schema(MIXER_SCHEMA);
         this._logoMenuSettings = this._schema(LOGO_MENU_SCHEMA);
         this._focusSettings = this._schema(FOCUS_SCHEMA);
@@ -112,6 +117,13 @@ export default class DeskBridge extends Extension {
                 console.warn(`desk-bridge: the colour picker is unavailable: ${String(e)}`);
             }
         }
+        if (this._ocrSettings) {
+            try {
+                this._ocr = new OcrFeature(this._ocrSettings, this._skin(), this._clipboard);
+            } catch (e) {
+                console.warn(`desk-bridge: the text extractor is unavailable: ${String(e)}`);
+            }
+        }
         if (this._mixerSettings) {
             try {
                 this._mixer = new MixerFeature(this.path, this._mixerSettings, this._skin(),
@@ -151,6 +163,8 @@ export default class DeskBridge extends Extension {
         this._focus?.destroy();
         this._focus = null;
         this._indicator?.setClipboard(null);
+        this._ocr?.destroy();
+        this._ocr = null;
         this._emoji?.destroy();
         this._emoji = null;
         this._colorPicker?.destroy();
@@ -175,6 +189,7 @@ export default class DeskBridge extends Extension {
         this._clipboard?.setSkin(skin);
         this._emoji?.setSkin(skin);
         this._colorPicker?.setSkin(skin);
+        this._ocr?.setSkin(skin);
         this._mixer?.setSkin(skin);
         this._logoMenu?.setSkin(skin);
         this._indicator?.setSkin(skin);
@@ -194,6 +209,7 @@ export default class DeskBridge extends Extension {
         this._settings = null;
         this._emojiSettings = null;
         this._colorPickerSettings = null;
+        this._ocrSettings = null;
         this._mixerSettings = null;
         this._logoMenuSettings = null;
         this._focusSettings = null;

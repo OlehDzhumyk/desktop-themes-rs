@@ -34,6 +34,7 @@ use engine::color_picker::ColorPickerFeature;
 use engine::emoji::EmojiFeature;
 use engine::focus::FocusFeature;
 use engine::mixer::MixerFeature;
+use engine::ocr::OcrEngine;
 use engine::{Engines, Setup};
 use service::Desk;
 
@@ -55,6 +56,7 @@ fn features() -> Vec<String> {
         "appearance".to_string(),
         "emoji".to_string(),
         "color-picker".to_string(),
+        "ocr".to_string(),
     ];
     f.push("focus".into());
     if cfg!(feature = "pipewire") {
@@ -70,6 +72,7 @@ fn engines(setup: &Setup) -> Engines {
         Box::new(MixerFeature::new(setup)),
         Box::new(EmojiFeature::new(setup)),
         Box::new(ColorPickerFeature::new(setup)),
+        Box::new(OcrEngine::new(setup)),
         Box::new(ClipboardFeature::new(setup)),
         Box::new(FocusFeature::new(setup)),
         Box::new(AppearanceFeature::new(setup)),

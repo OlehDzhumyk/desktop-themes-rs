@@ -16,6 +16,8 @@ export const EMOJI_IFACE = 'io.github.OlehDzhumyk.Desk.Emoji';
 /** Offered with the content the bridge puts on the clipboard itself (desk_proto::INTERNAL_MIME). */
 export const INTERNAL_MIME = 'application/x-desk-internal';
 export const MIXER_PATH = '/io/github/OlehDzhumyk/Desk/Mixer';
+export const OCR_PATH = '/io/github/OlehDzhumyk/Desk/Ocr';
+export const OCR_IFACE = 'io.github.OlehDzhumyk.Desk.Ocr';
 const THEMES_BUS = 'io.github.OlehDzhumyk.Themes';
 const THEMES_PATH = '/io/github/OlehDzhumyk/Themes';
 

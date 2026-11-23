@@ -152,6 +152,25 @@ Skins:
 * **macos**: translucent square in the centre with a large icon over a smooth bar; a pill at `bottom-center` or `top-right`.
 * **default**: GNOME's own OSD; the bridge does not touch `Main.osdWindowManager`. The same with `enabled` off, or when another extension has already replaced its methods (one warning in the log).
 
+## Text extractor (OCR)
+
+| | |
+|---|---|
+| Open | Windows 11 theme: **Shift+Super+T**; macOS theme: **Ctrl+Shift+Super+T**; Fedora: **Shift+Super+T** (`ocr-shortcut` in the theme's `desk.dconf`; override on «Keyboard shortcuts» or `themes shortcut set ocr-toggle ...`). Normal mode only: never on the lock screen |
+| Select | The screen dims with a crosshair cursor; drag over the text, or press an arrow key (a rectangle appears; arrows move it, Shift+arrows resize, Ctrl for 1 px steps) and `Enter`; `Esc` or a right click cancels and nothing runs; regions under 8 px are ignored |
+| Recognise | `deskd` runs `tesseract` locally on a 0600 PNG in `$XDG_RUNTIME_DIR/deskd/ocr/`, deleted when the call ends; `RLIMIT_AS` 1 GiB, no network namespace where the kernel allows it, killed after 20 s; one recognition at a time; regions above `max-megapixels` are refused |
+| Result | The text (paragraphs kept, hyphenated line ends joined) goes to the clipboard and a toast says «Copied text: …» (first line, 60 characters); «No text found» leaves the clipboard alone; missing language data is named (`tesseract-langpack-<code>`) and recognition runs with the rest (English as the fallback) |
+| History | `record-in-history` off: the text is copied but the clipboard history skips it; private mode always wins |
+| Errors | Without `tesseract` the toast names the package at once and no overlay opens; timeout: «Recognition was interrupted» |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Ocr` at `/io/github/OlehDzhumyk/Desk/Ocr`: `Recognize`, `AvailableLanguages`, `IsAvailable` |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Ocr`: `enabled`, `languages`, `record-in-history`, `keep-line-breaks`, `max-megapixels`, `ocr-shortcut`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `ocr-toggle` |
+
+Skins:
+
+* **windows11**: darker dim and a light-blue frame, like PowerToys Text Extractor; square-cornered toast.
+* **macos**: lighter dim, thin white frame and a pill toast.
+* **default**: frame in the GNOME accent colour. High contrast gives every skin opaque surfaces and a thick frame.
+
 ## Automatic light/dark
 
 | | |

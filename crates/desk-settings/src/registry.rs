@@ -39,6 +39,7 @@ pub static FEATURES: &[&Feature] = &[
     &FEATURE_CLIPBOARD,
     &crate::emoji::FEATURE_EMOJI,
     &crate::color_picker::FEATURE_COLOR_PICKER,
+    &crate::ocr::FEATURE_OCR,
     &crate::mixer::FEATURE_MIXER,
     &crate::osd::FEATURE_OSD,
     &crate::appearance::FEATURE_APPEARANCE,
@@ -120,6 +121,7 @@ pub static DESK: Schema = Schema {
         ("clipboard", CLIPBOARD_SCHEMA),
         ("emoji", crate::emoji::EMOJI_SCHEMA),
         ("color-picker", crate::color_picker::COLOR_PICKER_SCHEMA),
+        ("ocr", crate::ocr::OCR_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
         ("osd", crate::osd::OSD_SCHEMA),
@@ -364,6 +366,7 @@ pub static SHORTCUT_KEYS: Schema = Schema {
         &crate::emoji::SC_EMOJI_TOGGLE,
         &crate::mixer::SC_MIXER_OPEN,
         &crate::color_picker::SC_COLOR_PICKER_TOGGLE,
+        &crate::ocr::SC_OCR_TOGGLE,
     ],
     children: &[],
 };
@@ -374,6 +377,7 @@ pub static SHORTCUTS: &[&Shortcut] = &[
     &crate::emoji::SHORTCUT_EMOJI,
     &crate::mixer::SHORTCUT_MIXER,
     &crate::color_picker::SHORTCUT_COLOR_PICKER,
+    &crate::ocr::SHORTCUT_OCR,
 ];
 
 /// All schemas, parents first (the order of the generated XML).
@@ -382,6 +386,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &CLIPBOARD,
     &crate::emoji::EMOJI,
     &crate::color_picker::COLOR_PICKER,
+    &crate::ocr::OCR,
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
     &crate::osd::OSD,
@@ -504,6 +509,7 @@ pub static PAGE_SHORTCUTS: Page = Page {
             Item::Shortcut(&crate::emoji::SHORTCUT_EMOJI),
             Item::Shortcut(&crate::mixer::SHORTCUT_MIXER),
             Item::Shortcut(&crate::color_picker::SHORTCUT_COLOR_PICKER),
+            Item::Shortcut(&crate::ocr::SHORTCUT_OCR),
         ],
     }],
 };
@@ -529,6 +535,7 @@ pub static PAGES: &[&Page] = &[
     &PAGE_CLIPBOARD,
     &crate::emoji::PAGE_EMOJI,
     &crate::color_picker::PAGE_COLOR_PICKER,
+    &crate::ocr::PAGE_OCR,
     &crate::mixer::PAGE_MIXER,
     &crate::osd::PAGE_OSD,
     &crate::appearance::PAGE_APPEARANCE,

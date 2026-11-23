@@ -64,6 +64,21 @@ pub fn read_color_picker(
     }
 }
 
+/// GSettings `io.github.OlehDzhumyk.Desk.Ocr` (None while the schema is not installed).
+pub fn ocr_settings() -> Option<desk_settings::accessors::OcrSettings> {
+    desk_settings::accessors::OcrSettings::new()
+}
+
+/// The OCR engine's part of its settings (`record-in-history` is read by the bridge).
+pub fn read_ocr(s: &desk_settings::accessors::OcrSettings) -> crate::ocr::service::Config {
+    crate::ocr::service::Config {
+        enabled: s.enabled(),
+        languages: s.languages(),
+        keep_line_breaks: s.keep_line_breaks(),
+        max_megapixels: s.max_megapixels(),
+    }
+}
+
 /// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
 pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
     desk_settings::accessors::MixerSettings::new()

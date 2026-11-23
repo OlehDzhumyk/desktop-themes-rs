@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! The engine lifecycle of deskd. Every feature (clipboard, emoji, colour picker, mixer, appearance,
-//! focus) is an [`Engine`]; `main` only owns the bus, the main loop and the process signals.
+//! The engine lifecycle of deskd. Every feature (clipboard, emoji, colour picker, OCR, mixer,
+//! appearance, focus) is an [`Engine`]; `main` only owns the bus, the main loop and the process signals.
 //!
 //! ```text
 //! new (no bus yet) → register (connection builder) → start (name owned) → shutdown (loop left)
@@ -15,6 +15,7 @@ pub mod color_picker;
 pub mod emoji;
 pub mod focus;
 pub mod mixer;
+pub mod ocr;
 
 use std::sync::{Arc, OnceLock};
 

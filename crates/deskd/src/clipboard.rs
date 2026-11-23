@@ -271,6 +271,21 @@ pub(crate) fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
     std::fs::rename(&tmp, path)
 }
 
+/// The runtime directory of deskd: `$DESKD_RUNTIME_DIR` or `$XDG_RUNTIME_DIR/deskd` (the OCR
+/// engine keeps its temporary images under it too).
+pub(crate) fn runtime_base() -> PathBuf {
+    // DESKD_RUNTIME_DIR: тести (tools/headless) тримають тимчасові файли окремо
+    std::env::var_os("DESKD_RUNTIME_DIR")
+        .map(PathBuf::from)
+        .filter(|p| p.is_absolute())
+        .or_else(|| {
+            std::env::var_os("XDG_RUNTIME_DIR")
+                .map(|p| PathBuf::from(p).join("deskd"))
+                .filter(|p| p.is_absolute())
+        })
+        .unwrap_or_else(|| std::env::temp_dir().join("deskd"))
+}
+
 pub(crate) fn ensure_private_dir(p: &Path) -> std::io::Result<()> {
     use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
     if !p.is_dir() {
@@ -301,17 +316,10 @@ impl Engine {
             .map(PathBuf::from)
             .filter(|p| p.is_absolute())
             .unwrap_or_else(|| home.join(".local/share"));
-        // DESKD_RUNTIME_DIR: тести (tools/headless) тримають тимчасові файли окремо
-        let rt = std::env::var_os("DESKD_RUNTIME_DIR")
-            .map(PathBuf::from)
-            .filter(|p| p.is_absolute())
-            .or_else(|| {
-                std::env::var_os("XDG_RUNTIME_DIR")
-                    .map(|p| PathBuf::from(p).join("deskd"))
-                    .filter(|p| p.is_absolute())
-            })
-            .unwrap_or_else(|| std::env::temp_dir().join("deskd"));
-        (data.join("deskd/clipboard"), rt.join("clipboard"))
+        (
+            data.join("deskd/clipboard"),
+            runtime_base().join("clipboard"),
+        )
     }
 
     fn store_path(&self) -> PathBuf {

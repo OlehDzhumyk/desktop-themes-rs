@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! OCR core of deskd (`docs/spec/features/ocr.md`): text post-processing, language helpers and an
 //! isolated Tesseract runner. Pure functions plus one child process; no D-Bus, no settings.
-//!
-//! The D-Bus engine that wires this module in comes in the follow-up change, so nothing here has a
-//! caller yet; the module-level `allow(dead_code)` below goes away with that change.
-#![allow(dead_code)]
+//! [`service`] puts it on the bus (`io.github.OlehDzhumyk.Desk.Ocr`).
 
+pub mod service;
+
+use std::ffi::OsStr;
 use std::fmt;
 use std::io::{Read, Write};
+use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -18,6 +19,10 @@ use crate::clipboard::ensure_private_dir;
 
 /// The recognition limit of the spec (the process is killed after it).
 pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(20);
+
+/// The address space limit of the child (`RLIMIT_AS`, spec: 1 GB). Tesseract needs a few hundred
+/// MB for a screen region; the limit stops a hostile image from taking the session's memory.
+pub const CHILD_ADDRESS_SPACE: u64 = 1 << 30;
 
 /// Why [`run_tesseract`] gave no text.
 #[derive(Debug)]
@@ -188,9 +193,54 @@ pub fn filter_languages(requested: &[String], installed: &[String]) -> (Vec<Stri
     (available, missing)
 }
 
+/// Width and height from the `IHDR` chunk of a PNG image; `None` when the bytes are not a PNG.
+/// The engine checks the region size against these, not against what the caller claims.
+#[must_use]
+pub fn png_dimensions(bytes: &[u8]) -> Option<(u32, u32)> {
+    const SIGNATURE: [u8; 8] = [0x89, b'P', b'N', b'G', b'\r', b'\n', 0x1a, b'\n'];
+    if bytes.len() < 24 || bytes[..8] != SIGNATURE || &bytes[12..16] != b"IHDR" {
+        return None;
+    }
+    let width = u32::from_be_bytes(bytes[16..20].try_into().ok()?);
+    let height = u32::from_be_bytes(bytes[20..24].try_into().ok()?);
+    Some((width, height))
+}
+
 // ---------------------------------------------------------------------------------------------
 // Isolated runner
 // ---------------------------------------------------------------------------------------------
+
+/// Limit and isolate a child before it starts: `RLIMIT_AS` of [`CHILD_ADDRESS_SPACE`] (required:
+/// the start fails without it), no new privileges, killed with deskd, and, where the kernel
+/// allows unprivileged user namespaces, a new user and network namespace, so the process has no
+/// network at all (only a loopback device that is down). Without namespaces (some containers and
+/// sandboxes refuse them) it runs with the network of the session; Tesseract opens no sockets.
+/// OpenMP is held to one thread: each extra thread costs address space and a 1080p region gains
+/// little from it.
+fn isolate(cmd: &mut Command) {
+    cmd.env("OMP_THREAD_LIMIT", "1");
+    // SAFETY: the closure runs in the forked child before `exec`. It only makes system calls that
+    // are async-signal-safe (setrlimit, prctl, unshare), allocates nothing and touches no lock.
+    unsafe {
+        cmd.pre_exec(|| {
+            let limit = libc::rlimit {
+                rlim_cur: CHILD_ADDRESS_SPACE as libc::rlim_t,
+                rlim_max: CHILD_ADDRESS_SPACE as libc::rlim_t,
+            };
+            if libc::setrlimit(libc::RLIMIT_AS, &limit) != 0 {
+                return Err(std::io::Error::last_os_error());
+            }
+            // best effort: the limit above is what must hold
+            libc::prctl(libc::PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+            libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGKILL, 0, 0, 0);
+            // The forked child has one thread, which CLONE_NEWUSER requires. Without a uid map the
+            // process shows as nobody inside, but the kernel checks files against its real uid, so
+            // it still reads the 0600 image of its user.
+            libc::unshare(libc::CLONE_NEWUSER | libc::CLONE_NEWNET);
+            Ok(())
+        });
+    }
+}
 
 /// A 0600 file in the private OCR directory that is deleted when the guard drops: on success, on
 /// error, on timeout and while a panic unwinds (the pixels are as sensitive as the screen).
@@ -259,12 +309,8 @@ fn describe_failure(status: ExitStatus, stderr: &str) -> String {
 /// Run `bin` on `image_bytes` and return the raw text (feed it to [`clean_text`]).
 ///
 /// The image goes to a 0600 file in `<runtime_dir>/ocr/` (a 0700 directory) that is deleted when the
-/// call ends, whatever the outcome. The command line is `<file> stdout -l <langs joined with +>`
-/// with no standard input. After `timeout` the child is killed and reaped
-/// ([`OcrError::Timeout`]). The wait blocks on a channel; nothing polls.
-///
-/// A child that starts its own children and leaves them running keeps the pipes open after
-/// the kill; the reader threads then end when those children do. Tesseract starts none.
+/// call ends, whatever the outcome. The command line is `<file> stdout -l <langs joined with +>`,
+/// run by [`run_isolated`].
 ///
 /// # Errors
 /// [`OcrError::NoLanguages`] for an empty `langs` (nothing is written), [`OcrError::MissingEngine`]
@@ -283,23 +329,56 @@ pub fn run_tesseract(
     let dir = runtime_dir.join("ocr");
     ensure_private_dir(&dir)?;
     let image = TempFile::create(&dir, image_bytes)?;
+    let langs = langs.join("+");
+    let args: [&OsStr; 4] = [
+        image.path.as_os_str(),
+        OsStr::new("stdout"),
+        OsStr::new("-l"),
+        OsStr::new(&langs),
+    ];
+    let (stdout, _) = run_isolated(bin, &args, timeout)?;
+    Ok(String::from_utf8_lossy(&stdout).into_owned())
+}
 
-    let mut child = Command::new(bin)
-        .arg(&image.path)
-        .arg("stdout")
-        .arg("-l")
-        .arg(langs.join("+"))
+/// The language codes with installed data (`<bin> --list-langs`, see [`parse_tesseract_langs`]).
+/// Old Tesseract releases print the list to standard error; that is read when standard output
+/// lists nothing.
+///
+/// # Errors
+/// As [`run_isolated`]: [`OcrError::MissingEngine`] when `bin` does not exist.
+pub fn installed_languages(bin: &Path, timeout: Duration) -> Result<Vec<String>, OcrError> {
+    let (stdout, stderr) = run_isolated(bin, &[OsStr::new("--list-langs")], timeout)?;
+    let langs = parse_tesseract_langs(&String::from_utf8_lossy(&stdout));
+    if langs.is_empty() {
+        return Ok(parse_tesseract_langs(&String::from_utf8_lossy(&stderr)));
+    }
+    Ok(langs)
+}
+
+/// Run `bin args` limited and isolated ([`isolate`]), with no standard input, and return its
+/// standard output and standard error. After `timeout` the child is killed and reaped
+/// ([`OcrError::Timeout`]). The wait blocks on a channel; nothing polls.
+///
+/// A child that starts its own children and leaves them running keeps the pipes open after
+/// the kill; the reader threads then end when those children do. Tesseract starts none.
+fn run_isolated(
+    bin: &Path,
+    args: &[&OsStr],
+    timeout: Duration,
+) -> Result<(Vec<u8>, Vec<u8>), OcrError> {
+    let mut cmd = Command::new(bin);
+    cmd.args(args)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .map_err(|e| {
-            if e.kind() == std::io::ErrorKind::NotFound {
-                OcrError::MissingEngine
-            } else {
-                OcrError::Io(e)
-            }
-        })?;
+        .stderr(Stdio::piped());
+    isolate(&mut cmd);
+    let mut child = cmd.spawn().map_err(|e| {
+        if e.kind() == std::io::ErrorKind::NotFound {
+            OcrError::MissingEngine
+        } else {
+            OcrError::Io(e)
+        }
+    })?;
 
     let (tx, rx) = mpsc::channel();
     if let Some(out) = child.stdout.take() {
@@ -328,7 +407,7 @@ pub fn run_tesseract(
 
     let status = child.wait()?;
     if status.success() {
-        Ok(String::from_utf8_lossy(&stdout).into_owned())
+        Ok((stdout, stderr))
     } else {
         Err(OcrError::Failed(describe_failure(
             status,
@@ -337,15 +416,73 @@ pub fn run_tesseract(
     }
 }
 
+/// Fake Tesseract scripts in a private directory, shared by the runner and the service tests.
 #[cfg(test)]
-mod tests {
-    use super::*;
+pub(crate) mod testutil {
     use std::os::unix::fs::PermissionsExt;
+    use std::path::PathBuf;
     use std::sync::Mutex;
 
-    fn s(v: &[&str]) -> Vec<String> {
+    /// Writing and starting a fresh executable while another test thread forks can fail with
+    /// "text file busy" (the fork still holds the write descriptor). One lock for all tests that
+    /// write a script; take it with [`spawn_lock`].
+    static SPAWN: Mutex<()> = Mutex::new(());
+
+    pub(crate) struct Sandbox {
+        pub(crate) dir: PathBuf,
+    }
+
+    impl Sandbox {
+        pub(crate) fn new(tag: &str) -> Sandbox {
+            let dir = std::env::temp_dir().join(format!("deskd-ocr-{tag}-{}", std::process::id()));
+            let _ = std::fs::remove_dir_all(&dir);
+            std::fs::create_dir_all(&dir).unwrap();
+            Sandbox { dir }
+        }
+
+        pub(crate) fn runtime(&self) -> PathBuf {
+            self.dir.join("run")
+        }
+
+        pub(crate) fn script(&self, body: &str) -> PathBuf {
+            let path = self.dir.join("fake-tesseract");
+            std::fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+            path
+        }
+
+        /// Names left in `<runtime>/ocr/`.
+        pub(crate) fn leftovers(&self) -> Vec<String> {
+            let Ok(dir) = std::fs::read_dir(self.runtime().join("ocr")) else {
+                return Vec::new();
+            };
+            dir.map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+                .collect()
+        }
+    }
+
+    impl Drop for Sandbox {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.dir);
+        }
+    }
+
+    pub(crate) fn spawn_lock() -> std::sync::MutexGuard<'static, ()> {
+        SPAWN
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    pub(crate) fn s(v: &[&str]) -> Vec<String> {
         v.iter().map(|x| (*x).to_string()).collect()
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::testutil::{Sandbox, s, spawn_lock};
+    use super::*;
+    use std::os::unix::fs::PermissionsExt;
 
     // ----- clean_text -----
 
@@ -473,53 +610,9 @@ mod tests {
 
     // ----- run_tesseract -----
 
-    /// Writing and starting a fresh executable while another test thread forks can fail with
-    /// "text file busy" (the fork still holds the write descriptor). One lock for all runner tests.
-    static SPAWN: Mutex<()> = Mutex::new(());
-
-    struct Sandbox {
-        dir: PathBuf,
-    }
-
-    impl Sandbox {
-        fn new(tag: &str) -> Sandbox {
-            let dir = std::env::temp_dir().join(format!("deskd-ocr-{tag}-{}", std::process::id()));
-            let _ = std::fs::remove_dir_all(&dir);
-            std::fs::create_dir_all(&dir).unwrap();
-            Sandbox { dir }
-        }
-
-        fn runtime(&self) -> PathBuf {
-            self.dir.join("run")
-        }
-
-        fn script(&self, body: &str) -> PathBuf {
-            let path = self.dir.join("fake-tesseract");
-            std::fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
-            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
-            path
-        }
-
-        /// Names left in `<runtime>/ocr/`.
-        fn leftovers(&self) -> Vec<String> {
-            std::fs::read_dir(self.runtime().join("ocr"))
-                .unwrap()
-                .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
-                .collect()
-        }
-    }
-
-    impl Drop for Sandbox {
-        fn drop(&mut self) {
-            let _ = std::fs::remove_dir_all(&self.dir);
-        }
-    }
-
     #[test]
     fn run_returns_stdout_and_deletes_the_image() {
-        let _lock = SPAWN
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _lock = spawn_lock();
         let sb = Sandbox::new("ok");
         let seen = sb.dir.join("seen");
         let bin = sb.script(&format!(
@@ -552,9 +645,7 @@ mod tests {
 
     #[test]
     fn run_failure_returns_stderr_and_deletes_the_image() {
-        let _lock = SPAWN
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _lock = spawn_lock();
         let sb = Sandbox::new("fail");
         let bin = sb.script("echo 'Error opening data file' >&2\nexit 3");
         let err =
@@ -593,9 +684,7 @@ mod tests {
 
     #[test]
     fn run_timeout_kills_the_child_and_deletes_the_image() {
-        let _lock = SPAWN
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _lock = spawn_lock();
         let sb = Sandbox::new("hang");
         let pid_file = sb.dir.join("pid");
         // `exec` keeps the pid, so the kill reaches the sleeping process itself
@@ -649,5 +738,83 @@ mod tests {
         });
         assert!(result.is_err());
         assert!(sb.leftovers().is_empty());
+    }
+
+    // ----- png_dimensions -----
+
+    #[test]
+    fn png_dimensions_reads_ihdr() {
+        let mut png = vec![
+            0x89, b'P', b'N', b'G', b'\r', b'\n', 0x1a, b'\n', 0, 0, 0, 13,
+        ];
+        png.extend_from_slice(b"IHDR");
+        png.extend_from_slice(&1920u32.to_be_bytes());
+        png.extend_from_slice(&1080u32.to_be_bytes());
+        assert_eq!(png_dimensions(&png), Some((1920, 1080)));
+        // truncated, wrong signature, wrong first chunk
+        assert_eq!(png_dimensions(&png[..23]), None);
+        let mut jpeg = png.clone();
+        jpeg[1] = b'X';
+        assert_eq!(png_dimensions(&jpeg), None);
+        let mut other = png.clone();
+        other[12..16].copy_from_slice(b"tEXt");
+        assert_eq!(png_dimensions(&other), None);
+        assert_eq!(png_dimensions(b""), None);
+    }
+
+    // ----- isolation -----
+
+    #[test]
+    fn run_limits_the_address_space_of_the_child() {
+        let _lock = spawn_lock();
+        let sb = Sandbox::new("rlimit");
+        // `ulimit -v` prints the RLIMIT_AS soft limit in KiB
+        let bin = sb.script("ulimit -v; printf '%s\\n' \"$OMP_THREAD_LIMIT\"");
+        let out = run_tesseract(&bin, b"x", &s(&["eng"]), &sb.runtime(), DEFAULT_TIMEOUT).unwrap();
+        assert_eq!(out, format!("{}\n1\n", CHILD_ADDRESS_SPACE / 1024));
+    }
+
+    /// AC-OCR-06: the child gets its own network namespace where the kernel allows it, and OCR
+    /// works either way.
+    #[test]
+    fn run_isolates_the_network_where_possible() {
+        let _lock = spawn_lock();
+        let sb = Sandbox::new("netns");
+        let bin = sb.script("readlink /proc/self/ns/net; echo text");
+        let out = run_tesseract(&bin, b"x", &s(&["eng"]), &sb.runtime(), DEFAULT_TIMEOUT).unwrap();
+        let mut lines = out.lines();
+        let child_ns = lines.next().unwrap_or_default().to_string();
+        assert_eq!(lines.next(), Some("text"));
+        let own_ns = std::fs::read_link("/proc/self/ns/net").unwrap();
+        // only where unprivileged user namespaces work (not in every container) must they differ
+        let userns = Command::new("unshare")
+            .args(["--user", "--net", "true"])
+            .stderr(Stdio::null())
+            .status()
+            .is_ok_and(|s| s.success());
+        if userns {
+            assert_ne!(Path::new(&child_ns), own_ns, "the child shares the network");
+        }
+    }
+
+    #[test]
+    fn installed_languages_reads_stdout_or_old_stderr() {
+        let _lock = spawn_lock();
+        let sb = Sandbox::new("langs");
+        let bin = sb.script(
+            "[ \"$1\" = --list-langs ] || exit 9\nprintf 'List of available languages (3):\\neng\\nosd\\nukr\\n'",
+        );
+        assert_eq!(
+            installed_languages(&bin, DEFAULT_TIMEOUT).unwrap(),
+            s(&["eng", "ukr"])
+        );
+        // Tesseract 3 printed the list to standard error
+        let bin = sb.script("printf 'List of available languages (1):\\ndeu\\n' >&2");
+        assert_eq!(
+            installed_languages(&bin, DEFAULT_TIMEOUT).unwrap(),
+            s(&["deu"])
+        );
+        let err = installed_languages(&sb.dir.join("none"), DEFAULT_TIMEOUT).unwrap_err();
+        assert!(matches!(err, OcrError::MissingEngine), "{err:?}");
     }
 }
