@@ -98,7 +98,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Screenshots, annotation, screen recording | Planned | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |
 | OCR text extractor | Planned | 3 | In Windows 11 and macOS | [ocr](features/ocr.md) |
 | Colour picker | Implemented | 3 | In Windows 11 (PowerToys) and macOS | [color-picker](features/color-picker.md) |
-| On-screen displays (volume, brightness, mute, keyboard backlight) | Planned | 3 | In Windows 11 and macOS | [osd](features/osd.md) |
+| On-screen displays (volume, brightness, mute, keyboard backlight) | Implemented | 3 | In Windows 11 and macOS | [osd](features/osd.md) |
 | Quick Look | Planned | 4 | From macOS, adapted for Windows 11 style | [quick-look](features/quick-look.md) |
 | Snap layouts and always-on-top | Planned | 4 | In Windows 11 and macOS (tiling); always-on-top from Windows | [window-layouts](features/window-layouts.md) |
 | Shortcut guide (hold Super) | Planned | 4 | From Windows, adapted for macOS style | [shortcut-guide](features/shortcut-guide.md) |

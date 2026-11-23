@@ -8,7 +8,24 @@ one, depending on the skin. It never takes keyboard focus and it hides on its ow
 
 ## Status
 
-**Planned** (stage 3, visual foundation). Origin badge: *In Windows 11 and macOS*.
+**Implemented** (stage 3, visual foundation). Origin badge: *In Windows 11 and macOS*.
+Code: `bridge/src/osd/` (`feature.ts` patch and restore, `popup.ts` drawing), settings
+`crates/desk-settings/src/osd.rs`, end-to-end tests `tests/e2e/test_osd.py`.
+
+*Known gaps of the first release:*
+
+* The bridge draws the values that GNOME Shell passes to `Main.osdWindowManager` (they are the
+  applied values the shell read back). `deskd` is not involved yet, so the rule «if `deskd` is
+  unreachable, keep the stock OSD» does not apply: the skinned OSD works without `deskd`.
+* `showAll` (the shell's own volume and the `ShowOSD` D-Bus call of gsd-media-keys) draws one OSD on
+  the pointer monitor, not one per monitor as the stock OSD does.
+* The shell's text label (it can name an audio device) is shown only when there is no level, to
+  keep device names off the screen.
+* The bar width scales with the display scale but not with `text-scaling-factor`; the number and
+  icon do.
+* Lock screen: the bridge declares no `session-modes`, so GNOME Shell disables it while the screen
+  is locked and the stock OSD is used there; no lock-screen test exists yet.
+* KDE and wlroots (`wlr-layer-shell`) surfaces are not implemented.
 
 *Where it draws:* on GNOME the bridge (`desk-bridge`) draws it. It replaces and styles
 `Main.osdWindowManager` for the `windows11` and `macos` skins. `disable()` restores the stock object
@@ -75,7 +92,7 @@ level bar then also jumps without easing. No information is carried by motion al
 If `deskd` is unreachable, the bridge does not draw its own OSD and the stock GNOME OSD stays in use. If
 a level cannot be read, the OSD shows the icon only, without a number.
 
-## Settings (proposed, `io.github.OlehDzhumyk.Desk.Osd`)
+## Settings (`io.github.OlehDzhumyk.Desk.Osd`)
 
 | Key | Type | Default | Range / values |
 |---|---|---|---|
@@ -131,5 +148,5 @@ beyond what the GNOME lock screen policy already allows.
 ## Open questions
 
 1. Should Caps Lock and Num Lock indicators be an opt-in OSD (as macOS does not and Windows can)? Default: off.
-2. macOS style: the centred square (Sequoia) or the compact top-right pill (Tahoe)? Proposal: centred square as the default, with `position = top-right` for the pill.
+2. macOS style: the centred square (Sequoia) or the compact top-right pill (Tahoe)? Decided: centred square as the default, with `position = top-right` (or `bottom-center`) for the pill.
 3. Should the OSD also confirm other keys (media play/pause, airplane mode, display switch)? Proposal: not in the first release.
