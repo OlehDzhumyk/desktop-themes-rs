@@ -74,7 +74,8 @@ if step build; then
       set -e
       export PATH="$HOME/.cargo/bin:$PATH"
       minor=$(rustc --version 2>/dev/null | sed -E "s/^rustc 1\.([0-9]+).*/\1/")
-      if ! [ "${minor:-0}" -ge 88 ] 2>/dev/null; then
+      want=$(sed -nE "s/^rust-version = \"1\.([0-9]+)\".*/\1/p" "$1/Cargo.toml")
+      if ! [ "${minor:-0}" -ge "$want" ] 2>/dev/null; then
         if [ "$2" = 1 ]; then
           # rustup-init pinned in versions.sh and verified; no `curl | sh`
           init=$(mktemp)
@@ -84,7 +85,7 @@ if step build; then
           rm -f "$init"
           export PATH="$HOME/.cargo/bin:$PATH"
         else
-          echo "error: Rust >= 1.89 is required (found: $(rustc --version 2>&1)). Re-run with --rustup." >&2; exit 1
+          echo "error: Rust >= 1.$want is required (found: $(rustc --version 2>&1)). Re-run with --rustup." >&2; exit 1
         fi
       fi
       cd "$1" && cargo build --release --locked

@@ -161,6 +161,8 @@ jobs:
           files=$(git ls-files -z | xargs -0 grep -IlE '^#!.*(ba)?sh' || true)
           test -n "$files" || { echo "no shell scripts found (git ls-files failed?)"; exit 1; }
           echo "$files" | tr '\n' '\0' | xargs -0 shellcheck --severity=warning
+      - name: rust-version equals the pinned toolchain
+        run: tools/check-rust-version.sh
       - name: Claude Code guard hook (table test)
         run: .claude/hooks/guard.test.sh
       - name: GSettings schema (strict)

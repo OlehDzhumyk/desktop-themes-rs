@@ -6,7 +6,9 @@ default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "
 [workspace.package]
 version = "0.3.0"
 edition = "2024"
-rust-version = "1.89"
+# = the Rust of Fedora 45 = rust-toolchain.toml (tools/check-rust-version.sh). Not lower: gtk4-rs needs 1.92,
+# so an older "MSRV" would only be a promise nobody tests.
+rust-version = "1.100"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/OlehDzhumyk/desktop-themes-rs"
 

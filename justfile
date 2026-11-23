@@ -7,7 +7,7 @@ default:
     @just --list
 
 # everything CI checks, locally
-check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep orphan-rs
+check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep orphan-rs rust-version
 
 # fast checks for what you changed vs origin/main
 check-changed:
@@ -62,6 +62,10 @@ i18n:
 # .rs files that no crate compiles (dead copies of modules), see tools/check-orphan-rs.sh
 orphan-rs:
     tools/check-orphan-rs.sh
+
+# rust-version in Cargo.toml equals the toolchain CI and Fedora use (F-4), see tools/check-rust-version.sh
+rust-version:
+    tools/check-rust-version.sh
 
 # structural lint rules (tools/ast-grep) and their own tests
 ast-grep:
