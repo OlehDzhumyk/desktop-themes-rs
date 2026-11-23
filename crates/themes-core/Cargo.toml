@@ -10,6 +10,9 @@ repository.workspace = true
 [lib]
 name = "themes_core"
 
+[lints]
+workspace = true
+
 [dependencies]
 gio.workspace = true
 # killpg for the hook time limit (already in the tree through zbus)

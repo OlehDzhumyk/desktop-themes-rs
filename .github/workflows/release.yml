@@ -16,6 +16,11 @@ on:
   push:
     tags: ["v*"]
 
+# One release build per tag; a running release is never cancelled half way.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -28,7 +33,7 @@ jobs:
     name: build (Fedora 45)
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:45
+      image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     outputs:
       version: ${{ steps.ver.outputs.version }}
     steps:
@@ -94,7 +99,7 @@ jobs:
     permissions:
       contents: write        # create the draft release
       id-token: write        # OIDC for the attestation
-      attestations: write
+      attestations: write    # store the provenance attestation
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

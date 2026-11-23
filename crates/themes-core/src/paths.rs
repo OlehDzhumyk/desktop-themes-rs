@@ -25,12 +25,9 @@ pub struct Ctx {
 
 impl Ctx {
     pub fn from_env() -> Ctx {
-        let home = std::env::var_os("HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| "/".into());
+        let home = std::env::var_os("HOME").map_or_else(|| "/".into(), PathBuf::from);
         let root = std::env::var_os("DESKTOP_THEMES_ROOT")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| home.join(".local/share/desktop-themes"));
+            .map_or_else(|| home.join(".local/share/desktop-themes"), PathBuf::from);
         Ctx::new(home, root)
     }
 

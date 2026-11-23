@@ -64,9 +64,17 @@ impl Notifier {
         emit: impl Fn(u8) + Send + 'static,
     ) -> Notifier {
         let (tx, rx) = mpsc::channel::<u8>();
-        std::thread::Builder::new()
+        let spawned = std::thread::Builder::new()
             .name("deskd-mixer-notify".into())
             .spawn(move || {
+                // A panic in `emit` must not end this thread: no later signal would go out.
+                let send = |flags: u8| {
+                    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| emit(flags)))
+                        .is_err()
+                    {
+                        eprintln!("deskd: mixer: sending a change signal panicked");
+                    }
+                };
                 let mut c = Coalesce::new(QUIET, MAX_WAIT);
                 loop {
                     let now = Instant::now();
@@ -81,15 +89,19 @@ impl Notifier {
                         Err(RecvTimeoutError::Timeout) => {
                             let now = Instant::now();
                             if let Some(flags) = c.take_due(now) {
-                                emit(flags);
+                                send(flags);
                             } else if next.is_some_and(|at| at <= now) {
-                                emit(super::model::dirty::APPS);
+                                send(super::model::dirty::APPS);
                             }
                         }
                     }
                 }
-            })
-            .expect("spawn the mixer notification thread");
+            });
+        // No thread (the system is out of threads): the mixer works, only its change signals stop.
+        // `touch` ignores the closed channel. Never panic here: deskd would take the clipboard down.
+        if let Err(e) = spawned {
+            eprintln!("deskd: mixer: cannot start the notification thread: {e}");
+        }
         Notifier { tx }
     }
 

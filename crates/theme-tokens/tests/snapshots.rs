@@ -37,8 +37,10 @@ fn check(dir: &Path, name: &str, actual: &str, failures: &mut Vec<String>) {
                 .lines()
                 .zip(actual.lines())
                 .position(|(a, b)| a != b)
-                .map(|i| i + 1)
-                .unwrap_or(expected.lines().count().min(actual.lines().count()) + 1);
+                .map_or(
+                    expected.lines().count().min(actual.lines().count()) + 1,
+                    |i| i + 1,
+                );
             failures.push(format!("{} differs from line {line}", p.display()));
         }
         Err(_) => failures.push(format!(

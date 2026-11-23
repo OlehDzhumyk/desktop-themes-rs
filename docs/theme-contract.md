@@ -27,6 +27,28 @@ Standard `dconf dump` text: `[path/relative/to/root]` section headers, `key=GVar
 Lines starting with `#` or `;` are comments. The list keys `enabled-extensions` and
 `disabled-extensions` are ignored here: extensions are driven only by `extensions.txt`.
 
+### Keys that run commands
+
+Some dconf keys make the desktop start a program: the `command` of a custom shortcut
+(`…/custom-keybindings/<name>/command`), the terminal's `exec`, autostart-like keys, and any key
+whose name is `command`, `exec`, `script` or ends in `-command`, `-exec`, `-script`, `-cmd`
+or contains `autostart` (`themes_core::commands::runs_command`). A theme may set them, but they
+are the one way a theme can run code outside the documented hooks, so:
+
+* `themes apply <id> --dry-run` lists them under "Keys that run commands".
+* The first apply asks for a yes: `--yes` on the command line (scripts have no other way), a dialog
+  that lists the commands in the window. Nothing is applied without it.
+* The yes is remembered for that key and that exact command in
+  `~/.local/share/desktop-themes/approved-commands.json`; a theme that changes the command asks
+  again. Empty values (`''`, `[]`) run nothing and do not ask.
+* The bundled `windows11` theme binds `Ctrl+Shift+Esc` to `gnome-system-monitor` this way, so its
+  first apply asks once.
+
+The check works on the planned writes, so it covers every theme module and mixed selections.
+
+Known gap: the D-Bus `Themes` service (quick settings in the shell) applies a theme without asking;
+it does not call this check yet. Use the CLI or the window for themes you do not trust.
+
 ## Portable paths
 
 Themes must not contain absolute home directories. The manager expands, at load time:
@@ -57,6 +79,21 @@ palette='Pro'
 `@DEFAULT_PTYXIS_PROFILE@` is replaced by the value of `/org/gnome/Ptyxis/default-profile-uuid`.
 If that key does not exist yet (Ptyxis never ran), those keys are skipped and the rest of the
 module still applies.
+
+## `flatpak.conf` allowlist
+
+Each line is one `flatpak override --user` call. A line is applied only when **every** argument is
+one of these, otherwise the whole line is refused with a warning (in `themes apply`, in the
+`--dry-run` output, and in `themes doctor`):
+
+* `--filesystem=<path>:ro` where `<path>` is one of `xdg-config/gtk-3.0`, `xdg-config/gtk-4.0`,
+  `xdg-data/themes`, `xdg-data/icons`, `~/.themes`, `~/.icons` (exactly, read-only);
+* `--env=GTK_THEME=<name>` with a name of letters, digits and `. _ + : -`;
+* a Flatpak application id (`org.example.App`) to limit the override to one app.
+
+Everything else is refused: `--filesystem=host`/`home`/`:rw`, `--socket=…`, `--talk-name=…`
+(for example `org.freedesktop.Flatpak`, a sandbox escape), `--device=…`, `--share=…`, other `--env`.
+The allowlist is `flatpak::refusal` in `themes-core`.
 
 ## Hooks
 

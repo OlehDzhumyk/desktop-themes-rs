@@ -39,6 +39,12 @@ desktop-themes-rs runs entirely as the logged-in user. Things we treat as securi
   or checksum, or writing outside the user's home.
 * **Release artifacts**: tampering with the release workflow, checksums or provenance.
 
+Two guards limit what a theme can do besides its hooks ([theme contract](docs/theme-contract.md)):
+Flatpak overrides in `flatpak.conf` are limited to read-only GTK, theme and icon folders and
+`GTK_THEME` (anything else is refused with a warning), and dconf keys that run commands (custom
+shortcuts, terminal `exec`, autostart) are listed in `apply --dry-run` and need a yes (`--yes` or the
+window's dialog) the first time.
+
 Theme hooks and the scripts you run yourself execute with your privileges by design: reviewing a
 theme from an untrusted source before applying it is the user's responsibility, and the
 documentation says so. Third-party extensions and themes that bootstrap downloads are separate

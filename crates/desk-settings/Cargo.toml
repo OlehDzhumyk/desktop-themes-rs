@@ -12,6 +12,9 @@ default = []
 # typed GSettings accessors and reading the language setting
 gio = ["dep:gio"]
 
+[lints]
+workspace = true
+
 [dependencies]
 gettext-rs = { version = "0.8.0", features = ["gettext-system"] }
 gio = { workspace = true, optional = true }

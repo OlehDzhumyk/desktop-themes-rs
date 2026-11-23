@@ -7,6 +7,7 @@
 
 mod clipboard;
 mod mixer;
+mod panic_policy;
 mod persist;
 mod service;
 mod settings;
@@ -92,6 +93,10 @@ fn start_mixer(m: &Arc<Mixer>) {
 #[cfg(not(feature = "pipewire"))]
 fn start_mixer(_m: &Arc<Mixer>) {}
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "one linear start-up sequence (bus, settings, engines, signal threads); the engine trait of the next stage restructures it"
+)]
 fn main() {
     desk_settings::i18n::init(desk_settings::i18n::language_from_gsettings);
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -151,8 +156,7 @@ fn main() {
     let mixer_settings = settings::mixer_settings();
     let (mixer_on, mixer_cfg) = mixer_settings
         .as_ref()
-        .map(settings::read_mixer)
-        .unwrap_or((true, Default::default()));
+        .map_or((true, Default::default()), settings::read_mixer);
     let store = mixer::store::default_path();
     let mut graph = mixer::model::Graph::new(mixer_cfg, {
         let dirs = mixer::icons::data_dirs();
@@ -275,7 +279,7 @@ fn main() {
                     && let Ok(mut lost) = proxy.receive_name_lost().await
                 {
                     while let Some(sig) = lost.next().await {
-                        if sig.args().map(|a| a.name == BUS_NAME).unwrap_or(false) {
+                        if sig.args().is_ok_and(|a| a.name == BUS_NAME) {
                             eprintln!("deskd: another process took {BUS_NAME}, exiting");
                             ml.quit();
                             break;

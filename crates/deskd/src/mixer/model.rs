@@ -51,6 +51,10 @@ pub fn to_cubic(linear: f32) -> f64 {
 }
 
 /// Linear channel volume for a slider position, clamped to `0 ..= MAX_VOLUME`.
+#[allow(
+    clippy::cast_possible_truncation,
+    reason = "a volume of at most MAX_VOLUME cubed; f32 is the precision PipeWire stores"
+)]
 pub fn to_linear(cubic: f64) -> f32 {
     let c = if cubic.is_finite() { cubic } else { 0.0 };
     c.clamp(0.0, MAX_VOLUME).powi(3) as f32
@@ -138,7 +142,7 @@ pub struct Node {
 
 impl Node {
     fn prop(&self, k: &str) -> &str {
-        self.props.get(k).map(String::as_str).unwrap_or("")
+        self.props.get(k).map_or("", String::as_str)
     }
 
     fn first(&self, keys: &[&str]) -> &str {
@@ -833,7 +837,7 @@ impl Graph {
             }
         });
         let new = Remembered {
-            volume: volume.map(clamp).unwrap_or(base.volume),
+            volume: volume.map_or(base.volume, clamp),
             mute: mute.unwrap_or(base.mute),
         };
         if cur == Some(new) {

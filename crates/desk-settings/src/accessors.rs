@@ -117,6 +117,7 @@ impl ClipboardSettings {
     pub const HISTORY_SIZE: &'static str = "history-size";
     pub const IMAGES: &'static str = "images";
     pub const IMAGE_MAX_KB: &'static str = "image-max-kb";
+    pub const IMAGE_BUDGET_MB: &'static str = "image-budget-mb";
     pub const PERSIST: &'static str = "persist";
     pub const PERSIST_IMAGES: &'static str = "persist-images";
     pub const PRIVATE_MODE: &'static str = "private-mode";
@@ -163,6 +164,15 @@ impl ClipboardSettings {
 
     pub fn set_image_max_kb(&self, v: u32) -> Result<(), gio::glib::BoolError> {
         self.0.set_uint(Self::IMAGE_MAX_KB, v)
+    }
+
+    /// Total size of the images in the history, in MiB (oldest images are dropped first)
+    pub fn image_budget_mb(&self) -> u32 {
+        self.0.uint(Self::IMAGE_BUDGET_MB)
+    }
+
+    pub fn set_image_budget_mb(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::IMAGE_BUDGET_MB, v)
     }
 
     /// Keep text history across sessions

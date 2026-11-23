@@ -27,8 +27,7 @@ pub fn hook_timeout() -> Duration {
         .ok()
         .and_then(|s| s.trim().parse::<u64>().ok())
         .filter(|s| *s > 0)
-        .map(Duration::from_secs)
-        .unwrap_or(DEFAULT_TIMEOUT)
+        .map_or(DEFAULT_TIMEOUT, Duration::from_secs)
 }
 
 /// Запускає хук. Повертає Err з текстом помилки.
@@ -55,8 +54,7 @@ pub(crate) fn run_hook_with(
     let dir = path
         .ancestors()
         .nth(3)
-        .map(|p| p.to_path_buf())
-        .unwrap_or_else(|| theme.dir.clone());
+        .map_or_else(|| theme.dir.clone(), |p| p.to_path_buf());
     let mut c = Command::new(&path);
     desk_settings::i18n::restore_child_env(&mut c);
     crate::util::child_bus_env(&mut c);

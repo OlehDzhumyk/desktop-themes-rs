@@ -13,6 +13,16 @@ updates:
     cooldown: {default-days: 7}
     groups:
       rust: {patterns: ["*"]}
+  # Base images pinned by digest (Containerfile, tests/e2e/Containerfile). The images named in
+  # workflow `container:` keys are refreshed with tools/update-image-digests.sh (docs/maintainer.md).
+  - package-ecosystem: docker
+    directory: /
+    schedule: {interval: weekly}
+    cooldown: {default-days: 7}
+  - package-ecosystem: docker
+    directory: /tests/e2e
+    schedule: {interval: weekly}
+    cooldown: {default-days: 7}
   - package-ecosystem: npm
     directory: /bridge
     schedule: {interval: weekly}

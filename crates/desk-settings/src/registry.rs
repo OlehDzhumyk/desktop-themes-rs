@@ -192,6 +192,24 @@ pub static CLIP_IMAGE_MAX_KB: Key = Key {
     sensitive_if: Some("images"),
 };
 
+pub static CLIP_IMAGE_BUDGET_MB: Key = Key {
+    schema: CLIPBOARD_SCHEMA,
+    name: "image-budget-mb",
+    kind: Kind::UInt {
+        default: 256,
+        min: 16,
+        max: 4096,
+        step: 16,
+    },
+    label: n_("Image budget, MiB"),
+    description: n_("When images take more space, the oldest are dropped"),
+    summary: "Total size of the images in the history, in MiB (oldest images are dropped first)",
+    doc: "Images wait in $XDG_RUNTIME_DIR (memory), so their total is capped; nothing is written when that directory is nearly full.",
+    feature: "clipboard",
+    widget: Widget::Edit,
+    sensitive_if: Some("images"),
+};
+
 pub static CLIP_PERSIST: Key = Key {
     doc: "Stored in ~/.local/share/deskd/clipboard (mode 0600).",
     ..clip_bool(
@@ -290,6 +308,7 @@ pub static CLIPBOARD: Schema = Schema {
         &CLIP_HISTORY_SIZE,
         &CLIP_IMAGES,
         &CLIP_IMAGE_MAX_KB,
+        &CLIP_IMAGE_BUDGET_MB,
         &CLIP_PERSIST,
         &CLIP_PERSIST_IMAGES,
         &CLIP_PRIVATE_MODE,
@@ -377,6 +396,7 @@ pub static PAGE_CLIPBOARD: Page = Page {
                 Item::Key(&CLIP_HISTORY_SIZE),
                 Item::Key(&CLIP_IMAGES),
                 Item::Key(&CLIP_IMAGE_MAX_KB),
+                Item::Key(&CLIP_IMAGE_BUDGET_MB),
                 Item::Key(&CLIP_PASTE_ON_SELECT),
             ],
         },

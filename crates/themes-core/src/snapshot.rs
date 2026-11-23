@@ -96,6 +96,10 @@ pub struct SnapshotResult {
     pub warnings: Vec<String>,
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "one pass over the module files of a theme; split only moves the shared state around"
+)]
 pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<SnapshotResult> {
     if !valid_id(id) {
         return Err(crate::Error(tr!(
@@ -166,8 +170,7 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
         if real.starts_with(&root_real) && pp.is_file() {
             let ext = pp
                 .extension()
-                .map(|e| format!(".{}", e.to_string_lossy()))
-                .unwrap_or_default();
+                .map_or_default(|e| format!(".{}", e.to_string_lossy()));
             let leaf = key
                 .rsplit('/')
                 .next()
@@ -206,8 +209,7 @@ pub fn snapshot(ctx: &Ctx, id: &str, name: Option<&str>, force: bool) -> Result<
     let (cur_en, _, default_en, _) = crate::apply::ext_lists(&cur);
     let base_en = baseline
         .get(EXT_KEY)
-        .map(|s| dconf::parse_strv(s))
-        .unwrap_or(default_en);
+        .map_or(default_en, |s| dconf::parse_strv(s));
     let exts: Vec<String> = cur_en
         .iter()
         .filter(|u| !base_en.contains(u) && !PERMANENT_EXTENSIONS.contains(&u.as_str()))

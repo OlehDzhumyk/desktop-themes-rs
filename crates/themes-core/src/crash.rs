@@ -82,13 +82,12 @@ pub fn parse_apply_log(text: &str) -> Vec<(String, String, Vec<String>)> {
         let ext = rest
             .split_whitespace()
             .find_map(|w| w.strip_prefix("ext="))
-            .map(|s| {
+            .map_or_default(|s| {
                 s.split(',')
                     .filter(|x| !x.is_empty() && *x != "-")
                     .map(String::from)
                     .collect()
-            })
-            .unwrap_or_default();
+            });
         out.push((ts.to_string(), id, ext));
     }
     out
@@ -111,8 +110,7 @@ pub fn culprit(
         .rev()
         .skip(1)
         .find(|(_, pid, _)| pid != id)
-        .map(|(_, _, e)| e.clone())
-        .unwrap_or_default();
+        .map_or_default(|(_, _, e)| e.clone());
     let suspects = ext.iter().filter(|u| !prev.contains(u)).cloned().collect();
     (Some(id.clone()), suspects)
 }
@@ -121,8 +119,7 @@ fn local(unix: i64) -> String {
     gio::glib::DateTime::from_unix_local(unix)
         .ok()
         .and_then(|d| d.format("%Y-%m-%d %H:%M:%S").ok())
-        .map(|s| s.to_string())
-        .unwrap_or_default()
+        .map_or_default(|s| s.to_string())
 }
 
 /// `coredumpctl info PID`: (командний рядок, верхня функція стека).
@@ -171,9 +168,7 @@ pub fn recent_shell_crashes(ctx: &Ctx, hours: u32) -> Vec<ShellCrash> {
         return vec![];
     };
     let rows: Vec<CoredumpRow> = serde_json::from_str(o.stdout.trim()).unwrap_or_default();
-    let applies = std::fs::read_to_string(&ctx.log)
-        .map(|t| parse_apply_log(&t))
-        .unwrap_or_default();
+    let applies = std::fs::read_to_string(&ctx.log).map_or_default(|t| parse_apply_log(&t));
     let mut out = Vec::new();
     for r in rows.into_iter().rev().take(5) {
         if !r.exe.is_empty() && !r.exe.ends_with("/gnome-shell") {

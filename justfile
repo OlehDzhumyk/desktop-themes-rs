@@ -7,7 +7,7 @@ default:
     @just --list
 
 # everything CI checks, locally
-check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep
+check: fmt-check lint test xtask-check bridge shellcheck privacy ast-grep orphan-rs rust-version
 
 # fast checks for what you changed vs origin/main
 check-changed:
@@ -59,6 +59,14 @@ i18n:
     cargo xtask pot
     cargo test -p desk-settings --locked --test i18n_lint
 
+# .rs files that no crate compiles (dead copies of modules), see tools/check-orphan-rs.sh
+orphan-rs:
+    tools/check-orphan-rs.sh
+
+# rust-version in Cargo.toml equals the toolchain CI and Fedora use (F-4), see tools/check-rust-version.sh
+rust-version:
+    tools/check-rust-version.sh
+
 # structural lint rules (tools/ast-grep) and their own tests
 ast-grep:
     ast-grep scan
@@ -67,7 +75,7 @@ ast-grep:
 # workflow lint: actionlint (and zizmor when installed)
 workflows:
     actionlint
-    if command -v zizmor >/dev/null; then zizmor .github/workflows; fi
+    if command -v zizmor >/dev/null; then zizmor --persona pedantic .github/workflows; fi
 
 # optional hygiene tools, skipped when not installed
 hygiene:

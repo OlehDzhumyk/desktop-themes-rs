@@ -239,8 +239,7 @@ pub fn describe(p: &Pending) -> String {
         step = p
             .begun
             .last()
-            .map(|s| format!("{s:?}").to_lowercase())
-            .unwrap_or_else(|| "-".into())
+            .map_or_else(|| "-".into(), |s| format!("{s:?}").to_lowercase())
     )
 }
 

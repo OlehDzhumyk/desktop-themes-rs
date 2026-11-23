@@ -88,8 +88,7 @@ pub fn now(fmt: &str) -> String {
     gio::glib::DateTime::now_local()
         .ok()
         .and_then(|d| d.format(fmt).ok())
-        .map(|s| s.to_string())
-        .unwrap_or_default()
+        .map_or_default(|s| s.to_string())
 }
 
 pub fn log(ctx: &Ctx, msg: &str) {
@@ -167,8 +166,7 @@ pub fn run_check(cmd: &str, args: &[&str], input: Option<&str>) -> Result<String
 
 pub fn which(cmd: &str) -> bool {
     std::env::var_os("PATH")
-        .map(|p| std::env::split_paths(&p).any(|d| d.join(cmd).is_file()))
-        .unwrap_or(false)
+        .is_some_and(|p| std::env::split_paths(&p).any(|d| d.join(cmd).is_file()))
 }
 
 /// The session bus address to use when `DBUS_SESSION_BUS_ADDRESS` is not set (e.g. over SSH):
@@ -205,9 +203,7 @@ pub unsafe fn init_bus_env() {
 
 pub fn unsafe_getuid() -> u32 {
     use std::os::unix::fs::MetadataExt;
-    std::fs::metadata("/proc/self")
-        .map(|m| m.uid())
-        .unwrap_or(1000)
+    std::fs::metadata("/proc/self").map_or(1000, |m| m.uid())
 }
 
 const TRANSLIT: &[(char, &str)] = &[
@@ -292,9 +288,7 @@ pub fn valid_id(id: &str) -> bool {
 
 pub fn is_executable(p: &Path) -> bool {
     use std::os::unix::fs::PermissionsExt;
-    std::fs::metadata(p)
-        .map(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
-        .unwrap_or(false)
+    std::fs::metadata(p).is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
 }
 
 /// Аналог os.path.lexists.

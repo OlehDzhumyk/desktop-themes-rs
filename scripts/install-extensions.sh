@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Install the GNOME Shell extensions the themes use, at user level.
-#   * 12 extensions from extensions.gnome.org, pinned by version tag (tested with GNOME Shell 51)
+#   * 11 extensions from extensions.gnome.org, pinned by version tag and verified by SHA-256
+#     (tested with GNOME Shell 51; versions.sh)
 #   * spotlight@nin gets the unified diffs from patches/spotlight@nin applied (see patches/README.md)
 #   * Liquid Glass from its upstream repository at a pinned commit (it is not on extensions.gnome.org)
 #   * this repository's own extensions: desk-bridge (built from bridge/ with npm), lockscreen-layout
 # Newly installed extensions appear in GNOME Shell only after you log out and in again.
 #
-# Usage: scripts/install-extensions.sh [--dry-run] [--latest]
-#   --latest  ignore the pinned version tags and ask extensions.gnome.org for the newest build
-#             that supports the running shell (useful on a GNOME version other than 51)
+# Usage: scripts/install-extensions.sh [--dry-run]
+# On another GNOME version, pin new versions first: tools/ego-pin.sh UUID SHELL_MAJOR prints the
+# line for versions.sh with its checksum. There is no "newest build" mode: it could not be verified.
 set -euo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 parse_common_flags "$@"
-LATEST=0
 for a in "${DT_ARGS[@]+"${DT_ARGS[@]}"}"; do
   case "$a" in
-    --latest) LATEST=1 ;;
-    -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
     *) die "unknown option: $a" ;;
   esac
 done
@@ -29,7 +28,7 @@ if have gnome-shell; then
   SHELL_MAJOR=$(gnome-shell --version | sed -E 's/[^0-9]*([0-9]+).*/\1/')
 fi
 note "GNOME Shell major version: $SHELL_MAJOR (extensions are pinned for 51)"
-[ "$SHELL_MAJOR" = 51 ] || [ "$LATEST" = 1 ] || warn "running shell is $SHELL_MAJOR, not 51: consider --latest"
+[ "$SHELL_MAJOR" = 51 ] || warn "running shell is $SHELL_MAJOR, not 51: the pinned extensions may not support it (tools/ego-pin.sh)"
 
 compile_schemas() { # DIR
   local d=$1
@@ -40,24 +39,16 @@ compile_schemas() { # DIR
   fi
 }
 
-install_ego() { # uuid tag label
-  local uuid=$1 tag=$2 label=$3 zip=$DT_CACHE/ego/$1.zip url
+install_ego() { # uuid tag label sha256
+  local uuid=$1 tag=$2 label=$3 sum=$4 zip=$DT_CACHE/ego/$1.zip url
   say "$uuid ($label)"
-  if [ "$LATEST" = 1 ]; then
-    if [ "$DRY_RUN" = 1 ]; then note "+ query extension-info for $uuid (shell $SHELL_MAJOR)"; tag=latest
-    else
-      tag=$(curl -fsSL "https://extensions.gnome.org/extension-info/?uuid=$uuid&shell_version=$SHELL_MAJOR" \
-        | python3 -c 'import json,sys; print(json.load(sys.stdin)["download_url"].split("version_tag=")[1])') \
-        || { warn "$uuid is not available for shell $SHELL_MAJOR, skipped"; return 0; }
-    fi
-  fi
+  [ -n "$sum" ] || die "$uuid: no sha256 in scripts/versions.sh (tools/ego-pin.sh $uuid)"
   url="https://extensions.gnome.org/download-extension/$uuid.shell-extension.zip?version_tag=$tag"
+  # fetch_file checks the SHA-256 of the download (and of a cached copy) before anything is unpacked
+  fetch_file "$url" "$sum" "$zip"
   if [ "$DRY_RUN" = 1 ]; then
-    note "+ curl $url"
     note "+ unzip -> $EXT_DIR/$uuid"
   else
-    mkdir -p "$(dirname "$zip")"
-    curl -fsSL --retry 3 -o "$zip" "$url"
     rm -rf "${EXT_DIR:?}/$uuid"; mkdir -p "$EXT_DIR/$uuid"
     unzip -q "$zip" -d "$EXT_DIR/$uuid"
   fi

@@ -11,6 +11,62 @@ use crate::state::{FlatpakChange, State};
 use crate::theme::Theme;
 use crate::util::{run, which};
 
+/// Read-only paths a theme may open to Flatpak apps: what GTK needs to find its theme and icons.
+/// Anything else (a different path, `:rw`, `host`, `home`) would be a hole in the sandbox.
+const ALLOWED_PATHS: [&str; 6] = [
+    "xdg-config/gtk-3.0",
+    "xdg-config/gtk-4.0",
+    "xdg-data/themes",
+    "xdg-data/icons",
+    "~/.themes",
+    "~/.icons",
+];
+
+/// Why `args` (one line of `flatpak.conf`, one `flatpak override --user` call) is not allowed, or
+/// `None` when every argument is on the allowlist (S-4): `--filesystem=<allowed path>:ro`,
+/// `--env=GTK_THEME=<name>`, and an app id as target.
+pub fn refusal(args: &[String]) -> Option<String> {
+    args.iter().find_map(|a| refusal_of(a))
+}
+
+fn refusal_of(arg: &str) -> Option<String> {
+    if let Some(v) = arg.strip_prefix("--filesystem=") {
+        let ok = v
+            .strip_suffix(":ro")
+            .is_some_and(|p| ALLOWED_PATHS.contains(&p));
+        return (!ok).then(|| {
+            tr!(
+                "{arg}: only read-only access (:ro) to the GTK, theme and icon folders is allowed",
+                arg = arg
+            )
+        });
+    }
+    if let Some(v) = arg.strip_prefix("--env=GTK_THEME=") {
+        let ok = !v.is_empty()
+            && v.chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '+' | ':' | '-'));
+        return (!ok).then(|| tr!("{arg}: not a valid theme name", arg = arg));
+    }
+    if arg.starts_with('-') {
+        return Some(tr!(
+            "{arg}: this Flatpak option is not allowed in a theme (only read-only GTK, theme and icon folders and GTK_THEME)",
+            arg = arg
+        ));
+    }
+    (!is_app_id(arg)).then(|| tr!("{arg}: not a Flatpak application id", arg = arg))
+}
+
+/// `org.example.App`: at least two dot-separated parts of letters, digits, `_` and `-`.
+fn is_app_id(s: &str) -> bool {
+    let parts: Vec<&str> = s.split('.').collect();
+    parts.len() >= 2
+        && parts.iter().all(|p| {
+            !p.is_empty()
+                && p.chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+        })
+}
+
 type KeyFile = (BTreeMap<String, Vec<(String, String)>>, Vec<String>);
 
 fn kf_read(path: &Path) -> KeyFile {
@@ -79,7 +135,7 @@ fn kf_write(path: &Path, kf: &KeyFile) -> Result<()> {
 fn target_file(ctx: &Ctx, args: &[String]) -> std::path::PathBuf {
     let pos: Vec<&String> = args.iter().filter(|a| !a.starts_with('-')).collect();
     ctx.flatpak_overrides
-        .join(pos.last().map(|s| s.as_str()).unwrap_or("global"))
+        .join(pos.last().map_or("global", |s| s.as_str()))
 }
 
 pub fn remove(st: &mut State, warnings: &mut Vec<String>) -> Result<()> {
@@ -120,6 +176,13 @@ pub fn apply(
     theme: &Theme,
     warnings: &mut Vec<String>,
 ) -> Result<usize> {
+    for (line, why) in theme.flatpak_refused() {
+        warnings.push(tr!(
+            "flatpak override “{line}” of the theme is refused: {why}",
+            line = line,
+            why = why
+        ));
+    }
     let lines = theme.flatpak_lines();
     if !lines.is_empty() && !which("flatpak") {
         warnings.push(tr!("flatpak not found; overrides skipped"));
@@ -152,4 +215,62 @@ pub fn apply(
         }
     }
     Ok(lines.len())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn line(s: &str) -> Vec<String> {
+        crate::util::shlex_split(s).unwrap()
+    }
+
+    #[test]
+    fn the_bundled_overrides_are_allowed() {
+        for l in [
+            "--filesystem=xdg-config/gtk-4.0:ro",
+            "--filesystem=xdg-config/gtk-3.0:ro",
+            "--filesystem=xdg-data/themes:ro",
+            "--filesystem=xdg-data/icons:ro",
+            "--filesystem=~/.themes:ro",
+            "--env=GTK_THEME=Adwaita:dark",
+            "org.gnome.Calculator --filesystem=xdg-data/icons:ro",
+            "--filesystem=xdg-data/icons:ro --env=GTK_THEME=Colloid-Dark",
+        ] {
+            assert_eq!(refusal(&line(l)), None, "{l}");
+        }
+    }
+
+    /// The sandbox escapes the audit names, and the near misses of the allowed forms.
+    #[test]
+    fn everything_else_is_refused() {
+        for l in [
+            "--filesystem=host",
+            "--filesystem=host:ro",
+            "--filesystem=home",
+            "--filesystem=xdg-config/gtk-4.0",
+            "--filesystem=xdg-config/gtk-4.0:rw",
+            "--filesystem=xdg-config/gtk-4.0:create",
+            "--filesystem=xdg-config/gtk-4.0/../..:ro",
+            "--filesystem=xdg-config:ro",
+            "--filesystem=/etc:ro",
+            "--socket=session-bus",
+            "--socket=x11",
+            "--talk-name=org.freedesktop.Flatpak",
+            "--system-talk-name=org.freedesktop.systemd1",
+            "--device=all",
+            "--share=network",
+            "--env=LD_PRELOAD=/home/u/x.so",
+            "--env=GTK_THEME=",
+            "--env=GTK_THEME='a b'",
+            "--env=GTK_THEME='$(id)'",
+            "--persist=.",
+            "--reset",
+            "not-an-app-id",
+            "--filesystem=xdg-data/icons:ro --filesystem=host",
+            "--filesystem=xdg-data/icons:ro --socket=session-bus",
+        ] {
+            assert!(refusal(&line(l)).is_some(), "{l} must be refused");
+        }
+    }
 }

@@ -6,7 +6,9 @@ default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "
 [workspace.package]
 version = "0.3.0"
 edition = "2024"
-rust-version = "1.89"
+# = the Rust of Fedora 45 = rust-toolchain.toml (tools/check-rust-version.sh). Not lower: gtk4-rs needs 1.92,
+# so an older "MSRV" would only be a promise nobody tests.
+rust-version = "1.100"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/OlehDzhumyk/desktop-themes-rs"
 
@@ -24,9 +26,19 @@ desk-proto = { path = "crates/desk-proto" }
 theme-tokens = { path = "crates/theme-tokens" }
 desk-settings = { path = "crates/desk-settings" }
 
+# Selected clippy::pedantic lints (audit Q-7); the rest of pedantic stays off on purpose. Threshold of
+# too_many_lines: clippy.toml. Fix the finding, or `#[allow(..., reason = "...")]` on the item.
+[workspace.lints.clippy]
+cast_possible_truncation = "warn"
+cast_sign_loss = "warn"
+too_many_lines = "warn"
+map_unwrap_or = "warn"
+
 [profile.release]
 opt-level = 3
 lto = "fat"
 codegen-units = 1
-panic = "abort"
+# unwind, not abort: deskd must survive a panic in one handler or thread (see src/panic_policy.rs).
+# Costs about 0.5 MB per binary; the code on the non-panicking path is unchanged.
+panic = "unwind"
 strip = true
