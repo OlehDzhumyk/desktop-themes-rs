@@ -46,7 +46,8 @@ extensions, installs the binary, `.desktop` file, D-Bus service and systemd unit
 snapshot and runs `themes list`. Log out and in once afterwards so the shell loads the new extensions.
 
 Each step is also available separately: `scripts/install-themes.sh`, `install-assets.sh`,
-`generate-assets.sh`, `install-extensions.sh`, `data/install.sh`. All accept `--dry-run`.
+`generate-assets.sh`, `install-extensions.sh`, `data/install.sh`. To update an existing install
+after pulling new commits, run `scripts/update.sh`. All accept `--dry-run`.
 
 ```sh
 themes list                          # themes and their modules
@@ -144,7 +145,8 @@ scripts/bootstrap.sh             # виконати
 Скрипт збирає програму в toolbox, встановлює теми, завантажує сторонні ресурси (WhiteSur, Fluent,
 значки, курсори, шрифти, шпалери) з оригінальних сховищ за зафіксованими комітами, генерує звуки й
 шпалери, встановлює розширення, програму, службу D-Bus і юніт systemd, робить знімок baseline вашого
-dconf. Після цього один раз вийдіть із сесії й увійдіть знову.
+dconf. Після цього один раз вийдіть із сесії й увійдіть знову. Для швидкого оновлення вже встановленої
+системи запускайте `scripts/update.sh` (підтримує `--dry-run`).
 
 Повний посібник користувача (команди, як додати тему, що робити, якщо щось зламалося):
 [docs/README.uk.md](docs/README.uk.md). Ліцензія: GPL-3.0-or-later; сторонні проєкти й їхні ліцензії

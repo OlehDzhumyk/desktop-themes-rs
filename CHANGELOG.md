@@ -21,6 +21,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Incremental update script `scripts/update.sh`: pulls latest `main` (`--ff-only`), reuses the
+  existing build toolbox (refreshing dnf packages, third-party assets and extensions automatically
+  when `scripts/versions.sh` changes or when `--with-assets` / `--with-extensions` / `--all` is
+  passed), rebuilds Rust release binaries and `desk-bridge`, syncs bundled themes, runs
+  `data/install.sh` and checks `themes doctor`. `data/install.sh` now also detects stale
+  `bridge/build/` artifacts when `bridge/src` or `bridge/static` changed.
 - Search engine core (stage 4): the pure-Rust crate `desk-search` (no desktop dependency) with the
   query language (`=` calculator, `>` system actions, `.`/`file:` files, `#` clipboard, `:` emoji,
   plain text for all; cut at 256 characters), a safe arithmetic evaluator (`= 12*(3+4)` → `84`; no
