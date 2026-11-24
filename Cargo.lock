@@ -317,6 +317,7 @@ dependencies = [
  "desk-capture",
  "desk-layouts",
  "desk-proto",
+ "desk-search",
  "desk-settings",
  "futures-util",
  "gio",

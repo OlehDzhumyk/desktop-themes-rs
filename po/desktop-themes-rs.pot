@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:58+0000\n"
+"POT-Creation-Date: 2026-11-24 04:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1637,7 +1637,7 @@ msgstr ""
 msgid "Sleep"
 msgstr ""
 
-#: crates/deskd/src/main.rs:49
+#: crates/deskd/src/main.rs:51
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -1648,9 +1648,14 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:109 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:113 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
+msgstr ""
+
+#: crates/deskd/src/search/mod.rs:179
+#, rust-format
+msgid "Search the web for “{query}”"
 msgstr ""
 
 #: crates/themes-core/src/apply.rs:129

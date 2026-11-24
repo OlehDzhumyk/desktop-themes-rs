@@ -30,6 +30,8 @@ libc.workspace = true
 desk-capture.workspace = true
 # window layouts core: built-in layouts, zone geometry, layouts.json (workspace crate, pure Rust)
 desk-layouts.workspace = true
+# search core: query parser, calculator, ranking, desktop entries, usage store (workspace crate, pure Rust)
+desk-search.workspace = true
 signal-hook = { version = "0.4.6", default-features = false, features = ["iterator"] }
 pipewire = { version = "0.10.1", optional = true }
 

@@ -21,6 +21,18 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Search engine core (stage 4): the pure-Rust crate `desk-search` (no desktop dependency) with the
+  query language (`=` calculator, `>` system actions, `.`/`file:` files, `#` clipboard, `:` emoji,
+  plain text for all; cut at 256 characters), a safe arithmetic evaluator (`= 12*(3+4)` → `84`; no
+  shell or script input), tiered ranking (exact, prefix, word prefix, substring, fuzzy with typos)
+  with Unicode folding and Ukrainian ↔ QWERTY layout tolerance (`сдшзищфкв` finds «clipboard»),
+  an XDG desktop entry parser, seven system actions, and decayed usage counts in an atomic 0600
+  `search-usage.json` that is never written with `remember-usage=false`. `deskd` serves it as
+  `io.github.OlehDzhumyk.Desk.Search` (`Query`, `RecordLaunch`, `ClearUsage`) to trusted callers
+  only (ADR 0008); applications are cached in memory and dropped when an `applications/` folder
+  changes (no polling). Settings `io.github.OlehDzhumyk.Desk.Search` (`enabled`, `search-shortcut`,
+  `web-search` off by default, `max-results`, `remember-usage`) and a «Пошук» page; the shortcut
+  is empty until the bridge launcher replaces `spotlight@nin`.
 - Quick Look (stage 4, partial): `themes quick-look <paths>…` opens a short-lived GTK 4 /
   libadwaita previewer styled for the skin (`macos` dark title strip, `windows11` Peek-style
   header with `<` `>`, `default` plain window). It shows images with zoom, text and code (only the

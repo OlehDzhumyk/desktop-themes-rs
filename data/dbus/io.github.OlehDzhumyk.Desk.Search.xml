@@ -1,0 +1,38 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Search engine of deskd (docs/spec/features/search.md). deskd parses the query, ranks the
+     applications (XDG desktop entries, cached in memory and dropped when an applications folder
+     changes), the system actions and calculator results, and keeps the decayed usage counts in
+     search-usage.json (deskd data folder, mode 0600). The adapter (the GNOME bridge) draws the
+     box and performs the chosen result. The logic is the pure-Rust crate desk-search, so other
+     desktops can use the same calls (ADR 0011). No query leaves the computer; with the
+     web-search setting on, a web result only carries the query for the browser.
+     Access (ADR 0008): every method answers AccessDenied unless the caller is the owner of
+     org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any sandbox.
+     Errors: NotSupported while the `enabled` setting is off (ClearUsage always works);
+     InvalidArgs for an empty, too long or control-character item id; IOError when
+     search-usage.json cannot be written or deleted. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Search">
+    <!-- Answer the text of the search field. Prefixes: "=" calculator, ">" system actions,
+         ". " or "file:" files, "#" clipboard history, ":" emoji, plain text all providers;
+         only the first 256 characters are matched. max_results 0 uses the max-results setting;
+         a larger number is cut to the setting. The answer is a JSON list, best first, of
+         {"id", "kind", "title", "subtitle", "icon", "activate", "score"}: kind is "calculator",
+         "app", "action", "file", "clipboard", "emoji" or "web"; activate is the desktop id
+         (app), the action id (action: lock, suspend, logout, restart, power-off, dark-mode,
+         clipboard-private), the text to copy (calculator, emoji) or the query for the browser
+         (web). An empty plain query lists the most used items when usage is remembered. -->
+    <method name="Query">
+      <arg name="text" type="s" direction="in"/>
+      <arg name="max_results" type="u" direction="in"/>
+      <arg name="results_json" type="s" direction="out"/>
+    </method>
+    <!-- The user activated the result item_id (its "id" field). Counted in search-usage.json
+         unless remember-usage is off; then nothing is written. -->
+    <method name="RecordLaunch">
+      <arg name="item_id" type="s" direction="in"/>
+    </method>
+    <!-- Forget every usage count and delete search-usage.json. -->
+    <method name="ClearUsage"/>
+  </interface>
+</node>

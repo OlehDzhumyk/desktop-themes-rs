@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:58+0000\n"
+"POT-Creation-Date: 2026-11-24 04:59+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -2641,7 +2641,7 @@ msgstr "Робота"
 msgid "Sleep"
 msgstr "Режим сну"
 
-#: crates/deskd/src/main.rs:49
+#: crates/deskd/src/main.rs:51
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -2658,10 +2658,15 @@ msgstr ""
 "replace, і дозволити наступному забрати її\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:109 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:113 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
+
+#: crates/deskd/src/search/mod.rs:179
+#, rust-format
+msgid "Search the web for “{query}”"
+msgstr "Шукати «{query}» в інтернеті"
 
 #: crates/themes-core/src/apply.rs:129
 #, rust-format
