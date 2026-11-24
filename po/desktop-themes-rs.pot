@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 09:25+0000\n"
+"POT-Creation-Date: 2026-11-24 09:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1807,7 +1807,7 @@ msgstr ""
 msgid "{format} image"
 msgstr ""
 
-#: crates/deskd/src/engine/clipboard.rs:38
+#: crates/deskd/src/engine/clipboard.rs:41
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
@@ -1822,7 +1822,7 @@ msgstr ""
 msgid "Sleep"
 msgstr ""
 
-#: crates/deskd/src/main.rs:51
+#: crates/deskd/src/main.rs:52
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -1833,114 +1833,179 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:115 crates/themes/src/service.rs:410
+#: crates/deskd/src/main.rs:116 crates/themes/src/service.rs:410
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:129
+#: crates/themes-core/src/apply.rs:102
+#, rust-format
+msgid "{desktop}: the skin was not applied to the compositor: {error}"
+msgstr ""
+
+#: crates/themes-core/src/apply.rs:167
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme and is applied only after an explicit "
 "confirmation: {warning}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:192
+#: crates/themes-core/src/apply.rs:230
 #, rust-format
 msgid ""
 "theme “{theme}” (module {module}) not found; its keys go back to the "
 "standard values"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:237
+#: crates/themes-core/src/apply.rs:275
 #, rust-format
 msgid ""
 "shortcut conflict: {conflict}; the feature keeps it, the system shortcut "
 "loses it"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:242
+#: crates/themes-core/src/apply.rs:280
 #, rust-format
 msgid "shortcut conflict: {conflict}; change one of them (themes shortcut set)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:378
+#: crates/themes-core/src/apply.rs:417
 #, rust-format
 msgid "extension {uuid} is not installed"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:382
+#: crates/themes-core/src/apply.rs:421
 #, rust-format
 msgid "extension {uuid} is turned off as broken (see “themes doctor”)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:548
+#: crates/themes-core/src/apply.rs:587
 #, rust-format
 msgid ""
 "applying “{theme}” hit an error after its hooks ran, so it was completed: "
 "{error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:554
+#: crates/themes-core/src/apply.rs:593
 #, rust-format
 msgid "could not apply “{theme}”: {error}. The changes were rolled back."
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:562
+#: crates/themes-core/src/apply.rs:601
 #, rust-format
 msgid "Not everything could be undone: {problems}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:696
+#: crates/themes-core/src/apply.rs:736
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): the theme's extensions will not work until you turn them "
 "on (themes doctor --enable-extensions or the button in the Themes window)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:704
+#: crates/themes-core/src/apply.rs:744
 msgid "the session is locked; new extensions turn on after unlocking"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:725
+#: crates/themes-core/src/apply.rs:765
 #, rust-format
 msgid ""
 "the shell does not know the extension {uuid} yet (installed after login)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:731
+#: crates/themes-core/src/apply.rs:771
 #, rust-format
 msgid "extension {uuid}: {state} {error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:740
+#: crates/themes-core/src/apply.rs:780
 #, rust-format
 msgid "extension {uuid} did not turn on live (state {state})"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:751
+#: crates/themes-core/src/apply.rs:791
 #, rust-format
 msgid "extension {uuid} did not turn off live"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:759
+#: crates/themes-core/src/apply.rs:799
 #, rust-format
 msgid "swapping {old} ↔ {new} live leaves panel artefacts"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:795
+#: crates/themes-core/src/apply.rs:835
 msgid "automatic rollback after applying"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:862
+#: crates/themes-core/src/apply.rs:902
 msgid "the theme “fedora” cannot be deleted: it is the standard look"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:875
+#: crates/themes-core/src/apply.rs:915
 #, rust-format
 msgid ""
 "the theme “{theme}” is active now (modules: {modules}); apply another one "
 "first (themes reset)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:159
+msgid "this desktop has no backend yet: GNOME Shell checks are skipped"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:319
+msgid "labwc is not installed (rpm-ostree install labwc)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:325
+msgid ""
+"labwc is not running in this session; run the check inside the labwc session"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:332
+msgid ""
+"desk-shell is not installed: no taskbar and Start menu (run data/install.sh)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:340
+msgid ""
+"libgtk4-layer-shell.so.0 is not found: desk-shell draws normal windows "
+"instead of a taskbar (install gtk4-layer-shell)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:348
+msgid ""
+"deskd is not installed: no clipboard history or search (run data/install.sh)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:355
+msgid ""
+"swaylock is not installed: the screen cannot be locked (install swaylock)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:362
+msgid "swaybg is not installed: the desktop has no wallpaper (install swaybg)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:370
+#, rust-format
+msgid ""
+"the labwc session config {path} is missing (log in with the “Desk (Windows "
+"11 / labwc)” session)"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:399
+#, rust-format
+msgid "skin → {skin} (theme {theme})"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:413
+#, rust-format
+msgid "labwc theme {name} updated"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:423
+#, rust-format
+msgid "labwc (pid {pid}) reconfigured"
 msgstr ""
 
 #: crates/themes-core/src/crash.rs:65
@@ -1973,312 +2038,312 @@ msgstr ""
 msgid "could not restore {keys}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:141
+#: crates/themes-core/src/doctor.rs:146
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): no extension works now"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:149
+#: crates/themes-core/src/doctor.rs:154
 #, rust-format
 msgid ""
 "Better switch to the safe theme first (themes apply {safe}) if “{theme}” is "
 "to blame"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:157
+#: crates/themes-core/src/doctor.rs:162
 msgid "To turn them on again: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:181 crates/themes-core/src/doctor.rs:206
-#: crates/themes-core/src/doctor.rs:217 crates/themes-core/src/overlay.rs:150
+#: crates/themes-core/src/doctor.rs:186 crates/themes-core/src/doctor.rs:211
+#: crates/themes-core/src/doctor.rs:222 crates/themes-core/src/overlay.rs:150
 #: crates/themes-core/src/tokens.rs:142
 #, rust-format
 msgid "theme “{theme}”: {error}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:191
+#: crates/themes-core/src/doctor.rs:196
 #, rust-format
 msgid "theme “{theme}”: flatpak override “{line}” is refused: {why}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:274
+#: crates/themes-core/src/doctor.rs:279
 #, rust-format
 msgid "theme {theme} ({module})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:298
+#: crates/themes-core/src/doctor.rs:303
 #, rust-format
 msgid "GTK theme “{name}” not found (from: {from})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:303
+#: crates/themes-core/src/doctor.rs:308
 #, rust-format
 msgid "icon theme “{name}” not found (from: {from})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:308
+#: crates/themes-core/src/doctor.rs:313
 #, rust-format
 msgid "cursor theme “{name}” not found (from: {from})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:313
+#: crates/themes-core/src/doctor.rs:318
 #, rust-format
 msgid "sound theme “{name}” not found (from: {from})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:318
+#: crates/themes-core/src/doctor.rs:323
 #, rust-format
 msgid "shell theme “{name}” not found (from: {from})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:336
+#: crates/themes-core/src/doctor.rs:341
 #, rust-format
 msgid "the wallpaper file does not exist: {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:356
+#: crates/themes-core/src/doctor.rs:361
 msgid ""
 "deskd is not installed: its D-Bus service file is missing (run data/"
 "install.sh)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:362
+#: crates/themes-core/src/doctor.rs:367
 msgid ""
 "deskd is not running (it starts when a feature such as the clipboard is "
 "first used)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:368
+#: crates/themes-core/src/doctor.rs:373
 msgid ""
 "deskd owns its D-Bus name but does not answer; restart it: systemctl --user "
 "restart deskd"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:374
+#: crates/themes-core/src/doctor.rs:379
 #, rust-format
 msgid ""
 "deskd {running} is running but this program is {ours}; restart it: systemctl "
 "--user restart deskd"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:429
+#: crates/themes-core/src/doctor.rs:434
 #, rust-format
 msgid "focus mode “{name}” is on (end it with: themes focus stop)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:436
+#: crates/themes-core/src/doctor.rs:441
 msgid ""
 "notification banners are off (do not disturb) and no focus mode is active; "
 "turn do not disturb off in the notification list if this is not intended"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:528
+#: crates/themes-core/src/doctor.rs:533
 #, rust-format
 msgid "compiled the GSettings schemas of {what}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:532
+#: crates/themes-core/src/doctor.rs:537
 msgid "gschemas.compiled is missing"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:533
+#: crates/themes-core/src/doctor.rs:538
 msgid "gschemas.compiled is older than the schema files"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:534
+#: crates/themes-core/src/doctor.rs:539
 #, rust-format
 msgid "gschemas.compiled does not contain {schema}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:540
+#: crates/themes-core/src/doctor.rs:545
 #, rust-format
 msgid "{what}: {why} (themes doctor --fix runs glib-compile-schemas)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:578
+#: crates/themes-core/src/doctor.rs:583
 #, rust-format
 msgid "the GSettings schema {schema} is not installed (run data/install.sh)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:607
+#: crates/themes-core/src/doctor.rs:612
 #, rust-format
 msgid "the extension {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:627
+#: crates/themes-core/src/doctor.rs:632
 #, rust-format
 msgid ""
 "{key} holds a value that is not allowed ({why}); it is ignored (gsettings "
 "reset or change it in the window)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:671
+#: crates/themes-core/src/doctor.rs:676
 #, rust-format
 msgid "generated the token files of the theme “{theme}”"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:679 crates/themes-core/src/overlay.rs:225
+#: crates/themes-core/src/doctor.rs:684 crates/themes-core/src/overlay.rs:225
 #, rust-format
 msgid ""
 "the files generated from tokens.toml of the theme “{theme}” are missing or "
 "out of date (themes doctor --fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:697
+#: crates/themes-core/src/doctor.rs:702
 #, rust-format
 msgid "updated {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:746
+#: crates/themes-core/src/doctor.rs:751
 msgid "replaced GTK symlinks with Flatpak-compatible copies"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:756
+#: crates/themes-core/src/doctor.rs:761
 msgid ""
 "GTK files are symlinked instead of copied; Flatpak apps cannot read them "
 "(themes doctor --fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:775
+#: crates/themes-core/src/doctor.rs:780
 msgid ""
 "Flatpak apps do not have read access to ~/.config/gtk-4.0; run: flatpak "
 "override --user --filesystem=xdg-config/gtk-4.0:ro"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:800
+#: crates/themes-core/src/doctor.rs:805
 msgid "removed the wallpaper palette"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:809
+#: crates/themes-core/src/doctor.rs:814
 msgid ""
 "a wallpaper palette is left in the libadwaita stylesheet, but “Accent from "
 "wallpaper” is off (themes doctor --fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:822
+#: crates/themes-core/src/doctor.rs:827
 #, rust-format
 msgid ""
 "the libadwaita colours of the theme “{theme}” follow the wallpaper (seed "
 "colour {colour}): {path}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:837
+#: crates/themes-core/src/doctor.rs:842
 #, rust-format
 msgid ""
 "the accent follows the wallpaper (deskd): {accent} from the seed colour "
 "{colour}; turning “Accent from wallpaper” off restores {original}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:874
+#: crates/themes-core/src/doctor.rs:879
 #, rust-format
 msgid ""
 "theme “{theme}” has been removed; switch to “{replacement}” (themes doctor --"
 "fix)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:883
+#: crates/themes-core/src/doctor.rs:888
 #, rust-format
 msgid "switched retired theme “{theme}” to “{replacement}”"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:898
+#: crates/themes-core/src/doctor.rs:903
 #, rust-format
 msgid ""
 "extension {uuid} is no longer used by any bundled theme (themes doctor --fix "
 "turns it off)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:903
+#: crates/themes-core/src/doctor.rs:908
 #, rust-format
 msgid ""
 "extension {uuid} is still installed but no longer used by any bundled theme; "
 "you may remove it"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:916
+#: crates/themes-core/src/doctor.rs:921
 #, rust-format
 msgid "turned off retired extension {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:987
+#: crates/themes-core/src/doctor.rs:992
 #, rust-format
 msgid "journal: {line}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1057
+#: crates/themes-core/src/doctor.rs:1078
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1086
+#: crates/themes-core/src/doctor.rs:1108
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1088
+#: crates/themes-core/src/doctor.rs:1110
 msgid "error (ERROR)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1110
+#: crates/themes-core/src/doctor.rs:1132
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1118
+#: crates/themes-core/src/doctor.rs:1140
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1130
+#: crates/themes-core/src/doctor.rs:1152
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1147
+#: crates/themes-core/src/doctor.rs:1169
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
 "is not installed"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1155
+#: crates/themes-core/src/doctor.rs:1177
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1178
+#: crates/themes-core/src/doctor.rs:1203
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1219
+#: crates/themes-core/src/doctor.rs:1244
 #, rust-format
 msgid "turned off {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1277
+#: crates/themes-core/src/doctor.rs:1302
 #, rust-format
 msgid "turned on {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1311
+#: crates/themes-core/src/doctor.rs:1336
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1316
+#: crates/themes-core/src/doctor.rs:1341
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1325 crates/themes/src/cli.rs:504
+#: crates/themes-core/src/doctor.rs:1350 crates/themes/src/cli.rs:504
 #: crates/themes/src/gui/window.rs:1357
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1328
+#: crates/themes-core/src/doctor.rs:1353
 msgid "Themes: system check"
 msgstr ""
 
