@@ -462,6 +462,45 @@ export function clipTrusted() {
     return clipClient().trusted;
 }
 
+/**
+ * Call a deskd method from the shell's own bus connection, the caller deskd trusts (ADR 0008);
+ * the test process itself gets AccessDenied. `sig` is the input signature ('' for none) and
+ * `args` its values as JSON (a byte array as a list of numbers). Returns {ok, value} with the
+ * unpacked reply, or {ok: false, name, message} with the D-Bus error name.
+ */
+export function deskCall(path, iface, method, sig, args) {
+    const params = sig ? new GLib.Variant(sig, args) : null;
+    return new Promise(resolve => {
+        Gio.DBus.session.call('io.github.OlehDzhumyk.Desk', path, iface, method, params, null,
+            Gio.DBusCallFlags.NONE, 30000, null, (conn, res) => {
+                try {
+                    resolve({ok: true, value: conn.call_finish(res).recursiveUnpack()});
+                } catch (e) {
+                    const name = Gio.DBusError.get_remote_error(e) ?? '';
+                    Gio.DBusError.strip_remote_error(e);
+                    resolve({ok: false, name, message: String(e?.message ?? e)});
+                }
+            });
+    });
+}
+
+// the bridge's Stage 3/4 features, by their field on the extension object
+const FEATURES = ['_colorPicker', '_ocr', '_capture', '_layouts', '_quickLook', '_shortcutGuide'];
+
+/** Which of the Stage 3/4 features the bridge holds (all false after disable; null: not loaded). */
+export function bridgeFeatures() {
+    const b = bridge();
+    if (!b)
+        return null;
+    return Object.fromEntries(FEATURES.map(f => [f, b[f] !== null && b[f] !== undefined]));
+}
+
+/** The work area of the primary monitor in logical pixels, as the bridge passes it to deskd. */
+export function workArea() {
+    const wa = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
+    return {x: wa.x, y: wa.y, w: wa.width, h: wa.height};
+}
+
 // ---- leak tracker. While tracking, every GObject created and every signal handler / main-loop
 // source added with `fragment` (a path part such as the extension uuid) in the JS stack is
 // recorded. leaks() then reports what is still alive:
