@@ -8,7 +8,9 @@
 #      autostart.user in that directory belong to you and are never overwritten; when
 #      rc.local.xml exists, labwc uses it instead of the bundled rc.xml.
 #   2. Install the labwc theme desk-win11 (~/.local/share/themes/desk-win11/openbox-3/themerc).
-#   3. Export the session environment and replace this process with labwc.
+#   3. Export the session environment and run labwc. Its autostart imports WAYLAND_DISPLAY and
+#      XDG_CURRENT_DESKTOP into the systemd user manager; when labwc exits, this script removes
+#      them again, so user services started later do not reach a compositor that is gone.
 #
 # Usage: desk-win11-session [--dry-run]   (--dry-run: set up the files, print the labwc command)
 # Environment: DESK_LABWC_SRC  the bundled config directory, when it is not in a default place.
@@ -74,4 +76,19 @@ if [ "$DRY" = 1 ]; then
   printf 'labwc -C %q\n' "$CFG_DIR"
   exit 0
 fi
-exec labwc -C "$CFG_DIR"
+
+# The user manager forgets this session when labwc exits (also on a signal to this script).
+cleanup() {
+  if systemctl --user show-environment >/dev/null 2>&1; then
+    systemctl --user unset-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE \
+      DESK_LABWC_DIR >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+status=0
+labwc -C "$CFG_DIR" || status=$?
+exit "$status"
