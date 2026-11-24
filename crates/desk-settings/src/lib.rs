@@ -19,6 +19,7 @@ pub mod model;
 pub mod ocr;
 pub mod osd;
 pub mod registry;
+pub mod shortcut_guide;
 pub mod shortcuts;
 pub mod stable_hash;
 pub mod validate;
@@ -40,6 +41,7 @@ pub use model::*;
 pub use ocr::*;
 pub use osd::*;
 pub use registry::*;
+pub use shortcut_guide::*;
 
 /// Every schema of the registry: ours ([`SCHEMAS`]) and those of the repository's extensions
 /// ([`EXTENSION_SCHEMAS`]).

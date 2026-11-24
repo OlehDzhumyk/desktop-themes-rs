@@ -920,6 +920,7 @@ impl ShortcutSettings {
     pub const CAPTURE_RECORD: &'static str = "capture-record";
     pub const LAYOUT_PICKER: &'static str = "layout-picker";
     pub const ALWAYS_ON_TOP: &'static str = "always-on-top";
+    pub const SHORTCUT_GUIDE_TOGGLE: &'static str = "shortcut-guide-toggle";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -1023,6 +1024,15 @@ impl ShortcutSettings {
 
     pub fn set_always_on_top(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::ALWAYS_ON_TOP, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the shortcut guide (override)
+    pub fn shortcut_guide_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::SHORTCUT_GUIDE_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_shortcut_guide_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::SHORTCUT_GUIDE_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
 
@@ -1496,5 +1506,68 @@ impl LogoMenuSettings {
 
     pub fn set_hide_activities(&self, v: bool) -> Result<(), gio::glib::BoolError> {
         self.0.set_boolean(Self::HIDE_ACTIVITIES, v)
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.ShortcutGuide` at `/io/github/OlehDzhumyk/Desk/shortcut-guide/`.
+#[derive(Clone, Debug)]
+pub struct ShortcutGuideSettings(pub gio::Settings);
+
+impl ShortcutGuideSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.ShortcutGuide";
+    pub const ENABLED: &'static str = "enabled";
+    pub const HOLD_DELAY: &'static str = "hold-delay";
+    pub const STICKY: &'static str = "sticky";
+    pub const SHOW_OWNER: &'static str = "show-owner";
+    pub const SHORTCUT_GUIDE_SHORTCUT: &'static str = "shortcut-guide-shortcut";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Show the shortcut guide when Super is held
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Milliseconds to hold Super before showing the shortcut guide
+    pub fn hold_delay(&self) -> u32 {
+        self.0.uint(Self::HOLD_DELAY)
+    }
+
+    pub fn set_hold_delay(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::HOLD_DELAY, v)
+    }
+
+    /// Keep the shortcut guide open after Super is released
+    pub fn sticky(&self) -> bool {
+        self.0.boolean(Self::STICKY)
+    }
+
+    pub fn set_sticky(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::STICKY, v)
+    }
+
+    /// Show whether each shortcut comes from the theme or your setting
+    pub fn show_owner(&self) -> bool {
+        self.0.boolean(Self::SHOW_OWNER)
+    }
+
+    pub fn set_show_owner(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SHOW_OWNER, v)
+    }
+
+    /// Shortcut that opens the shortcut guide in sticky search mode (in force)
+    pub fn shortcut_guide_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::SHORTCUT_GUIDE_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_shortcut_guide_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::SHORTCUT_GUIDE_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
