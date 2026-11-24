@@ -519,12 +519,12 @@ fn draw_ellipse(img: &mut Image, r: Box2, c: [u8; 4], stroke: u32, fill: bool) {
     let (cx, cy) = (fx(r.x0 + r.x1) / 2.0, fx(r.y0 + r.y1) / 2.0);
     let (rx, ry) = (fx(r.width()) / 2.0, fx(r.height()) / 2.0);
     let s = f64::from(stroke);
-    let (ix, iy) = (rx - s, ry - s);
+    let (inner_rx, inner_ry) = (rx - s, ry - s);
     let within = |x: f64, y: f64, a: f64, b: f64| {
         a > 0.0 && b > 0.0 && ((x - cx) / a).powi(2) + ((y - cy) / b).powi(2) <= 1.0
     };
     m.mark(r, |x, y| {
-        within(x, y, rx, ry) && (fill || !within(x, y, ix, iy))
+        within(x, y, rx, ry) && (fill || !within(x, y, inner_rx, inner_ry))
     });
     m.paint(img, c, Blend::Over);
 }
