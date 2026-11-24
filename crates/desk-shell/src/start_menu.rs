@@ -3,8 +3,9 @@
 //! (`Layer::Overlay`, keyboard on demand, 12 px above the bar).
 //!
 //! An empty query shows the pinned grid (4 × 3) and the footer (user, Settings, Lock, Power); a
-//! query shows the ranked results of `desk-search` (calculator, layout-tolerant applications,
-//! system actions). Keys: `Up`/`Down` move, `Return` activates, `Esc` clears the query, then
+//! query shows the ranked results of deskd's `Search.Query` (calculator, layout-tolerant
+//! applications, system actions, files, clipboard history, emoji, usage ranking). Without deskd
+//! the in-process `desk-search` catalog answers (no files, clipboard or emoji). Keys: `Up`/`Down` move, `Return` activates, `Esc` clears the query, then
 //! closes. Losing the focus closes the flyout too.
 
 use std::cell::{Cell, RefCell};
@@ -109,6 +110,8 @@ pub struct StartMenu {
     start_button: RefCell<Option<glib::WeakRef<gtk::ToggleButton>>>,
     /// When a focus loss last closed the flyout (monotonic µs).
     closed_at: Cell<i64>,
+    /// Bumped by every query: answers of an older query are dropped.
+    query_gen: Cell<u64>,
 }
 
 impl StartMenu {
@@ -148,6 +151,7 @@ impl StartMenu {
             opts,
             start_button: RefCell::default(),
             closed_at: Cell::new(0),
+            query_gen: Cell::new(0),
         });
         menu.layout(grid);
         menu.connect();
@@ -402,15 +406,33 @@ impl StartMenu {
         }
     }
 
-    fn refresh(&self) {
-        let text = self.entry.text();
+    fn refresh(self: &Rc<Self>) {
+        let generation = self.query_gen.get().wrapping_add(1);
+        self.query_gen.set(generation);
+        let text = self.entry.text().to_string();
         if page_for(&text) == Page::Pinned {
             self.stack.set_visible_child_name("pinned");
             self.results.borrow_mut().clear();
             return;
         }
+        let (menu, query) = (Rc::downgrade(self), text.clone());
+        crate::deskd::search(&query, move |remote| {
+            let Some(m) = menu.upgrade() else { return };
+            if m.query_gen.get() != generation {
+                return;
+            }
+            let results = remote.unwrap_or_else(|| m.local_search(&text));
+            m.show_results(results);
+        });
+    }
+
+    /// The in-process catalog (deskd is not running or refused).
+    fn local_search(&self, text: &str) -> Vec<SearchResult> {
         let now = glib::real_time().max(0).unsigned_abs() / 1_000_000;
-        let results = self.catalog.search(&text, &self.usage, &self.opts, now);
+        self.catalog.search(text, &self.usage, &self.opts, now)
+    }
+
+    fn show_results(&self, results: Vec<SearchResult>) {
         while let Some(child) = self.list.first_child() {
             self.list.remove(&child);
         }
