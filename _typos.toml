@@ -30,3 +30,4 @@ ba = "ba"         # background alpha
 lits = "lits"     # literals, in the i18n lint
 windw = "windw"   # deliberate misspelling in a test
 tema = "tema"     # Ukrainian "тема" (theme) transliterated, id prefix in util.rs
+controllen = "controllen" # POSIX msghdr::msg_controllen field
