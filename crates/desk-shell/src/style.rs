@@ -119,7 +119,7 @@ window.desk-shell { background: none; }
 .desk-shell-taskbar {
   min-height: 48px;
   background-color: var(--ds-bg);
-  border-top: 1px solid var(--ds-stroke);
+  box-shadow: inset 0 1px 0 var(--ds-stroke);
   padding: 0 8px;
 }
 .desk-shell-taskbar button {
@@ -136,9 +136,16 @@ window.desk-shell { background: none; }
 .desk-shell-taskbar button:hover { background-color: var(--ds-hover); }
 .desk-shell-taskbar button:active,
 .desk-shell-taskbar button:checked { background-color: var(--ds-active); }
-.desk-shell-taskbar .pin { border-bottom: 3px solid transparent; }
-.desk-shell-taskbar .pin:checked { border-bottom-color: var(--ds-accent); }
 .desk-shell-taskbar .pin image { -gtk-icon-size: 24px; }
+.desk-shell-taskbar .pin.active { background-color: var(--ds-hover); }
+.desk-shell-taskbar .app-indicator {
+  min-width: 6px;
+  min-height: 3px;
+  margin-bottom: 1px;
+  border-radius: 2px;
+  background-color: var(--ds-dim);
+}
+.desk-shell-taskbar .app-indicator.active { min-width: 16px; background-color: var(--ds-accent); }
 
 .desk-shell-start-tile { min-width: 8px; min-height: 8px; border-radius: 1px; background-color: #0078d4; }
 .desk-shell.dark .desk-shell-start-tile { background-color: #4cc2ff; }
@@ -148,7 +155,7 @@ window.desk-shell { background: none; }
   min-width: 180px;
   border-radius: 999px;
   background-color: var(--ds-field);
-  border: 1px solid var(--ds-stroke);
+  box-shadow: inset 0 0 0 1px var(--ds-stroke);
 }
 .desk-shell-search-pill label { color: var(--ds-dim); }
 
@@ -215,6 +222,25 @@ window.desk-shell { background: none; }
 .desk-shell-start-menu .start-footer button:hover { background-color: var(--ds-hover); }
 
 .desk-shell-tray-pill { padding: 0 10px; }
+
+.desk-shell-window-menu > contents {
+  background-color: var(--ds-flyout);
+  border: 1px solid var(--ds-stroke);
+  border-radius: var(--ds-flyout-radius);
+  padding: 4px;
+  color: var(--ds-fg);
+}
+.desk-shell-window-menu button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--ds-radius);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--ds-fg);
+}
+.desk-shell-window-menu button:hover { background-color: var(--ds-hover); }
+.desk-shell-window-menu button label { font-weight: normal; }
 
 .desk-shell-flyout {
   background-color: var(--ds-flyout);
@@ -355,6 +381,49 @@ mod tests {
         }
     }
 
+    /// The declarations of every rule whose selector starts with `selector`.
+    fn rules_of(selector: &str) -> Vec<&'static str> {
+        CSS.split('}')
+            .filter_map(|rule| rule.split_once('{'))
+            .filter(|(sel, _)| sel.trim().starts_with(selector))
+            .map(|(_, body)| body)
+            .collect()
+    }
+
+    /// The declarations of the rule with exactly `selector`.
+    fn rule(selector: &str) -> &'static str {
+        let (_, body) = CSS
+            .split('}')
+            .filter_map(|rule| rule.split_once('{'))
+            .find(|(sel, _)| sel.trim() == selector)
+            .unwrap_or_else(|| panic!("no rule {selector}"));
+        body
+    }
+
+    #[test]
+    fn the_taskbar_is_exactly_48_px_high() {
+        // ADR 0012: 48 px surface and exclusive zone. A vertical border, padding or margin on
+        // the bar, or a border on a 40 px button with 4 px margins, makes it taller (labwc
+        // reported 49 px with a 1 px top border), so lines and indicators are inset shadows
+        // and overlays instead.
+        assert!(rule(".desk-shell-taskbar").contains("min-height: 48px"));
+        for selector in [
+            ".desk-shell-taskbar",
+            ".desk-shell-search-pill",
+            ".desk-shell-tray-pill",
+            ".desk-shell-clock",
+        ] {
+            for body in rules_of(selector) {
+                for bad in ["border-top", "border-bottom", "border: 1px", "border:1px"] {
+                    assert!(!body.contains(bad), "{selector}: {bad}");
+                }
+            }
+        }
+        let button = rule(".desk-shell-taskbar button");
+        assert!(button.contains("min-height: 40px") && button.contains("margin: 4px 2px"));
+        assert!(button.contains("padding: 0 6px") && button.contains("border: none"));
+    }
+
     #[test]
     fn stylesheet_is_balanced_and_names_the_surfaces() {
         assert_eq!(CSS.matches('{').count(), CSS.matches('}').count());
@@ -367,6 +436,8 @@ mod tests {
             ":focus-visible",
             ".desk-shell.hc",
             ".desk-shell.dark",
+            ".app-indicator.active",
+            ".desk-shell-window-menu",
         ] {
             assert!(CSS.contains(surface), "{surface}");
         }
