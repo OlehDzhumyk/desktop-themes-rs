@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 13:52+0000\n"
+"POT-Creation-Date: 2026-11-24 14:33+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -2476,8 +2476,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
-#: crates/desk-shell/src/start_menu.rs:139 crates/desk-shell/src/taskbar.rs:94
-#: crates/desk-shell/src/taskbar.rs:97
+#: crates/desk-shell/src/start_menu.rs:139 crates/desk-shell/src/taskbar.rs:96
+#: crates/desk-shell/src/taskbar.rs:99
 msgid "Search"
 msgstr "Пошук"
 
@@ -2612,7 +2612,7 @@ msgstr ""
 #: crates/desk-shell/src/clipboard_flyout.rs:93
 #: crates/desk-shell/src/clipboard_flyout.rs:115
 #: crates/desk-shell/src/emoji_flyout.rs:176
-#: crates/desk-shell/src/taskbar.rs:107
+#: crates/desk-shell/src/taskbar.rs:109
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
 
@@ -2621,6 +2621,7 @@ msgid "Private mode is on: new items are not recorded"
 msgstr "Приватний режим увімкнено: нові елементи не записуються"
 
 #: crates/desk-shell/src/clipboard_flyout.rs:79
+#: crates/desk-shell/src/taskbar.rs:320
 msgid "Clear all"
 msgstr "Очистити все"
 
@@ -2712,10 +2713,25 @@ msgstr "Немає нещодавно використаних емодзі"
 msgid "No emoji found"
 msgstr "Емодзі не знайдено"
 
-#: crates/desk-shell/src/main.rs:303 crates/deskd/src/search/mod.rs:258
+#: crates/desk-shell/src/main.rs:307 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr "Шукати «{query}» в інтернеті"
+
+#: crates/desk-shell/src/notifications.rs:351
+#: crates/desk-shell/src/taskbar.rs:314
+msgid "Notifications"
+msgstr "Сповіщення"
+
+#: crates/desk-shell/src/notifications.rs:656
+#: crates/desk-shell/src/taskbar.rs:229
+msgid "Notification"
+msgstr "Сповіщення"
+
+#: crates/desk-shell/src/notifications.rs:669
+#: crates/desk-shell/src/taskbar.rs:248
+msgid "Dismiss notification"
+msgstr "Закрити сповіщення"
 
 #: crates/desk-shell/src/oneshot.rs:74
 msgid "Screen text recognition is turned off"
@@ -2847,7 +2863,7 @@ msgid "Bluetooth"
 msgstr "Bluetooth"
 
 #: crates/desk-shell/src/quick_settings.rs:246
-#: crates/desk-shell/src/taskbar.rs:133
+#: crates/desk-shell/src/taskbar.rs:135
 msgid "Quick settings"
 msgstr "Швидкі налаштування"
 
@@ -2922,7 +2938,7 @@ msgstr "Пошук в інтернеті"
 msgid "File"
 msgstr "Файл"
 
-#: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:84
+#: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:86
 msgid "Start menu"
 msgstr "Пуск"
 
@@ -2954,33 +2970,37 @@ msgstr "Заблокувати екран"
 msgid "No results"
 msgstr "Нічого не знайдено"
 
-#: crates/desk-shell/src/taskbar.rs:292
+#: crates/desk-shell/src/taskbar.rs:333
+msgid "No notifications"
+msgstr "Немає сповіщень"
+
+#: crates/desk-shell/src/taskbar.rs:545
 msgid "Restore"
 msgstr "Відновити"
 
-#: crates/desk-shell/src/taskbar.rs:294
+#: crates/desk-shell/src/taskbar.rs:547
 msgid "Minimize"
 msgstr "Згорнути"
 
-#: crates/desk-shell/src/taskbar.rs:300
+#: crates/desk-shell/src/taskbar.rs:553
 msgid "Unmaximize"
 msgstr "Відновити розмір"
 
-#: crates/desk-shell/src/taskbar.rs:302
+#: crates/desk-shell/src/taskbar.rs:555
 msgid "Maximize"
 msgstr "Розгорнути"
 
-#: crates/desk-shell/src/taskbar.rs:306
+#: crates/desk-shell/src/taskbar.rs:559
 #: crates/themes/src/gui/capture_editor/mod.rs:848
 #: crates/themes/src/gui/window.rs:1369
 msgid "Close"
 msgstr "Закрити"
 
-#: crates/desk-shell/src/taskbar.rs:449
+#: crates/desk-shell/src/taskbar.rs:712
 msgid "Taskbar"
 msgstr "Панель завдань"
 
-#: crates/desk-shell/src/taskbar.rs:587
+#: crates/desk-shell/src/taskbar.rs:855
 msgid "Window"
 msgstr "Вікно"
 

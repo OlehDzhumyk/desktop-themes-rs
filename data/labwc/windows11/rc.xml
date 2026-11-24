@@ -172,10 +172,11 @@
       <action name="Iconify"/>
     </keybind>
 
-    <!-- Win+Shift+S and Print: region screenshot, then the capture editor -->
+    <!-- Win+Shift+S: region screenshot (consistent with W-S-t and W-S-c) -->
     <keybind key="W-S-s">
-      <action name="Execute" command="sh -c 'exec &quot;$DESK_LABWC_DIR/capture&quot;'"/>
+      <action name="Execute" command="desk-shell --capture-region"/>
     </keybind>
+    <!-- Print: region screenshot, then the capture editor -->
     <keybind key="Print">
       <action name="Execute" command="sh -c 'exec &quot;$DESK_LABWC_DIR/capture&quot;'"/>
     </keybind>

@@ -24,12 +24,14 @@ mod emoji_flyout;
 mod flyout;
 mod launch;
 mod layer_shell;
+mod notifications;
 mod oneshot;
 mod osd;
 mod pinned;
 mod quick_settings;
 mod region;
 mod running;
+mod sni;
 mod start_menu;
 mod style;
 mod system;
@@ -175,6 +177,8 @@ struct Shell {
     _look: Rc<LiveLook>,
     _user_css: Option<Rc<style::CssWatcher>>,
     _system: Rc<system::SystemStatus>,
+    _sni: Rc<sni::SniWatcher>,
+    _notifications: Rc<notifications::NotificationDaemon>,
     _taskbars: Rc<taskbar::Taskbars>,
 }
 
@@ -322,8 +326,19 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
     });
     let q = Rc::downgrade(&quick);
     let osd = Osd::new(app, move || q.upgrade().is_some_and(|q| q.is_open()));
+    let sni = sni::SniWatcher::new();
+    let notifications = notifications::NotificationDaemon::new(app);
     let look = LiveLook::new(app, args.skin);
-    let taskbars = taskbar::Taskbars::new(app, &menu, &quick, &clip, &pins, &apps);
+    let taskbars = taskbar::Taskbars::new(
+        app,
+        &menu,
+        &quick,
+        &clip,
+        &sni,
+        &notifications,
+        &pins,
+        &apps,
+    );
     taskbars.start();
     look.apply();
     look.sync();
@@ -336,6 +351,8 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
         _look: look,
         _user_css: user_css,
         _system: system,
+        _sni: sni,
+        _notifications: notifications,
         _taskbars: taskbars,
     }
 }

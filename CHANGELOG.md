@@ -34,6 +34,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- desk-shell: built-in system tray (`org.kde.StatusNotifierWatcher` / `StatusNotifierItem` icons in
+  the taskbar with left/right/middle click and ARGB32 pixmap support, degrading silently if another
+  watcher owns the name), built-in `org.freedesktop.Notifications` daemon with Windows 11 Fluent
+  `Layer::Overlay` toast popups, `Desk.Focus` Do Not Disturb suppression (still showing critical
+  notifications), Notification History with per-item dismiss and "Clear all" inside the
+  Clock/Calendar flyout, and an unread indicator dot on the taskbar clock; `Win+Shift+S` in the
+  Windows 11 labwc config now invokes `desk-shell --capture-region`.
 - Packaging foundation: `packaging/desktop-themes-rs.spec` for Fedora 44/45/rawhide (core
   `desktop-themes-rs` plus `desktop-themes-rs-labwc-session` and `desktop-themes-rs-gnome-bridge`
   subpackages), `@BIN@` templating in `data/deskd.service` and `data/themes-doctor.service` so

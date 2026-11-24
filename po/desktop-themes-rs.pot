@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 13:52+0000\n"
+"POT-Creation-Date: 2026-11-24 14:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1496,8 +1496,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
-#: crates/desk-shell/src/start_menu.rs:139 crates/desk-shell/src/taskbar.rs:94
-#: crates/desk-shell/src/taskbar.rs:97
+#: crates/desk-shell/src/start_menu.rs:139 crates/desk-shell/src/taskbar.rs:96
+#: crates/desk-shell/src/taskbar.rs:99
 msgid "Search"
 msgstr ""
 
@@ -1617,7 +1617,7 @@ msgstr ""
 #: crates/desk-shell/src/clipboard_flyout.rs:93
 #: crates/desk-shell/src/clipboard_flyout.rs:115
 #: crates/desk-shell/src/emoji_flyout.rs:176
-#: crates/desk-shell/src/taskbar.rs:107
+#: crates/desk-shell/src/taskbar.rs:109
 msgid "Clipboard history"
 msgstr ""
 
@@ -1626,6 +1626,7 @@ msgid "Private mode is on: new items are not recorded"
 msgstr ""
 
 #: crates/desk-shell/src/clipboard_flyout.rs:79
+#: crates/desk-shell/src/taskbar.rs:320
 msgid "Clear all"
 msgstr ""
 
@@ -1717,9 +1718,24 @@ msgstr ""
 msgid "No emoji found"
 msgstr ""
 
-#: crates/desk-shell/src/main.rs:303 crates/deskd/src/search/mod.rs:258
+#: crates/desk-shell/src/main.rs:307 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
+msgstr ""
+
+#: crates/desk-shell/src/notifications.rs:351
+#: crates/desk-shell/src/taskbar.rs:314
+msgid "Notifications"
+msgstr ""
+
+#: crates/desk-shell/src/notifications.rs:656
+#: crates/desk-shell/src/taskbar.rs:229
+msgid "Notification"
+msgstr ""
+
+#: crates/desk-shell/src/notifications.rs:669
+#: crates/desk-shell/src/taskbar.rs:248
+msgid "Dismiss notification"
 msgstr ""
 
 #: crates/desk-shell/src/oneshot.rs:74
@@ -1852,7 +1868,7 @@ msgid "Bluetooth"
 msgstr ""
 
 #: crates/desk-shell/src/quick_settings.rs:246
-#: crates/desk-shell/src/taskbar.rs:133
+#: crates/desk-shell/src/taskbar.rs:135
 msgid "Quick settings"
 msgstr ""
 
@@ -1927,7 +1943,7 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:84
+#: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:86
 msgid "Start menu"
 msgstr ""
 
@@ -1959,33 +1975,37 @@ msgstr ""
 msgid "No results"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:292
+#: crates/desk-shell/src/taskbar.rs:333
+msgid "No notifications"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:545
 msgid "Restore"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:294
+#: crates/desk-shell/src/taskbar.rs:547
 msgid "Minimize"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:300
+#: crates/desk-shell/src/taskbar.rs:553
 msgid "Unmaximize"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:302
+#: crates/desk-shell/src/taskbar.rs:555
 msgid "Maximize"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:306
+#: crates/desk-shell/src/taskbar.rs:559
 #: crates/themes/src/gui/capture_editor/mod.rs:848
 #: crates/themes/src/gui/window.rs:1369
 msgid "Close"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:449
+#: crates/desk-shell/src/taskbar.rs:712
 msgid "Taskbar"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:587
+#: crates/desk-shell/src/taskbar.rs:855
 msgid "Window"
 msgstr ""
 
