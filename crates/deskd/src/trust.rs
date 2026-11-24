@@ -132,14 +132,14 @@ pub struct Trust {
 }
 
 impl Trust {
-    /// deskd itself and the `themes` binary installed next to it.
+    /// deskd itself and the `themes` and `desk-shell` binaries installed next to it.
     pub fn installed() -> Trust {
-        let sibling = std::env::current_exe()
+        let dir = std::env::current_exe()
             .ok()
-            .and_then(|p| p.parent().map(|d| d.join("themes")));
+            .and_then(|p| p.parent().map(Path::to_path_buf));
         Trust {
             own_exe: true,
-            binaries: sibling.into_iter().collect(),
+            binaries: dir.map_or_else(Vec::new, |d| vec![d.join("themes"), d.join("desk-shell")]),
             logged: Mutex::default(),
         }
     }
