@@ -32,6 +32,7 @@ mod region;
 mod running;
 mod start_menu;
 mod style;
+mod system;
 mod taskbar;
 mod toplevels;
 
@@ -172,6 +173,8 @@ struct Shell {
     emoji: Rc<EmojiFlyout>,
     osd: Rc<Osd>,
     _look: Rc<LiveLook>,
+    _user_css: Option<Rc<style::CssWatcher>>,
+    _system: Rc<system::SystemStatus>,
     _taskbars: Rc<taskbar::Taskbars>,
 }
 
@@ -280,7 +283,8 @@ fn default_browser() -> Option<String> {
 
 fn build(app: &gtk::Application, args: &Args) -> Shell {
     let display = gtk::gdk::Display::default().expect("a display");
-    style::install(&display);
+    let user_css = style::install(&display);
+    let system = system::SystemStatus::new();
     let apps = desktop::scan(
         &desktop::application_dirs(&desktop::data_dirs()),
         &ParseOptions::from_env(),
@@ -301,7 +305,7 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
     // read-only: deskd owns search-usage.json and counts launches (RecordLaunch)
     let usage = UsageStore::load(UsageStore::default_path(), true);
     let menu = StartMenu::new(app, Catalog::new(apps.clone(), gettext), usage, opts, &grid);
-    let quick = QuickSettings::new(app);
+    let quick = QuickSettings::new(app, &system);
     let clip = ClipboardFlyout::new(app);
     let emoji = EmojiFlyout::new(app);
     let e = Rc::downgrade(&emoji);
@@ -330,6 +334,8 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
         emoji,
         osd,
         _look: look,
+        _user_css: user_css,
+        _system: system,
         _taskbars: taskbars,
     }
 }

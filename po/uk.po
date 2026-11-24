@@ -1934,7 +1934,7 @@ msgstr "Верхня панель"
 
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
-#: crates/desk-shell/src/quick_settings.rs:139
+#: crates/desk-shell/src/quick_settings.rs:276
 msgid "Volume mixer"
 msgstr "Мікшер гучності"
 
@@ -2712,7 +2712,7 @@ msgstr "Немає нещодавно використаних емодзі"
 msgid "No emoji found"
 msgstr "Емодзі не знайдено"
 
-#: crates/desk-shell/src/main.rs:299 crates/deskd/src/search/mod.rs:258
+#: crates/desk-shell/src/main.rs:303 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr "Шукати «{query}» в інтернеті"
@@ -2807,65 +2807,101 @@ msgstr "Звук вимкнено"
 msgid "Volume {percent} %"
 msgstr "Гучність {percent} %"
 
-#: crates/desk-shell/src/quick_settings.rs:93
+#: crates/desk-shell/src/quick_settings.rs:71
+msgid "Wi-Fi connected"
+msgstr "Wi-Fi підключено"
+
+#: crates/desk-shell/src/quick_settings.rs:73
+msgid "Wi-Fi off"
+msgstr "Wi-Fi вимкнено"
+
+#: crates/desk-shell/src/quick_settings.rs:81
+#, rust-format
+msgid "Battery {percent}% (charging)"
+msgstr "Батарея {percent}% (заряджається)"
+
+#: crates/desk-shell/src/quick_settings.rs:83
+#, rust-format
+msgid "Battery {percent}%"
+msgstr "Батарея {percent}%"
+
+#: crates/desk-shell/src/quick_settings.rs:91
+#, rust-format
+msgid "{percent}% (charging)"
+msgstr "{percent}% (заряджається)"
+
+#: crates/desk-shell/src/quick_settings.rs:160
 msgid "Mute"
 msgstr "Вимкнути звук"
 
-#: crates/desk-shell/src/quick_settings.rs:93
+#: crates/desk-shell/src/quick_settings.rs:160
 msgid "Unmute"
 msgstr "Увімкнути звук"
 
-#: crates/desk-shell/src/quick_settings.rs:124
-#: crates/desk-shell/src/taskbar.rs:122
+#: crates/desk-shell/src/quick_settings.rs:240
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+#: crates/desk-shell/src/quick_settings.rs:242
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: crates/desk-shell/src/quick_settings.rs:246
+#: crates/desk-shell/src/taskbar.rs:133
 msgid "Quick settings"
 msgstr "Швидкі налаштування"
 
-#: crates/desk-shell/src/quick_settings.rs:125
+#: crates/desk-shell/src/quick_settings.rs:251
 msgid "Dark mode"
 msgstr "Темний режим"
 
-#: crates/desk-shell/src/quick_settings.rs:126
+#: crates/desk-shell/src/quick_settings.rs:252
 #: crates/deskd/src/focus/model.rs:186
 msgid "Do not disturb"
 msgstr "Не турбувати"
 
-#: crates/desk-shell/src/quick_settings.rs:127
+#: crates/desk-shell/src/quick_settings.rs:253
 msgid "Private clipboard"
 msgstr "Приватний буфер"
 
-#: crates/desk-shell/src/quick_settings.rs:158
+#: crates/desk-shell/src/quick_settings.rs:254
 msgid "Screenshot"
 msgstr "Знімок екрана"
 
-#: crates/desk-shell/src/quick_settings.rs:159
+#: crates/desk-shell/src/quick_settings.rs:255
 msgid "Color picker"
 msgstr "Піпетка кольору"
 
-#: crates/desk-shell/src/quick_settings.rs:160
+#: crates/desk-shell/src/quick_settings.rs:256
 msgid "Screen text"
 msgstr "Текст із екрана"
 
-#: crates/desk-shell/src/quick_settings.rs:163
+#: crates/desk-shell/src/quick_settings.rs:259
 msgid "Settings hub"
 msgstr "Центр налаштувань"
 
-#: crates/desk-shell/src/quick_settings.rs:207
+#: crates/desk-shell/src/quick_settings.rs:337
+#: crates/desk-shell/src/quick_settings.rs:339
+msgid "Brightness"
+msgstr "Яскравість"
+
+#: crates/desk-shell/src/quick_settings.rs:348
 msgid "Sound"
 msgstr "Звук"
 
-#: crates/desk-shell/src/quick_settings.rs:217
+#: crates/desk-shell/src/quick_settings.rs:358
 msgid "Volume"
 msgstr "Гучність"
 
-#: crates/desk-shell/src/quick_settings.rs:330
+#: crates/desk-shell/src/quick_settings.rs:573
 msgid "Sound is not available: the desktop service is not running"
 msgstr "Звук недоступний: служба стільниці не працює"
 
-#: crates/desk-shell/src/quick_settings.rs:332
+#: crates/desk-shell/src/quick_settings.rs:575
 msgid "No output device"
 msgstr "Немає пристрою виведення"
 
-#: crates/desk-shell/src/quick_settings.rs:392
+#: crates/desk-shell/src/quick_settings.rs:646
 #, rust-format
 msgid "Volume of {app}"
 msgstr "Гучність {app}"
@@ -2918,33 +2954,33 @@ msgstr "Заблокувати екран"
 msgid "No results"
 msgstr "Нічого не знайдено"
 
-#: crates/desk-shell/src/taskbar.rs:281
+#: crates/desk-shell/src/taskbar.rs:292
 msgid "Restore"
 msgstr "Відновити"
 
-#: crates/desk-shell/src/taskbar.rs:283
+#: crates/desk-shell/src/taskbar.rs:294
 msgid "Minimize"
 msgstr "Згорнути"
 
-#: crates/desk-shell/src/taskbar.rs:289
+#: crates/desk-shell/src/taskbar.rs:300
 msgid "Unmaximize"
 msgstr "Відновити розмір"
 
-#: crates/desk-shell/src/taskbar.rs:291
+#: crates/desk-shell/src/taskbar.rs:302
 msgid "Maximize"
 msgstr "Розгорнути"
 
-#: crates/desk-shell/src/taskbar.rs:295
+#: crates/desk-shell/src/taskbar.rs:306
 #: crates/themes/src/gui/capture_editor/mod.rs:848
 #: crates/themes/src/gui/window.rs:1369
 msgid "Close"
 msgstr "Закрити"
 
-#: crates/desk-shell/src/taskbar.rs:438
+#: crates/desk-shell/src/taskbar.rs:449
 msgid "Taskbar"
 msgstr "Панель завдань"
 
-#: crates/desk-shell/src/taskbar.rs:576
+#: crates/desk-shell/src/taskbar.rs:587
 msgid "Window"
 msgstr "Вікно"
 
