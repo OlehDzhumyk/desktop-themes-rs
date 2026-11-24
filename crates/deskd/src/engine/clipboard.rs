@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The clipboard history engine: the history, its debounced saver, the expiry timer of probable
-//! secrets and the GSettings watcher.
+//! secrets, the GSettings watcher and, outside GNOME Shell, the Wayland capture thread.
 
 use std::sync::{Arc, Mutex};
 
@@ -13,6 +13,7 @@ use zbus::connection::Builder;
 
 use super::{Engine, RuntimeCtx, Setup};
 use crate::clipboard::Config;
+use crate::clipboard_wayland::{Target, Watcher};
 use crate::persist::{self, Saver};
 use crate::service::{self, ClipboardIface, Shared};
 use crate::settings;
@@ -23,6 +24,8 @@ pub struct ClipboardFeature {
     saver: Saver,
     gate: Gate,
     settings: Option<ClipboardSettings>,
+    /// Clipboard capture on data-control compositors (labwc, sway, ...); none under GNOME Shell.
+    wayland: Option<Watcher>,
 }
 
 impl ClipboardFeature {
@@ -63,6 +66,7 @@ impl ClipboardFeature {
             saver,
             gate: setup.gate.clone(),
             settings,
+            wayland: None,
         }
     }
 }
@@ -115,9 +119,22 @@ impl Engine for ClipboardFeature {
                 emit_changed(&conn);
             });
         }
+        // the thread ends by itself, silently, when the compositor has no data-control protocol
+        let saver = self.saver.clone();
+        let conn = ctx.conn.clone();
+        self.wayland = Watcher::start(Target {
+            eng: self.eng.clone(),
+            on_change: Box::new(move || {
+                saver.touch();
+                emit_changed(&conn);
+            }),
+        });
     }
 
     fn shutdown(&mut self) {
+        if let Some(mut w) = self.wayland.take() {
+            w.stop();
+        }
         self.saver.flush();
     }
 }
