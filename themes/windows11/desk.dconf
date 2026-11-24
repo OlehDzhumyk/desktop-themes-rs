@@ -30,3 +30,10 @@ capture-region-shortcut=['<Shift><Super>s']
 capture-screen-shortcut=['<Super>Print']
 capture-toolbar-shortcut=['Print']
 capture-record-shortcut=['<Shift><Super>r']
+
+# Window layouts: 8 px outer / 6 px inner gaps, snap assist and maximise-button hover picker on.
+[io/github/OlehDzhumyk/Desk/layouts]
+gap-outer=uint32 8
+gap-inner=uint32 6
+snap-assist=true
+hover-picker=true

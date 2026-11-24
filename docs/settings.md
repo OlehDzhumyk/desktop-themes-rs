@@ -24,6 +24,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Colour picker (`color-picker`) | In Windows 11 (PowerToys) and macOS (Digital Color Meter) |
 | Text extractor (`ocr`) | In Windows 11 (PowerToys Text Extractor) and macOS (Live Text) |
 | Screenshots (`capture`) | In Windows 11 and macOS |
+| Window layouts (`layouts`) | In Windows 11 and macOS |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | On-screen displays (`osd`) | In Windows 11 and macOS |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
@@ -117,6 +118,20 @@ Path `/io/github/OlehDzhumyk/Desk/capture/`.
 | `capture-toolbar-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | Windows 11: Print; macOS: Shift+Super+5; Fedora: none, GNOME's screenshot UI stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-toolbar. | capture | shortcut row on `--page shortcuts` |
 | `capture-record-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | Windows 11: Shift+Super+R; macOS: none (record from the Shift+Super+5 toolbar); Fedora: none, GNOME's Ctrl+Shift+Alt+R stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-record. | capture | shortcut row on `--page shortcuts` |
 
+## `io.github.OlehDzhumyk.Desk.Layouts`
+
+Path `/io/github/OlehDzhumyk/Desk/layouts/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Window layouts | Off: deskd refuses layout calls and the bridge binds no layout shortcut. | layouts | switch on `--page layouts` |
+| `layout-picker-shortcut` | shortcut list | `['<Super>z']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default from desk.dconf (Windows 11 and Fedora: Super+Z; macOS: Ctrl+Super+Up). An override in io.github.OlehDzhumyk.Desk.Shortcuts layout-picker replaces it. The name ends in -shortcut because shell keybinding names are global. | layouts | shortcut row on `--page shortcuts` |
+| `always-on-top-shortcut` | shortcut list | `['<Control><Super>t']` |  | Keyboard shortcut | The accelerators the bridge binds (default: Ctrl+Super+T, as PowerToys Always on Top). An override in io.github.OlehDzhumyk.Desk.Shortcuts always-on-top replaces it. | layouts | shortcut row on `--page shortcuts` |
+| `gap-outer` | unsigned | `8` | 0…64 (step 2) | Outer gap, px | Even pixels from 0 to 64. Windows 11 uses 8 px; Fedora uses 0 px. | layouts | spin button on `--page layouts` |
+| `gap-inner` | unsigned | `6` | 0…64 (step 2) | Inner gap, px | Even pixels from 0 to 64. Windows 11 uses 6 px; Fedora uses 0 px. | layouts | spin button on `--page layouts` |
+| `snap-assist` | boolean | `true` |  | Snap assist | On by default in Windows 11; off by default in macOS. | layouts | switch on `--page layouts` |
+| `hover-picker` | boolean | `true` |  | Show layout picker on hover | On by default in Windows 11; off by default in macOS and Fedora. | layouts | switch on `--page layouts` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -132,6 +147,8 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `capture-screen` | shortcut list | `[]` |  | Capture the whole screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
 | `capture-toolbar` | shortcut list | `[]` |  | Open the screenshot toolbar | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
 | `capture-record` | shortcut list | `[]` |  | Start or stop a screen recording | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
+| `layout-picker` | shortcut list | `[]` |  | Open the window layout picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
+| `always-on-top` | shortcut list | `[]` |  | Pin or unpin the focused window above others | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
 
@@ -235,6 +252,8 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `capture-screen` | Capture the whole screen | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-screen-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-screen` |
 | `capture-toolbar` | Open the screenshot toolbar | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-toolbar-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-toolbar` |
 | `capture-record` | Start or stop a screen recording | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-record-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-record` |
+| `layout-picker` | Open the window layout picker | layouts | `/io/github/OlehDzhumyk/Desk/layouts/layout-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/layout-picker` |
+| `always-on-top` | Pin or unpin the focused window above others | layouts | `/io/github/OlehDzhumyk/Desk/layouts/always-on-top-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/always-on-top` |
 
 ## Pages of the window
 
@@ -245,6 +264,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `color-picker` | Colour picker | Picker, History, How to open |
 | `ocr` | Text extractor | Recognition, Clipboard, How to open |
 | `capture` | Screenshots | Screenshots, Screen recording, How to open |
+| `layouts` | Window layouts | Layouts and gaps, Behaviour, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `osd` | On-screen displays | Display, Style |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |

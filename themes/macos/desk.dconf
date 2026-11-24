@@ -25,3 +25,9 @@ capture-region-shortcut=['<Shift><Super>4']
 capture-screen-shortcut=['<Shift><Super>3']
 capture-toolbar-shortcut=['<Shift><Super>5']
 capture-record-shortcut=@as []
+
+# Window layouts: snap assist and hover picker off by default; Ctrl+Super+Up opens the picker.
+[io/github/OlehDzhumyk/Desk/layouts]
+snap-assist=false
+hover-picker=false
+layout-picker-shortcut=['<Control><Super>Up']

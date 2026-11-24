@@ -12,6 +12,7 @@ mod color_picker;
 mod emoji;
 mod engine;
 mod focus;
+mod layouts;
 mod mixer;
 mod ocr;
 mod panic_policy;
@@ -35,6 +36,7 @@ use engine::clipboard::ClipboardFeature;
 use engine::color_picker::ColorPickerFeature;
 use engine::emoji::EmojiFeature;
 use engine::focus::FocusFeature;
+use engine::layouts::LayoutsEngine;
 use engine::mixer::MixerFeature;
 use engine::ocr::OcrEngine;
 use engine::{Engines, Setup};
@@ -60,6 +62,7 @@ fn features() -> Vec<String> {
         "color-picker".to_string(),
         "ocr".to_string(),
         "capture".to_string(),
+        "layouts".to_string(),
     ];
     f.push("focus".into());
     if cfg!(feature = "pipewire") {
@@ -77,6 +80,7 @@ fn engines(setup: &Setup) -> Engines {
         Box::new(ColorPickerFeature::new(setup)),
         Box::new(OcrEngine::new(setup)),
         Box::new(CaptureFeature::new(setup)),
+        Box::new(LayoutsEngine::new(setup)),
         Box::new(ClipboardFeature::new(setup)),
         Box::new(FocusFeature::new(setup)),
         Box::new(AppearanceFeature::new(setup)),

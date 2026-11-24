@@ -278,6 +278,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "desk-layouts"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "desk-proto"
 version = "0.3.0"
 dependencies = [
@@ -299,6 +307,7 @@ name = "deskd"
 version = "0.3.0"
 dependencies = [
  "desk-capture",
+ "desk-layouts",
  "desk-proto",
  "desk-settings",
  "futures-util",

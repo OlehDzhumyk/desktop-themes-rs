@@ -820,6 +820,89 @@ impl CaptureSettings {
     }
 }
 
+/// `io.github.OlehDzhumyk.Desk.Layouts` at `/io/github/OlehDzhumyk/Desk/layouts/`.
+#[derive(Clone, Debug)]
+pub struct LayoutsSettings(pub gio::Settings);
+
+impl LayoutsSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Layouts";
+    pub const ENABLED: &'static str = "enabled";
+    pub const LAYOUT_PICKER_SHORTCUT: &'static str = "layout-picker-shortcut";
+    pub const ALWAYS_ON_TOP_SHORTCUT: &'static str = "always-on-top-shortcut";
+    pub const GAP_OUTER: &'static str = "gap-outer";
+    pub const GAP_INNER: &'static str = "gap-inner";
+    pub const SNAP_ASSIST: &'static str = "snap-assist";
+    pub const HOVER_PICKER: &'static str = "hover-picker";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable window snap layouts and always-on-top
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Shortcut that opens the window layout picker (in force)
+    pub fn layout_picker_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::LAYOUT_PICKER_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_layout_picker_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::LAYOUT_PICKER_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Shortcut that toggles always-on-top for the focused window (in force)
+    pub fn always_on_top_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::ALWAYS_ON_TOP_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_always_on_top_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::ALWAYS_ON_TOP_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Outer gap around snapped windows, in logical pixels
+    pub fn gap_outer(&self) -> u32 {
+        self.0.uint(Self::GAP_OUTER)
+    }
+
+    pub fn set_gap_outer(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::GAP_OUTER, v)
+    }
+
+    /// Inner gap between adjacent snapped windows, in logical pixels
+    pub fn gap_inner(&self) -> u32 {
+        self.0.uint(Self::GAP_INNER)
+    }
+
+    pub fn set_gap_inner(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::GAP_INNER, v)
+    }
+
+    /// Offer other windows to fill remaining snap zones
+    pub fn snap_assist(&self) -> bool {
+        self.0.boolean(Self::SNAP_ASSIST)
+    }
+
+    pub fn set_snap_assist(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SNAP_ASSIST, v)
+    }
+
+    /// Show the layout picker when hovering the maximise button
+    pub fn hover_picker(&self) -> bool {
+        self.0.boolean(Self::HOVER_PICKER)
+    }
+
+    pub fn set_hover_picker(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::HOVER_PICKER, v)
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -835,6 +918,8 @@ impl ShortcutSettings {
     pub const CAPTURE_SCREEN: &'static str = "capture-screen";
     pub const CAPTURE_TOOLBAR: &'static str = "capture-toolbar";
     pub const CAPTURE_RECORD: &'static str = "capture-record";
+    pub const LAYOUT_PICKER: &'static str = "layout-picker";
+    pub const ALWAYS_ON_TOP: &'static str = "always-on-top";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -920,6 +1005,24 @@ impl ShortcutSettings {
 
     pub fn set_capture_record(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::CAPTURE_RECORD, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the window layout picker (override)
+    pub fn layout_picker(&self) -> Vec<String> {
+        self.0.strv(Self::LAYOUT_PICKER).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_layout_picker(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::LAYOUT_PICKER, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for always-on-top (override)
+    pub fn always_on_top(&self) -> Vec<String> {
+        self.0.strv(Self::ALWAYS_ON_TOP).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_always_on_top(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::ALWAYS_ON_TOP, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
 

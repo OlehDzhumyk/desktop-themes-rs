@@ -41,6 +41,7 @@ pub static FEATURES: &[&Feature] = &[
     &crate::color_picker::FEATURE_COLOR_PICKER,
     &crate::ocr::FEATURE_OCR,
     &crate::capture::FEATURE_CAPTURE,
+    &crate::layouts::FEATURE_LAYOUTS,
     &crate::mixer::FEATURE_MIXER,
     &crate::osd::FEATURE_OSD,
     &crate::appearance::FEATURE_APPEARANCE,
@@ -124,6 +125,7 @@ pub static DESK: Schema = Schema {
         ("color-picker", crate::color_picker::COLOR_PICKER_SCHEMA),
         ("ocr", crate::ocr::OCR_SCHEMA),
         ("capture", crate::capture::CAPTURE_SCHEMA),
+        ("layouts", crate::layouts::LAYOUTS_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
         ("osd", crate::osd::OSD_SCHEMA),
@@ -373,6 +375,8 @@ pub static SHORTCUT_KEYS: Schema = Schema {
         &crate::capture::SC_CAPTURE_SCREEN,
         &crate::capture::SC_CAPTURE_TOOLBAR,
         &crate::capture::SC_CAPTURE_RECORD,
+        &crate::layouts::SC_LAYOUT_PICKER,
+        &crate::layouts::SC_ALWAYS_ON_TOP,
     ],
     children: &[],
 };
@@ -388,6 +392,8 @@ pub static SHORTCUTS: &[&Shortcut] = &[
     &crate::capture::SHORTCUT_CAPTURE_SCREEN,
     &crate::capture::SHORTCUT_CAPTURE_TOOLBAR,
     &crate::capture::SHORTCUT_CAPTURE_RECORD,
+    &crate::layouts::SHORTCUT_LAYOUT_PICKER,
+    &crate::layouts::SHORTCUT_ALWAYS_ON_TOP,
 ];
 
 /// All schemas, parents first (the order of the generated XML).
@@ -398,6 +404,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &crate::color_picker::COLOR_PICKER,
     &crate::ocr::OCR,
     &crate::capture::CAPTURE,
+    &crate::layouts::LAYOUTS,
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
     &crate::osd::OSD,
@@ -525,6 +532,8 @@ pub static PAGE_SHORTCUTS: Page = Page {
             Item::Shortcut(&crate::capture::SHORTCUT_CAPTURE_SCREEN),
             Item::Shortcut(&crate::capture::SHORTCUT_CAPTURE_TOOLBAR),
             Item::Shortcut(&crate::capture::SHORTCUT_CAPTURE_RECORD),
+            Item::Shortcut(&crate::layouts::SHORTCUT_LAYOUT_PICKER),
+            Item::Shortcut(&crate::layouts::SHORTCUT_ALWAYS_ON_TOP),
         ],
     }],
 };
@@ -552,6 +561,7 @@ pub static PAGES: &[&Page] = &[
     &crate::color_picker::PAGE_COLOR_PICKER,
     &crate::ocr::PAGE_OCR,
     &crate::capture::PAGE_CAPTURE,
+    &crate::layouts::PAGE_LAYOUTS,
     &crate::mixer::PAGE_MIXER,
     &crate::osd::PAGE_OSD,
     &crate::appearance::PAGE_APPEARANCE,

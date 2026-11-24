@@ -1,0 +1,48 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Window layouts engine of deskd (docs/spec/features/window-layouts.md). deskd keeps the layout
+     definitions (zones as fractions of a monitor work area), the custom layouts and the active
+     layout of each monitor (layouts.json in the deskd data folder, mode 0600); the bridge moves
+     and resizes the windows and draws the picker. The geometry is the pure-Rust crate
+     desk-layouts, so other desktops can use the same calls (ADR 0011).
+     Access (ADR 0008): every method answers AccessDenied unless the caller is the owner of
+     org.gnome.Shell or a desktop-themes-rs binary, of the same user and outside any sandbox.
+     Errors: NotSupported while the `enabled` setting is off; InvalidArgs for an unknown layout,
+     an empty or too long monitor key, or an empty work area; IOError when layouts.json cannot be
+     written. -->
+<node>
+  <interface name="io.github.OlehDzhumyk.Desk.Layouts">
+    <!-- All layouts as a JSON list: the six built-in ones (halves, thirds, two-thirds, quarters,
+         focus, stack) and then the custom ones. Each item is {"id", "name", "builtin", "zones"},
+         and each zone is {"x", "y", "w", "h"} in fractions 0.0 to 1.0 of a landscape work area. -->
+    <method name="ListLayouts">
+      <arg name="json" type="s" direction="out"/>
+    </method>
+    <!-- The active layout of a monitor. monitor_key is chosen by the caller (the bridge uses the
+         connector and the product of the monitor). A monitor with no choice gets "halves". -->
+    <method name="ActiveLayout">
+      <arg name="monitor_key" type="s" direction="in"/>
+      <arg name="layout_id" type="s" direction="out"/>
+    </method>
+    <!-- Make layout_id the active layout of a monitor and save it. Emits Changed when the choice
+         is new. -->
+    <method name="SetActiveLayout">
+      <arg name="monitor_key" type="s" direction="in"/>
+      <arg name="layout_id" type="s" direction="in"/>
+    </method>
+    <!-- The zones of a layout in a work area (x, y, w, h in logical pixels), with the gap-outer
+         and gap-inner settings applied, as a JSON list of {"x", "y", "w", "h"} in the order of
+         the layout's zones. Every zone has even coordinates and sizes and stays inside the work
+         area; a portrait work area (h greater than w) turns columns into rows. -->
+    <method name="ResolveZones">
+      <arg name="layout_id" type="s" direction="in"/>
+      <arg name="x" type="i" direction="in"/>
+      <arg name="y" type="i" direction="in"/>
+      <arg name="w" type="i" direction="in"/>
+      <arg name="h" type="i" direction="in"/>
+      <arg name="zones_json" type="s" direction="out"/>
+    </method>
+    <!-- The layouts, an active layout or a setting that changes the zones (enabled, gap-outer,
+         gap-inner) changed: read again. -->
+    <signal name="Changed"/>
+  </interface>
+</node>

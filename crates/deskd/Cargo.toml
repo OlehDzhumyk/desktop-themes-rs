@@ -28,6 +28,8 @@ theme-tokens.workspace = true
 libc.workspace = true
 # screenshot core: PNG checks, metadata scrubbing, saving, redaction (workspace crate, pure Rust)
 desk-capture.workspace = true
+# window layouts core: built-in layouts, zone geometry, layouts.json (workspace crate, pure Rust)
+desk-layouts.workspace = true
 signal-hook = { version = "0.4.6", default-features = false, features = ["iterator"] }
 pipewire = { version = "0.10.1", optional = true }
 
