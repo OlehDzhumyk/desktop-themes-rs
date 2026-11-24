@@ -7,8 +7,6 @@ container: doctor reports them as warnings ("enabled but not installed"), which 
 a clean report means no error-level finding."""
 import pytest
 
-from gi.repository import GLib
-
 from conftest import themes
 from harness.shell import UUID
 
@@ -103,35 +101,37 @@ def test_apply_live_many_times_no_shell_crash(make_shell):
     assert '/per-key' not in log, log
 
 
+def themes_call(shell, method, sig='', *args):
+    """A theme service call as the bridge makes it, from the shell's connection (ADR 0008):
+    {ok, value} or {ok: False, name, message}."""
+    return shell.hook('themesCall', method, sig, list(args), timeout_ms=130000)
+
+
 def test_dbus_apply_needs_confirmation(make_shell):
     """The service refuses an experimental theme on Apply (ADR 0006); ApplyConfirmed exists for
-    the confirmed case. Only the refusal is exercised with an experimental theme."""
+    the confirmed case. Only the refusal is exercised with an experimental theme. The calls come
+    from the shell, the caller the service trusts (an untrusted caller: test_trust.py)."""
     shell = make_shell(skin='default')
     exp_id = _add_experimental_theme(shell)
     before = shell.dconf_read('/org/gnome/shell/enabled-extensions')
-    with pytest.raises(GLib.Error) as e:
-        shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Apply',
-                   GLib.Variant('(sas)', (exp_id, [])), '(bsas)', timeout_ms=120000)
-    assert 'AccessDenied' in str(e.value), e.value
+    r = themes_call(shell, 'Apply', '(sas)', exp_id, [])
+    assert not r['ok'] and r['name'].endswith('AccessDenied'), r
+    assert 'only GNOME Shell' not in r['message'], 'refused by the trust gate, not by ADR 0006'
     assert shell.dconf_read('/org/gnome/shell/enabled-extensions') == before
+    # metadata stays open to any caller
     (exp,) = shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Experimental', None, '(a{ss})').unpack()
     assert exp_id in exp, exp
     # S-5: unapproved command keys are also refused on Apply and reported by PendingCommands
-    (pending,) = shell.call(
-        THEMES_BUS, THEMES_PATH, THEMES_BUS, 'PendingCommands',
-        GLib.Variant('(sas)', ('windows11', ['behavior'])), '(a(ss))').unpack()
-    assert pending, pending
-    with pytest.raises(GLib.Error) as e2:
-        shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Apply',
-                   GLib.Variant('(sas)', ('windows11', ['behavior'])), '(bsas)', timeout_ms=120000)
-    assert 'AccessDenied' in str(e2.value), e2.value
-    relogin, _msg, _warn = shell.call(
-        THEMES_BUS, THEMES_PATH, THEMES_BUS, 'ApplyConfirmed',
-        GLib.Variant('(sas)', ('windows11', ['behavior'])), '(bsas)', timeout_ms=120000).unpack()
+    r = themes_call(shell, 'PendingCommands', '(sas)', 'windows11', ['behavior'])
+    assert r['ok'] and r['value'][0], r
+    r = themes_call(shell, 'Apply', '(sas)', 'windows11', ['behavior'])
+    assert not r['ok'] and r['name'].endswith('AccessDenied'), r
+    assert 'only GNOME Shell' not in r['message'], r
+    r = themes_call(shell, 'ApplyConfirmed', '(sas)', 'windows11', ['behavior'])
+    assert r['ok'], r
+    relogin, _msg, _warn = r['value']
     assert not relogin
     (cur,) = shell.call(THEMES_BUS, THEMES_PATH, THEMES_BUS, 'Current', None, '(a{ss})').unpack()
     assert cur['behavior'] == 'windows11' and exp_id not in cur.values(), cur
-    (pending_after,) = shell.call(
-        THEMES_BUS, THEMES_PATH, THEMES_BUS, 'PendingCommands',
-        GLib.Variant('(sas)', ('windows11', ['behavior'])), '(a(ss))').unpack()
-    assert pending_after == [], pending_after
+    r = themes_call(shell, 'PendingCommands', '(sas)', 'windows11', ['behavior'])
+    assert r['ok'] and r['value'][0] == [], r

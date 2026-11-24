@@ -29,3 +29,9 @@ desk-proto.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
 # the screenshot editor: decode, annotate (destructive redaction), encode and save atomically
 desk-capture.workspace = true
+
+[dev-dependencies]
+# Trust::with_binaries and Gate::open in the D-Bus tests
+desk-proto = { workspace = true, features = ["test-util"] }
+# peer-to-peer connections: the gate test needs no bus daemon
+zbus = { workspace = true, features = ["p2p"] }

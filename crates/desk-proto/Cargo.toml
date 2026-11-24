@@ -13,3 +13,7 @@ workspace = true
 [dependencies]
 serde.workspace = true
 zbus.workspace = true
+
+[features]
+# `Trust::with_binaries` and `Gate::open` for the D-Bus tests of deskd and themes
+test-util = []

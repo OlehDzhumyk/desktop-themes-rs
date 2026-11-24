@@ -41,5 +41,7 @@ default = ["pipewire"]
 pipewire = ["dep:pipewire"]
 
 [dev-dependencies]
+# Trust::with_binaries and Gate::open in the D-Bus tests
+desk-proto = { workspace = true, features = ["test-util"] }
 # peer-to-peer connections: the D-Bus API tests need no bus daemon
 zbus = { workspace = true, features = ["p2p"] }

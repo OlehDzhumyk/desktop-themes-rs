@@ -463,25 +463,37 @@ export function clipTrusted() {
 }
 
 /**
- * Call a deskd method from the shell's own bus connection, the caller deskd trusts (ADR 0008);
- * the test process itself gets AccessDenied. `sig` is the input signature ('' for none) and
- * `args` its values as JSON (a byte array as a list of numbers). Returns {ok, value} with the
- * unpacked reply, or {ok: false, name, message} with the D-Bus error name.
+ * Call a method of `name` from the shell's own bus connection, the caller deskd and the theme
+ * service trust (ADR 0008); the test process itself gets AccessDenied. `sig` is the input
+ * signature ('' for none) and `args` its values as JSON (a byte array as a list of numbers).
+ * Returns {ok, value} with the unpacked reply, or {ok: false, name, message} with the D-Bus error
+ * name.
  */
-export function deskCall(path, iface, method, sig, args) {
+export function busCall(name, path, iface, method, sig, args, timeoutMs = 30000) {
     const params = sig ? new GLib.Variant(sig, args) : null;
     return new Promise(resolve => {
-        Gio.DBus.session.call('io.github.OlehDzhumyk.Desk', path, iface, method, params, null,
-            Gio.DBusCallFlags.NONE, 30000, null, (conn, res) => {
+        Gio.DBus.session.call(name, path, iface, method, params, null,
+            Gio.DBusCallFlags.NONE, timeoutMs, null, (conn, res) => {
                 try {
                     resolve({ok: true, value: conn.call_finish(res).recursiveUnpack()});
                 } catch (e) {
-                    const name = Gio.DBusError.get_remote_error(e) ?? '';
+                    const errName = Gio.DBusError.get_remote_error(e) ?? '';
                     Gio.DBusError.strip_remote_error(e);
-                    resolve({ok: false, name, message: String(e?.message ?? e)});
+                    resolve({ok: false, name: errName, message: String(e?.message ?? e)});
                 }
             });
     });
+}
+
+/** A deskd method called as the shell calls it (see busCall). */
+export function deskCall(path, iface, method, sig, args) {
+    return busCall('io.github.OlehDzhumyk.Desk', path, iface, method, sig, args);
+}
+
+/** A theme service method called as the bridge calls it (see busCall); applies may take long. */
+export function themesCall(method, sig, args) {
+    return busCall('io.github.OlehDzhumyk.Themes', '/io/github/OlehDzhumyk/Themes',
+        'io.github.OlehDzhumyk.Themes', method, sig, args, 120000);
 }
 
 // the bridge's Stage 3/4 features, by their field on the extension object

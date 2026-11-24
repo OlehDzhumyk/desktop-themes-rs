@@ -173,7 +173,7 @@ fn main() {
 
     let setup = Setup {
         bus: Arc::default(),
-        gate: trust::Gate::new(Arc::new(trust::Trust::installed())),
+        gate: trust::Gate::new(Arc::new(trust::Trust::installed("deskd"))),
     };
     let mut engines = engines(&setup);
     let conn = connect(&mut engines, replace);
