@@ -27,3 +27,5 @@ zruntime = { version = "0.2.4", default-features = false, features = ["unblock"]
 themes-core.workspace = true
 desk-proto.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
+# the screenshot editor: decode, annotate (destructive redaction), encode and save atomically
+desk-capture.workspace = true

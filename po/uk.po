@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 00:11+0000\n"
+"POT-Creation-Date: 2026-11-24 00:27+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -16,47 +16,17 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: bridge/src/accentPicker.ts:26
-msgid "Blue"
-msgstr "Синій"
-
 #: bridge/src/accentPicker.ts:27
 msgid "Teal"
 msgstr "Бірюзовий"
-
-#: bridge/src/accentPicker.ts:28
-msgid "Green"
-msgstr "Зелений"
-
-#: bridge/src/accentPicker.ts:29
-msgid "Yellow"
-msgstr "Жовтий"
-
-#: bridge/src/accentPicker.ts:30
-msgid "Orange"
-msgstr "Помаранчевий"
-
-#: bridge/src/accentPicker.ts:31
-msgid "Red"
-msgstr "Червоний"
 
 #: bridge/src/accentPicker.ts:32
 msgid "Pink"
 msgstr "Рожевий"
 
-#: bridge/src/accentPicker.ts:33
-msgid "Purple"
-msgstr "Фіолетовий"
-
 #: bridge/src/accentPicker.ts:34
 msgid "Slate"
 msgstr "Сланцевий"
-
-#: bridge/src/accentPicker.ts:81 bridge/src/accentPicker.ts:87
-#: bridge/src/accentPicker.ts:135 bridge/src/accentPicker.ts:145
-#: bridge/src/accentPicker.ts:146
-msgid "Accent colour"
-msgstr "Колір акценту"
 
 #: bridge/src/accentPicker.ts:123
 msgid "From wallpaper"
@@ -98,7 +68,9 @@ msgstr "Виберіть ділянку для знімка"
 msgid ""
 "Drag over the region to capture it. Arrow keys and Enter select with the "
 "keyboard; Esc cancels."
-msgstr "Протягніть над ділянкою, щоб зробити знімок. Стрілки та Enter вибирають клавіатурою; Esc скасовує."
+msgstr ""
+"Протягніть над ділянкою, щоб зробити знімок. Стрілки та Enter вибирають "
+"клавіатурою; Esc скасовує."
 
 #: bridge/src/capture/feature.ts:288
 msgid "Could not open the editor: {error}"
@@ -116,19 +88,19 @@ msgstr "Знімок збережено"
 msgid "Screenshot saved. Open it in the editor"
 msgstr "Знімок збережено. Відкрити його в редакторі"
 
-#: bridge/src/capture/recorder.ts:67
+#: bridge/src/capture/recorder.ts:69
 msgid "The screen recording stopped because of an error"
 msgstr "Запис екрана зупинився через помилку"
 
-#: bridge/src/capture/recorder.ts:92
+#: bridge/src/capture/recorder.ts:94
 msgid "GNOME refused to start the recording"
 msgstr "GNOME не дозволив почати запис"
 
-#: bridge/src/capture/recorder.ts:129
+#: bridge/src/capture/recorder.ts:131
 msgid "The screen recording could not be saved"
 msgstr "Не вдалося зберегти запис екрана"
 
-#: bridge/src/capture/recorder.ts:147
+#: bridge/src/capture/recorder.ts:149
 msgid "Stop the screen recording"
 msgstr "Зупинити запис екрана"
 
@@ -861,6 +833,7 @@ msgid "Empty: Screenshots in the Pictures folder. ~ is your home folder."
 msgstr "Порожньо: «Screenshots» у теці «Зображення». ~ — ваша домашня тека."
 
 #: crates/desk-settings/src/capture.rs:49
+#: crates/themes/src/gui/capture_editor/mod.rs:158
 msgid "Copy to the clipboard"
 msgstr "Копіювати в буфер обміну"
 
@@ -2605,7 +2578,7 @@ msgstr ""
 msgid "GNOME updated: {old} → {new}"
 msgstr "GNOME оновлено: {old} → {new}"
 
-#: crates/themes-core/src/doctor.rs:1325 crates/themes/src/cli.rs:488
+#: crates/themes-core/src/doctor.rs:1325 crates/themes/src/cli.rs:496
 #: crates/themes/src/gui/window.rs:1357
 #, rust-format
 msgid "turned on again: {uuid}"
@@ -3070,28 +3043,36 @@ msgstr "Клавіатурні скорочення функцій (тема з�
 msgid "Focus modes: do not disturb, schedules, focus sessions"
 msgstr "Режими фокусу: не турбувати, розклади, сеанси фокусування"
 
-#: crates/themes/src/cli.rs:229 crates/themes/src/gui/window.rs:1108
+#: crates/themes/src/cli.rs:54
+msgid "Annotate and redact a screenshot (PNG) in an editor window"
+msgstr "Позначити й приховати частини знімка екрана (PNG) у вікні редактора"
+
+#: crates/themes/src/cli.rs:55
+msgid "The PNG file; Save replaces it (redactions are destructive)"
+msgstr "Файл PNG; «Зберегти» замінює його (приховане не відновити)"
+
+#: crates/themes/src/cli.rs:236 crates/themes/src/gui/window.rs:1108
 #: crates/themes/src/gui/window.rs:1143 crates/themes/src/gui/window.rs:1255
 #: crates/themes/src/gui/window.rs:1290
 #, rust-format
 msgid "Error: {error}"
 msgstr "Помилка: {error}"
 
-#: crates/themes/src/cli.rs:301
+#: crates/themes/src/cli.rs:309
 #, rust-format
 msgid "active: {modules}"
 msgstr "активні: {modules}"
 
-#: crates/themes/src/cli.rs:316
+#: crates/themes/src/cli.rs:324
 msgid "(unknown: no theme has been applied yet)"
 msgstr "(невідомо — тему ще не застосовували)"
 
-#: crates/themes/src/cli.rs:329
+#: crates/themes/src/cli.rs:337
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr "(усі модулі з теми «{theme}»)"
 
-#: crates/themes/src/cli.rs:393
+#: crates/themes/src/cli.rs:401
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
@@ -3100,55 +3081,55 @@ msgstr ""
 "Збережено тему «{name}» ({id}): ключів dconf {keys} ({per_module}), "
 "розширень {extensions}"
 
-#: crates/themes/src/cli.rs:403 crates/themes/src/cli.rs:802
+#: crates/themes/src/cli.rs:411 crates/themes/src/cli.rs:810
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:201
 #, rust-format
 msgid "warning: {text}"
 msgstr "увага: {text}"
 
-#: crates/themes/src/cli.rs:416
+#: crates/themes/src/cli.rs:424
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr "Тему «{name}» видалено (переміщено до {path})"
 
-#: crates/themes/src/cli.rs:435
+#: crates/themes/src/cli.rs:443
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr "Розширення знову ввімкнено (disable-user-extensions=false)."
 
-#: crates/themes/src/cli.rs:438
+#: crates/themes/src/cli.rs:446
 msgid "Extensions are already on."
 msgstr "Розширення й так увімкнені."
 
-#: crates/themes/src/cli.rs:456 crates/themes/src/gui/system.rs:141
+#: crates/themes/src/cli.rs:464 crates/themes/src/gui/system.rs:141
 #: crates/themes/src/gui/window.rs:1334
 msgid "running"
 msgstr "запущено"
 
-#: crates/themes/src/cli.rs:458 crates/themes/src/gui/system.rs:143
+#: crates/themes/src/cli.rs:466 crates/themes/src/gui/system.rs:143
 #: crates/themes/src/gui/window.rs:1336
 msgid "not running"
 msgstr "не запущено"
 
-#: crates/themes/src/cli.rs:463
+#: crates/themes/src/cli.rs:471
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr "Перевірено розширень: {count}"
 
-#: crates/themes/src/cli.rs:466 crates/themes/src/gui/system.rs:149
+#: crates/themes/src/cli.rs:474 crates/themes/src/gui/system.rs:149
 #: crates/themes/src/gui/window.rs:1343
 msgid "No problems found."
 msgstr "Проблем не знайдено."
 
-#: crates/themes/src/cli.rs:478
+#: crates/themes/src/cli.rs:486
 msgid "fix with: themes doctor --fix"
 msgstr "виправить: themes doctor --fix"
 
-#: crates/themes/src/cli.rs:485
+#: crates/themes/src/cli.rs:493
 #, rust-format
 msgid "fixed: {what}"
 msgstr "виправлено: {what}"
 
-#: crates/themes/src/cli.rs:526
+#: crates/themes/src/cli.rs:534
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
@@ -3157,26 +3138,26 @@ msgstr ""
 "«{name}» — експериментальна тема: {warning}\n"
 "Запустіть ще раз із --yes, щоб усе одно застосувати."
 
-#: crates/themes/src/cli.rs:533
+#: crates/themes/src/cli.rs:541
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr "«{name}» — експериментальна тема."
 
-#: crates/themes/src/cli.rs:539 crates/themes/src/cli.rs:600
+#: crates/themes/src/cli.rs:547 crates/themes/src/cli.rs:608
 msgid "Cancelled: the theme was not applied."
 msgstr "Скасовано: тему не застосовано."
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:547
+#: crates/themes/src/cli.rs:555
 msgid "Apply it anyway? [y/N]"
 msgstr "Усе одно застосувати? [y/N]"
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:553
+#: crates/themes/src/cli.rs:561
 msgid "y|yes"
 msgstr "т|так"
 
-#: crates/themes/src/cli.rs:586
+#: crates/themes/src/cli.rs:594
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -3187,7 +3168,7 @@ msgstr ""
 "{list}\n"
 "Запустіть ще раз з --yes, щоб усе одно застосувати."
 
-#: crates/themes/src/cli.rs:594
+#: crates/themes/src/cli.rs:602
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -3196,7 +3177,7 @@ msgstr ""
 "Тема «{name}» задає ключі, що запускають команди:\n"
 "{list}"
 
-#: crates/themes/src/cli.rs:617
+#: crates/themes/src/cli.rs:625
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
@@ -3205,85 +3186,85 @@ msgstr ""
 "Ключі, що запускають команди ({count}); застосування просить підтвердження "
 "(--yes), якщо його не було раніше:"
 
-#: crates/themes/src/cli.rs:625
+#: crates/themes/src/cli.rs:633
 msgid "  (approved)"
 msgstr "  (схвалено)"
 
-#: crates/themes/src/cli.rs:648
+#: crates/themes/src/cli.rs:656
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr "автовідкат: розширення {uuid} вимкнено ({reason})"
 
-#: crates/themes/src/cli.rs:666
+#: crates/themes/src/cli.rs:674
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr "перевизначення flatpak відхилено: «{line}»: {why}"
 
-#: crates/themes/src/cli.rs:698
+#: crates/themes/src/cli.rs:706
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 "Пробний запуск для «{name}» ({id}), модулі: {modules} — нічого не змінено"
 
-#: crates/themes/src/cli.rs:704
+#: crates/themes/src/cli.rs:712
 #, rust-format
 msgid "Write ({count}):"
 msgstr "Записати ({count}):"
 
-#: crates/themes/src/cli.rs:710
+#: crates/themes/src/cli.rs:718
 #, rust-format
 msgid "Reset ({count}):"
 msgstr "Скинути ({count}):"
 
-#: crates/themes/src/cli.rs:719
+#: crates/themes/src/cli.rs:727
 #, rust-format
 msgid "Extensions: {list}"
 msgstr "Розширення: {list}"
 
-#: crates/themes/src/cli.rs:743
+#: crates/themes/src/cli.rs:751
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr "Тему «{name}» ({id}) застосовано; модулі: {modules}."
 
-#: crates/themes/src/cli.rs:752
+#: crates/themes/src/cli.rs:760
 msgid "before:"
 msgstr "попередньо:"
 
-#: crates/themes/src/cli.rs:755
+#: crates/themes/src/cli.rs:763
 msgid "now:"
 msgstr "тепер:"
 
-#: crates/themes/src/cli.rs:757
+#: crates/themes/src/cli.rs:765
 msgid "dconf keys changed:"
 msgstr "змінено ключів dconf:"
 
-#: crates/themes/src/cli.rs:759
+#: crates/themes/src/cli.rs:767
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr "{count} (з них скинуто до типових: {resets})"
 
-#: crates/themes/src/cli.rs:764
+#: crates/themes/src/cli.rs:772
 msgid "extensions:"
 msgstr "розширення:"
 
-#: crates/themes/src/cli.rs:770
+#: crates/themes/src/cli.rs:778
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr "увімкнено: {added}   вимкнено: {removed}"
 
-#: crates/themes/src/cli.rs:777
+#: crates/themes/src/cli.rs:785
 msgid "GTK links:"
 msgstr "посилання GTK:"
 
-#: crates/themes/src/cli.rs:784
+#: crates/themes/src/cli.rs:792
 msgid "cleaned up after extensions:"
 msgstr "прибрано після розширень:"
 
-#: crates/themes/src/cli.rs:789
+#: crates/themes/src/cli.rs:797
 msgid "hooks:"
 msgstr "хуки:"
 
-#: crates/themes/src/cli.rs:807
+#: crates/themes/src/cli.rs:815
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
@@ -3291,7 +3272,7 @@ msgstr ""
 "GNOME Shell зараз не запущено — зміни оболонки набудуть чинності при "
 "наступному вході."
 
-#: crates/themes/src/cli.rs:813
+#: crates/themes/src/cli.rs:821
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
@@ -3301,11 +3282,11 @@ msgstr ""
 "розширення теми не працюють. Перевірте «themes doctor» і ввімкніть їх: "
 "themes doctor --enable-extensions"
 
-#: crates/themes/src/cli.rs:819
+#: crates/themes/src/cli.rs:827
 msgid "You MUST log out and log in again:"
 msgstr "ПОТРІБНО вийти з сесії та увійти знову:"
 
-#: crates/themes/src/cli.rs:827
+#: crates/themes/src/cli.rs:835
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
@@ -3313,29 +3294,29 @@ msgstr ""
 "Застосовано наживо, перевхід не потрібен (відкриті програми GTK4/libadwaita "
 "варто перезапустити)."
 
-#: crates/themes/src/cli.rs:842
+#: crates/themes/src/cli.rs:850
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr "Згенеровано з tokens.toml ({count}):"
 
-#: crates/themes/src/cli.rs:850
+#: crates/themes/src/cli.rs:858
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr "з tokens.toml ({count}, {ms} мс):"
 
-#: crates/themes/src/cli.rs:858
+#: crates/themes/src/cli.rs:866
 msgid "cache up to date"
 msgstr "кеш актуальний"
 
-#: crates/themes/src/cli.rs:859
+#: crates/themes/src/cli.rs:867
 msgid "generated"
 msgstr "згенеровано"
 
-#: crates/themes/src/cli.rs:860
+#: crates/themes/src/cli.rs:868
 msgid "will be generated"
 msgstr "буде згенеровано"
 
-#: crates/themes/src/cli.rs:865
+#: crates/themes/src/cli.rs:873
 #, rust-format
 msgid "link: {path}"
 msgstr "посилання: {path}"
@@ -3480,6 +3461,213 @@ msgstr "неправильна тривалість «{value}»"
 msgid "invalid time “{value}”"
 msgstr "неправильний час «{value}»"
 
+#: crates/themes/src/gui/capture_editor/mod.rs:56
+#: crates/themes/src/gui/capture_editor/mod.rs:63
+#, rust-format
+msgid "Cannot open {path}: {error}"
+msgstr "Не вдалося відкрити {path}: {error}"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:133
+msgid "Undo"
+msgstr "Скасувати"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:139
+msgid "Redo"
+msgstr "Повторити"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:144
+#: crates/themes/src/gui/capture_editor/mod.rs:146
+#: crates/themes/src/gui/capture_editor/mod.rs:865
+#: crates/themes/src/gui/focus.rs:367 crates/themes/src/gui/window.rs:1221
+msgid "Save"
+msgstr "Зберегти"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:152
+#: crates/themes/src/gui/capture_editor/mod.rs:825
+msgid "Save As…"
+msgstr "Зберегти як…"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:203
+#, rust-format
+msgid "{name} ({keys})"
+msgstr "{name} ({keys})"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:223
+msgid "Tools"
+msgstr "Інструменти"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:261
+msgid "Colour"
+msgstr "Колір"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:291
+#: crates/themes/src/gui/capture_editor/mod.rs:292
+msgid "Line width"
+msgstr "Товщина лінії"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:315
+msgid "Zoom out"
+msgstr "Зменшити"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:323
+msgid "Zoom in"
+msgstr "Збільшити"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:329
+msgid "Original size"
+msgstr "Справжній розмір"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:335
+msgid "Fit to window"
+msgstr "За розміром вікна"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:720
+#, rust-format
+msgid "{percent}%"
+msgstr "{percent} %"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:721
+msgid "Fit"
+msgstr "Вписати"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:784
+msgid "Copied to the clipboard"
+msgstr "Скопійовано в буфер обміну"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:787
+msgid "Could not copy the screenshot"
+msgstr "Не вдалося скопіювати знімок екрана"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:805
+msgid "Saved"
+msgstr "Збережено"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:810
+msgid "Could not save the screenshot"
+msgstr "Не вдалося зберегти знімок екрана"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:819
+msgid "PNG images"
+msgstr "Зображення PNG"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:848
+#: crates/themes/src/gui/window.rs:1369
+msgid "Close"
+msgstr "Закрити"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:855
+msgid "Save changes?"
+msgstr "Зберегти зміни?"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:857
+msgid ""
+"The annotations are lost if you close without saving. Redactions are applied "
+"to the file only when it is saved."
+msgstr ""
+"Якщо закрити без збереження, позначки буде втрачено. Приховування "
+"застосовується до файлу лише під час збереження."
+
+#: crates/themes/src/gui/capture_editor/mod.rs:863
+#: crates/themes/src/gui/features.rs:452 crates/themes/src/gui/features.rs:514
+#: crates/themes/src/gui/features.rs:751 crates/themes/src/gui/system.rs:251
+#: crates/themes/src/gui/wallpaper.rs:213 crates/themes/src/gui/window.rs:1043
+#: crates/themes/src/gui/window.rs:1101 crates/themes/src/gui/window.rs:1220
+#: crates/themes/src/gui/window.rs:1280 crates/themes/src/gui/window.rs:1412
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: crates/themes/src/gui/capture_editor/mod.rs:864
+msgid "Discard"
+msgstr "Не зберігати"
+
+#: crates/themes/src/gui/capture_editor/state.rs:45
+msgid "Redact (solid)"
+msgstr "Приховати (суцільно)"
+
+#: crates/themes/src/gui/capture_editor/state.rs:46
+msgid "Redact (pixelate)"
+msgstr "Приховати (пікселізувати)"
+
+#: crates/themes/src/gui/capture_editor/state.rs:47
+msgid "Pen"
+msgstr "Перо"
+
+#: crates/themes/src/gui/capture_editor/state.rs:48
+msgid "Highlighter"
+msgstr "Маркер"
+
+#: crates/themes/src/gui/capture_editor/state.rs:49
+msgid "Arrow"
+msgstr "Стрілка"
+
+#: crates/themes/src/gui/capture_editor/state.rs:50
+msgid "Line"
+msgstr "Лінія"
+
+#: crates/themes/src/gui/capture_editor/state.rs:51
+msgid "Rectangle"
+msgstr "Прямокутник"
+
+#: crates/themes/src/gui/capture_editor/state.rs:52
+msgid "Ellipse"
+msgstr "Еліпс"
+
+#: crates/themes/src/gui/capture_editor/state.rs:53
+msgid "Crop"
+msgstr "Обрізати"
+
+#: crates/themes/src/gui/capture_editor/state.rs:96
+msgid "Accent colour"
+msgstr "Колір акценту"
+
+#: crates/themes/src/gui/capture_editor/state.rs:97
+msgid "Red"
+msgstr "Червоний"
+
+#: crates/themes/src/gui/capture_editor/state.rs:98
+msgid "Orange"
+msgstr "Помаранчевий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:99
+msgid "Yellow"
+msgstr "Жовтий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:100
+msgid "Green"
+msgstr "Зелений"
+
+#: crates/themes/src/gui/capture_editor/state.rs:101
+msgid "Blue"
+msgstr "Синій"
+
+#: crates/themes/src/gui/capture_editor/state.rs:102
+msgid "Purple"
+msgstr "Фіолетовий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:103
+msgid "Black"
+msgstr "Чорний"
+
+#: crates/themes/src/gui/capture_editor/state.rs:104
+msgid "White"
+msgstr "Білий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:110
+msgid "Thin"
+msgstr "Тонка"
+
+#: crates/themes/src/gui/capture_editor/state.rs:111
+msgid "Medium"
+msgstr "Середня"
+
+#: crates/themes/src/gui/capture_editor/state.rs:112
+msgid "Thick"
+msgstr "Товста"
+
+#: crates/themes/src/gui/capture_editor/state.rs:113
+msgid "Extra thick"
+msgstr "Дуже товста"
+
 #: crates/themes/src/gui/card.rs:77 crates/themes/src/gui/card.rs:261
 msgid "experimental"
 msgstr "експериментальна"
@@ -3602,14 +3790,6 @@ msgstr "Очистити історію буфера обміну?"
 #: crates/themes/src/gui/features.rs:449
 msgid "All items will be deleted, pinned ones too. This cannot be undone."
 msgstr "Буде видалено всі записи, зокрема закріплені. Це не можна скасувати."
-
-#: crates/themes/src/gui/features.rs:452 crates/themes/src/gui/features.rs:514
-#: crates/themes/src/gui/features.rs:751 crates/themes/src/gui/system.rs:251
-#: crates/themes/src/gui/wallpaper.rs:213 crates/themes/src/gui/window.rs:1043
-#: crates/themes/src/gui/window.rs:1101 crates/themes/src/gui/window.rs:1220
-#: crates/themes/src/gui/window.rs:1280 crates/themes/src/gui/window.rs:1412
-msgid "Cancel"
-msgstr "Скасувати"
 
 #: crates/themes/src/gui/features.rs:452
 msgid "Clear"
@@ -3810,10 +3990,6 @@ msgstr "З (ГГ:ХХ)"
 #: crates/themes/src/gui/focus.rs:349
 msgid "To (HH:MM)"
 msgstr "До (ГГ:ХХ)"
-
-#: crates/themes/src/gui/focus.rs:367 crates/themes/src/gui/window.rs:1221
-msgid "Save"
-msgstr "Зберегти"
 
 #: crates/themes/src/gui/search.rs:11
 msgid "Switch the look of the GNOME desktop"
@@ -4299,10 +4475,6 @@ msgstr "Тему «{name}» видалено"
 #: crates/themes/src/gui/window.rs:1362
 msgid "The system is fine"
 msgstr "Система в порядку"
-
-#: crates/themes/src/gui/window.rs:1369
-msgid "Close"
-msgstr "Закрити"
 
 #: crates/themes/src/gui/window.rs:1371
 msgid "Fix"

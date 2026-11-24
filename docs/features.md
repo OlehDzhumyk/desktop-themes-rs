@@ -171,11 +171,11 @@ Skins:
 * **macos**: lighter dim, thin white frame and a pill toast.
 * **default**: frame in the GNOME accent colour. High contrast gives every skin opaque surfaces and a thick frame.
 
-## Screenshots (core)
+## Screenshots
 
-The deskd side of screenshots: the bridge takes the pixels and hands deskd a PNG; deskd checks, cleans and
-saves it, and draws the editor's annotations. The bridge draws the toolbar, the countdown, the preview and the
-recording indicator; the annotation editor (`themes capture-edit`) comes in a later change.
+The bridge takes the pixels and hands deskd a PNG; deskd checks, scrubs metadata and saves it; the bridge draws the
+toolbar, countdown, preview thumbnail and recording indicator; `themes capture-edit` is the GTK 4 annotation and
+destructive redaction editor.
 
 | | |
 |---|---|
@@ -190,7 +190,7 @@ recording indicator; the annotation editor (`themes capture-edit`) comes in a la
 | Region | the shared selector: drag, or arrow keys (`Shift`: resize, `Ctrl`: 1 px) and `Enter`; `Esc` cancels and nothing is saved |
 | Delay | a countdown toast; `Esc` (grabbed only while it runs) or the shortcut again cancels; no modal grab, so a menu can be opened and captured |
 | Result | PNG to deskd (`SaveScreenshot`); with `copy-to-clipboard` the same PNG goes to the clipboard as `image/png` first, so a failed save keeps the image there |
-| Editor | `annotate-after-capture`, or a click on the macOS thumbnail, starts `themes capture-edit <path>` (argument vector, no shell) |
+| Editor | `themes capture-edit <path.png>` (started by `annotate-after-capture` or clicking the macOS thumbnail): GTK 4 / libadwaita window with Pen (**P**), Highlighter (**H**), Arrow (**A**), Line (**L**), Rectangle (**R**), Ellipse (**E**), Redact solid (**X**) and pixelate (**M**), Crop (**C**); colours (accent first, named for screen readers), line width, zoom (**Ctrl+=**, **Ctrl+−**, **Ctrl+1**, fit **Ctrl+0**); **Ctrl+Z** / **Ctrl+Shift+Z** undo and redo; **Ctrl+C** copies the PNG; **Ctrl+S** saves over the file atomically, **Ctrl+Shift+S** saves as; **Esc** closes and asks «Зберегти зміни?» only when edited. The saved file is one RGBA PNG without metadata: redaction destroys the pixels, no layer or undo history is kept |
 | Recording | GNOME's screencast service (`org.gnome.Shell.Screencast`): full screen, pointer as `include-pointer`; file in `~/Videos/Screencasts`, encoder and extension chosen by GNOME; a top-bar item shows the elapsed time, a click or `Enter` stops it |
 | Lock screen | the shortcuts are bound in normal mode only; locking closes an open toolbar, selector or countdown |
 
@@ -202,7 +202,8 @@ Skins:
   bottom right for 6 s: it stays while the pointer is on it, a click opens the editor, a right click (or `Esc`
   when it has the focus) dismisses it; it slides in only when animations are enabled.
 * **default**: a shell-styled bar near the bottom and the toast. High contrast gives every skin opaque surfaces,
-  an outline and a thick focus ring; `show-preview=false` shows nothing after a capture.
+  an outline and a thick focus ring; `show-preview=false` shows nothing after a capture. The editor follows the
+  libadwaita style and the accent colour in every skin.
 
 ## Automatic light/dark
 
