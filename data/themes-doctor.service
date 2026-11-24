@@ -7,7 +7,7 @@ PartOf=graphical-session.target
 
 [Service]
 Type=oneshot
-ExecStart=%h/.local/bin/themes doctor --fix --wait-shell 90
+ExecStart=@BIN@/themes doctor --fix --wait-shell 90
 # exit code 3 = problems that could not be fixed automatically; this is not a service failure
 SuccessExitStatus=3
 TimeoutStartSec=180

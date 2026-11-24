@@ -105,15 +105,16 @@ msgfmt_ --desktop -d "$SRC/po" --template "$SRC/data/$APP_ID.desktop.in" -o "$TM
 msgfmt_ --xml -d "$SRC/po" --template "$SRC/data/$APP_ID.metainfo.xml.in" -o "$TMPD/$APP_ID.metainfo.xml"
 
 if [ "$DRY" = 1 ]; then
-  echo "    + sed @BIN@ -> $BIN: data/$APP_ID.{service,desktop} -> $DATA/{dbus-1/services,applications}"
+  echo "    + sed @BIN@ -> $BIN: data/$APP_ID.{service,desktop}, data/$DESK_ID.service -> $DATA/{dbus-1/services,applications}"
+  echo "    + sed @BIN@ -> %h/.local/bin: data/{deskd,themes-doctor}.service -> $HOME/.config/systemd/user"
 else
   sed "s|@BIN@|$BIN|g" "$SRC/data/$APP_ID.service" > "$DATA/dbus-1/services/$APP_ID.service"
   sed "s|@BIN@|$BIN|g" "$TMPD/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
   sed "s|@BIN@|$BIN|g" "$SRC/data/$DESK_ID.service" > "$DATA/dbus-1/services/$DESK_ID.service"
   install -m 0644 "$TMPD/$APP_ID.metainfo.xml" "$DATA/metainfo/$APP_ID.metainfo.xml"
+  sed "s|@BIN@|%h/.local/bin|g" "$SRC/data/themes-doctor.service" > "$HOME/.config/systemd/user/themes-doctor.service"
+  sed "s|@BIN@|%h/.local/bin|g" "$SRC/data/deskd.service" > "$HOME/.config/systemd/user/deskd.service"
 fi
-run install -m 0644 "$SRC/data/themes-doctor.service" "$HOME/.config/systemd/user/themes-doctor.service"
-run install -m 0644 "$SRC/data/deskd.service" "$HOME/.config/systemd/user/deskd.service"
 
 # GNOME Shell extensions that belong to this repository (build/rebuild the TypeScript bridge if missing or stale)
 ext_dirs=("$SRC"/extensions/*/)

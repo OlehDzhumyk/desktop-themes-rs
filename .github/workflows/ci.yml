@@ -197,7 +197,7 @@ jobs:
           for t in data/*.metainfo.xml.in; do
             out="$RUNNER_TEMP/$(basename "${t%.in}")"
             msgfmt --xml -d po --template "$t" -o "$out"
-            appstreamcli validate --no-net --explain "$out" || echo "::warning::appstream findings in $t (report only)"
+            appstreamcli validate --no-net --explain "$out"
           done
       - name: D-Bus interface XML, labwc rc.xml and extension metadata
         run: |

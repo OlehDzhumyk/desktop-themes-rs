@@ -34,6 +34,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Packaging foundation: `packaging/desktop-themes-rs.spec` for Fedora 44/45/rawhide (core
+  `desktop-themes-rs` plus `desktop-themes-rs-labwc-session` and `desktop-themes-rs-gnome-bridge`
+  subpackages), `@BIN@` templating in `data/deskd.service` and `data/themes-doctor.service` so
+  system (`/usr/bin`) and user (`~/.local/bin`) installs share the same units, enriched AppStream
+  metadata (`<releases>`, `<categories>`, `<branding>`, `<requires>`) with strict
+  `appstreamcli validate --no-net --explain` enforcement in CI, and packaging documentation in
+  [docs/packaging.md](docs/packaging.md).
 - desk-shell: live token CSS reloading (`$XDG_CONFIG_HOME/desk-shell/desk-shell.css` loaded at
   `APPLICATION + 1` priority and watched via `gio::FileMonitor`, clearing overrides cleanly when
   removed) and live system status indicators on the taskbar tray pill and in Quick Settings:

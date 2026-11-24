@@ -77,7 +77,7 @@ check ".desktop has Name[uk]" has_text "$D/applications/$APP_ID.desktop" '^Name\
 check ".desktop has Comment[uk]" has_text "$D/applications/$APP_ID.desktop" '^Comment\[uk\]='
 check ".desktop Exec points into the temporary HOME" has_text "$D/applications/$APP_ID.desktop" "^Exec=$HOME/.local/bin/"
 check "metainfo has a uk translation" has_text "$D/metainfo/$APP_ID.metainfo.xml" 'xml:lang="uk"'
-check "no @BIN@ placeholder left" test -z "$(grep -rl '@BIN@' "$D/applications" "$D/dbus-1" 2>/dev/null || true)"
+check "no @BIN@ placeholder left" test -z "$(grep -rl '@BIN@' "$D/applications" "$D/dbus-1" "$XDG_CONFIG_HOME/systemd/user" 2>/dev/null || true)"
 
 check "labwc autostart stays executable" test -x "$D/desktop-themes/labwc/windows11/autostart"
 
