@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 14:33+0000\n"
+"POT-Creation-Date: 2026-11-24 14:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: crates/desk-search/src/actions.rs:25
 #: crates/desk-settings/src/lockscreen.rs:19
@@ -2548,24 +2549,29 @@ msgstr ""
 msgid "turned on {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1336
+#: crates/themes-core/src/doctor.rs:1312
+#, rust-format
+msgid "update from git: {problem}"
+msgstr ""
+
+#: crates/themes-core/src/doctor.rs:1347
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1341
+#: crates/themes-core/src/doctor.rs:1352
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1350 crates/themes/src/cli.rs:504
+#: crates/themes-core/src/doctor.rs:1361 crates/themes/src/cli.rs:508
 #: crates/themes/src/gui/window.rs:1357
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1353
+#: crates/themes-core/src/doctor.rs:1364
 msgid "Themes: system check"
 msgstr ""
 
@@ -2829,6 +2835,78 @@ msgid ""
 "“themes doctor --fix” finishes it"
 msgstr ""
 
+#: crates/themes-core/src/update.rs:48
+#, rust-format
+msgid ""
+"No git checkout is recorded in {file}. Install from a checkout with scripts/"
+"bootstrap.sh, or run scripts/update.sh in it once. A package install updates "
+"with the package manager."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:52
+#, rust-format
+msgid "Cannot read {file}: {error}"
+msgstr ""
+
+#: crates/themes-core/src/update.rs:55
+#, rust-format
+msgid ""
+"{file} does not hold an absolute path (“{value}”). Run scripts/update.sh in "
+"your checkout once to record it again."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:60
+#, rust-format
+msgid ""
+"The recorded checkout {path} does not exist any more. Run scripts/update.sh "
+"in your checkout once to record its new place."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:64
+#, rust-format
+msgid ""
+"{path} is not a git repository. Clone the project again and run scripts/"
+"bootstrap.sh in it."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:68
+#, rust-format
+msgid ""
+"{path} is not a desktop-themes-rs checkout. Run scripts/update.sh in the "
+"right checkout once."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:72
+#, rust-format
+msgid ""
+"The checkout {path} has local changes ({count}, for example {file}). Commit "
+"or stash them, then update again."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:78
+#, rust-format
+msgid "The checkout {path} is not on a branch. Run: git -C {path} switch main"
+msgstr ""
+
+#: crates/themes-core/src/update.rs:82
+#, rust-format
+msgid ""
+"The branch in {path} has no upstream. Run: git -C {path} branch --set-"
+"upstream-to=origin/main"
+msgstr ""
+
+#: crates/themes-core/src/update.rs:91
+#, rust-format
+msgid ""
+"The branch in {path} and {upstream} have diverged ({ahead} local, {behind} "
+"new commits). Rebase or reset it, then update again."
+msgstr ""
+
+#: crates/themes-core/src/update.rs:228
+#, rust-format
+msgid "git {command} failed in {path}: {error}"
+msgstr ""
+
 #: crates/themes-core/src/util.rs:31
 msgid "unclosed single quote"
 msgstr ""
@@ -2837,7 +2915,8 @@ msgstr ""
 msgid "unclosed double quote"
 msgstr ""
 
-#: crates/themes-core/src/util.rs:123
+#: crates/themes-core/src/util.rs:123 crates/themes/src/update_cli.rs:138
+#: crates/themes/src/update_cli.rs:195
 #, rust-format
 msgid "could not start {command}: {error}"
 msgstr ""
@@ -3014,109 +3093,113 @@ msgstr ""
 msgid "The files or folders; arrow keys move between them"
 msgstr ""
 
-#: crates/themes/src/cli.rs:243 crates/themes/src/gui/window.rs:1108
+#: crates/themes/src/cli.rs:58
+msgid "Update a git checkout install to the latest version (scripts/update.sh)"
+msgstr ""
+
+#: crates/themes/src/cli.rs:246 crates/themes/src/gui/window.rs:1108
 #: crates/themes/src/gui/window.rs:1143 crates/themes/src/gui/window.rs:1255
-#: crates/themes/src/gui/window.rs:1290
+#: crates/themes/src/gui/window.rs:1290 crates/themes/src/update_cli.rs:54
 #, rust-format
 msgid "Error: {error}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:317
+#: crates/themes/src/cli.rs:321
 #, rust-format
 msgid "active: {modules}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:332
+#: crates/themes/src/cli.rs:336
 msgid "(unknown: no theme has been applied yet)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:345
+#: crates/themes/src/cli.rs:349
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:409
+#: crates/themes/src/cli.rs:413
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
 "extensions {extensions}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:419 crates/themes/src/cli.rs:818
+#: crates/themes/src/cli.rs:423 crates/themes/src/cli.rs:822
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:201
 #, rust-format
 msgid "warning: {text}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:432
+#: crates/themes/src/cli.rs:436
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:451
+#: crates/themes/src/cli.rs:455
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:454
+#: crates/themes/src/cli.rs:458
 msgid "Extensions are already on."
 msgstr ""
 
-#: crates/themes/src/cli.rs:472 crates/themes/src/gui/system.rs:141
+#: crates/themes/src/cli.rs:476 crates/themes/src/gui/system.rs:141
 #: crates/themes/src/gui/window.rs:1334
 msgid "running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:474 crates/themes/src/gui/system.rs:143
+#: crates/themes/src/cli.rs:478 crates/themes/src/gui/system.rs:143
 #: crates/themes/src/gui/window.rs:1336
 msgid "not running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:479
+#: crates/themes/src/cli.rs:483
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:482 crates/themes/src/gui/system.rs:149
+#: crates/themes/src/cli.rs:486 crates/themes/src/gui/system.rs:149
 #: crates/themes/src/gui/window.rs:1343
 msgid "No problems found."
 msgstr ""
 
-#: crates/themes/src/cli.rs:494
+#: crates/themes/src/cli.rs:498
 msgid "fix with: themes doctor --fix"
 msgstr ""
 
-#: crates/themes/src/cli.rs:501
+#: crates/themes/src/cli.rs:505
 #, rust-format
 msgid "fixed: {what}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:542
+#: crates/themes/src/cli.rs:546
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:549
+#: crates/themes/src/cli.rs:553
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr ""
 
-#: crates/themes/src/cli.rs:555 crates/themes/src/cli.rs:616
+#: crates/themes/src/cli.rs:559 crates/themes/src/cli.rs:620
 msgid "Cancelled: the theme was not applied."
 msgstr ""
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:563
+#: crates/themes/src/cli.rs:567
 msgid "Apply it anyway? [y/N]"
 msgstr ""
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:569
+#: crates/themes/src/cli.rs:573
 msgid "y|yes"
 msgstr ""
 
-#: crates/themes/src/cli.rs:602
+#: crates/themes/src/cli.rs:606
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -3124,143 +3207,143 @@ msgid ""
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:610
+#: crates/themes/src/cli.rs:614
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
 "{list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:633
+#: crates/themes/src/cli.rs:637
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
 "unless approved before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:641
+#: crates/themes/src/cli.rs:645
 msgid "  (approved)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:664
+#: crates/themes/src/cli.rs:668
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:682
+#: crates/themes/src/cli.rs:686
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:714
+#: crates/themes/src/cli.rs:718
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 
-#: crates/themes/src/cli.rs:720
+#: crates/themes/src/cli.rs:724
 #, rust-format
 msgid "Write ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:726
+#: crates/themes/src/cli.rs:730
 #, rust-format
 msgid "Reset ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:735
+#: crates/themes/src/cli.rs:739
 #, rust-format
 msgid "Extensions: {list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:759
+#: crates/themes/src/cli.rs:763
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr ""
 
-#: crates/themes/src/cli.rs:768
+#: crates/themes/src/cli.rs:772
 msgid "before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:771
+#: crates/themes/src/cli.rs:775
 msgid "now:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:773
+#: crates/themes/src/cli.rs:777
 msgid "dconf keys changed:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:775
+#: crates/themes/src/cli.rs:779
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:780
+#: crates/themes/src/cli.rs:784
 msgid "extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:786
+#: crates/themes/src/cli.rs:790
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:793
+#: crates/themes/src/cli.rs:797
 msgid "GTK links:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:800
+#: crates/themes/src/cli.rs:804
 msgid "cleaned up after extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:805
+#: crates/themes/src/cli.rs:809
 msgid "hooks:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:823
+#: crates/themes/src/cli.rs:827
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
 msgstr ""
 
-#: crates/themes/src/cli.rs:829
+#: crates/themes/src/cli.rs:833
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
 "them on: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes/src/cli.rs:835
+#: crates/themes/src/cli.rs:839
 msgid "You MUST log out and log in again:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:843
+#: crates/themes/src/cli.rs:847
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:858
+#: crates/themes/src/cli.rs:862
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:866
+#: crates/themes/src/cli.rs:870
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:874
+#: crates/themes/src/cli.rs:878
 msgid "cache up to date"
 msgstr ""
 
-#: crates/themes/src/cli.rs:875
+#: crates/themes/src/cli.rs:879
 msgid "generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:876
+#: crates/themes/src/cli.rs:880
 msgid "will be generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:881
+#: crates/themes/src/cli.rs:885
 #, rust-format
 msgid "link: {path}"
 msgstr ""
@@ -4726,6 +4809,65 @@ msgstr ""
 msgid "{ms} ms. To apply: themes apply {id} --only look,apps"
 msgstr ""
 
+#: crates/themes/src/update_cli.rs:18
+msgid "Only fetch and list the new commits; change nothing"
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:19
+msgid "Wait for Enter at the end (for a terminal opened by the launcher)"
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:20
+msgid "Show every step of scripts/update.sh without changing anything"
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:60
+msgid "Update finished."
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:62
+#, rust-format
+msgid "Update failed (exit code {code})."
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:66
+msgid ""
+"The messages above show the step that failed. Fix it and run “themes update” "
+"in a terminal again; “themes doctor” checks the installation."
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:70
+msgid "Press Enter to close this window."
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:95
+#, rust-format
+msgid "Up to date with {upstream}."
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:102
+#, rust-format
+msgid "{n} commit behind {upstream}:"
+msgid_plural "{n} commits behind {upstream}:"
+msgstr[0] ""
+msgstr[1] ""
+
+#: crates/themes/src/update_cli.rs:115
+#, rust-format
+msgid "… and {n} more"
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:118
+msgid "Update with: themes update"
+msgstr ""
+
+#: crates/themes/src/update_cli.rs:182
+#, rust-format
+msgid ""
+"No terminal to show the update in: {launcher} is not installed. Run “themes "
+"update” in a terminal."
+msgstr ""
+
 #: bridge/src/accentPicker.ts:27
 msgid "Teal"
 msgstr ""
@@ -5609,6 +5751,22 @@ msgstr ""
 
 #: bridge/src/shortcutGuide/reader.ts:344
 msgid "Custom shortcut"
+msgstr ""
+
+#: data/io.github.OlehDzhumyk.Themes.Update.desktop.in:7
+#: data/io.github.OlehDzhumyk.Themes.desktop.in:18
+msgid "Update Desktop Themes"
+msgstr ""
+
+#: data/io.github.OlehDzhumyk.Themes.Update.desktop.in:8
+msgid ""
+"Download, build and install the latest desktop-themes-rs from its git "
+"checkout"
+msgstr ""
+
+#. TRANSLATORS: search keywords, separated and terminated by semicolons; keep the English ones too
+#: data/io.github.OlehDzhumyk.Themes.Update.desktop.in:14
+msgid "update;upgrade;git;theme;"
 msgstr ""
 
 #: data/io.github.OlehDzhumyk.Themes.desktop.in:4

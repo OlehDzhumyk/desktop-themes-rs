@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 14:33+0000\n"
+"POT-Creation-Date: 2026-11-24 14:41+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -3612,7 +3612,12 @@ msgstr "вимкнено {uuid}"
 msgid "turned on {uuid}"
 msgstr "увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1336
+#: crates/themes-core/src/doctor.rs:1312
+#, rust-format
+msgid "update from git: {problem}"
+msgstr "оновлення з git: {problem}"
+
+#: crates/themes-core/src/doctor.rs:1347
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
@@ -3620,18 +3625,18 @@ msgstr ""
 "GNOME вимкнув розширення після збою оболонки. Відкрийте «Теми», щоб "
 "увімкнути їх знову."
 
-#: crates/themes-core/src/doctor.rs:1341
+#: crates/themes-core/src/doctor.rs:1352
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr "GNOME оновлено: {old} → {new}"
 
-#: crates/themes-core/src/doctor.rs:1350 crates/themes/src/cli.rs:504
+#: crates/themes-core/src/doctor.rs:1361 crates/themes/src/cli.rs:508
 #: crates/themes/src/gui/window.rs:1357
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr "знову увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1353
+#: crates/themes-core/src/doctor.rs:1364
 msgid "Themes: system check"
 msgstr "Теми: перевірка системи"
 
@@ -3906,6 +3911,95 @@ msgstr ""
 "застосування «{theme}», розпочате {started}, перервано на кроці {step}; "
 "«themes doctor --fix» його завершить"
 
+#: crates/themes-core/src/update.rs:48
+#, rust-format
+msgid ""
+"No git checkout is recorded in {file}. Install from a checkout with scripts/"
+"bootstrap.sh, or run scripts/update.sh in it once. A package install updates "
+"with the package manager."
+msgstr ""
+"У {file} не записано git-копію. Встановіть із копії через scripts/"
+"bootstrap.sh або один раз запустіть у ній scripts/update.sh. Встановлення з "
+"пакета оновлює менеджер пакетів."
+
+#: crates/themes-core/src/update.rs:52
+#, rust-format
+msgid "Cannot read {file}: {error}"
+msgstr "Не вдалося прочитати {file}: {error}"
+
+#: crates/themes-core/src/update.rs:55
+#, rust-format
+msgid ""
+"{file} does not hold an absolute path (“{value}”). Run scripts/update.sh in "
+"your checkout once to record it again."
+msgstr ""
+"{file} не містить абсолютного шляху («{value}»). Один раз запустіть scripts/"
+"update.sh у своїй копії, щоб записати його знову."
+
+#: crates/themes-core/src/update.rs:60
+#, rust-format
+msgid ""
+"The recorded checkout {path} does not exist any more. Run scripts/update.sh "
+"in your checkout once to record its new place."
+msgstr ""
+"Записаної копії {path} більше немає. Один раз запустіть scripts/update.sh у "
+"своїй копії, щоб записати її нове місце."
+
+#: crates/themes-core/src/update.rs:64
+#, rust-format
+msgid ""
+"{path} is not a git repository. Clone the project again and run scripts/"
+"bootstrap.sh in it."
+msgstr ""
+"{path} не є git-репозиторієм. Клонуйте проєкт знову і запустіть у ньому "
+"scripts/bootstrap.sh."
+
+#: crates/themes-core/src/update.rs:68
+#, rust-format
+msgid ""
+"{path} is not a desktop-themes-rs checkout. Run scripts/update.sh in the "
+"right checkout once."
+msgstr ""
+"{path} не є копією desktop-themes-rs. Один раз запустіть scripts/update.sh у "
+"правильній копії."
+
+#: crates/themes-core/src/update.rs:72
+#, rust-format
+msgid ""
+"The checkout {path} has local changes ({count}, for example {file}). Commit "
+"or stash them, then update again."
+msgstr ""
+"У копії {path} є локальні зміни ({count}, наприклад {file}). Зафіксуйте або "
+"сховайте їх (commit, stash), потім оновіть знову."
+
+#: crates/themes-core/src/update.rs:78
+#, rust-format
+msgid "The checkout {path} is not on a branch. Run: git -C {path} switch main"
+msgstr "Копія {path} не на гілці. Виконайте: git -C {path} switch main"
+
+#: crates/themes-core/src/update.rs:82
+#, rust-format
+msgid ""
+"The branch in {path} has no upstream. Run: git -C {path} branch --set-"
+"upstream-to=origin/main"
+msgstr ""
+"Гілка в {path} не має upstream. Виконайте: git -C {path} branch --set-"
+"upstream-to=origin/main"
+
+#: crates/themes-core/src/update.rs:91
+#, rust-format
+msgid ""
+"The branch in {path} and {upstream} have diverged ({ahead} local, {behind} "
+"new commits). Rebase or reset it, then update again."
+msgstr ""
+"Гілка в {path} і {upstream} розійшлися (локальних комітів: {ahead}, нових: "
+"{behind}). Перебазуйте або скиньте її, потім оновіть знову."
+
+#: crates/themes-core/src/update.rs:228
+#, rust-format
+msgid "git {command} failed in {path}: {error}"
+msgstr "git {command} не вдався в {path}: {error}"
+
 #: crates/themes-core/src/util.rs:31
 msgid "unclosed single quote"
 msgstr "незакрита одинарна лапка"
@@ -3914,7 +4008,8 @@ msgstr "незакрита одинарна лапка"
 msgid "unclosed double quote"
 msgstr "незакрита подвійна лапка"
 
-#: crates/themes-core/src/util.rs:123
+#: crates/themes-core/src/util.rs:123 crates/themes/src/update_cli.rs:138
+#: crates/themes/src/update_cli.rs:195
 #, rust-format
 msgid "could not start {command}: {error}"
 msgstr "не вдалося запустити {command}: {error}"
@@ -4103,28 +4198,33 @@ msgstr ""
 msgid "The files or folders; arrow keys move between them"
 msgstr "Файли або теки; стрілки переходять між ними"
 
-#: crates/themes/src/cli.rs:243 crates/themes/src/gui/window.rs:1108
+#: crates/themes/src/cli.rs:58
+msgid "Update a git checkout install to the latest version (scripts/update.sh)"
+msgstr ""
+"Оновити встановлення з git-копії до найновішої версії (scripts/update.sh)"
+
+#: crates/themes/src/cli.rs:246 crates/themes/src/gui/window.rs:1108
 #: crates/themes/src/gui/window.rs:1143 crates/themes/src/gui/window.rs:1255
-#: crates/themes/src/gui/window.rs:1290
+#: crates/themes/src/gui/window.rs:1290 crates/themes/src/update_cli.rs:54
 #, rust-format
 msgid "Error: {error}"
 msgstr "Помилка: {error}"
 
-#: crates/themes/src/cli.rs:317
+#: crates/themes/src/cli.rs:321
 #, rust-format
 msgid "active: {modules}"
 msgstr "активні: {modules}"
 
-#: crates/themes/src/cli.rs:332
+#: crates/themes/src/cli.rs:336
 msgid "(unknown: no theme has been applied yet)"
 msgstr "(невідомо — тему ще не застосовували)"
 
-#: crates/themes/src/cli.rs:345
+#: crates/themes/src/cli.rs:349
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr "(усі модулі з теми «{theme}»)"
 
-#: crates/themes/src/cli.rs:409
+#: crates/themes/src/cli.rs:413
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
@@ -4133,55 +4233,55 @@ msgstr ""
 "Збережено тему «{name}» ({id}): ключів dconf {keys} ({per_module}), "
 "розширень {extensions}"
 
-#: crates/themes/src/cli.rs:419 crates/themes/src/cli.rs:818
+#: crates/themes/src/cli.rs:423 crates/themes/src/cli.rs:822
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:201
 #, rust-format
 msgid "warning: {text}"
 msgstr "увага: {text}"
 
-#: crates/themes/src/cli.rs:432
+#: crates/themes/src/cli.rs:436
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr "Тему «{name}» видалено (переміщено до {path})"
 
-#: crates/themes/src/cli.rs:451
+#: crates/themes/src/cli.rs:455
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr "Розширення знову ввімкнено (disable-user-extensions=false)."
 
-#: crates/themes/src/cli.rs:454
+#: crates/themes/src/cli.rs:458
 msgid "Extensions are already on."
 msgstr "Розширення й так увімкнені."
 
-#: crates/themes/src/cli.rs:472 crates/themes/src/gui/system.rs:141
+#: crates/themes/src/cli.rs:476 crates/themes/src/gui/system.rs:141
 #: crates/themes/src/gui/window.rs:1334
 msgid "running"
 msgstr "запущено"
 
-#: crates/themes/src/cli.rs:474 crates/themes/src/gui/system.rs:143
+#: crates/themes/src/cli.rs:478 crates/themes/src/gui/system.rs:143
 #: crates/themes/src/gui/window.rs:1336
 msgid "not running"
 msgstr "не запущено"
 
-#: crates/themes/src/cli.rs:479
+#: crates/themes/src/cli.rs:483
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr "Перевірено розширень: {count}"
 
-#: crates/themes/src/cli.rs:482 crates/themes/src/gui/system.rs:149
+#: crates/themes/src/cli.rs:486 crates/themes/src/gui/system.rs:149
 #: crates/themes/src/gui/window.rs:1343
 msgid "No problems found."
 msgstr "Проблем не знайдено."
 
-#: crates/themes/src/cli.rs:494
+#: crates/themes/src/cli.rs:498
 msgid "fix with: themes doctor --fix"
 msgstr "виправить: themes doctor --fix"
 
-#: crates/themes/src/cli.rs:501
+#: crates/themes/src/cli.rs:505
 #, rust-format
 msgid "fixed: {what}"
 msgstr "виправлено: {what}"
 
-#: crates/themes/src/cli.rs:542
+#: crates/themes/src/cli.rs:546
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
@@ -4190,26 +4290,26 @@ msgstr ""
 "«{name}» — експериментальна тема: {warning}\n"
 "Запустіть ще раз із --yes, щоб усе одно застосувати."
 
-#: crates/themes/src/cli.rs:549
+#: crates/themes/src/cli.rs:553
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr "«{name}» — експериментальна тема."
 
-#: crates/themes/src/cli.rs:555 crates/themes/src/cli.rs:616
+#: crates/themes/src/cli.rs:559 crates/themes/src/cli.rs:620
 msgid "Cancelled: the theme was not applied."
 msgstr "Скасовано: тему не застосовано."
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:563
+#: crates/themes/src/cli.rs:567
 msgid "Apply it anyway? [y/N]"
 msgstr "Усе одно застосувати? [y/N]"
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:569
+#: crates/themes/src/cli.rs:573
 msgid "y|yes"
 msgstr "т|так"
 
-#: crates/themes/src/cli.rs:602
+#: crates/themes/src/cli.rs:606
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -4220,7 +4320,7 @@ msgstr ""
 "{list}\n"
 "Запустіть ще раз з --yes, щоб усе одно застосувати."
 
-#: crates/themes/src/cli.rs:610
+#: crates/themes/src/cli.rs:614
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -4229,7 +4329,7 @@ msgstr ""
 "Тема «{name}» задає ключі, що запускають команди:\n"
 "{list}"
 
-#: crates/themes/src/cli.rs:633
+#: crates/themes/src/cli.rs:637
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
@@ -4238,85 +4338,85 @@ msgstr ""
 "Ключі, що запускають команди ({count}); застосування просить підтвердження "
 "(--yes), якщо його не було раніше:"
 
-#: crates/themes/src/cli.rs:641
+#: crates/themes/src/cli.rs:645
 msgid "  (approved)"
 msgstr "  (схвалено)"
 
-#: crates/themes/src/cli.rs:664
+#: crates/themes/src/cli.rs:668
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr "автовідкат: розширення {uuid} вимкнено ({reason})"
 
-#: crates/themes/src/cli.rs:682
+#: crates/themes/src/cli.rs:686
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr "перевизначення flatpak відхилено: «{line}»: {why}"
 
-#: crates/themes/src/cli.rs:714
+#: crates/themes/src/cli.rs:718
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 "Пробний запуск для «{name}» ({id}), модулі: {modules} — нічого не змінено"
 
-#: crates/themes/src/cli.rs:720
+#: crates/themes/src/cli.rs:724
 #, rust-format
 msgid "Write ({count}):"
 msgstr "Записати ({count}):"
 
-#: crates/themes/src/cli.rs:726
+#: crates/themes/src/cli.rs:730
 #, rust-format
 msgid "Reset ({count}):"
 msgstr "Скинути ({count}):"
 
-#: crates/themes/src/cli.rs:735
+#: crates/themes/src/cli.rs:739
 #, rust-format
 msgid "Extensions: {list}"
 msgstr "Розширення: {list}"
 
-#: crates/themes/src/cli.rs:759
+#: crates/themes/src/cli.rs:763
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr "Тему «{name}» ({id}) застосовано; модулі: {modules}."
 
-#: crates/themes/src/cli.rs:768
+#: crates/themes/src/cli.rs:772
 msgid "before:"
 msgstr "попередньо:"
 
-#: crates/themes/src/cli.rs:771
+#: crates/themes/src/cli.rs:775
 msgid "now:"
 msgstr "тепер:"
 
-#: crates/themes/src/cli.rs:773
+#: crates/themes/src/cli.rs:777
 msgid "dconf keys changed:"
 msgstr "змінено ключів dconf:"
 
-#: crates/themes/src/cli.rs:775
+#: crates/themes/src/cli.rs:779
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr "{count} (з них скинуто до типових: {resets})"
 
-#: crates/themes/src/cli.rs:780
+#: crates/themes/src/cli.rs:784
 msgid "extensions:"
 msgstr "розширення:"
 
-#: crates/themes/src/cli.rs:786
+#: crates/themes/src/cli.rs:790
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr "увімкнено: {added}   вимкнено: {removed}"
 
-#: crates/themes/src/cli.rs:793
+#: crates/themes/src/cli.rs:797
 msgid "GTK links:"
 msgstr "посилання GTK:"
 
-#: crates/themes/src/cli.rs:800
+#: crates/themes/src/cli.rs:804
 msgid "cleaned up after extensions:"
 msgstr "прибрано після розширень:"
 
-#: crates/themes/src/cli.rs:805
+#: crates/themes/src/cli.rs:809
 msgid "hooks:"
 msgstr "хуки:"
 
-#: crates/themes/src/cli.rs:823
+#: crates/themes/src/cli.rs:827
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
@@ -4324,7 +4424,7 @@ msgstr ""
 "GNOME Shell зараз не запущено — зміни оболонки набудуть чинності при "
 "наступному вході."
 
-#: crates/themes/src/cli.rs:829
+#: crates/themes/src/cli.rs:833
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
@@ -4334,11 +4434,11 @@ msgstr ""
 "розширення теми не працюють. Перевірте «themes doctor» і ввімкніть їх: "
 "themes doctor --enable-extensions"
 
-#: crates/themes/src/cli.rs:835
+#: crates/themes/src/cli.rs:839
 msgid "You MUST log out and log in again:"
 msgstr "ПОТРІБНО вийти з сесії та увійти знову:"
 
-#: crates/themes/src/cli.rs:843
+#: crates/themes/src/cli.rs:847
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
@@ -4346,29 +4446,29 @@ msgstr ""
 "Застосовано наживо, перевхід не потрібен (відкриті програми GTK4/libadwaita "
 "варто перезапустити)."
 
-#: crates/themes/src/cli.rs:858
+#: crates/themes/src/cli.rs:862
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr "Згенеровано з tokens.toml ({count}):"
 
-#: crates/themes/src/cli.rs:866
+#: crates/themes/src/cli.rs:870
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr "з tokens.toml ({count}, {ms} мс):"
 
-#: crates/themes/src/cli.rs:874
+#: crates/themes/src/cli.rs:878
 msgid "cache up to date"
 msgstr "кеш актуальний"
 
-#: crates/themes/src/cli.rs:875
+#: crates/themes/src/cli.rs:879
 msgid "generated"
 msgstr "згенеровано"
 
-#: crates/themes/src/cli.rs:876
+#: crates/themes/src/cli.rs:880
 msgid "will be generated"
 msgstr "буде згенеровано"
 
-#: crates/themes/src/cli.rs:881
+#: crates/themes/src/cli.rs:885
 #, rust-format
 msgid "link: {path}"
 msgstr "посилання: {path}"
@@ -5889,6 +5989,88 @@ msgstr "кластери: {list}"
 #, rust-format
 msgid "{ms} ms. To apply: themes apply {id} --only look,apps"
 msgstr "{ms} мс. Застосувати: themes apply {id} --only look,apps"
+
+#: crates/themes/src/update_cli.rs:18
+msgid "Only fetch and list the new commits; change nothing"
+msgstr "Лише завантажити й показати нові коміти; нічого не змінювати"
+
+#: crates/themes/src/update_cli.rs:19
+msgid "Wait for Enter at the end (for a terminal opened by the launcher)"
+msgstr "Наприкінці чекати на Enter (для терміналу, який відкрив запускач)"
+
+#: crates/themes/src/update_cli.rs:20
+msgid "Show every step of scripts/update.sh without changing anything"
+msgstr "Показати кожен крок scripts/update.sh, нічого не змінюючи"
+
+#: crates/themes/src/update_cli.rs:60
+msgid "Update finished."
+msgstr "Оновлення завершено."
+
+#: crates/themes/src/update_cli.rs:62
+#, rust-format
+msgid "Update failed (exit code {code})."
+msgstr "Оновлення не вдалося (код виходу {code})."
+
+#: crates/themes/src/update_cli.rs:66
+msgid ""
+"The messages above show the step that failed. Fix it and run “themes update” "
+"in a terminal again; “themes doctor” checks the installation."
+msgstr ""
+"Повідомлення вище показують крок, який не вдався. Усуньте причину і знову "
+"запустіть «themes update» у терміналі; «themes doctor» перевіряє "
+"встановлення."
+
+#: crates/themes/src/update_cli.rs:70
+msgid "Press Enter to close this window."
+msgstr "Натисніть Enter, щоб закрити це вікно."
+
+#: crates/themes/src/update_cli.rs:95
+#, rust-format
+msgid "Up to date with {upstream}."
+msgstr "Актуально: збігається з {upstream}."
+
+#: crates/themes/src/update_cli.rs:102
+#, rust-format
+msgid "{n} commit behind {upstream}:"
+msgid_plural "{n} commits behind {upstream}:"
+msgstr[0] "{upstream} має {n} новий коміт:"
+msgstr[1] "{upstream} має {n} нові коміти:"
+msgstr[2] "{upstream} має {n} нових комітів:"
+
+#: crates/themes/src/update_cli.rs:115
+#, rust-format
+msgid "… and {n} more"
+msgstr "… і ще {n}"
+
+#: crates/themes/src/update_cli.rs:118
+msgid "Update with: themes update"
+msgstr "Оновити: themes update"
+
+#: crates/themes/src/update_cli.rs:182
+#, rust-format
+msgid ""
+"No terminal to show the update in: {launcher} is not installed. Run “themes "
+"update” in a terminal."
+msgstr ""
+"Немає терміналу для показу оновлення: {launcher} не встановлено. Запустіть "
+"«themes update» у терміналі."
+
+#: data/io.github.OlehDzhumyk.Themes.Update.desktop.in:7
+#: data/io.github.OlehDzhumyk.Themes.desktop.in:18
+msgid "Update Desktop Themes"
+msgstr "Оновити теми"
+
+#: data/io.github.OlehDzhumyk.Themes.Update.desktop.in:8
+msgid ""
+"Download, build and install the latest desktop-themes-rs from its git "
+"checkout"
+msgstr ""
+"Завантажити, зібрати й встановити свіжу версію desktop-themes-rs з git-копії"
+
+#. TRANSLATORS: search keywords, separated and terminated by semicolons; keep the English ones too
+#: data/io.github.OlehDzhumyk.Themes.Update.desktop.in:14
+msgid "update;upgrade;git;theme;"
+msgstr "update;upgrade;git;theme;оновити;оновлення;тема;теми;"
 
 #: data/io.github.OlehDzhumyk.Themes.desktop.in:4
 msgid "Desktop theme switcher"

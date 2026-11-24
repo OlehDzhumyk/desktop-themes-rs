@@ -135,6 +135,7 @@ fn pot() -> Result<(), String> {
     common(&mut c);
     c.arg("-o").arg(&out).args([
         "data/io.github.OlehDzhumyk.Themes.desktop.in",
+        "data/io.github.OlehDzhumyk.Themes.Update.desktop.in",
         "data/io.github.OlehDzhumyk.Themes.metainfo.xml.in",
     ]);
     run(&mut c)?;

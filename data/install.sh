@@ -11,6 +11,10 @@
 #   Also: desk-shell (when built; the Wayland taskbar of ADR 0012) and the Windows 11 labwc session
 #   files (desk-win11-session in ~/.local/bin, data/labwc/windows11 → ~/.local/share/desktop-themes/
 #   labwc/windows11; the session entry needs sudo, see docs/wayland-session.md).
+#   From a git checkout only: its absolute path goes to <theme root>/repo-path (read by
+#   `themes update`), the launcher "Update Desktop Themes" and the Update action of the main entry
+#   are installed, and a hand-made `desktop-themes-update` launcher of older setups is removed.
+#   From an archive (no .git), the Update action is left out and both of those files are removed.
 # Run on the host after `cargo build --release` (scripts/bootstrap.sh does all of it).
 #
 # Usage: data/install.sh [--dry-run] [--no-gnome-bridge] [--bin PATH] [--deskd PATH] [--desk-shell PATH]
@@ -33,18 +37,22 @@ while [ $# -gt 0 ]; do
     --bin) BIN_SRC=$2; shift 2 ;;
     --deskd) DESKD_SRC=$2; shift 2 ;;
     --desk-shell) SHELL_SRC=$2; shift 2 ;;
-    -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,25p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done
 run() { if [ "$DRY" = 1 ]; then printf '    + '; printf '%q ' "$@"; printf '\n'; else "$@"; fi; }
 
 APP_ID=io.github.OlehDzhumyk.Themes
+UPDATE_ID=$APP_ID.Update
 DESK_ID=io.github.OlehDzhumyk.Desk
 BRIDGE=desk-bridge@desktop-themes-rs
 DATA=${XDG_DATA_HOME:-$HOME/.local/share}
 BIN="$HOME/.local/bin"
 ROOT="${DESKTOP_THEMES_ROOT:-$DATA/desktop-themes}"
+# a git checkout (a worktree has a .git file) can update itself: `themes update`
+GIT_CHECKOUT=0
+[ -e "$SRC/.git" ] && GIT_CHECKOUT=1
 
 # an existing install from before the language setting? (decided before the binary is replaced)
 UPGRADE_LANG=0
@@ -102,18 +110,48 @@ done
 TMPD=$(mktemp -d)
 trap 'rm -rf "$TMPD"' EXIT
 msgfmt_ --desktop -d "$SRC/po" --template "$SRC/data/$APP_ID.desktop.in" -o "$TMPD/$APP_ID.desktop"
+msgfmt_ --desktop -d "$SRC/po" --template "$SRC/data/$UPDATE_ID.desktop.in" -o "$TMPD/$UPDATE_ID.desktop"
 msgfmt_ --xml -d "$SRC/po" --template "$SRC/data/$APP_ID.metainfo.xml.in" -o "$TMPD/$APP_ID.metainfo.xml"
 
 if [ "$DRY" = 1 ]; then
   echo "    + sed @BIN@ -> $BIN: data/$APP_ID.{service,desktop}, data/$DESK_ID.service -> $DATA/{dbus-1/services,applications}"
   echo "    + sed @BIN@ -> %h/.local/bin: data/{deskd,themes-doctor}.service -> $HOME/.config/systemd/user"
+  if [ "$GIT_CHECKOUT" = 1 ]; then
+    echo "    + sed @BIN@ -> $BIN: data/$UPDATE_ID.desktop -> $DATA/applications"
+    echo "    + echo $SRC > $ROOT/repo-path"
+  else
+    echo "    + not a git checkout: drop the Update action, remove $DATA/applications/$UPDATE_ID.desktop and $ROOT/repo-path"
+  fi
 else
   sed "s|@BIN@|$BIN|g" "$SRC/data/$APP_ID.service" > "$DATA/dbus-1/services/$APP_ID.service"
-  sed "s|@BIN@|$BIN|g" "$TMPD/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
+  if [ "$GIT_CHECKOUT" = 1 ]; then
+    sed "s|@BIN@|$BIN|g" "$TMPD/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
+    sed "s|@BIN@|$BIN|g" "$TMPD/$UPDATE_ID.desktop" > "$DATA/applications/$UPDATE_ID.desktop"
+    mkdir -p "$ROOT"
+    printf '%s\n' "$SRC" > "$ROOT/repo-path"
+  else
+    # the Update action is the last group of the template
+    sed -e "s|@BIN@|$BIN|g" -e '/^Actions=/d' -e '/^\[Desktop Action Update\]/,$d' \
+      "$TMPD/$APP_ID.desktop" > "$DATA/applications/$APP_ID.desktop"
+    rm -f "$DATA/applications/$UPDATE_ID.desktop" "$ROOT/repo-path"
+  fi
   sed "s|@BIN@|$BIN|g" "$SRC/data/$DESK_ID.service" > "$DATA/dbus-1/services/$DESK_ID.service"
   install -m 0644 "$TMPD/$APP_ID.metainfo.xml" "$DATA/metainfo/$APP_ID.metainfo.xml"
   sed "s|@BIN@|%h/.local/bin|g" "$SRC/data/themes-doctor.service" > "$HOME/.config/systemd/user/themes-doctor.service"
   sed "s|@BIN@|%h/.local/bin|g" "$SRC/data/deskd.service" > "$HOME/.config/systemd/user/deskd.service"
+fi
+
+# The hand-made update launcher of older setups (~/.local/bin/desktop-themes-update and its .desktop
+# file) does what the Update launcher does now: remove both, but only when the script is that one.
+LEGACY_BIN="$BIN/desktop-themes-update"
+LEGACY_DESKTOP="$DATA/applications/desktop-themes-update.desktop"
+if [ "$GIT_CHECKOUT" = 1 ] && [ -f "$LEGACY_BIN" ] \
+   && grep -m1 '^# ' "$LEGACY_BIN" | grep -q 'Update desktop-themes-rs from GitHub'; then
+  run rm -f "$LEGACY_BIN"
+  if [ -f "$LEGACY_DESKTOP" ] && grep -qx 'Exec=desktop-themes-update' "$LEGACY_DESKTOP"; then
+    run rm -f "$LEGACY_DESKTOP"
+  fi
+  [ "$DRY" = 1 ] || echo "Replaced the old desktop-themes-update launcher with \"Update Desktop Themes\" (themes update)"
 fi
 
 # GNOME Shell extensions that belong to this repository (build/rebuild the TypeScript bridge if missing or stale)
@@ -159,6 +197,7 @@ if command -v update-desktop-database >/dev/null 2>&1; then run update-desktop-d
 run systemctl --user try-restart deskd.service
 installed="$BIN/themes, $BIN/deskd"
 if [ "$SHELL_INSTALLED" = 1 ]; then installed="$installed, $BIN/desk-shell"; fi
+if [ "$GIT_CHECKOUT" = 1 ]; then installed="$installed, $UPDATE_ID.desktop (themes update: $SRC)"; fi
 installed="$installed, $BIN/desk-win11-session"
 if [ "$GNOME_BRIDGE" = 1 ]; then installed="$installed, $BRIDGE"; fi
 echo "Installed: $installed (theme root: $ROOT)"

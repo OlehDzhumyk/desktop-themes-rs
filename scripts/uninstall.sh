@@ -8,7 +8,8 @@
 #   3. take our extensions (and, unless --keep-extensions, the ones bootstrap fetched) out of
 #      enabled/disabled-extensions
 #   4. remove binaries (themes, theme, themes-gui, deskd, desk-shell, desk-win11-session), the
-#      labwc session config, D-Bus activation files, .desktop file,
+#      labwc session config, D-Bus activation files, .desktop files (and the update launcher),
+#      the record of the git checkout (<theme root>/repo-path),
 #      systemd units, the GSettings schema, extensions, third-party themes/icons/cursors/fonts/
 #      wallpapers/sounds that bootstrap installed (unless --keep-assets) and the download cache
 # KEPT unless --purge: the theme root (~/.local/share/desktop-themes: your themes and snapshots,
@@ -150,7 +151,8 @@ say "binaries and desktop integration"
 rm_path "$BIN/themes" "$BIN/theme" "$BIN/themes-gui" "$BIN/deskd" "$BIN/themes.new" "$BIN/deskd.new"
 rm_path "$BIN/desk-shell" "$BIN/desk-shell.new" "$BIN/desk-win11-session" "$DATA_HOME/desktop-themes/labwc"
 rm_path "$DATA_HOME/dbus-1/services/$APP_ID.service" "$DATA_HOME/dbus-1/services/$DESK_ID.service"
-rm_path "$DATA_HOME/applications/$APP_ID.desktop"
+rm_path "$DATA_HOME/applications/$APP_ID.desktop" "$DATA_HOME/applications/$APP_ID.Update.desktop"
+rm_path "$DT_ROOT/repo-path"
 rm_path "$UNITS/deskd.service" "$UNITS/themes-doctor.service"
 rm_path "$UNITS"/*.wants/themes-doctor.service "$UNITS"/*.wants/deskd.service
 if have systemctl; then run systemctl --user daemon-reload || true; fi

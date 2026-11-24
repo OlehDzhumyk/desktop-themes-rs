@@ -11,3 +11,10 @@ Categories=GNOME;GTK;Settings;DesktopSettings;
 Keywords=theme;appearance;macos;windows;sounds;behavior;
 StartupNotify=true
 DBusActivatable=false
+# Git checkout installs only: data/install.sh and the RPM spec remove the action otherwise (keep it last)
+Actions=Update;
+
+[Desktop Action Update]
+Name=Update Desktop Themes
+Exec=@BIN@/themes update --pause
+Icon=software-update-available-symbolic
