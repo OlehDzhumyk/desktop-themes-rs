@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """The trust boundary of deskd (ADR 0008): only GNOME Shell (the bridge) and our own binaries get
 clipboard content; the bus name cannot be taken over; and the bridge sends nothing to (and pastes
-nothing from) a process that owns the name but is not the installed deskd."""
+nothing from) a process that owns the name but is not the installed deskd. The theme service
+(`themes --dbus-service`) follows the same rule for its applies."""
 import pytest
 
 from gi.repository import Gio, GLib
@@ -100,3 +101,40 @@ def test_bridge_refuses_an_impostor(make_shell):
     assert shell.hook('clipTrusted') is False
     log = shell.log_bytes().decode(errors='replace')
     assert 'which is not the installed deskd' in log
+
+
+THEMES = 'io.github.OlehDzhumyk.Themes'
+THEMES_PATH = '/io/github/OlehDzhumyk/Themes'
+
+
+def test_foreign_client_cannot_apply_themes(make_shell):
+    """The theme service (ADR 0008) changes the desktop only for the shell and our binaries: this
+    test process is refused before anything is applied, the metadata stays open, and its bus name
+    cannot be taken over."""
+    shell = make_shell(skin='default')
+    before = shell.dconf_read('/org/gnome/shell/enabled-extensions')
+
+    def themes(method, args, rtype):
+        return lambda: shell.call(THEMES, THEMES_PATH, THEMES, method, args, rtype, timeout_ms=120000)
+
+    sas = GLib.Variant('(sas)', ('windows11', []))
+    access_denied(themes('ApplyConfirmed', sas, '(bsas)'))
+    access_denied(themes('Apply', sas, '(bsas)'))
+    access_denied(themes('PendingCommands', sas, '(a(ss))'))
+    access_denied(themes('Doctor', GLib.Variant('(b)', (True,)), '(bass)'))
+    assert shell.dconf_read('/org/gnome/shell/enabled-extensions') == before
+    (cur,) = themes('Current', None, '(a{ss})')().unpack()
+    assert 'windows11' not in cur.values(), cur
+    (rows,) = themes('List', None, '(a(sssas))')().unpack()
+    assert any(r[0] == 'windows11' for r in rows), rows
+
+    (owner,) = shell.call('org.freedesktop.DBus', '/org/freedesktop/DBus', 'org.freedesktop.DBus',
+                          'GetNameOwner', GLib.Variant('(s)', (THEMES,)), '(s)').unpack()
+    REPLACE_EXISTING, DO_NOT_QUEUE, EXISTS = 0x2, 0x4, 3
+    (reply,) = shell.call('org.freedesktop.DBus', '/org/freedesktop/DBus', 'org.freedesktop.DBus',
+                          'RequestName', GLib.Variant('(su)', (THEMES, REPLACE_EXISTING | DO_NOT_QUEUE)),
+                          '(u)').unpack()
+    assert reply == EXISTS
+    (after,) = shell.call('org.freedesktop.DBus', '/org/freedesktop/DBus', 'org.freedesktop.DBus',
+                          'GetNameOwner', GLib.Variant('(s)', (THEMES,)), '(s)').unpack()
+    assert after == owner

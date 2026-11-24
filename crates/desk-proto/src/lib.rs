@@ -7,6 +7,8 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod trust;
+
 pub const BUS_NAME: &str = "io.github.OlehDzhumyk.Desk";
 pub const DESK_PATH: &str = "/io/github/OlehDzhumyk/Desk";
 pub const DESK_IFACE: &str = "io.github.OlehDzhumyk.Desk";

@@ -255,20 +255,41 @@ fn image_label(mime: &str, data: &[u8]) -> String {
     }
 }
 
+/// Writes `data` to `path` atomically with mode 0600: a new temporary file next to it, created
+/// with `create_new` (O_EXCL, so it never writes through a file or link that is already there)
+/// under a name unique to this process and call, then `sync_all` and `rename`. A failed write
+/// leaves `path` as it was and removes the temporary file.
 pub(crate) fn write_private(path: &Path, data: &[u8]) -> std::io::Result<()> {
     use std::os::unix::fs::OpenOptionsExt;
-    let tmp = path.with_extension("tmp");
-    {
-        let mut f = std::fs::OpenOptions::new()
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static SEQ: AtomicU64 = AtomicU64::new(0);
+    let name = path
+        .file_name()
+        .ok_or_else(|| std::io::Error::other("no file name"))?
+        .to_string_lossy();
+    let (tmp, mut f) = loop {
+        let n = SEQ.fetch_add(1, Ordering::Relaxed);
+        let tmp = path.with_file_name(format!(".{name}.{}.{n}.tmp", std::process::id()));
+        match std::fs::OpenOptions::new()
             .write(true)
-            .create(true)
-            .truncate(true)
+            .create_new(true)
             .mode(0o600)
-            .open(&tmp)?;
-        f.write_all(data)?;
-        f.sync_all()?;
+            .open(&tmp)
+        {
+            Ok(f) => break (tmp, f),
+            // a leftover of an earlier deskd with the same pid: take the next number
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
+            Err(e) => return Err(e),
+        }
+    };
+    let written = f
+        .write_all(data)
+        .and_then(|()| f.sync_all())
+        .and_then(|()| std::fs::rename(&tmp, path));
+    if written.is_err() {
+        let _ = std::fs::remove_file(&tmp);
     }
-    std::fs::rename(&tmp, path)
+    written
 }
 
 /// The runtime directory of deskd: `$DESKD_RUNTIME_DIR` or `$XDG_RUNTIME_DIR/deskd` (the OCR
@@ -823,6 +844,33 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    /// Private writes: mode 0600, the old content replaced, a file or link sitting at the old
+    /// fixed temporary name is neither followed nor touched, and no temporary file stays.
+    #[test]
+    fn write_private_is_atomic_and_exclusive() {
+        use std::os::unix::fs::PermissionsExt;
+        let d = std::env::temp_dir().join(format!("deskd-write-private-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        std::fs::create_dir_all(&d).unwrap();
+        let target = d.join("history.json");
+        let victim = d.join("victim");
+        std::fs::write(&victim, b"keep").unwrap();
+        std::os::unix::fs::symlink(&victim, d.join("history.tmp")).unwrap();
+        super::write_private(&target, b"one").unwrap();
+        super::write_private(&target, b"two").unwrap();
+        assert_eq!(std::fs::read(&target).unwrap(), b"two");
+        let mode = std::fs::metadata(&target).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode, 0o600);
+        assert_eq!(std::fs::read(&victim).unwrap(), b"keep");
+        let mut names: Vec<String> = std::fs::read_dir(&d)
+            .unwrap()
+            .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+            .collect();
+        names.sort();
+        assert_eq!(names, ["history.json", "history.tmp", "victim"]);
+        let _ = std::fs::remove_dir_all(d);
+    }
+
     use super::*;
 
     fn tmp(tag: &str) -> PathBuf {

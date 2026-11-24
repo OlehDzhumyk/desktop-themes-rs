@@ -7,12 +7,18 @@
 //! calls. The process exits when it has been idle for [`IDLE_EXIT`] with no operation running, or
 //! at once when the bus connection closes. A file monitor on `state.json` emits `Changed` for
 //! applies made by the CLI or the window.
+//!
+//! The bus name is not replaceable and the methods that change the desktop or read the user's
+//! settings (`Apply`, `ApplyConfirmed`, `PendingCommands`, `Doctor`) answer only GNOME Shell and
+//! our own binaries (ADR 0008, [`desk_proto::trust`]); `List`, `Current` and `Experimental` stay
+//! open, they carry theme metadata only.
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use desk_proto::trust::{Gate, Trust};
 use desk_settings::tr;
 use gtk::gio::prelude::*;
 use gtk::{gio, glib};
@@ -20,6 +26,7 @@ use themes_core::modules::Module;
 use themes_core::state::State;
 use themes_core::theme::{all_themes, get_theme};
 use themes_core::{Ctx, DBUS_NAME, DBUS_PATH};
+use zbus::message::Header;
 use zbus::object_server::SignalEmitter;
 
 const IDLE_EXIT: u64 = 90;
@@ -76,6 +83,25 @@ impl Activity {
 struct Service {
     ctx: Ctx,
     act: Activity,
+    /// State changes only for the shell and our binaries (ADR 0008).
+    gate: Gate,
+}
+
+/// Flags for owning [`DBUS_NAME`]: never `ALLOW_REPLACEMENT` (zbus sets it by default), so no
+/// other process can take the name and receive the applies meant for us (ADR 0008).
+fn name_flags() -> zbus::fdo::RequestNameFlags {
+    zbus::fdo::RequestNameFlags::DO_NOT_QUEUE
+}
+
+async fn own_name(conn: &zbus::Connection) -> zbus::Result<()> {
+    use zbus::fdo::RequestNameReply;
+    match conn
+        .request_name_with_flags(DBUS_NAME, name_flags())
+        .await?
+    {
+        RequestNameReply::PrimaryOwner | RequestNameReply::AlreadyOwner => Ok(()),
+        _ => Err(zbus::Error::NameTaken),
+    }
 }
 
 pub fn current_map(ctx: &Ctx) -> HashMap<String, String> {
@@ -237,8 +263,11 @@ impl Service {
         &self,
         theme: String,
         modules: Vec<String>,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
     ) -> zbus::fdo::Result<Vec<(String, String)>> {
         self.act.touch();
+        self.gate.check(conn, Some(&hdr)).await?;
         let mods = Module::parse_list(&modules.join(","))
             .map_err(|e| zbus::fdo::Error::InvalidArgs(e.0))?;
         let ctx = self.ctx.clone();
@@ -271,8 +300,11 @@ impl Service {
         &self,
         theme: String,
         modules: Vec<String>,
+        #[zbus(header)] hdr: Header<'_>,
         #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
     ) -> zbus::fdo::Result<(bool, String, Vec<String>)> {
+        self.act.touch();
+        self.gate.check(emitter.connection(), Some(&hdr)).await?;
         self.apply_impl(theme, modules, false, &emitter).await
     }
 
@@ -282,14 +314,24 @@ impl Service {
         &self,
         theme: String,
         modules: Vec<String>,
+        #[zbus(header)] hdr: Header<'_>,
         #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
     ) -> zbus::fdo::Result<(bool, String, Vec<String>)> {
+        self.act.touch();
+        self.gate.check(emitter.connection(), Some(&hdr)).await?;
         self.apply_impl(theme, modules, true, &emitter).await
     }
 
     /// Перевірка системи. Повертає (усе гаразд, повідомлення, JSON-звіт).
     #[zbus(out_args("ok", "messages", "report"))]
-    async fn doctor(&self, fix: bool) -> zbus::fdo::Result<(bool, Vec<String>, String)> {
+    async fn doctor(
+        &self,
+        fix: bool,
+        #[zbus(header)] hdr: Header<'_>,
+        #[zbus(connection)] conn: &zbus::Connection,
+    ) -> zbus::fdo::Result<(bool, Vec<String>, String)> {
+        self.act.touch();
+        self.gate.check(conn, Some(&hdr)).await?;
         let _busy = self.act.busy();
         let ctx = self.ctx.clone();
         let rep = blocking(move || {
@@ -350,13 +392,16 @@ pub fn run() -> i32 {
     let svc = Service {
         ctx: ctx.clone(),
         act: act.clone(),
+        gate: Gate::new(Arc::new(Trust::installed("themes --dbus-service"))),
     };
+    // the object is served before the name is owned: activated callers reach it at once
     let conn = match zbus::block_on(async {
-        zbus::connection::Builder::session()
-            .name(DBUS_NAME)
+        let conn = zbus::connection::Builder::session()
             .serve_at(DBUS_PATH, svc)
             .build()
-            .await
+            .await?;
+        own_name(&conn).await?;
+        Ok::<_, zbus::Error>(conn)
     }) {
         Ok(c) => c,
         Err(e) => {
@@ -443,6 +488,7 @@ mod tests {
         let svc = Service {
             ctx: Ctx::new("/nonexistent".into(), "/nonexistent".into()),
             act: Activity::default(),
+            gate: Gate::open(),
         };
         let mut xml = String::new();
         svc.introspect_to_writer(&mut xml, 0);
@@ -461,5 +507,80 @@ mod tests {
         assert_eq!(act.running.load(Ordering::SeqCst), 0);
         let m = HashMap::from([("look".to_string(), "a".to_string())]);
         assert!(act.announce(&m) && !act.announce(&m));
+    }
+
+    /// The name is never replaceable: zbus's default flags allow replacement, ours do not.
+    #[test]
+    fn bus_name_is_not_replaceable() {
+        use zbus::fdo::RequestNameFlags as F;
+        assert!(
+            F::default().contains(F::ALLOW_REPLACEMENT),
+            "zbus default changed"
+        );
+        let f = name_flags();
+        assert!(!f.contains(F::ALLOW_REPLACEMENT) && !f.contains(F::REPLACE_EXISTING));
+        assert!(f.contains(F::DO_NOT_QUEUE));
+    }
+
+    /// With the real gate, a caller it cannot identify (a peer-to-peer connection has no sender
+    /// and no bus to ask) is refused on every state-changing method before any work is done,
+    /// while the metadata methods stay open.
+    #[test]
+    fn gate_guards_state_changing_methods() {
+        let dir = std::env::temp_dir().join(format!("themes-gate-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let (a, b) = std::os::unix::net::UnixStream::pair().unwrap();
+        let svc = Service {
+            ctx: Ctx::new(dir.join("home"), dir.join("root")),
+            act: Activity::default(),
+            gate: Gate::new(Arc::new(Trust::with_binaries(vec![]))),
+        };
+        let server = std::thread::spawn(move || {
+            zbus::block_on(
+                zbus::connection::Builder::unix_stream(a)
+                    .server(zbus::Guid::generate())
+                    .p2p()
+                    .serve_at(DBUS_PATH, svc)
+                    .build(),
+            )
+            .unwrap()
+        });
+        zbus::block_on(async {
+            let client = zbus::connection::Builder::unix_stream(b)
+                .p2p()
+                .build()
+                .await
+                .unwrap();
+            let _server = server.join().unwrap();
+            let sas = ("fedora", Vec::<String>::new());
+            let call = |m: &'static str| {
+                client.call_method(None::<&str>, DBUS_PATH, Some(DBUS_NAME), m, &sas)
+            };
+            let refused = [
+                ("Apply", call("Apply").await),
+                ("ApplyConfirmed", call("ApplyConfirmed").await),
+                ("PendingCommands", call("PendingCommands").await),
+                (
+                    "Doctor",
+                    client
+                        .call_method(None::<&str>, DBUS_PATH, Some(DBUS_NAME), "Doctor", &(true,))
+                        .await,
+                ),
+            ];
+            for (m, r) in refused {
+                assert!(
+                    matches!(r, Err(zbus::Error::FDO(ref e)) if matches!(**e, zbus::fdo::Error::AccessDenied(_))),
+                    "{m}: {r:?}"
+                );
+            }
+            for m in ["List", "Current", "Experimental"] {
+                client
+                    .call_method(None::<&str>, DBUS_PATH, Some(DBUS_NAME), m, &())
+                    .await
+                    .unwrap_or_else(|e| panic!("{m}: {e}"));
+            }
+        });
+        assert!(!dir.join("root/state.json").exists(), "nothing was applied");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

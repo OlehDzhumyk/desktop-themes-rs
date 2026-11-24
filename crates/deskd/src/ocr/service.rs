@@ -211,8 +211,9 @@ impl Ocr {
 }
 
 /// Run `f` on its own thread and wait for it without blocking the executor. `None` when `f`
-/// panicked (the panic stays in that thread; the caller answers with an error).
-fn unblock<T: Send + 'static>(
+/// panicked (the panic stays in that thread; the caller answers with an error). Also used by
+/// the Capture interface for its PNG work.
+pub(crate) fn unblock<T: Send + 'static>(
     f: impl FnOnce() -> T + Send + 'static,
 ) -> impl Future<Output = Option<T>> {
     struct Slot<T> {

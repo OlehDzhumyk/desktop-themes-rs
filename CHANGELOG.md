@@ -18,6 +18,16 @@ All notable changes to this project are documented in this file. The format is b
   outside deskd's directory); SVG is no longer captured and images must be PNG, JPEG, GIF or WebP by
   their bytes; more password-manager hints are honoured; text that looks like a password or token is
   kept in memory only for 120 s and never saved; the bridge's own paste is not recorded again.
+- The theme service (`io.github.OlehDzhumyk.Themes`) applies themes, reports pending commands and
+  runs `Doctor` only for GNOME Shell and our own binaries, and its bus name can no longer be taken
+  over (zbus requested it replaceable by default); `List`, `Current` and `Experimental` stay open
+  ([ADR 0008](docs/adr/0008-deskd-serves-content-to-trusted-callers.md)).
+- deskd keeps at most 4 MiB of the OCR engine's output and 64 KiB of its error output; a runaway
+  engine can no longer grow deskd's memory without bound.
+- deskd writes its private files (clipboard history, images, recents, the wallpaper state) through
+  a new `0600` temporary file with a unique name (`O_EXCL`) and an atomic rename; it never writes
+  through a file or link left at the old fixed `.tmp` name, and the wallpaper state is no longer
+  written in place.
 
 ### Added
 
@@ -356,6 +366,13 @@ All notable changes to this project are documented in this file. The format is b
   cancelled on disable.
 - `data/install.sh` compiles the GSettings schemas of repository extensions after copying them
   (`lockscreen-layout` failed to load with a missing `gschemas.compiled` after a reinstall).
+- `setlocale` runs before the language setting is read, while the program still has one thread
+  (reading GSettings starts GLib's worker threads, and `setlocale` is not thread-safe).
+- deskd's Capture interface decodes, annotates and encodes PNG files on a worker thread and holds
+  no lock meanwhile; other D-Bus calls are no longer held up while a screenshot is saved.
+- The caller check (ADR 0008) asks the bus for the owner of `org.gnome.Shell` only for callers that
+  are not our own binaries, and builds its bus proxy once: `desk-shell` on compositors without
+  GNOME Shell no longer pays for a failing lookup on every call.
 
 ## [0.3.0] - 2026-11-22
 
