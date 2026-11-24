@@ -256,8 +256,9 @@ contrast gives opaque surfaces, outlines and a thick focus ring in every skin.
 
 ## Search
 
-Status: **core only** (stage 4). deskd answers queries; the launcher box in the bridge comes in a later change, and
-until then the macOS look keeps `spotlight@nin`. Spec: [search.md](spec/features/search.md).
+Status: **partial** (stage 4). deskd answers queries and the bridge draws the search box. No theme sets
+`search-shortcut` yet, so the macOS look keeps `spotlight@nin` until the box is tested on a live session.
+Spec: [search.md](spec/features/search.md).
 
 | | |
 |---|---|
@@ -267,14 +268,25 @@ until then the macOS look keeps `spotlight@nin`. Spec: [search.md](spec/features
 | Ranking | exact > prefix > word prefix > substring > fuzzy (typos, letters in order); Unicode case folding; a query typed in the wrong layout (Ukrainian ЙЦУКЕН ↔ QWERTY, both ways) matches too (AC-SRCH-04); ties broken by usage with a 14-day half-life, then applications before actions |
 | Usage | `~/.local/share/deskd/search-usage.json` (0600, atomic); with `remember-usage=false` nothing is written and the file is deleted (AC-SRCH-07); `ClearUsage` forgets everything |
 | Web | off by default (`web-search`, AC-SRCH-06); when on, the last result only carries the query for the browser; deskd makes no request |
-| Shortcut | `search-shortcut` (empty by default, so it does not clash with `spotlight@nin` or the overview); override `search-toggle` in `io.github.OlehDzhumyk.Desk.Shortcuts` |
+| Box | the field has the focus; results grouped under «Top hit», then by kind (Calculator, Applications, System actions, Files, Clipboard, Emoji, Web), icon, title and subtitle; `↑`/`↓` (and `PgUp`/`PgDn`) move, `Enter` opens, `Super+1`..`Super+9` open the first nine rows, `Esc` clears the field and closes it when empty, a click outside closes; «Nothing found for “…”» when empty |
+| Open a result | application: launched (`Shell.AppSystem`, desktop entry as fallback); calculator: copied, with a «Copied …» toast; system action: lock, suspend, log out, restart and power off through the screen saver, logind and the session manager (which asks first), dark mode and clipboard private mode toggled with a toast; file: opened in its default application (local `file://` only); clipboard entry: put back (pasted with `paste-on-select`); emoji: inserted into the focused window without changing the clipboard; web: the query opens in the default browser on DuckDuckGo. Then `RecordLaunch` (best effort) |
+| Shortcut | `search-shortcut` (empty by default, so it does not clash with `spotlight@nin` or the overview); override `search-toggle` in `io.github.OlehDzhumyk.Desk.Shortcuts`; bound in normal mode only (never in the overview or on the lock screen); listed in the Shortcut Guide |
 | D-Bus | `io.github.OlehDzhumyk.Desk.Search` at `/io/github/OlehDzhumyk/Desk/Search`: `Query(s, u) → s` (JSON results), `RecordLaunch(s)`, `ClearUsage()` |
 | Settings | GSettings `io.github.OlehDzhumyk.Desk.Search`: `enabled`, `search-shortcut`, `web-search`, `max-results` (5 to 50, 12), `remember-usage` |
 | Idle cost | none: applications are read once and dropped when an `applications/` folder changes (GIO file monitor, no polling) |
 | Core | crate `desk-search`: pure Rust (only `serde`), no GTK, GLib or D-Bus, so KDE or wlroots adapters can reuse it (ADR 0011) |
 
-Skins: none yet; the bridge part will draw the box per skin (`macos` Spotlight panel, `windows11` start-menu
-flyout, `default` overview search provider).
+Skins (bridge `src/search/`):
+
+* **macos**: a Spotlight-like wide translucent pill, centred, its top at 22% of the monitor height; `⌘1`..`⌘9` hints.
+* **windows11**: a Fluent panel (8 px corners, accent line under the field) in the middle of the monitor; `Super+1`..`Super+9` hints.
+  The start-menu flyout with filters and pinned apps is still to come.
+* **default**: a GNOME (Adwaita) popover in the upper third, drawn by the shell theme (`popup-menu-content`).
+  The overview search provider is still to come.
+
+All skins follow the light colour scheme, high contrast (opaque surface, outlines, a thick ring on the selected
+row) and reduced motion (a fade of 100 ms, none when animations are off). The box opens on the monitor with the
+pointer, and each row's accessible name carries its group.
 
 ## Automatic light/dark
 

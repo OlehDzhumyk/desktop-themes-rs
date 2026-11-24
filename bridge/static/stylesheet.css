@@ -938,3 +938,117 @@
 .desk-hc .desk-layouts-zone { border: 2px solid currentColor; }
 .desk-hc .desk-layouts-card:focus, .desk-hc .desk-layouts-assist-choice:focus,
 .desk-hc .desk-layouts-zone:focus { border: 3px solid currentColor; }
+
+/* ---- Search box (src/search/panel.ts, docs/spec/features/search.md) ----
+   macos: a Spotlight-like wide pill at 22% of the monitor height; windows11: a Fluent panel in
+   the middle; default: the shell's popup-menu-content (Adwaita) in the upper third. The selected
+   row has the accent colour and, in high contrast, an outline, so it never depends on colour
+   alone. */
+.desk-search-layer { background-color: transparent; }
+.desk-search-panel {
+  width: 640px;
+  spacing: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  color: #f2f2f2;
+  background-color: rgba(30,30,32,0.95);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+}
+.desk-search-entry {
+  font-size: 13pt;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: inherit;
+  caret-color: -st-accent-color;
+  selection-background-color: -st-accent-color;
+  background-color: rgba(255,255,255,0.08);
+  border: 2px solid transparent;
+}
+.desk-search-entry:focus { border-color: -st-accent-color; }
+.desk-search-entry-icon { icon-size: 18px; padding-right: 8px; color: inherit; }
+.desk-search-scroll { max-height: 440px; }
+.desk-search-results { spacing: 6px; }
+.desk-search-group { spacing: 2px; }
+.desk-search-group-title {
+  font-size: 8.5pt;
+  font-weight: bold;
+  padding: 4px 10px 2px;
+  color: rgba(255,255,255,0.65);
+}
+.desk-search-row {
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: inherit;
+  border: 2px solid transparent;
+}
+.desk-search-row:hover { background-color: rgba(255,255,255,0.08); }
+.desk-search-row:selected { color: #ffffff; background-color: -st-accent-color; }
+.desk-search-row-box { spacing: 10px; }
+.desk-search-row-icon { icon-size: 28px; }
+.desk-search-row-texts { spacing: 1px; }
+.desk-search-row-title { font-size: 10.5pt; color: inherit; }
+.desk-search-row-subtitle { font-size: 8.5pt; color: inherit; opacity: 0.75; }
+.desk-search-row-key { font-size: 8.5pt; color: inherit; opacity: 0.7; }
+.desk-search-empty { padding: 12px; text-align: center; color: rgba(255,255,255,0.7); }
+
+/* macos: Spotlight-like translucent pill, the field is the panel */
+.desk-skin-macos.desk-search-panel {
+  width: 680px;
+  padding: 8px;
+  border-radius: 26px;
+  background-color: rgba(40,40,42,0.86);
+  font-family: Inter, Cantarell, sans-serif;
+}
+.desk-skin-macos .desk-search-entry {
+  font-size: 16pt;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background-color: transparent;
+}
+.desk-skin-macos .desk-search-row { border-radius: 10px; }
+.desk-skin-macos .desk-search-row:selected { background-color: #2f6fe4; }
+/* windows11: Fluent surface, 8 px corners, accent line under the field */
+.desk-skin-windows11.desk-search-panel {
+  width: 600px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #2b2b2b;
+  font-family: "Segoe UI Variable", "Segoe UI", Inter, Cantarell, sans-serif;
+}
+.desk-skin-windows11 .desk-search-entry {
+  border-radius: 4px;
+  background-color: rgba(255,255,255,0.06);
+  border-width: 0 0 2px 0;
+  border-color: rgba(255,255,255,0.35);
+}
+.desk-skin-windows11 .desk-search-entry:focus { border-color: #60cdff; }
+.desk-skin-windows11 .desk-search-row { border-radius: 4px; }
+.desk-skin-windows11 .desk-search-row:selected { color: inherit; background-color: rgba(255,255,255,0.10); border-color: #60cdff; }
+/* default: the shell theme draws the surface (popup-menu-content); spacing and colours inherit */
+.desk-skin-default.desk-search-panel { color: inherit; }
+.desk-skin-default .desk-search-group-title,
+.desk-skin-default .desk-search-empty { color: inherit; opacity: 0.7; }
+.desk-skin-default .desk-search-entry { background-color: rgba(127,127,127,0.18); }
+
+/* light colour scheme (skins with their own palette) */
+.desk-light.desk-skin-macos.desk-search-panel,
+.desk-light.desk-skin-windows11.desk-search-panel {
+  color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14);
+}
+.desk-light.desk-skin-windows11.desk-search-panel { background-color: #f3f3f3; }
+.desk-light .desk-search-entry { background-color: rgba(0,0,0,0.05); }
+.desk-light.desk-skin-macos .desk-search-entry { background-color: transparent; }
+.desk-light .desk-search-group-title, .desk-light .desk-search-empty { color: rgba(0,0,0,0.65); }
+.desk-light .desk-search-row:hover { background-color: rgba(0,0,0,0.05); }
+.desk-light.desk-skin-windows11 .desk-search-entry { border-color: rgba(0,0,0,0.35); }
+.desk-light.desk-skin-windows11 .desk-search-entry:focus { border-color: #005fb8; }
+.desk-light.desk-skin-windows11 .desk-search-row:selected { background-color: rgba(0,0,0,0.06); border-color: #005fb8; }
+
+/* high contrast: opaque surface, outlines, a thick ring on the selected row */
+.desk-hc.desk-search-panel { color: #ffffff; background-color: #000000; border: 2px solid #ffffff; box-shadow: none; }
+.desk-hc.desk-light.desk-search-panel { color: #000000; background-color: #ffffff; border-color: #000000; }
+.desk-hc .desk-search-entry { background-color: transparent; border: 2px solid currentColor; }
+.desk-hc .desk-search-group-title, .desk-hc .desk-search-empty,
+.desk-hc .desk-search-row-subtitle, .desk-hc .desk-search-row-key { color: inherit; opacity: 1; }
+.desk-hc .desk-search-row:selected { color: inherit; background-color: transparent; border: 3px solid currentColor; }

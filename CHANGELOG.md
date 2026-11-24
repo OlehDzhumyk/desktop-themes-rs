@@ -33,6 +33,16 @@ All notable changes to this project are documented in this file. The format is b
   changes (no polling). Settings `io.github.OlehDzhumyk.Desk.Search` (`enabled`, `search-shortcut`,
   `web-search` off by default, `max-results`, `remember-usage`) and a «Пошук» page; the shortcut
   is empty until the bridge launcher replaces `spotlight@nin`.
+- Search box (stage 4, partial): the bridge draws the own search launcher per skin (`macos`
+  Spotlight-like pill at 22% of the monitor height, `windows11` Fluent panel, `default` Adwaita
+  popover), with grouped results («Top hit», then by kind), icons, `↑`/`↓`, `Enter`,
+  `Super+1`..`Super+9`, `Esc` that clears first and then closes, and a click outside to close. It
+  follows the light scheme, high contrast and reduced motion. Applications launch, calculations
+  are copied, the seven system actions run (power actions through the session manager, which
+  asks first), files open, clipboard entries are put back, emoji are inserted and a web result
+  opens the browser; each launch is counted with `RecordLaunch`. Queries go only to the verified
+  deskd (ADR 0008), and a slow reply never replaces newer results. `search-shortcut` is bound in
+  normal mode only and shown in the Shortcut Guide; it stays empty in every theme for now.
 - Quick Look (stage 4, partial): `themes quick-look <paths>…` opens a short-lived GTK 4 /
   libadwaita previewer styled for the skin (`macos` dark title strip, `windows11` Peek-style
   header with `<` `>`, `default` plain window). It shows images with zoom, text and code (only the

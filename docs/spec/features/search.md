@@ -12,7 +12,10 @@ search engine in deskd (provider-based, privacy-preserving) drawn by the bridge 
 
 * **Current implementation: Partial.** Works through third-party extensions; its behaviour is not under
   this project's control beyond a theme's dconf keys and two patches.
-* **Own search engine: Planned** (stage 4). Origin badge: *Based on Spotlight by itsnin
+* **Own search engine: Partial** (stage 4). deskd answers queries (`desk-search`, `Desk.Search`) and
+  the bridge draws the box in all three skins (`bridge/src/search/`); no theme binds its shortcut yet.
+  Still to come: files and clipboard providers in deskd, the Windows 11 flyout with filters and pinned
+  apps, the overview search provider for `default`, `Tab` between groups and the file preview pane. Origin badge: *Based on Spotlight by itsnin
   (GPL-3.0-or-later)* for the current launcher; the engine itself is *In Windows 11 and macOS*.
 
 ## Reference behaviour

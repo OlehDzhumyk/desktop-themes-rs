@@ -22,6 +22,7 @@ import {MixerFeature} from './mixer/feature.js';
 import {OcrFeature} from './ocr/feature.js';
 import {OsdFeature} from './osd/feature.js';
 import {QuickLookFeature} from './quickLook/feature.js';
+import {SearchFeature} from './search/feature.js';
 import {ShortcutGuideFeature} from './shortcutGuide/feature.js';
 import type {Skin} from './accentPicker.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
@@ -38,6 +39,7 @@ const FOCUS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Focus';
 const OCR_SCHEMA = 'io.github.OlehDzhumyk.Desk.Ocr';
 const OSD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Osd';
 const QUICK_LOOK_SCHEMA = 'io.github.OlehDzhumyk.Desk.QuickLook';
+const SEARCH_SCHEMA = 'io.github.OlehDzhumyk.Desk.Search';
 const SHORTCUT_GUIDE_SCHEMA = 'io.github.OlehDzhumyk.Desk.ShortcutGuide';
 
 export default class DeskBridge extends Extension {
@@ -64,6 +66,8 @@ export default class DeskBridge extends Extension {
     private _osdSettings: Gio.Settings | null = null;
     private _quickLook: QuickLookFeature | null = null;
     private _quickLookSettings: Gio.Settings | null = null;
+    private _search: SearchFeature | null = null;
+    private _searchSettings: Gio.Settings | null = null;
     private _shortcutGuide: ShortcutGuideFeature | null = null;
     private _shortcutGuideSettings: Gio.Settings | null = null;
     private _appearanceSettings: Gio.Settings | null = null;
@@ -121,6 +125,11 @@ export default class DeskBridge extends Extension {
             this._quickLookSettings = this._schema(QUICK_LOOK_SCHEMA);
         } catch (e) {
             console.warn(`desk-bridge: Quick Look is unavailable: ${String(e)}`);
+        }
+        try {
+            this._searchSettings = this._schema(SEARCH_SCHEMA);
+        } catch (e) {
+            console.warn(`desk-bridge: the search box is unavailable: ${String(e)}`);
         }
         try {
             this._shortcutGuideSettings = this._schema(SHORTCUT_GUIDE_SCHEMA);
@@ -219,6 +228,13 @@ export default class DeskBridge extends Extension {
                 console.warn(`desk-bridge: Quick Look is unavailable: ${String(e)}`);
             }
         }
+        if (this._searchSettings) {
+            try {
+                this._search = new SearchFeature(this._searchSettings, this._skin(), this._clipboard);
+            } catch (e) {
+                console.warn(`desk-bridge: the search box is unavailable: ${String(e)}`);
+            }
+        }
         if (this._shortcutGuideSettings) {
             try {
                 this._shortcutGuide = new ShortcutGuideFeature(
@@ -236,6 +252,8 @@ export default class DeskBridge extends Extension {
     private _teardown(): void {
         this._shortcutGuide?.destroy();
         this._shortcutGuide = null;
+        this._search?.destroy();
+        this._search = null;
         this._quickLook?.destroy();
         this._quickLook = null;
         this._osd?.destroy();
@@ -282,6 +300,7 @@ export default class DeskBridge extends Extension {
         this._focus?.setSkin(skin);
         this._osd?.setSkin(skin);
         this._quickLook?.setSkin(skin);
+        this._search?.setSkin(skin);
         this._shortcutGuide?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
     }
@@ -305,6 +324,7 @@ export default class DeskBridge extends Extension {
         this._focusSettings = null;
         this._osdSettings = null;
         this._quickLookSettings = null;
+        this._searchSettings = null;
         this._shortcutGuideSettings = null;
         this._appearanceSettings = null;
     }

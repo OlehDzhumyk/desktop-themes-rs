@@ -118,8 +118,13 @@ export class ClipboardFeature implements PanelHost {
     }
 
     activate(item: ClipItem): void {
+        this.activateId(item.id);
+    }
+
+    /** Put history entry `id` back on the clipboard (and paste it when paste-on-select is on). */
+    activateId(id: number): void {
         const paste = this.settings.get_boolean('paste-on-select');
-        this.client.activate(item.id)
+        this.client.activate(id)
             .then(([mime, data]) => {
                 this._watcher.expectOwnContent();
                 this._paster.paste(mime, data, paste);

@@ -187,6 +187,12 @@ const DESK_BINDINGS: readonly DeskBindingSpec[] = [
         overrideKey: 'quick-look-toggle',
         label: () => _('Quick Look'),
     },
+    {
+        schema: 'io.github.OlehDzhumyk.Desk.Search',
+        key: 'search-shortcut',
+        overrideKey: 'search-toggle',
+        label: () => _('Search'),
+    },
 ];
 
 const GROUP_ORDER: readonly GroupId[] = ['windows', 'desktop', 'features', 'input', 'custom'];
