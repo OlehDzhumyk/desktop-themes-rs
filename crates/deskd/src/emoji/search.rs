@@ -92,14 +92,27 @@ pub fn search(
     } else {
         limit as usize
     };
-    let q_raw = query.trim();
-    if q_raw.is_empty() {
+    if normalize(query).split_whitespace().next().is_none() {
         return entries.iter().take(cap).map(|e| e.to_item(lang)).collect();
     }
-    let q = normalize(q_raw);
+    ranked(entries, query, cap, recents)
+        .into_iter()
+        .map(|(_, e)| e.to_item(lang))
+        .collect()
+}
+
+/// The entries matching a non-empty `query` with their match rank (0 is best, see
+/// `score_entry`), best first, at most `cap`. An empty query matches nothing here.
+pub fn ranked<'a>(
+    entries: &'a [EmojiEntry],
+    query: &str,
+    cap: usize,
+    recents: &[String],
+) -> Vec<(u8, &'a EmojiEntry)> {
+    let q = normalize(query.trim());
     let tokens: Vec<&str> = q.split_whitespace().collect();
     if tokens.is_empty() {
-        return entries.iter().take(cap).map(|e| e.to_item(lang)).collect();
+        return Vec::new();
     }
 
     let mut ranked: Vec<(u8, usize, usize, &EmojiEntry)> = entries
@@ -116,6 +129,6 @@ pub fn search(
     ranked
         .into_iter()
         .take(cap)
-        .map(|(_, _, _, e)| e.to_item(lang))
+        .map(|(rank, _, _, e)| (rank, e))
         .collect()
 }

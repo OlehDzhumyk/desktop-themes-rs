@@ -517,6 +517,11 @@ impl Engine {
         }
     }
 
+    /// All entries, newest first (the search provider reads them without a copy).
+    pub fn entries(&self) -> &[Entry] {
+        &self.items
+    }
+
     pub fn find(&self, id: u64) -> Option<&Entry> {
         self.items.iter().find(|e| e.id == id)
     }
