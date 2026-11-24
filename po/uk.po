@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 09:59+0000\n"
+"POT-Creation-Date: 2026-11-24 13:43+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -79,10 +79,6 @@ msgstr "Не вдалося відкрити редактор: {error}"
 #: bridge/src/capture/preview.ts:44
 msgid "Screenshot copied and saved"
 msgstr "Знімок скопійовано та збережено"
-
-#: bridge/src/capture/preview.ts:44
-msgid "Screenshot saved"
-msgstr "Знімок збережено"
 
 #: bridge/src/capture/preview.ts:61
 msgid "Screenshot saved. Open it in the editor"
@@ -194,10 +190,6 @@ msgstr "{n} д тому"
 msgid "{text}, pinned"
 msgstr "{text}, закріплено"
 
-#: bridge/src/clipboard/winFlyout.ts:60
-msgid "Symbols"
-msgstr "Символи"
-
 #: bridge/src/clipboard/winFlyout.ts:221
 msgid "Private mode is on: copies are not kept."
 msgstr "Приватний режим увімкнено: скопійоване не зберігається."
@@ -283,34 +275,6 @@ msgstr "Вилучити {value}"
 #: bridge/src/emoji/panel.ts:28
 msgid "Recents"
 msgstr "Нещодавні"
-
-#: bridge/src/emoji/panel.ts:29
-msgid "Smileys"
-msgstr "Смайли"
-
-#: bridge/src/emoji/panel.ts:30
-msgid "People"
-msgstr "Люди й жести"
-
-#: bridge/src/emoji/panel.ts:31
-msgid "Animals and nature"
-msgstr "Тварини й природа"
-
-#: bridge/src/emoji/panel.ts:32
-msgid "Food and drink"
-msgstr "Їжа й напої"
-
-#: bridge/src/emoji/panel.ts:33
-msgid "Travel and places"
-msgstr "Подорожі й місця"
-
-#: bridge/src/emoji/panel.ts:34
-msgid "Activities"
-msgstr "Активності"
-
-#: bridge/src/emoji/panel.ts:35
-msgid "Objects"
-msgstr "Предмети"
 
 #: bridge/src/emoji/panel.ts:36
 msgid "Emoji symbols"
@@ -587,10 +551,6 @@ msgstr "{row}, без звуку"
 msgid "Copied text: {preview}"
 msgstr "Скопійовано текст: {preview}"
 
-#: bridge/src/ocr/feature.ts:26
-msgid "No text found"
-msgstr "Тексту не знайдено"
-
 #: bridge/src/ocr/feature.ts:28
 msgid "No data for language {code}: install tesseract-langpack-{code}"
 msgstr "Немає даних мови {code}: встановіть tesseract-langpack-{code}"
@@ -638,10 +598,6 @@ msgstr "Мікрофон вимкнено"
 #: bridge/src/osd/popup.ts:57
 msgid "Microphone on"
 msgstr "Мікрофон увімкнено"
-
-#: bridge/src/osd/popup.ts:63
-msgid "Volume muted"
-msgstr "Звук вимкнено"
 
 #: bridge/src/osd/popup.ts:65
 msgid "Volume {level} percent"
@@ -2652,52 +2608,204 @@ msgstr ""
 "Скорочення для доступності змінюється на сторінці «Клавіатурні скорочення»; "
 "вигляд наслідує стиль поточної теми."
 
-#: crates/desk-shell/src/clipboard_flyout.rs:65
-#: crates/desk-shell/src/clipboard_flyout.rs:88
-#: crates/desk-shell/src/clipboard_flyout.rs:108
+#: crates/desk-shell/src/clipboard_flyout.rs:68
+#: crates/desk-shell/src/clipboard_flyout.rs:93
+#: crates/desk-shell/src/clipboard_flyout.rs:115
+#: crates/desk-shell/src/emoji_flyout.rs:176
 #: crates/desk-shell/src/taskbar.rs:107
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:71
+#: crates/desk-shell/src/clipboard_flyout.rs:74
 msgid "Private mode is on: new items are not recorded"
 msgstr "Приватний режим увімкнено: нові елементи не записуються"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:76
+#: crates/desk-shell/src/clipboard_flyout.rs:79
 msgid "Clear all"
 msgstr "Очистити все"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:165
+#: crates/desk-shell/src/clipboard_flyout.rs:99
+#: crates/desk-shell/src/emoji_flyout.rs:142
+#: crates/desk-shell/src/emoji_flyout.rs:170
+#: crates/desk-shell/src/emoji_flyout.rs:192
+#: crates/desk-shell/src/start_menu.rs:96
+msgid "Emoji"
+msgstr "Емодзі"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:194
 msgid ""
 "The clipboard history is not available: the desktop service is not running"
 msgstr "Історія буфера обміну недоступна: служба стільниці не працює"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:167
+#: crates/desk-shell/src/clipboard_flyout.rs:196
 msgid "The clipboard history is empty"
 msgstr "Історія буфера обміну порожня"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:198
-#: crates/desk-shell/src/clipboard_flyout.rs:229
+#: crates/desk-shell/src/clipboard_flyout.rs:227
+#: crates/desk-shell/src/clipboard_flyout.rs:258
 msgid "Pinned item"
 msgstr "Закріплений елемент"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:203
+#: crates/desk-shell/src/clipboard_flyout.rs:232
 msgid "Pin"
 msgstr "Закріпити"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:203
+#: crates/desk-shell/src/clipboard_flyout.rs:232
 msgid "Unpin"
 msgstr "Відкріпити"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:216
+#: crates/desk-shell/src/clipboard_flyout.rs:245
 #: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
 msgid "Delete"
 msgstr "Видалити"
 
-#: crates/desk-shell/src/main.rs:245 crates/deskd/src/search/mod.rs:258
+#: crates/desk-shell/src/emoji_flyout.rs:47
+msgid "Recently used"
+msgstr "Нещодавно використані"
+
+#: crates/desk-shell/src/emoji_flyout.rs:48
+msgid "Smileys"
+msgstr "Смайли"
+
+#: crates/desk-shell/src/emoji_flyout.rs:49
+msgid "People"
+msgstr "Люди й жести"
+
+#: crates/desk-shell/src/emoji_flyout.rs:50
+msgid "Animals and nature"
+msgstr "Тварини й природа"
+
+#: crates/desk-shell/src/emoji_flyout.rs:51
+msgid "Food and drink"
+msgstr "Їжа й напої"
+
+#: crates/desk-shell/src/emoji_flyout.rs:52
+msgid "Travel and places"
+msgstr "Подорожі й місця"
+
+#: crates/desk-shell/src/emoji_flyout.rs:53
+msgid "Activities"
+msgstr "Активності"
+
+#: crates/desk-shell/src/emoji_flyout.rs:54
+msgid "Objects"
+msgstr "Предмети"
+
+#: crates/desk-shell/src/emoji_flyout.rs:55
+msgid "Symbols"
+msgstr "Символи"
+
+#: crates/desk-shell/src/emoji_flyout.rs:144
+#: crates/desk-shell/src/emoji_flyout.rs:180
+msgid "Search emoji"
+msgstr "Пошук емодзі"
+
+#: crates/desk-shell/src/emoji_flyout.rs:285
+msgid "Emoji are not available: the desktop service is not running"
+msgstr "Емодзі недоступні: служба робочого столу не запущена"
+
+#: crates/desk-shell/src/emoji_flyout.rs:287
+msgid "No recently used emoji"
+msgstr "Немає нещодавно використаних емодзі"
+
+#: crates/desk-shell/src/emoji_flyout.rs:288
+msgid "No emoji found"
+msgstr "Емодзі не знайдено"
+
+#: crates/desk-shell/src/main.rs:299 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr "Шукати «{query}» в інтернеті"
+
+#: crates/desk-shell/src/oneshot.rs:74
+msgid "Screen text recognition is turned off"
+msgstr "Розпізнавання тексту з екрана вимкнено"
+
+#: crates/desk-shell/src/oneshot.rs:75
+msgid "The capture is not a valid image"
+msgstr "Знімок не є коректним зображенням"
+
+#: crates/desk-shell/src/oneshot.rs:76 crates/desk-shell/src/oneshot.rs:105
+msgid "The selected region is too large"
+msgstr "Вибрана область занадто велика"
+
+#: crates/desk-shell/src/oneshot.rs:77
+msgid "Text recognition is busy, try again"
+msgstr "Розпізнавання тексту зайняте, спробуйте ще раз"
+
+#: crates/desk-shell/src/oneshot.rs:78
+msgid "Text recognition needs Tesseract (not installed)"
+msgstr "Для розпізнавання тексту потрібен Tesseract (не встановлено)"
+
+#: crates/desk-shell/src/oneshot.rs:79
+msgid "No text recognition language is installed"
+msgstr "Не встановлено жодної мови для розпізнавання тексту"
+
+#: crates/desk-shell/src/oneshot.rs:80
+msgid "Text recognition took too long"
+msgstr "Розпізнавання тексту тривало занадто довго"
+
+#: crates/desk-shell/src/oneshot.rs:81
+msgid "Text recognition failed"
+msgstr "Не вдалося розпізнати текст"
+
+#: crates/desk-shell/src/oneshot.rs:82
+msgid "The desktop service is not running"
+msgstr "Служба робочого столу не запущена"
+
+#: crates/desk-shell/src/oneshot.rs:103
+#, rust-format
+msgid "{tool} is not installed"
+msgstr "{tool} не встановлено"
+
+#: crates/desk-shell/src/oneshot.rs:104
+#, rust-format
+msgid "{tool} failed"
+msgstr "{tool} завершився з помилкою"
+
+#: crates/desk-shell/src/oneshot.rs:177
+msgid "The screenshot could not be saved"
+msgstr "Не вдалося зберегти знімок екрана"
+
+#: crates/desk-shell/src/oneshot.rs:182
+msgid "Screenshot saved and copied"
+msgstr "Знімок збережено та скопійовано"
+
+#: crates/desk-shell/src/oneshot.rs:184
+msgid "Screenshot saved"
+msgstr "Знімок збережено"
+
+#: crates/desk-shell/src/oneshot.rs:212
+msgid "No text found"
+msgstr "Тексту не знайдено"
+
+#: crates/desk-shell/src/oneshot.rs:221
+#, rust-format
+msgid "Text copied: {preview}"
+msgstr "Текст скопійовано: {preview}"
+
+#: crates/desk-shell/src/oneshot.rs:257
+#, rust-format
+msgid "Copied {color}"
+msgstr "Скопійовано {color}"
+
+#: crates/desk-shell/src/oneshot.rs:259
+#, rust-format
+msgid "Copied {color} ({name})"
+msgstr "Скопійовано {color} ({name})"
+
+#: crates/desk-shell/src/osd.rs:169
+msgid "On-screen display"
+msgstr "Екранний індикатор"
+
+#: crates/desk-shell/src/osd.rs:259
+msgid "Volume muted"
+msgstr "Звук вимкнено"
+
+#: crates/desk-shell/src/osd.rs:260
+#, rust-format
+msgid "Volume {percent} %"
+msgstr "Гучність {percent} %"
 
 #: crates/desk-shell/src/quick_settings.rs:93
 msgid "Mute"
@@ -2729,27 +2837,35 @@ msgstr "Приватний буфер"
 msgid "Screenshot"
 msgstr "Знімок екрана"
 
-#: crates/desk-shell/src/quick_settings.rs:161
+#: crates/desk-shell/src/quick_settings.rs:159
+msgid "Color picker"
+msgstr "Піпетка кольору"
+
+#: crates/desk-shell/src/quick_settings.rs:160
+msgid "Screen text"
+msgstr "Текст із екрана"
+
+#: crates/desk-shell/src/quick_settings.rs:163
 msgid "Settings hub"
 msgstr "Центр налаштувань"
 
-#: crates/desk-shell/src/quick_settings.rs:193
+#: crates/desk-shell/src/quick_settings.rs:207
 msgid "Sound"
 msgstr "Звук"
 
-#: crates/desk-shell/src/quick_settings.rs:203
+#: crates/desk-shell/src/quick_settings.rs:217
 msgid "Volume"
 msgstr "Гучність"
 
-#: crates/desk-shell/src/quick_settings.rs:316
+#: crates/desk-shell/src/quick_settings.rs:330
 msgid "Sound is not available: the desktop service is not running"
 msgstr "Звук недоступний: служба стільниці не працює"
 
-#: crates/desk-shell/src/quick_settings.rs:318
+#: crates/desk-shell/src/quick_settings.rs:332
 msgid "No output device"
 msgstr "Немає пристрою виведення"
 
-#: crates/desk-shell/src/quick_settings.rs:373
+#: crates/desk-shell/src/quick_settings.rs:392
 #, rust-format
 msgid "Volume of {app}"
 msgstr "Гучність {app}"
@@ -2769,10 +2885,6 @@ msgstr "Пошук в інтернеті"
 #: crates/desk-shell/src/start_menu.rs:94
 msgid "File"
 msgstr "Файл"
-
-#: crates/desk-shell/src/start_menu.rs:96
-msgid "Emoji"
-msgstr "Емодзі"
 
 #: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:84
 msgid "Start menu"

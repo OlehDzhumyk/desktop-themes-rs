@@ -142,6 +142,29 @@ pub fn spawn(argv: &[&str]) {
     }
 }
 
+/// Start a program and leave it running after this process exits (the one-shot commands,
+/// which have no main loop to reap it; it is inherited by the session's subreaper).
+pub fn spawn_detached(argv: &[&str]) {
+    let Some((program, args)) = argv.split_first() else {
+        return;
+    };
+    if let Err(e) = std::process::Command::new(program)
+        .args(args)
+        .stdin(std::process::Stdio::null())
+        .spawn()
+    {
+        eprintln!("desk-shell: cannot start {program}: {e}");
+    }
+}
+
+/// This program (for the quick settings tiles that run a one-shot command).
+pub fn self_binary() -> String {
+    std::env::current_exe().map_or_else(
+        |_| "desk-shell".to_owned(),
+        |p| p.to_string_lossy().into_owned(),
+    )
+}
+
 /// The `themes` binary: next to this one when it exists (development builds), else from `PATH`.
 pub fn themes_binary() -> String {
     std::env::current_exe()

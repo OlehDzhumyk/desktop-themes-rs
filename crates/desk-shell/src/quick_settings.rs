@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! The Windows 11 quick settings flyout (Win+A, the tray pill of the taskbar): a 3 × 2 grid of
-//! quick toggles (dark mode, do not disturb, private clipboard) and actions (screenshot, the
-//! settings hub) over the volume of the default output and of each application that plays
+//! The Windows 11 quick settings flyout (Win+A, the tray pill of the taskbar): a grid of quick
+//! toggles (dark mode, do not disturb, private clipboard) and actions (screenshot, colour picker,
+//! screen text, the settings hub), three per row, over the volume of the default output and of each application that plays
 //! sound, all from `deskd` (`Appearance`, `Focus`, `Clipboard`, `Mixer`).
 //!
 //! The content is read again each time the flyout opens. When deskd does not answer, its
@@ -156,15 +156,19 @@ impl QuickSettings {
             .column_spacing(8)
             .build();
         let screenshot = action_tile("camera-photo-symbolic", &tr!("Screenshot"));
+        let color = action_tile("color-select-symbolic", &tr!("Color picker"));
+        let ocr = action_tile("insert-text-symbolic", &tr!("Screen text"));
         let hub = action_tile(
             "preferences-desktop-appearance-symbolic",
             &tr!("Settings hub"),
         );
-        let widgets: [&gtk::Widget; 5] = [
+        let widgets: [&gtk::Widget; 7] = [
             self.dark.upcast_ref(),
             self.focus.upcast_ref(),
             self.private.upcast_ref(),
             screenshot.upcast_ref(),
+            color.upcast_ref(),
+            ocr.upcast_ref(),
             hub.upcast_ref(),
         ];
         for (i, w) in widgets.into_iter().enumerate() {
@@ -178,6 +182,16 @@ impl QuickSettings {
             }
             capture::take_screenshot();
         });
+        // one-shot commands of this program (slurp needs the flyout out of the way first)
+        for (tile, flag) in [(&color, "--pick-color"), (&ocr, "--ocr-region")] {
+            let me = Rc::downgrade(self);
+            tile.connect_clicked(move |_| {
+                if let Some(q) = me.upgrade() {
+                    q.flyout.hide();
+                }
+                launch::spawn(&[&launch::self_binary(), flag]);
+            });
+        }
         let me = Rc::downgrade(self);
         hub.connect_clicked(move |_| {
             if let Some(q) = me.upgrade() {
@@ -349,6 +363,11 @@ impl QuickSettings {
         let mut icons = self.pill_icons.borrow_mut();
         icons.retain(|i| i.upgrade().is_some());
         icons.push(icon.downgrade());
+    }
+
+    /// The flyout is open (its slider shows volume changes: the on-screen display stays away).
+    pub fn is_open(&self) -> bool {
+        self.flyout.is_open()
     }
 
     /// Open or close (the tray pill, `desk-shell --toggle-quick-settings`).

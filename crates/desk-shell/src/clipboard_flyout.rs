@@ -3,7 +3,7 @@
 //! recent items of `deskd`'s `Clipboard` engine, most recent first. A click or `Return` puts an
 //! item on the clipboard of the session and closes the flyout; each item can be pinned or
 //! deleted, and "Clear all" keeps the pinned ones (as on Windows). A banner says when the
-//! private mode is on (nothing new is recorded).
+//! private mode is on (nothing new is recorded). A header button switches to the emoji panel.
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -50,10 +50,13 @@ pub struct ClipboardFlyout {
     status: gtk::Label,
     banner: gtk::Label,
     clear: gtk::Button,
+    switch: gtk::Button,
     rows: RefCell<Vec<ClipRow>>,
     /// Bumped by every refresh: answers of an older refresh are dropped, so two quick refreshes
     /// (open, then pin) never show stale or doubled rows.
     generation: Cell<u64>,
+    /// What the switch button of the header opens (the emoji panel).
+    on_switch: RefCell<Option<Box<dyn Fn()>>>,
 }
 
 impl ClipboardFlyout {
@@ -74,8 +77,10 @@ impl ClipboardFlyout {
                 .visible(false)
                 .build(),
             clear: gtk::Button::with_label(&tr!("Clear all")),
+            switch: gtk::Button::from_icon_name("face-smile-symbolic"),
             rows: RefCell::default(),
             generation: Cell::new(0),
+            on_switch: RefCell::default(),
         });
         clip.layout(&content);
         clip.connect();
@@ -91,6 +96,8 @@ impl ClipboardFlyout {
             .build();
         title.add_css_class("section-title");
         header.append(&title);
+        name_widget(&self.switch, &tr!("Emoji"));
+        header.append(&self.switch);
         header.append(&self.clear);
         content.append(&header);
         self.banner.add_css_class("clip-banner");
@@ -125,6 +132,28 @@ impl ClipboardFlyout {
                 }
             });
         });
+        let me = Rc::downgrade(self);
+        self.switch.connect_clicked(move |_| {
+            if let Some(c) = me.upgrade() {
+                c.flyout.hide();
+                if let Some(f) = c.on_switch.borrow().as_ref() {
+                    f();
+                }
+            }
+        });
+    }
+
+    /// What the switch button opens (set once, by the shell).
+    pub fn set_switch(&self, f: impl Fn() + 'static) {
+        *self.on_switch.borrow_mut() = Some(Box::new(f));
+    }
+
+    /// Open (with fresh items) unless it is open already.
+    pub fn open(self: &Rc<Self>) {
+        if !self.flyout.is_open() {
+            self.refresh();
+            self.flyout.show();
+        }
     }
 
     /// Put item `index` on the clipboard, then close.

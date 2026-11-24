@@ -1,8 +1,13 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Win+Shift+S in the labwc session: select a region, save it, copy it, open the capture editor.
-# Needs grim and slurp; wl-copy (wl-clipboard) and "themes capture-edit" are used when present.
+# With desk-shell installed, "desk-shell --capture-region" does it (deskd saves the file without
+# metadata, the shell shows a message). Without it: grim and slurp directly; wl-copy
+# (wl-clipboard) and "themes capture-edit" are used when present.
 set -eu
+if command -v desk-shell >/dev/null 2>&1; then
+  exec desk-shell --capture-region
+fi
 command -v grim >/dev/null 2>&1 || exit 1
 command -v slurp >/dev/null 2>&1 || exit 1
 

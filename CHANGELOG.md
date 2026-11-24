@@ -34,6 +34,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- desk-shell: Windows 11 on-screen display (`Layer::Overlay` pill above the taskbar) that follows
+  `deskd`'s `Mixer` volume and mute changes (quiet on start-up) and shows toasts via `--show-osd`;
+  Emoji picker (`Win+.`, `--toggle-emoji`, or the header switch in the clipboard history) backed by
+  `deskd`'s `Emoji` engine with EN/UK search and categories; and fast one-shot capture, OCR, and
+  colour picker tools (`--capture-region` / `Win+Shift+S`, `--ocr-region` / `Win+Shift+T`,
+  `--pick-color` / `Win+Shift+C`) wired to `deskd` (`Capture`, `Ocr`, `ColorPicker`) and Quick
+  Settings tiles.
 - `themes-core` gets the `DesktopBackend` boundary of [ADR 0011](docs/adr/0011-wayland-agnostic-rust-core.md):
   the desktop comes from `XDG_CURRENT_DESKTOP` (GNOME, labwc, other Wayland). In a labwc session
   `themes doctor` checks labwc, desk-shell, deskd, `libgtk4-layer-shell.so.0`, swaylock, swaybg and
