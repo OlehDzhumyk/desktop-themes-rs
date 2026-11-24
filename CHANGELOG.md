@@ -34,6 +34,9 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- desk-shell: right-click (`Menu` / `Shift+F10`) Pin / Unpin on taskbar application buttons,
+  persisted atomically to `$XDG_CONFIG_HOME/desk-shell/pinned.json` and reflected across every
+  monitor immediately (falling back to the default pins when the file is absent or invalid).
 - Update to the latest git version in one click: the launcher «Update Desktop Themes» («Оновити
   теми») in the app grid, and the same action on the Desktop icon, opens a terminal with
   `themes update --pause`. `themes update` runs `scripts/update.sh` of the checkout that
@@ -445,6 +448,16 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- desk-shell: the taskbar now spans the full monitor width on labwc / `wlr-layer-shell` (removed
+  `.resizable(false)`, which caused GTK 4 Wayland to clamp `configure(output_width, 48)` to the
+  widgets' natural width, and set `hexpand(true)` on the `CenterBox`; covered by the Wayland E2E
+  suite); notification toast popups no longer double-count the taskbar's 48 px exclusive zone
+  (12 px bottom margin matching flyouts); running window icon and pin matching now honours
+  `StartupWMClass` and strips `-wayland` / `-browser` suffixes.
+- Windows 11 labwc session: `autostart` only launches the `mako` / `dunst` fallback when
+  `desk-shell` is not installed (so they no longer claim `org.freedesktop.Notifications` before
+  `desk-shell` starts), and `desk-win11-session` appends existing Flatpak `exports/share`
+  directories to `XDG_DATA_DIRS` before starting `labwc`.
 - desk-shell: the taskbar is exactly 48 px high again, with a 48 px exclusive zone (ADR 0012); the
   top line and the Search pill outline are inset shadows, not borders (labwc 0.20 measured 49 px).
 - Windows 11 labwc session: `rc.xml` and the `desk-win11` theme no longer use options that labwc

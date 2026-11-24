@@ -15,7 +15,23 @@ pub const FALLBACK_ICON: &str = "application-x-executable-symbolic";
 
 /// `org.gnome.Nautilus.desktop` → `org.gnome.nautilus`.
 fn normalize(id: &str) -> String {
-    id.strip_suffix(".desktop").unwrap_or(id).to_lowercase()
+    let lower = id.to_lowercase();
+    lower.strip_suffix(".desktop").unwrap_or(&lower).to_owned()
+}
+
+/// Strip common Wayland/browser wrapper suffixes (`-wayland`, `-browser`) for loose matching.
+fn strip_variant(mut id: &str) -> &str {
+    loop {
+        if let Some(stem) = id
+            .strip_suffix("-wayland")
+            .or_else(|| id.strip_suffix("-browser"))
+            && !stem.is_empty()
+        {
+            id = stem;
+        } else {
+            return id;
+        }
+    }
 }
 
 fn last_part(id: &str) -> &str {
@@ -28,10 +44,21 @@ pub fn matches(desktop_id: &str, app_id: &str) -> bool {
     if entry.is_empty() || app.is_empty() {
         return false;
     }
-    entry == app || last_part(&entry) == app || last_part(&app) == entry
+    let (entry, app) = (strip_variant(&entry), strip_variant(&app));
+    entry == app || last_part(entry) == app || last_part(app) == entry
 }
 
-/// The desktop entry of `app_id`: an exact match first, then a loose one ([`matches`]).
+/// The window with `app_id` belongs to `entry` (via its desktop id or `StartupWMClass`).
+pub fn matches_entry(entry: &DesktopEntry, app_id: &str) -> bool {
+    matches(&entry.id, app_id)
+        || entry
+            .startup_wm_class
+            .as_deref()
+            .is_some_and(|wm| matches(wm, app_id))
+}
+
+/// The desktop entry of `app_id`: an exact desktop-id match first, then an exact
+/// `StartupWMClass` match, then a loose match ([`matches_entry`]).
 pub fn entry_for<'a>(apps: &'a [DesktopEntry], app_id: &str) -> Option<&'a DesktopEntry> {
     let app = normalize(app_id);
     if app.is_empty() {
@@ -39,7 +66,14 @@ pub fn entry_for<'a>(apps: &'a [DesktopEntry], app_id: &str) -> Option<&'a Deskt
     }
     apps.iter()
         .find(|e| normalize(&e.id) == app)
-        .or_else(|| apps.iter().find(|e| matches(&e.id, app_id)))
+        .or_else(|| {
+            apps.iter().find(|e| {
+                e.startup_wm_class
+                    .as_deref()
+                    .is_some_and(|wm| normalize(wm) == app)
+            })
+        })
+        .or_else(|| apps.iter().find(|e| matches_entry(e, app_id)))
 }
 
 /// The bar under a taskbar button.
@@ -92,18 +126,21 @@ pub struct Groups {
     pub unpinned: Vec<(String, Vec<Toplevel>)>,
 }
 
-/// Group `windows` (in the order they opened) for the pins `pin_ids`. Windows of `own_app_id`
-/// (the shell itself, in a preview) are left out.
-pub fn group(pin_ids: &[&str], windows: &[Toplevel], own_app_id: &str) -> Groups {
+fn group_by<P>(
+    pins: &[P],
+    windows: &[Toplevel],
+    own_app_id: &str,
+    pin_matches: impl Fn(&P, &str) -> bool,
+) -> Groups {
     let mut g = Groups {
-        pinned: vec![Vec::new(); pin_ids.len()],
+        pinned: vec![Vec::new(); pins.len()],
         unpinned: Vec::new(),
     };
     for w in windows {
         if !own_app_id.is_empty() && w.app_id.eq_ignore_ascii_case(own_app_id) {
             continue;
         }
-        if let Some(i) = pin_ids.iter().position(|id| matches(id, &w.app_id)) {
+        if let Some(i) = pins.iter().position(|pin| pin_matches(pin, &w.app_id)) {
             g.pinned[i].push(w.clone());
             continue;
         }
@@ -118,6 +155,19 @@ pub fn group(pin_ids: &[&str], windows: &[Toplevel], own_app_id: &str) -> Groups
         }
     }
     g
+}
+
+/// Group `windows` (in the order they opened) for the pins `pin_ids`. Windows of `own_app_id`
+/// (the shell itself, in a preview) are left out.
+#[cfg(test)]
+pub fn group(pin_ids: &[&str], windows: &[Toplevel], own_app_id: &str) -> Groups {
+    group_by(pin_ids, windows, own_app_id, |id, app| matches(id, app))
+}
+
+/// Group `windows` (in the order they opened) for the pinned [`DesktopEntry`] items (honouring
+/// `StartupWMClass` in addition to desktop ids). Windows of `own_app_id` are left out.
+pub fn group_entries(pins: &[DesktopEntry], windows: &[Toplevel], own_app_id: &str) -> Groups {
+    group_by(pins, windows, own_app_id, matches_entry)
 }
 
 /// Apply an update to the list of open windows (kept in opening order).
@@ -262,5 +312,77 @@ mod tests {
         assert_eq!(tooltip("Files", &[w.clone()]), "Files\nwindow 1");
         w.title = "Files".into();
         assert_eq!(tooltip("Files", &[w]), "Files");
+    }
+
+    fn entry_with_wm(id: &str, wm_class: &str) -> DesktopEntry {
+        DesktopEntry {
+            id: id.into(),
+            name: id.into(),
+            startup_wm_class: Some(wm_class.into()),
+            ..DesktopEntry::default()
+        }
+    }
+
+    #[test]
+    fn variant_suffixes_and_startup_wm_class_match() {
+        assert!(matches("org.mozilla.firefox.desktop", "firefox-wayland"));
+        assert!(matches("firefox-wayland.desktop", "org.mozilla.firefox"));
+        assert!(matches("chromium-browser.desktop", "chromium"));
+        assert!(matches("org.chromium.Chromium.desktop", "chromium-browser"));
+        assert!(matches("chromium.desktop", "chromium-browser-wayland"));
+        assert!(!matches("-wayland", "wayland"));
+
+        let spotify = entry_with_wm("com.spotify.Client.desktop", "Spotify");
+        assert!(matches_entry(&spotify, "spotify"));
+        assert!(matches_entry(&spotify, "Spotify"));
+        assert!(!matches_entry(&spotify, "vlc"));
+    }
+
+    #[test]
+    fn entry_for_prefers_exact_id_then_exact_wm_class_then_loose() {
+        let loose = entry("org.mozilla.firefox.desktop");
+        let wm = entry_with_wm("custom-browser.desktop", "Firefox");
+        let exact = entry("firefox.desktop");
+
+        // exact StartupWMClass beats loose desktop-id match
+        let apps = [loose.clone(), wm.clone()];
+        assert_eq!(
+            entry_for(&apps, "firefox").unwrap().id,
+            "custom-browser.desktop"
+        );
+        // exact desktop id beats exact StartupWMClass
+        let apps = [wm, exact];
+        assert_eq!(entry_for(&apps, "firefox").unwrap().id, "firefox.desktop");
+        // loose matching handles -wayland and -browser suffixes
+        let apps = [loose, entry("chromium-browser.desktop")];
+        assert_eq!(
+            entry_for(&apps, "firefox-wayland").unwrap().id,
+            "org.mozilla.firefox.desktop"
+        );
+        assert_eq!(
+            entry_for(&apps, "chromium").unwrap().id,
+            "chromium-browser.desktop"
+        );
+    }
+
+    #[test]
+    fn group_entries_matches_startup_wm_class_and_suffixes() {
+        let pins = [
+            entry_with_wm("com.spotify.Client.desktop", "Spotify"),
+            entry("org.mozilla.firefox.desktop"),
+            entry("chromium-browser.desktop"),
+        ];
+        let windows = [
+            win(1, "spotify", false),
+            win(2, "firefox-wayland", true),
+            win(3, "chromium", false),
+            win(4, "gimp", false),
+            win(5, "io.github.OlehDzhumyk.DeskShell", false),
+        ];
+        let g = group_entries(&pins, &windows, "io.github.OlehDzhumyk.DeskShell");
+        assert_eq!(g.pinned[0], [windows[0].clone()]);
+        assert_eq!(g.pinned[1], [windows[1].clone()]);
+        assert_eq!(g.pinned[2], [windows[2].clone()]);
+        assert_eq!(g.unpinned, vec![("gimp".into(), vec![windows[3].clone()])]);
     }
 }
