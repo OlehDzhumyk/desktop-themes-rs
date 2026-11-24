@@ -10,7 +10,7 @@ StartLimitBurst=5
 [Service]
 Type=dbus
 BusName=io.github.OlehDzhumyk.Desk
-ExecStart=%h/.local/bin/deskd
+ExecStart=@BIN@/deskd
 # A crash (signal, non-zero exit) restarts the daemon; a normal stop (logout, SIGTERM) does not.
 Restart=on-failure
 RestartSec=2
