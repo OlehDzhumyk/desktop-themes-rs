@@ -2,9 +2,9 @@
 //! D-Bus interface `io.github.OlehDzhumyk.Desk.Capture`
 //! (`data/dbus/io.github.OlehDzhumyk.Desk.Capture.xml`).
 //!
-//! A call does its work synchronously: saving is a check and one write (milliseconds for a
-//! 1080p capture); annotating decodes and encodes once and runs only when the user saves in the
-//! editor.
+//! The PNG work (decode, scrub, annotate, encode, write) runs on its own thread through
+//! [`unblock`], so the zbus executor keeps answering other calls meanwhile. The `Capture` lock is
+//! held only to copy the settings, never across that work.
 
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -13,6 +13,7 @@ use zbus::fdo;
 use zbus::message::Header;
 
 use super::{Capture, CaptureError, local_stamp};
+use crate::ocr::service::unblock;
 use crate::trust::Gate;
 
 pub type Shared = Arc<Mutex<Capture>>;
@@ -36,6 +37,18 @@ fn to_fdo(e: CaptureError) -> fdo::Error {
     }
 }
 
+/// Runs `f` on a copy of the engine, off the lock and off the bus executor.
+async fn off_executor<T: Send + 'static>(
+    engine: &Shared,
+    f: impl FnOnce(Capture) -> Result<T, CaptureError> + Send + 'static,
+) -> fdo::Result<T> {
+    let cap = lock(engine).clone();
+    unblock(move || f(cap))
+        .await
+        .ok_or_else(|| fdo::Error::Failed("internal error of the capture engine".into()))?
+        .map_err(to_fdo)
+}
+
 fn path_text(p: PathBuf) -> fdo::Result<String> {
     p.into_os_string()
         .into_string()
@@ -53,9 +66,7 @@ impl CaptureIface {
     ) -> fdo::Result<String> {
         self.gate.check(conn, Some(&hdr)).await?;
         let stamp = local_stamp();
-        let path = lock(&self.engine)
-            .save(&png_bytes, &stamp)
-            .map_err(to_fdo)?;
+        let path = off_executor(&self.engine, move |c| c.save(&png_bytes, &stamp)).await?;
         path_text(path)
     }
 
@@ -68,9 +79,8 @@ impl CaptureIface {
         #[zbus(connection)] conn: &zbus::Connection,
     ) -> fdo::Result<String> {
         self.gate.check(conn, Some(&hdr)).await?;
-        let saved = lock(&self.engine)
-            .annotate(&path, &annotations_json)
-            .map_err(to_fdo)?;
+        let saved =
+            off_executor(&self.engine, move |c| c.annotate(&path, &annotations_json)).await?;
         path_text(saved)
     }
 }

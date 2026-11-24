@@ -101,6 +101,9 @@ pub fn local_stamp() -> Stamp {
     }
 }
 
+/// Cheap to clone (settings and folders only): a call clones it under the lock and does its PNG
+/// work on the clone, off the lock and off the bus executor.
+#[derive(Clone)]
 pub struct Capture {
     cfg: Config,
     dirs: Dirs,
