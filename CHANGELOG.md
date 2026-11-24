@@ -21,6 +21,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Optional Windows 11 Wayland session on labwc: `data/labwc/windows11/` (labwc `rc.xml` with
+  Windows 11 key bindings, cascade placement and edge snapping; the Fluent dark `desk-win11`
+  window theme; `autostart` for the wallpaper, `deskd` and `desk-shell`), the launcher
+  `data/labwc/desk-win11-session`, the session entry `data/labwc/desk-win11.desktop` and the
+  guide [docs/wayland-session.md](docs/wayland-session.md). GNOME stays installed.
 - macOS skin: the focused application's name, in bold, right after the logo menu, with a small
   menu (New Window, Hide, Hide Others, Quit); it follows the focus and is removed with the logo menu.
 - macOS skin: dock icon magnification on dash-to-dock (1.45× under the pointer, cosine falloff over

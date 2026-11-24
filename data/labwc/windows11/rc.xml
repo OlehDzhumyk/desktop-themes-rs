@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-License-Identifier: GPL-3.0-or-later
+
+  labwc configuration of the "Desk (Windows 11 / labwc)" session (labwc 0.8 or later).
+  Window behavior and key bindings follow Windows 11 and themes/windows11/behavior.dconf.
+
+  The session launcher (desk-win11-session) copies this file into the session config
+  directory (default: ~/.config/desk-labwc) on each login. Do not edit the copy there:
+  put your own complete configuration in rc.local.xml in that directory, and the launcher
+  uses it instead of this file.
+
+  Commands of the session:
+    desk-shell   the Windows 11 panel and Start menu (layer-shell client)
+    deskd        the desktop features daemon (clipboard history, search, ...)
+    swaylock     the lock screen
+    grim, slurp  the region screenshot (see the "capture" helper)
+-->
+<labwc_config>
+
+  <core>
+    <!-- No gap around maximized and snapped windows, as on Windows 11 -->
+    <gap>0</gap>
+  </core>
+
+  <!-- New windows open in a cascade, offset from the last one -->
+  <placement>
+    <policy>cascade</policy>
+  </placement>
+
+  <theme>
+    <!-- ~/.local/share/themes/desk-win11/openbox-3/themerc (installed by the launcher) -->
+    <name>desk-win11</name>
+    <!-- Rounded top corners, 8 px as on Windows 11 -->
+    <cornerRadius>8</cornerRadius>
+    <keepBorder>yes</keepBorder>
+    <dropShadows>yes</dropShadows>
+    <titlebar>
+      <!-- Application icon on the left, minimize, maximize and close on the right -->
+      <layout>icon:iconify,max,close</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
+    <font place="ActiveWindow">
+      <name>Inter</name>
+      <size>10</size>
+    </font>
+    <font place="InactiveWindow">
+      <name>Inter</name>
+      <size>10</size>
+    </font>
+    <font place="MenuItem">
+      <name>Inter</name>
+      <size>10</size>
+    </font>
+    <font place="OnScreenDisplay">
+      <name>Inter</name>
+      <size>10</size>
+    </font>
+  </theme>
+
+  <!-- Window switcher (Alt+Tab): a centered list with the window titles -->
+  <windowSwitcher show="yes" preview="yes" outlines="yes" allWorkspaces="no">
+    <fields>
+      <field content="icon" width="5%"/>
+      <field content="title" width="95%"/>
+    </fields>
+  </windowSwitcher>
+
+  <!-- Snap layouts: drag a window to a screen edge to tile it, to the top to maximize it -->
+  <snapping>
+    <range>10</range>
+    <overlay>
+      <enabled>yes</enabled>
+      <delay inner="300" outer="300"/>
+    </overlay>
+    <topMaximize>yes</topMaximize>
+    <notifyClient>always</notifyClient>
+  </snapping>
+
+  <!-- Snap to the edges of other windows and of the screen when you move a window -->
+  <resistance>
+    <screenEdgeStrength>20</screenEdgeStrength>
+    <windowEdgeStrength>20</windowEdgeStrength>
+  </resistance>
+
+  <!-- One desktop, as on a default Windows 11 install -->
+  <desktops number="1"/>
+
+  <focus>
+    <followMouse>no</followMouse>
+    <raiseOnFocus>no</raiseOnFocus>
+  </focus>
+
+  <keyboard>
+    <numlock>on</numlock>
+    <repeatRate>25</repeatRate>
+    <repeatDelay>600</repeatDelay>
+
+    <!-- Start menu: tap the Windows key (on release, so Super shortcuts still work) -->
+    <keybind key="Super_L" onRelease="yes">
+      <action name="Execute" command="desk-shell --toggle-start"/>
+    </keybind>
+    <!-- Win+S opens search, Win+A the quick settings; both live in the Start menu here -->
+    <keybind key="W-s">
+      <action name="Execute" command="desk-shell --toggle-start"/>
+    </keybind>
+    <keybind key="W-a">
+      <action name="Execute" command="desk-shell --toggle-start"/>
+    </keybind>
+
+    <!-- Alt+Tab and Alt+Shift+Tab: switch windows -->
+    <keybind key="A-Tab">
+      <action name="NextWindow"/>
+    </keybind>
+    <keybind key="A-S-Tab">
+      <action name="PreviousWindow"/>
+    </keybind>
+
+    <!-- Win+D: show the desktop, press again to restore the windows -->
+    <keybind key="W-d">
+      <action name="ToggleShowDesktop"/>
+    </keybind>
+
+    <!-- Win+E: Files -->
+    <keybind key="W-e">
+      <action name="Execute" command="sh -c 'nautilus --new-window || xdg-open &quot;$HOME&quot;'"/>
+    </keybind>
+
+    <!-- Win+L: lock the screen -->
+    <keybind key="W-l">
+      <action name="Execute" command="swaylock -f"/>
+    </keybind>
+
+    <!-- Win+Arrow: snap left or right, maximize or restore, minimize -->
+    <keybind key="W-Left">
+      <action name="SnapToEdge" direction="left"/>
+    </keybind>
+    <keybind key="W-Right">
+      <action name="SnapToEdge" direction="right"/>
+    </keybind>
+    <keybind key="W-Up">
+      <action name="ToggleMaximize"/>
+    </keybind>
+    <keybind key="W-Down">
+      <action name="Iconify"/>
+    </keybind>
+
+    <!-- Win+Shift+S and Print: region screenshot, then the capture editor -->
+    <keybind key="W-S-s">
+      <action name="Execute" command="sh -c 'exec &quot;$DESK_LABWC_DIR/capture&quot;'"/>
+    </keybind>
+    <keybind key="Print">
+      <action name="Execute" command="sh -c 'exec &quot;$DESK_LABWC_DIR/capture&quot;'"/>
+    </keybind>
+
+    <!-- Ctrl+Shift+Esc: system monitor (Task Manager) -->
+    <keybind key="C-S-Escape">
+      <action name="Execute" command="gnome-system-monitor"/>
+    </keybind>
+
+    <!-- Alt+F4: close the active window -->
+    <keybind key="A-F4">
+      <action name="Close"/>
+    </keybind>
+
+    <!-- Alt+Space: the window menu -->
+    <keybind key="A-space">
+      <action name="ShowMenu" menu="client-menu" atCursor="no"/>
+    </keybind>
+
+    <!-- Volume and brightness keys -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute" command="wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"/>
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"/>
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute" command="wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"/>
+    </keybind>
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute" command="brightnessctl set +5%"/>
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute" command="brightnessctl set 5%-"/>
+    </keybind>
+  </keyboard>
+
+  <!--
+    Mouse: the labwc defaults (double-click on the titlebar toggles maximize, drag moves,
+    Super and drag moves or resizes, right-click on the titlebar shows the window menu).
+  -->
+  <mouse>
+    <default/>
+  </mouse>
+
+  <libinput>
+    <!-- Touchpad: tap to click, traditional scroll direction, click areas (behavior.dconf) -->
+    <device category="touchpad">
+      <naturalScroll>no</naturalScroll>
+      <tap>yes</tap>
+      <clickMethod>buttonAreas</clickMethod>
+      <disableWhileTyping>yes</disableWhileTyping>
+    </device>
+    <device category="non-touch">
+      <naturalScroll>no</naturalScroll>
+    </device>
+  </libinput>
+
+</labwc_config>

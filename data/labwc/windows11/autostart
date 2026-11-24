@@ -1,0 +1,44 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# labwc autostart of the "Desk (Windows 11 / labwc)" session.
+# labwc runs this file once at startup, after the Wayland socket is ready, because it is in the
+# config directory given with "labwc -C" (desk-win11-session sets that directory up).
+# Every long-running program goes to the background; this file itself must return.
+
+# Give the Wayland session to D-Bus and systemd user services (portals, deskd, notifications).
+if command -v dbus-update-activation-environment >/dev/null 2>&1; then
+  dbus-update-activation-environment --systemd \
+    WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DESK_LABWC_DIR >/dev/null 2>&1
+fi
+
+# Wallpaper: the Windows 11 dark "bloom" (scripts/generate-assets.sh), else a solid color.
+if command -v swaybg >/dev/null 2>&1; then
+  wallpaper=
+  for f in \
+    "${XDG_DATA_HOME:-$HOME/.local/share}/desktop-themes/themes/windows11/wallpapers/bloom-dark.png" \
+    "${XDG_DATA_HOME:-$HOME/.local/share}/backgrounds/windows11/bloom-dark.png"; do
+    if [ -r "$f" ]; then wallpaper=$f; break; fi
+  done
+  if [ -n "$wallpaper" ]; then
+    swaybg -m fill -i "$wallpaper" >/dev/null 2>&1 &
+  else
+    swaybg -c '#0b192c' >/dev/null 2>&1 &
+  fi
+fi
+
+# deskd: as a systemd user service when the user manager runs, else directly.
+if systemctl --user show-environment >/dev/null 2>&1 && systemctl --user cat deskd.service >/dev/null 2>&1; then
+  systemctl --user start deskd.service
+elif command -v deskd >/dev/null 2>&1; then
+  deskd >/dev/null 2>&1 &
+fi
+
+# The Windows 11 taskbar and Start menu.
+if command -v desk-shell >/dev/null 2>&1; then
+  desk-shell --skin windows11 &
+fi
+
+# Your own additions: an executable autostart.user in the same directory.
+if [ -x "${DESK_LABWC_DIR:-}/autostart.user" ]; then
+  "$DESK_LABWC_DIR/autostart.user" &
+fi

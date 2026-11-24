@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# labwc theme "desk-win11": Windows 11 Fluent dark window decorations.
+# Installed by desk-win11-session as ~/.local/share/themes/desk-win11/openbox-3/themerc.
+# Keys: labwc-theme(5). The 8 px rounded top corners are set in rc.xml (<cornerRadius>),
+# because labwc reads the corner radius from rc.xml, not from the theme.
+#
+# Colors follow the Windows 11 Fluent dark palette (accent: Windows blue #60cdff):
+#   #202020 titlebar (Mica, active)    #2b2b2b titlebar (inactive)
+#   #ffffff title text (active)        #9d9d9d title text (inactive)
+#   #3a3a3a 1 px border                #c42b1c close button hover
+
+# --- geometry ---
+border.width: 1
+padding.width: 8
+padding.height: 8
+titlebar.height: 32
+window.titlebar.padding.width: 0
+window.titlebar.padding.height: 0
+window.button.width: 46
+window.button.height: 32
+window.button.spacing: 0
+window.label.text.justify: left
+
+# --- active window ---
+window.active.border.color: #3a3a3a
+window.active.title.bg.color: #202020
+window.active.label.text.color: #ffffff
+window.active.button.unpressed.image.color: #ffffff
+window.active.button.close.unpressed.image.color: #ffffff
+
+# --- inactive window ---
+window.inactive.border.color: #2e2e2e
+window.inactive.title.bg.color: #2b2b2b
+window.inactive.label.text.color: #9d9d9d
+window.inactive.button.unpressed.image.color: #9d9d9d
+window.inactive.button.close.unpressed.image.color: #9d9d9d
+
+# --- button hover (square, full titlebar height, as on Windows 11) ---
+window.button.hover.bg.shape: rectangle
+window.button.hover.bg.corner-radius: 0
+window.active.button.hover.image.color: #ffffff
+window.active.button.close.hover.image.color: #ffffff
+window.active.button.close.hover.bg.color: #c42b1c
+
+# --- shadows ---
+window.active.shadow.size: 30
+window.inactive.shadow.size: 15
+window.active.shadow.color: #00000066
+window.inactive.shadow.color: #00000040
+
+# --- menus (window menu, root menu) ---
+menu.border.width: 1
+menu.border.color: #3a3a3a
+menu.items.bg.color: #2c2c2c
+menu.items.text.color: #ffffff
+menu.items.active.bg.color: #3d3d3d
+menu.items.active.text.color: #ffffff
+menu.items.padding.x: 12
+menu.items.padding.y: 6
+menu.separator.color: #3a3a3a
+menu.title.bg.color: #2c2c2c
+menu.title.text.color: #ffffff
+
+# --- on-screen display (Alt+Tab switcher) ---
+osd.bg.color: #2c2c2c
+osd.border.color: #3a3a3a
+osd.border.width: 1
+osd.label.text.color: #ffffff
+osd.window-switcher.item.active.bg.color: #3d3d3d
+osd.window-switcher.item.active.border.color: #60cdff
+osd.window-switcher.item.active.border.width: 2
+
+# --- snap overlay (preview of the snapped area) ---
+snapping.overlay.region.bg.color: #60cdff33
+snapping.overlay.edge.bg.color: #60cdff33
+snapping.overlay.region.border.color: #60cdff
+snapping.overlay.edge.border.color: #60cdff

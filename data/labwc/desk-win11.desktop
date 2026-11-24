@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Wayland session entry of "Desk (Windows 11 / labwc)". Install it into
+# /usr/local/share/wayland-sessions/ (docs/wayland-session.md).
+[Desktop Entry]
+Name=Desk (Windows 11 / labwc)
+Comment=labwc with the Windows 11 taskbar and Start menu of desktop-themes-rs
+Exec=desk-win11-session
+TryExec=labwc
+Type=Application
+DesktopNames=labwc;wlroots
+Keywords=wayland;labwc;windows11;

@@ -1,0 +1,22 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Win+Shift+S in the labwc session: select a region, save it, copy it, open the capture editor.
+# Needs grim and slurp; wl-copy (wl-clipboard) and "themes capture-edit" are used when present.
+set -eu
+command -v grim >/dev/null 2>&1 || exit 1
+command -v slurp >/dev/null 2>&1 || exit 1
+
+dir=${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots
+mkdir -p "$dir"
+file="$dir/Screenshot-$(date +%Y-%m-%d-%H%M%S).png"
+
+# slurp exits non-zero when the selection is cancelled (Escape): do nothing then.
+region=$(slurp) || exit 0
+grim -g "$region" "$file"
+
+if command -v wl-copy >/dev/null 2>&1; then
+  wl-copy --type image/png < "$file"
+fi
+if command -v themes >/dev/null 2>&1; then
+  exec themes capture-edit "$file"
+fi
