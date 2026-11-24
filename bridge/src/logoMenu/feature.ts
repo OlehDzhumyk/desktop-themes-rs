@@ -9,6 +9,7 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {_} from '../i18n.js';
+import {AppMenuButton} from './appMenu.js';
 import {
     forceQuitFocused,
     lockScreen,
@@ -27,6 +28,7 @@ export class LogoMenuFeature {
     private _settings: Gio.Settings;
     private _skin: string;
     private _button: PanelMenu.Button | null = null;
+    private _appMenu: AppMenuButton | null = null;
     private _savedActivitiesVisible: boolean | null = null;
     private _enabledId = 0;
     private _hideId = 0;
@@ -84,9 +86,15 @@ export class LogoMenuFeature {
 
         Main.panel.addToStatusArea(ROLE, btn, 0, 'left');
         this._button = btn;
+        // the focused application's name goes right after the logo
+        const box = btn.container.get_parent();
+        const index = box ? box.get_children().indexOf(btn.container) : 0;
+        this._appMenu = new AppMenuButton(index + 1);
     }
 
     private _detach(): void {
+        this._appMenu?.destroy();
+        this._appMenu = null;
         if (this._button) {
             this._button.destroy();
             this._button = null;

@@ -213,6 +213,11 @@
 
 /* ------------------------------------------------------------------ logo menu (macos top bar) */
 .desk-logo-menu-icon { icon-size: 16px; }
+/* focused application's name after the logo: bold like a menu bar title; the colour comes from the
+   panel (shell theme), so it follows light, dark and high contrast; a focus ring for the keyboard */
+.desk-app-menu-label { font-weight: bold; padding: 0 4px; }
+.desk-app-menu:focus .desk-app-menu-label { text-decoration: underline; }
+.desk-app-menu-popup { min-width: 12em; }
 
 /* ------------------------------------------------------------------ accent picker (quick settings «Theme») */
 /* macos: GNOME's named accent colours (libadwaita 1.6+ values) and a rainbow «From wallpaper» dot */
