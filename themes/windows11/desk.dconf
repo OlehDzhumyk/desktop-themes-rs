@@ -41,3 +41,7 @@ hover-picker=true
 # Shortcut guide: hold Super to show active shortcuts (PowerToys Shortcut Guide).
 [io/github/OlehDzhumyk/Desk/shortcut-guide]
 enabled=true
+
+# Quick Look: Ctrl+Space, as PowerToys Peek.
+[io/github/OlehDzhumyk/Desk/quick-look]
+quick-look-shortcut=['<Control>space']

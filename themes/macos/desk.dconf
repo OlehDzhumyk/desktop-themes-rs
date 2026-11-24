@@ -35,3 +35,7 @@ layout-picker-shortcut=['<Control><Super>Up']
 # Shortcut guide: hold Super (Cmd) to show active shortcuts in a centred cheat sheet.
 [io/github/OlehDzhumyk/Desk/shortcut-guide]
 enabled=true
+
+# Quick Look: Super+Y (Cmd+Y in Finder). Plain Space is not bound: shell keybindings are global.
+[io/github/OlehDzhumyk/Desk/quick-look]
+quick-look-shortcut=['<Super>y']

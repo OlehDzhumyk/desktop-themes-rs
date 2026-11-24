@@ -42,6 +42,7 @@ pub static FEATURES: &[&Feature] = &[
     &crate::ocr::FEATURE_OCR,
     &crate::capture::FEATURE_CAPTURE,
     &crate::layouts::FEATURE_LAYOUTS,
+    &crate::quick_look::FEATURE_QUICK_LOOK,
     &crate::mixer::FEATURE_MIXER,
     &crate::osd::FEATURE_OSD,
     &crate::appearance::FEATURE_APPEARANCE,
@@ -127,6 +128,7 @@ pub static DESK: Schema = Schema {
         ("ocr", crate::ocr::OCR_SCHEMA),
         ("capture", crate::capture::CAPTURE_SCHEMA),
         ("layouts", crate::layouts::LAYOUTS_SCHEMA),
+        ("quick-look", crate::quick_look::QUICK_LOOK_SCHEMA),
         ("shortcuts", SHORTCUTS_SCHEMA),
         ("mixer", crate::mixer::MIXER_SCHEMA),
         ("osd", crate::osd::OSD_SCHEMA),
@@ -383,6 +385,7 @@ pub static SHORTCUT_KEYS: Schema = Schema {
         &crate::layouts::SC_LAYOUT_PICKER,
         &crate::layouts::SC_ALWAYS_ON_TOP,
         &crate::shortcut_guide::SC_SHORTCUT_GUIDE_TOGGLE,
+        &crate::quick_look::SC_QUICK_LOOK_TOGGLE,
     ],
     children: &[],
 };
@@ -401,6 +404,7 @@ pub static SHORTCUTS: &[&Shortcut] = &[
     &crate::layouts::SHORTCUT_LAYOUT_PICKER,
     &crate::layouts::SHORTCUT_ALWAYS_ON_TOP,
     &crate::shortcut_guide::SHORTCUT_SHORTCUT_GUIDE,
+    &crate::quick_look::SHORTCUT_QUICK_LOOK,
 ];
 
 /// All schemas, parents first (the order of the generated XML).
@@ -412,6 +416,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &crate::ocr::OCR,
     &crate::capture::CAPTURE,
     &crate::layouts::LAYOUTS,
+    &crate::quick_look::QUICK_LOOK,
     &SHORTCUT_KEYS,
     &crate::mixer::MIXER,
     &crate::osd::OSD,
@@ -543,6 +548,7 @@ pub static PAGE_SHORTCUTS: Page = Page {
             Item::Shortcut(&crate::layouts::SHORTCUT_LAYOUT_PICKER),
             Item::Shortcut(&crate::layouts::SHORTCUT_ALWAYS_ON_TOP),
             Item::Shortcut(&crate::shortcut_guide::SHORTCUT_SHORTCUT_GUIDE),
+            Item::Shortcut(&crate::quick_look::SHORTCUT_QUICK_LOOK),
         ],
     }],
 };
@@ -571,6 +577,7 @@ pub static PAGES: &[&Page] = &[
     &crate::ocr::PAGE_OCR,
     &crate::capture::PAGE_CAPTURE,
     &crate::layouts::PAGE_LAYOUTS,
+    &crate::quick_look::PAGE_QUICK_LOOK,
     &crate::mixer::PAGE_MIXER,
     &crate::osd::PAGE_OSD,
     &crate::appearance::PAGE_APPEARANCE,

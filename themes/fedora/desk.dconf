@@ -31,3 +31,7 @@ capture-record-shortcut=@as []
 gap-outer=uint32 0
 gap-inner=uint32 0
 hover-picker=false
+
+# Quick Look: no shortcut of our own; the Space key of Files (Sushi) stays.
+[io/github/OlehDzhumyk/Desk/quick-look]
+quick-look-shortcut=@as []
