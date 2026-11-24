@@ -288,12 +288,30 @@ enum Pipe {
     Stderr(Vec<u8>),
 }
 
-fn drain(mut pipe: impl Read + Send + 'static, wrap: fn(Vec<u8>) -> Pipe, tx: mpsc::Sender<Pipe>) {
+/// At most this much of the child's stdout is kept (recognized text of a whole screen is a few
+/// KiB; a runaway or hostile engine must not grow deskd's memory without bound).
+const MAX_OCR_STDOUT_BYTES: u64 = 4 << 20;
+/// At most this much of its stderr is kept (only shown in error messages).
+const MAX_OCR_STDERR_BYTES: u64 = 64 << 10;
+
+/// Reads at most `limit` bytes of `pipe` and discards the rest up to end of file, so the child
+/// never blocks on a full pipe and deskd keeps a bounded buffer. A read error keeps what was
+/// read so far; the exit status tells success from failure.
+fn read_bounded(pipe: &mut impl Read, limit: u64) -> Vec<u8> {
+    let mut buf = Vec::new();
+    let _ = pipe.by_ref().take(limit).read_to_end(&mut buf);
+    let _ = std::io::copy(pipe, &mut std::io::sink());
+    buf
+}
+
+fn drain(
+    mut pipe: impl Read + Send + 'static,
+    limit: u64,
+    wrap: fn(Vec<u8>) -> Pipe,
+    tx: mpsc::Sender<Pipe>,
+) {
     std::thread::spawn(move || {
-        let mut buf = Vec::new();
-        // a read error keeps what was read so far; the exit status tells success from failure
-        let _ = pipe.read_to_end(&mut buf);
-        let _ = tx.send(wrap(buf));
+        let _ = tx.send(wrap(read_bounded(&mut pipe, limit)));
     });
 }
 
@@ -382,10 +400,10 @@ fn run_isolated(
 
     let (tx, rx) = mpsc::channel();
     if let Some(out) = child.stdout.take() {
-        drain(out, Pipe::Stdout, tx.clone());
+        drain(out, MAX_OCR_STDOUT_BYTES, Pipe::Stdout, tx.clone());
     }
     if let Some(err) = child.stderr.take() {
-        drain(err, Pipe::Stderr, tx.clone());
+        drain(err, MAX_OCR_STDERR_BYTES, Pipe::Stderr, tx.clone());
     }
     drop(tx);
 
@@ -483,6 +501,17 @@ mod tests {
     use super::testutil::{Sandbox, s, spawn_lock};
     use super::*;
     use std::os::unix::fs::PermissionsExt;
+
+    /// A pipe longer than the limit gives the first `limit` bytes and is read to its end (the
+    /// child is never left blocked on a full pipe).
+    #[test]
+    fn read_bounded_keeps_the_head_and_drains_the_rest() {
+        let mut big = std::io::Cursor::new(vec![b'x'; 10_000]);
+        assert_eq!(read_bounded(&mut big, 16), vec![b'x'; 16]);
+        assert_eq!(big.position(), 10_000, "the rest was drained");
+        let mut small = std::io::Cursor::new(b"text".to_vec());
+        assert_eq!(read_bounded(&mut small, 16), b"text");
+    }
 
     // ----- clean_text -----
 
