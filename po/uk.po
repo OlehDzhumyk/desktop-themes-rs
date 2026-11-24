@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 00:11+0000\n"
+"POT-Creation-Date: 2026-11-24 00:10+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -16,47 +16,17 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: bridge/src/accentPicker.ts:26
-msgid "Blue"
-msgstr "Синій"
-
 #: bridge/src/accentPicker.ts:27
 msgid "Teal"
 msgstr "Бірюзовий"
-
-#: bridge/src/accentPicker.ts:28
-msgid "Green"
-msgstr "Зелений"
-
-#: bridge/src/accentPicker.ts:29
-msgid "Yellow"
-msgstr "Жовтий"
-
-#: bridge/src/accentPicker.ts:30
-msgid "Orange"
-msgstr "Помаранчевий"
-
-#: bridge/src/accentPicker.ts:31
-msgid "Red"
-msgstr "Червоний"
 
 #: bridge/src/accentPicker.ts:32
 msgid "Pink"
 msgstr "Рожевий"
 
-#: bridge/src/accentPicker.ts:33
-msgid "Purple"
-msgstr "Фіолетовий"
-
 #: bridge/src/accentPicker.ts:34
 msgid "Slate"
 msgstr "Сланцевий"
-
-#: bridge/src/accentPicker.ts:81 bridge/src/accentPicker.ts:87
-#: bridge/src/accentPicker.ts:135 bridge/src/accentPicker.ts:145
-#: bridge/src/accentPicker.ts:146
-msgid "Accent colour"
-msgstr "Колір акценту"
 
 #: bridge/src/accentPicker.ts:123
 msgid "From wallpaper"
@@ -98,7 +68,9 @@ msgstr "Виберіть ділянку для знімка"
 msgid ""
 "Drag over the region to capture it. Arrow keys and Enter select with the "
 "keyboard; Esc cancels."
-msgstr "Протягніть над ділянкою, щоб зробити знімок. Стрілки та Enter вибирають клавіатурою; Esc скасовує."
+msgstr ""
+"Протягніть над ділянкою, щоб зробити знімок. Стрілки та Enter вибирають "
+"клавіатурою; Esc скасовує."
 
 #: bridge/src/capture/feature.ts:288
 msgid "Could not open the editor: {error}"
@@ -116,19 +88,19 @@ msgstr "Знімок збережено"
 msgid "Screenshot saved. Open it in the editor"
 msgstr "Знімок збережено. Відкрити його в редакторі"
 
-#: bridge/src/capture/recorder.ts:67
+#: bridge/src/capture/recorder.ts:69
 msgid "The screen recording stopped because of an error"
 msgstr "Запис екрана зупинився через помилку"
 
-#: bridge/src/capture/recorder.ts:92
+#: bridge/src/capture/recorder.ts:94
 msgid "GNOME refused to start the recording"
 msgstr "GNOME не дозволив почати запис"
 
-#: bridge/src/capture/recorder.ts:129
+#: bridge/src/capture/recorder.ts:131
 msgid "The screen recording could not be saved"
 msgstr "Не вдалося зберегти запис екрана"
 
-#: bridge/src/capture/recorder.ts:147
+#: bridge/src/capture/recorder.ts:149
 msgid "Stop the screen recording"
 msgstr "Зупинити запис екрана"
 
@@ -3479,6 +3451,94 @@ msgstr "неправильна тривалість «{value}»"
 #, rust-format
 msgid "invalid time “{value}”"
 msgstr "неправильний час «{value}»"
+
+#: crates/themes/src/gui/capture_editor/state.rs:45
+msgid "Redact (solid)"
+msgstr "Приховати (суцільно)"
+
+#: crates/themes/src/gui/capture_editor/state.rs:46
+msgid "Redact (pixelate)"
+msgstr "Приховати (пікселізувати)"
+
+#: crates/themes/src/gui/capture_editor/state.rs:47
+msgid "Pen"
+msgstr "Перо"
+
+#: crates/themes/src/gui/capture_editor/state.rs:48
+msgid "Highlighter"
+msgstr "Маркер"
+
+#: crates/themes/src/gui/capture_editor/state.rs:49
+msgid "Arrow"
+msgstr "Стрілка"
+
+#: crates/themes/src/gui/capture_editor/state.rs:50
+msgid "Line"
+msgstr "Лінія"
+
+#: crates/themes/src/gui/capture_editor/state.rs:51
+msgid "Rectangle"
+msgstr "Прямокутник"
+
+#: crates/themes/src/gui/capture_editor/state.rs:52
+msgid "Ellipse"
+msgstr "Еліпс"
+
+#: crates/themes/src/gui/capture_editor/state.rs:53
+msgid "Crop"
+msgstr "Обрізати"
+
+#: crates/themes/src/gui/capture_editor/state.rs:111
+msgid "Accent colour"
+msgstr "Колір акценту"
+
+#: crates/themes/src/gui/capture_editor/state.rs:112
+msgid "Red"
+msgstr "Червоний"
+
+#: crates/themes/src/gui/capture_editor/state.rs:113
+msgid "Orange"
+msgstr "Помаранчевий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:114
+msgid "Yellow"
+msgstr "Жовтий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:115
+msgid "Green"
+msgstr "Зелений"
+
+#: crates/themes/src/gui/capture_editor/state.rs:116
+msgid "Blue"
+msgstr "Синій"
+
+#: crates/themes/src/gui/capture_editor/state.rs:117
+msgid "Purple"
+msgstr "Фіолетовий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:118
+msgid "Black"
+msgstr "Чорний"
+
+#: crates/themes/src/gui/capture_editor/state.rs:119
+msgid "White"
+msgstr "Білий"
+
+#: crates/themes/src/gui/capture_editor/state.rs:128
+msgid "Thin"
+msgstr "Тонка"
+
+#: crates/themes/src/gui/capture_editor/state.rs:129
+msgid "Medium"
+msgstr "Середня"
+
+#: crates/themes/src/gui/capture_editor/state.rs:130
+msgid "Thick"
+msgstr "Товста"
+
+#: crates/themes/src/gui/capture_editor/state.rs:131
+msgid "Extra thick"
+msgstr "Дуже товста"
 
 #: crates/themes/src/gui/card.rs:77 crates/themes/src/gui/card.rs:261
 msgid "experimental"

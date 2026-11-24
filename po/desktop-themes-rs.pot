@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 00:11+0000\n"
+"POT-Creation-Date: 2026-11-24 00:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2631,6 +2631,94 @@ msgstr ""
 msgid "invalid time “{value}”"
 msgstr ""
 
+#: crates/themes/src/gui/capture_editor/state.rs:45
+msgid "Redact (solid)"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:46
+msgid "Redact (pixelate)"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:47
+msgid "Pen"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:48
+msgid "Highlighter"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:49
+msgid "Arrow"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:50
+msgid "Line"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:51
+msgid "Rectangle"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:52
+msgid "Ellipse"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:53
+msgid "Crop"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:111
+msgid "Accent colour"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:112
+msgid "Red"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:113
+msgid "Orange"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:114
+msgid "Yellow"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:115
+msgid "Green"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:116
+msgid "Blue"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:117
+msgid "Purple"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:118
+msgid "Black"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:119
+msgid "White"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:128
+msgid "Thin"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:129
+msgid "Medium"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:130
+msgid "Thick"
+msgstr ""
+
+#: crates/themes/src/gui/capture_editor/state.rs:131
+msgid "Extra thick"
+msgstr ""
+
 #: crates/themes/src/gui/card.rs:77 crates/themes/src/gui/card.rs:261
 msgid "experimental"
 msgstr ""
@@ -3691,46 +3779,16 @@ msgstr ""
 msgid "{ms} ms. To apply: themes apply {id} --only look,apps"
 msgstr ""
 
-#: bridge/src/accentPicker.ts:26
-msgid "Blue"
-msgstr ""
-
 #: bridge/src/accentPicker.ts:27
 msgid "Teal"
-msgstr ""
-
-#: bridge/src/accentPicker.ts:28
-msgid "Green"
-msgstr ""
-
-#: bridge/src/accentPicker.ts:29
-msgid "Yellow"
-msgstr ""
-
-#: bridge/src/accentPicker.ts:30
-msgid "Orange"
-msgstr ""
-
-#: bridge/src/accentPicker.ts:31
-msgid "Red"
 msgstr ""
 
 #: bridge/src/accentPicker.ts:32
 msgid "Pink"
 msgstr ""
 
-#: bridge/src/accentPicker.ts:33
-msgid "Purple"
-msgstr ""
-
 #: bridge/src/accentPicker.ts:34
 msgid "Slate"
-msgstr ""
-
-#: bridge/src/accentPicker.ts:81 bridge/src/accentPicker.ts:87
-#: bridge/src/accentPicker.ts:135 bridge/src/accentPicker.ts:145
-#: bridge/src/accentPicker.ts:146
-msgid "Accent colour"
 msgstr ""
 
 #: bridge/src/accentPicker.ts:123
@@ -3791,19 +3849,19 @@ msgstr ""
 msgid "Screenshot saved. Open it in the editor"
 msgstr ""
 
-#: bridge/src/capture/recorder.ts:67
+#: bridge/src/capture/recorder.ts:69
 msgid "The screen recording stopped because of an error"
 msgstr ""
 
-#: bridge/src/capture/recorder.ts:92
+#: bridge/src/capture/recorder.ts:94
 msgid "GNOME refused to start the recording"
 msgstr ""
 
-#: bridge/src/capture/recorder.ts:129
+#: bridge/src/capture/recorder.ts:131
 msgid "The screen recording could not be saved"
 msgstr ""
 
-#: bridge/src/capture/recorder.ts:147
+#: bridge/src/capture/recorder.ts:149
 msgid "Stop the screen recording"
 msgstr ""
 

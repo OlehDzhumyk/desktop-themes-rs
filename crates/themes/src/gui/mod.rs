@@ -2,6 +2,7 @@
 //! Програма «Теми» (GTK 4 + libadwaita).
 
 mod a11y;
+pub mod capture_editor;
 mod card;
 mod credits;
 mod features;
