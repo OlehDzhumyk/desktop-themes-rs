@@ -8,8 +8,31 @@ discoverable.
 
 ## Status
 
-**Planned** (stage 4). Origin badge: *From Windows, adapted for macOS style* (Windows: PowerToys Shortcut Guide; macOS has
-no system-wide guide, apps show their own, and the Cmd-hold cheat sheet exists only in third-party tools).
+**Implemented** (stage 4). Origin badge: *From Windows, adapted for macOS style* (Windows: PowerToys Shortcut Guide;
+macOS has no system-wide guide, apps show their own, and the Cmd-hold cheat sheet exists only in third-party tools).
+
+How the hold is detected (mutter gives key events to the focused client before the stage, so a stage event handler
+never sees them): the bridge grabs `Super_L` / `Super_R` as accelerators, which fire on press because mutter does not
+consume the overlay key's press; another shortcut is seen through the shell's `filter-keybinding` signal before it runs;
+the release of `Super` alone asks `filter-keybinding` about the overlay combo just before `overlay-key` is emitted, and
+the bridge answers «filtered» only when the guide was shown. No shell function is patched.
+
+Remaining gaps:
+
+* **Gap (focus while held):** once shown by the hold, the overlay holds a grab in `Shell.ActionMode.NORMAL` so it sees
+  the release of `Super` (mutter shortcuts still run first); the focused window loses the keyboard while the guide is
+  visible, unlike the «non-modal» wording below.
+* **Gap (unbound keys before the delay):** a key with no shortcut pressed together with `Super` goes to the focused
+  window and is not reported to the bridge. When the delay ends the bridge checks the modifier state once: the guide
+  opens only while `Super` alone is still held. Holding on after `Super`+<unbound key> or a `Super`+click still opens it.
+* **Gap (non-US keycap names):** `bridge/src/shortcutGuide/reader.ts` maps key symbols such as `Above_Tab` through a
+  static table rather than querying the active XKB keymap for the current layout's glyph.
+* **Gap (owner of GNOME keys):** only Desk feature shortcuts know their source (`Desk.Shortcuts` override); rows read from
+  GNOME schemas are always labelled «theme».
+* **Gap (headless E2E tests):** automated tests in `tests/e2e/` for AC-GUIDE-01..08 (in particular that the overview
+  stays closed on the `Super` release across Shell updates) are not written yet; the trigger was checked against the
+  mutter and GNOME Shell sources only.
+* Per-application shortcuts (reading menus of the focused app) are out of scope.
 
 ## Reference behaviour
 
@@ -57,10 +80,12 @@ Fade in <= 120 ms after the delay; instant with reduced motion.
 Registry unreadable: the overlay shows the keys it could read plus «Деякі скорочення недоступні». No custom shortcuts:
 the group is hidden.
 
-## Settings (proposed, `io.github.OlehDzhumyk.Desk.ShortcutGuide`)
+## Settings (`io.github.OlehDzhumyk.Desk.ShortcutGuide`)
 
-`enabled` (true in windows11/macos, false in default), `hold-delay` (uint 400..2000 ms, 900), `sticky` (bool, false),
-`show-owner` (bool, true).
+`enabled` (bool, default `false`; set to `true` by `themes/windows11/desk.dconf` and `themes/macos/desk.dconf`),
+`hold-delay` (uint 400..2000 ms, step 50, default 900), `sticky` (bool, default `false`), `show-owner` (bool, default
+`true`), `shortcut-guide-shortcut` (accel, default `['<Control><Shift><Super>slash']`; user override
+`shortcut-guide-toggle` in `io.github.OlehDzhumyk.Desk.Shortcuts`).
 
 ## Privacy & security
 
