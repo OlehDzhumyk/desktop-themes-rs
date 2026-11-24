@@ -160,18 +160,18 @@ pub fn score_folded(query: &str, candidate: &str) -> Option<u32> {
         return None;
     }
     let qlen = query.chars().count();
-    let clen = candidate.chars().count();
+    let cand_len = candidate.chars().count();
     if candidate == query {
         return Some(EXACT);
     }
     if candidate.starts_with(query) {
-        return Some(PREFIX + closeness(qlen, clen));
+        return Some(PREFIX + closeness(qlen, cand_len));
     }
     if word_prefix(query, candidate) {
-        return Some(WORD_PREFIX + closeness(qlen, clen));
+        return Some(WORD_PREFIX + closeness(qlen, cand_len));
     }
     if candidate.contains(query) {
-        return Some(SUBSTRING + closeness(qlen, clen));
+        return Some(SUBSTRING + closeness(qlen, cand_len));
     }
     fuzzy(query, candidate)
 }
@@ -324,7 +324,7 @@ mod tests {
         let exact = score("files", "Files").unwrap();
         let prefix = score("fil", "Files").unwrap();
         let word = score("ed", "Text Editor").unwrap();
-        let sub = score("dito", "Text Editor").unwrap();
+        let sub = score("ditor", "Text Editor").unwrap();
         let fuzzy = score("txe", "Text Editor").unwrap();
         assert_eq!(exact, EXACT);
         assert!(exact > prefix && prefix > word && word > sub && sub > fuzzy);
