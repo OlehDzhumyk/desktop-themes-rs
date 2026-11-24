@@ -5,6 +5,7 @@ mod gui;
 mod service;
 mod shortcut_cli;
 mod tokens_cli;
+mod update_cli;
 
 fn main() {
     // SAFETY: first statement of main, before GIO, GTK or zbus start any thread.
