@@ -30,8 +30,11 @@ All notable changes to this project are documented in this file. The format is b
   and devices are never opened, and an unreadable file shows an error card. Settings
   `io.github.OlehDzhumyk.Desk.QuickLook` (`enabled`, `quick-look-shortcut`, `max-text-kb`,
   `autoplay-media`, `follow-selection`) with per-theme shortcuts (Windows 11: Ctrl+Space; macOS:
-  Super+Y; Fedora: none) and a «Швидкий перегляд» page. The bridge key, the Files hand-over, media
-  and PDF follow separately.
+  Super+Y; Fedora: none) and a «Швидкий перегляд» page. The bridge binds `quick-look-shortcut`
+  in normal mode only (never plain Space) and opens the previewer on the local files copied to the
+  clipboard (Files offers no selection API); a second press closes it, and with no copied file a
+  toast explains what to do. The Shortcut Guide lists the shortcut. The Files hand-over (Space on
+  the selection), media and PDF follow separately.
 - Window layouts in the bridge (stage 4): `Super+Z` (macOS: `Ctrl+Super+Up`) opens a skin-aware
   layout picker for the focused window with miniature layouts and a full keyboard path; hovering
   or focusing a zone shows a click-through zone preview (no fade under reduced motion); choosing a

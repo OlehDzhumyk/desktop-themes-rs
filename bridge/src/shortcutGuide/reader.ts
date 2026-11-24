@@ -181,6 +181,12 @@ const DESK_BINDINGS: readonly DeskBindingSpec[] = [
         overrideKey: 'shortcut-guide-toggle',
         label: () => _('Shortcut guide'),
     },
+    {
+        schema: 'io.github.OlehDzhumyk.Desk.QuickLook',
+        key: 'quick-look-shortcut',
+        overrideKey: 'quick-look-toggle',
+        label: () => _('Quick Look'),
+    },
 ];
 
 const GROUP_ORDER: readonly GroupId[] = ['windows', 'desktop', 'features', 'input', 'custom'];

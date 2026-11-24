@@ -47,10 +47,10 @@ export function launchGui(page?: string): void {
 /**
  * Start `themes <args>` (the installed binary in ~/.local/bin). The arguments go to the process as
  * an argument vector, never through a shell, so a path with spaces or quotes stays one argument.
- * Throws when the process cannot be started.
+ * Returns the started process; throws when it cannot be started.
  */
-export function runThemes(args: string[]): void {
-    Gio.Subprocess.new([`${GLib.get_home_dir()}/.local/bin/themes`, ...args], Gio.SubprocessFlags.NONE);
+export function runThemes(args: string[]): Gio.Subprocess {
+    return Gio.Subprocess.new([`${GLib.get_home_dir()}/.local/bin/themes`, ...args], Gio.SubprocessFlags.NONE);
 }
 
 /**
