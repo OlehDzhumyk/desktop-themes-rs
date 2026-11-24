@@ -10,14 +10,16 @@
 //! * [`rank`]: tiered, layout-tolerant fuzzy matching (AC-SRCH-02, AC-SRCH-04);
 //! * [`desktop`]: XDG desktop entries;
 //! * [`actions`]: the built-in system actions;
-//! * [`usage`]: the decayed usage counts in `search-usage.json` (AC-SRCH-07).
+//! * [`usage`]: the decayed usage counts in `search-usage.json` (AC-SRCH-07);
+//! * [`files`]: the bounded in-memory index of the user's XDG folders.
 //!
-//! [`Catalog::search`] ties them together. Files, clipboard history and emoji come from other
-//! providers of the daemon; this crate never reads the network (AC-SRCH-06).
+//! [`Catalog::search_with`] ties them together with the other [`Provider`]s of the daemon
+//! (files, clipboard history, emoji); this crate never reads the network (AC-SRCH-06).
 
 pub mod actions;
 pub mod calc;
 pub mod desktop;
+pub mod files;
 pub mod query;
 pub mod rank;
 pub mod usage;
@@ -29,6 +31,7 @@ use serde::Serialize;
 
 pub use actions::{SYSTEM_ACTIONS, SystemAction};
 pub use desktop::{DesktopEntry, ParseOptions};
+pub use files::{FileIndex, FileLimits};
 pub use query::{Query, Scope};
 pub use usage::UsageStore;
 
@@ -48,6 +51,15 @@ const W_GENERIC: u32 = 80;
 const W_KEYWORD: u32 = 70;
 const W_PROGRAM: u32 = 60;
 const W_COMMENT: u32 = 50;
+
+/// What the results of the other providers weigh in a plain query (percent), so applications
+/// and actions outrank them at the same match tier: files, then clipboard entries, then emoji.
+pub const W_FILE: u32 = 90;
+pub const W_CLIPBOARD: u32 = 60;
+pub const W_EMOJI: u32 = 50;
+/// The shortest plain query that asks the clipboard and emoji providers (one letter matches too
+/// much to be useful).
+pub const MIN_EXTRA_QUERY_CHARS: usize = 2;
 
 /// Errors of the core.
 #[derive(Debug)]
@@ -103,15 +115,16 @@ pub enum ResultKind {
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct SearchResult {
     /// Stable id, also the key of the usage store: `app:<desktop id>`, `action:<id>`, `calc`,
-    /// `emoji:<id>`, `web`.
+    /// `file:<path>`, `clipboard:<entry id>`, `emoji:<id>`, `web`.
     pub id: String,
     pub kind: ResultKind,
     pub title: String,
     pub subtitle: String,
     /// Theme icon name or absolute path; empty for none.
     pub icon: String,
-    /// What activating it uses: the desktop id, the action id, the text to copy (calculator,
-    /// emoji) or the query to open in the browser (web).
+    /// What activating it uses: the desktop id, the action id, the absolute path (file), the
+    /// clipboard entry id in decimal, the text to copy (calculator, emoji) or the query to open in
+    /// the browser (web).
     pub activate: String,
     pub score: u32,
 }
@@ -134,6 +147,29 @@ impl Default for SearchOptions {
             max_results: 12,
             web_search: false,
             web_title: "Search the web for “{query}”".to_owned(),
+        }
+    }
+}
+
+/// A source of results outside the [`Catalog`]: files, clipboard history, emoji.
+pub trait Provider {
+    /// The kind of every result; it also picks the prefixed scope the provider answers.
+    fn kind(&self) -> ResultKind;
+
+    /// Up to `limit` results for `text` (the query without its prefix, trimmed), best first.
+    /// `scoped` is true for the provider's own prefix (`.`/`file:`, `#`, `:`), false for a plain
+    /// query, where scores should be weighted (see [`W_FILE`]) so applications stay on top.
+    fn search(&self, text: &str, scoped: bool, limit: usize) -> Vec<SearchResult>;
+}
+
+impl Scope {
+    /// The provider kind that answers this scope alone, if any.
+    pub fn provider_kind(self) -> Option<ResultKind> {
+        match self {
+            Scope::Files => Some(ResultKind::File),
+            Scope::Clipboard => Some(ResultKind::Clipboard),
+            Scope::Emoji => Some(ResultKind::Emoji),
+            Scope::All | Scope::Calculator | Scope::SystemActions => None,
         }
     }
 }
@@ -165,13 +201,27 @@ impl Catalog {
         Catalog { apps, actions }
     }
 
-    /// Answer a raw query (the text of the field).
+    /// Answer a raw query (the text of the field) from the catalog alone.
     pub fn search(
         &self,
         raw: &str,
         usage: &UsageStore,
         opts: &SearchOptions,
         now: u64,
+    ) -> Vec<SearchResult> {
+        self.search_with(raw, usage, opts, now, &[])
+    }
+
+    /// Answer a raw query from the catalog and `providers`. A prefixed scope (`.`, `#`, `:`)
+    /// asks only the providers of that kind, in their own order; a plain query merges their
+    /// weighted results into the ranking of applications and actions.
+    pub fn search_with(
+        &self,
+        raw: &str,
+        usage: &UsageStore,
+        opts: &SearchOptions,
+        now: u64,
+        providers: &[&dyn Provider],
     ) -> Vec<SearchResult> {
         let max = opts.max_results.clamp(MIN_RESULTS, MAX_RESULTS);
         let q = query::parse(raw);
@@ -186,14 +236,23 @@ impl Catalog {
             Scope::All => {
                 let mut ranked = self.apps_for(&q.text);
                 ranked.extend(self.actions_for(&q.text, usage, now));
+                let long_enough = q.text.chars().count() >= MIN_EXTRA_QUERY_CHARS;
+                for p in providers {
+                    if p.kind() == ResultKind::File || long_enough {
+                        ranked.extend(p.search(&q.text, false, max));
+                    }
+                }
                 sort(&mut ranked, usage, now);
                 if let Some(value) = calc::implicit(&q.text) {
                     ranked.insert(0, calc_result(&q.text, value));
                 }
                 ranked
             }
-            // other providers of the daemon answer these scopes
-            Scope::Files | Scope::Clipboard | Scope::Emoji => Vec::new(),
+            Scope::Files | Scope::Clipboard | Scope::Emoji => providers
+                .iter()
+                .filter(|p| Some(p.kind()) == q.scope.provider_kind())
+                .flat_map(|p| p.search(&q.text, true, max))
+                .collect(),
         };
         if opts.web_search && q.scope == Scope::All && !q.text.is_empty() {
             out.truncate(max - 1);
@@ -574,6 +633,111 @@ mod tests {
         assert_eq!(c.search(">", &off(), &one, 0).len(), 1);
         // a 1000-character query is cut and does not panic
         assert!(c.search(&"text ".repeat(200), &off(), &opts, 0).len() <= 12);
+    }
+
+    /// A provider that answers every query with fixed results of one kind.
+    struct Fixed(ResultKind, Vec<(&'static str, u32)>);
+
+    impl Provider for Fixed {
+        fn kind(&self) -> ResultKind {
+            self.0
+        }
+
+        fn search(&self, text: &str, scoped: bool, limit: usize) -> Vec<SearchResult> {
+            self.1
+                .iter()
+                .take(limit)
+                .map(|(title, score)| SearchResult {
+                    id: format!("{:?}:{title}:{scoped}:{text}", self.0),
+                    kind: self.0,
+                    title: (*title).to_owned(),
+                    subtitle: String::new(),
+                    icon: String::new(),
+                    activate: (*title).to_owned(),
+                    score: *score,
+                })
+                .collect()
+        }
+    }
+
+    #[test]
+    fn prefixed_scopes_ask_only_their_provider() {
+        let c = catalog();
+        let files = Fixed(ResultKind::File, vec![("notes.txt", 900)]);
+        let clips = Fixed(ResultKind::Clipboard, vec![("token", 10), ("older", 5)]);
+        let emoji = Fixed(ResultKind::Emoji, vec![("😀", 1)]);
+        let providers: [&dyn Provider; 3] = [&files, &clips, &emoji];
+        let opts = SearchOptions::default();
+        for (raw, kind, first) in [
+            (". notes", ResultKind::File, "File:notes.txt:true:notes"),
+            ("file:notes", ResultKind::File, "File:notes.txt:true:notes"),
+            ("# tok", ResultKind::Clipboard, "Clipboard:token:true:tok"),
+            ("#", ResultKind::Clipboard, "Clipboard:token:true:"),
+            (": smile", ResultKind::Emoji, "Emoji:😀:true:smile"),
+        ] {
+            let r = c.search_with(raw, &off(), &opts, 0, &providers);
+            assert!(r.iter().all(|x| x.kind == kind), "{raw}: {:?}", ids(&r));
+            assert_eq!(r[0].id, first, "{raw}");
+        }
+        // the provider order is kept in a scope (recency for the clipboard)
+        let r = c.search_with("#", &off(), &opts, 0, &providers);
+        assert_eq!(r[1].title, "older");
+        // the scoped limit is the query limit
+        let one = SearchOptions {
+            max_results: 1,
+            ..SearchOptions::default()
+        };
+        assert_eq!(c.search_with("#", &off(), &one, 0, &providers).len(), 1);
+    }
+
+    #[test]
+    fn plain_queries_merge_providers_below_applications() {
+        let c = catalog();
+        // weighted scores as the real providers give them for a prefix match
+        let files = Fixed(
+            ResultKind::File,
+            vec![("Text notes.txt", 800 * W_FILE / 100)],
+        );
+        let clips = Fixed(
+            ResultKind::Clipboard,
+            vec![("text copied", 800 * W_CLIPBOARD / 100)],
+        );
+        let emoji = Fixed(ResultKind::Emoji, vec![("📝", 800 * W_EMOJI / 100)]);
+        let providers: [&dyn Provider; 3] = [&emoji, &clips, &files];
+        let r = c.search_with("text", &off(), &SearchOptions::default(), 0, &providers);
+        let kinds: Vec<ResultKind> = r.iter().map(|x| x.kind).collect();
+        let pos = |k| kinds.iter().position(|x| *x == k).unwrap();
+        assert_eq!(r[0].id, "app:org.gnome.TextEditor.desktop");
+        assert!(pos(ResultKind::App) < pos(ResultKind::File), "{kinds:?}");
+        assert!(
+            pos(ResultKind::File) < pos(ResultKind::Clipboard),
+            "{kinds:?}"
+        );
+        assert!(
+            pos(ResultKind::Clipboard) < pos(ResultKind::Emoji),
+            "{kinds:?}"
+        );
+        // providers are asked unscoped
+        assert!(r.iter().any(|x| x.id == "File:Text notes.txt:false:text"));
+
+        // equal scores: the kind order puts applications before files
+        let tie = Fixed(ResultKind::File, vec![("Clipper", 1000)]);
+        let r = c.search_with("clipper", &off(), &SearchOptions::default(), 0, &[&tie]);
+        assert_eq!(r[0].kind, ResultKind::App);
+        assert_eq!(r[1].kind, ResultKind::File);
+
+        // one letter asks files only, never the clipboard or emoji
+        let r = c.search_with("t", &off(), &SearchOptions::default(), 0, &providers);
+        assert!(r.iter().any(|x| x.kind == ResultKind::File));
+        assert!(
+            r.iter()
+                .all(|x| !matches!(x.kind, ResultKind::Clipboard | ResultKind::Emoji))
+        );
+        // the empty plain query asks no provider
+        assert!(
+            c.search_with("", &off(), &SearchOptions::default(), 0, &providers)
+                .is_empty()
+        );
     }
 
     #[test]
