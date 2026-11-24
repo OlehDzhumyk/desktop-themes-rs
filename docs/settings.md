@@ -26,6 +26,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Screenshots (`capture`) | In Windows 11 and macOS |
 | Window layouts (`layouts`) | In Windows 11 and macOS |
 | Quick Look (`quick-look`) | From macOS, adapted for Windows 11 style |
+| Search (`search`) | In Windows 11 and macOS |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | On-screen displays (`osd`) | In Windows 11 and macOS |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
@@ -146,6 +147,18 @@ Path `/io/github/OlehDzhumyk/Desk/quick-look/`.
 | `autoplay-media` | boolean | `false` |  | Play video and audio at once | Reserved for the media player of the previewer (not implemented yet). | quick-look | switch on `--page quick-look` |
 | `follow-selection` | boolean | `true` |  | Follow the selection | Off: the arrow keys do nothing and the preview stays on the first file. | quick-look | switch on `--page quick-look` |
 
+## `io.github.OlehDzhumyk.Desk.Search`
+
+Path `/io/github/OlehDzhumyk/Desk/search/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Search | Off: deskd refuses search calls and the bridge binds no search shortcut. | search | switch on `--page search` |
+| `search-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Empty by default, so it does not clash with the launcher of the macOS look (spotlight@nin) or the overview until the own launcher ships. An override in io.github.OlehDzhumyk.Desk.Shortcuts search-toggle replaces it. The name ends in -shortcut because shell keybinding names are global. | search | shortcut row on `--page shortcuts` |
+| `web-search` | boolean | `false` |  | Offer web search | Off by default (AC-SRCH-06). Even when on, deskd makes no network request: activating the result only opens the default browser with the query. | search | switch on `--page search` |
+| `max-results` | unsigned | `12` | 5…50 (step 1) | Maximum results | From 5 to 50. A caller may ask for fewer in its Query call. | search | spin button on `--page search` |
+| `remember-usage` | boolean | `true` |  | Rank by usage | Kept in ~/.local/share/deskd/search-usage.json (mode 0600). Off: nothing is recorded and the file is deleted (AC-SRCH-07). | search | switch on `--page search` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -163,6 +176,7 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `capture-record` | shortcut list | `[]` |  | Start or stop a screen recording | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
 | `layout-picker` | shortcut list | `[]` |  | Open the window layout picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
 | `always-on-top` | shortcut list | `[]` |  | Pin or unpin the focused window above others | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
+| `search-toggle` | shortcut list | `[]` |  | Open the search box | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | search | shortcut row on `--page shortcuts` |
 | `shortcut-guide-toggle` | shortcut list | `[]` |  | Open the shortcut guide | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | shortcut-guide | shortcut row on `--page shortcuts` |
 | `quick-look-toggle` | shortcut list | `[]` |  | Preview the selected files (Quick Look) | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | quick-look | shortcut row on `--page shortcuts` |
 
@@ -282,6 +296,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `capture-record` | Start or stop a screen recording | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-record-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-record` |
 | `layout-picker` | Open the window layout picker | layouts | `/io/github/OlehDzhumyk/Desk/layouts/layout-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/layout-picker` |
 | `always-on-top` | Pin or unpin the focused window above others | layouts | `/io/github/OlehDzhumyk/Desk/layouts/always-on-top-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/always-on-top` |
+| `search-toggle` | Open the search box | search | `/io/github/OlehDzhumyk/Desk/search/search-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/search-toggle` |
 | `shortcut-guide-toggle` | Open the shortcut guide | shortcut-guide | `/io/github/OlehDzhumyk/Desk/shortcut-guide/shortcut-guide-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/shortcut-guide-toggle` |
 | `quick-look-toggle` | Preview the selected files (Quick Look) | quick-look | `/io/github/OlehDzhumyk/Desk/quick-look/quick-look-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/quick-look-toggle` |
 
@@ -296,6 +311,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `capture` | Screenshots | Screenshots, Screen recording, How to open |
 | `layouts` | Window layouts | Layouts and gaps, Behaviour, How to open |
 | `quick-look` | Quick Look | Preview, How to open |
+| `search` | Search | Search box, Privacy, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `osd` | On-screen displays | Display, Style |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |

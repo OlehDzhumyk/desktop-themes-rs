@@ -31,6 +31,8 @@ pub const CAPTURE_PATH: &str = "/io/github/OlehDzhumyk/Desk/Capture";
 pub const CAPTURE_IFACE: &str = "io.github.OlehDzhumyk.Desk.Capture";
 pub const LAYOUTS_PATH: &str = "/io/github/OlehDzhumyk/Desk/Layouts";
 pub const LAYOUTS_IFACE: &str = "io.github.OlehDzhumyk.Desk.Layouts";
+pub const SEARCH_PATH: &str = "/io/github/OlehDzhumyk/Desk/Search";
+pub const SEARCH_IFACE: &str = "io.github.OlehDzhumyk.Desk.Search";
 
 /// GSettings: загальна схема deskd (скін) і схема буфера обміну.
 pub const SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk";
@@ -43,6 +45,7 @@ pub const COLOR_PICKER_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.ColorPicker
 pub const OCR_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Ocr";
 pub const CAPTURE_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Capture";
 pub const LAYOUTS_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Layouts";
+pub const SEARCH_SCHEMA_ID: &str = "io.github.OlehDzhumyk.Desk.Search";
 pub const SCHEMA_XML: &str = include_str!("../../../data/io.github.OlehDzhumyk.Desk.gschema.xml");
 
 pub const DESK_XML: &str = include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.xml");
@@ -60,6 +63,8 @@ pub const CAPTURE_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Capture.xml");
 pub const LAYOUTS_XML: &str =
     include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Layouts.xml");
+pub const SEARCH_XML: &str =
+    include_str!("../../../data/dbus/io.github.OlehDzhumyk.Desk.Search.xml");
 
 /// Offered by the bridge with the clipboard content it set itself (paste from the history), so
 /// deskd does not record its own paste again. Apps may offer it too; it only stops recording.
@@ -391,6 +396,24 @@ pub mod layouts {
     }
 }
 
+/// Search: client proxy of the search engine.
+pub mod search {
+    /// Client proxy of the search engine (`data/dbus/io.github.OlehDzhumyk.Desk.Search.xml`).
+    #[zbus::proxy(
+        interface = "io.github.OlehDzhumyk.Desk.Search",
+        default_service = "io.github.OlehDzhumyk.Desk",
+        default_path = "/io/github/OlehDzhumyk/Desk/Search"
+    )]
+    pub trait Search {
+        /// The results of a query, best first, as JSON (0 = the max-results setting).
+        fn query(&self, text: &str, max_results: u32) -> zbus::Result<String>;
+        /// Count one activation of a result (nothing is written with remember-usage off).
+        fn record_launch(&self, item_id: &str) -> zbus::Result<()>;
+        /// Forget all usage counts.
+        fn clear_usage(&self) -> zbus::Result<()>;
+    }
+}
+
 /// Клієнтський проксі самої служби (версія, список функцій).
 #[zbus::proxy(
     interface = "io.github.OlehDzhumyk.Desk",
@@ -532,6 +555,21 @@ mod tests {
                 ("method", "ResolveZones"),
                 ("method", "SetActiveLayout"),
                 ("signal", "Changed")
+            ]
+        );
+    }
+
+    #[test]
+    fn search_xml_names_the_interface_and_members() {
+        assert!(SEARCH_XML.contains(&format!("name=\"{SEARCH_IFACE}\"")));
+        let m = xml_members(SEARCH_XML);
+        let m: Vec<(&str, &str)> = m.iter().map(|(k, n)| (k.as_str(), n.as_str())).collect();
+        assert_eq!(
+            m,
+            [
+                ("method", "ClearUsage"),
+                ("method", "Query"),
+                ("method", "RecordLaunch")
             ]
         );
     }

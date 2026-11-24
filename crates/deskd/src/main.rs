@@ -18,6 +18,7 @@ mod ocr;
 mod panic_policy;
 mod persist;
 mod schedule;
+mod search;
 mod service;
 mod settings;
 mod trust;
@@ -39,6 +40,7 @@ use engine::focus::FocusFeature;
 use engine::layouts::LayoutsEngine;
 use engine::mixer::MixerFeature;
 use engine::ocr::OcrEngine;
+use engine::search::SearchEngine;
 use engine::{Engines, Setup};
 use service::Desk;
 
@@ -63,6 +65,7 @@ fn features() -> Vec<String> {
         "ocr".to_string(),
         "capture".to_string(),
         "layouts".to_string(),
+        "search".to_string(),
     ];
     f.push("focus".into());
     if cfg!(feature = "pipewire") {
@@ -81,6 +84,7 @@ fn engines(setup: &Setup) -> Engines {
         Box::new(OcrEngine::new(setup)),
         Box::new(CaptureFeature::new(setup)),
         Box::new(LayoutsEngine::new(setup)),
+        Box::new(SearchEngine::new(setup)),
         Box::new(ClipboardFeature::new(setup)),
         Box::new(FocusFeature::new(setup)),
         Box::new(AppearanceFeature::new(setup)),

@@ -966,6 +966,69 @@ impl QuickLookSettings {
     }
 }
 
+/// `io.github.OlehDzhumyk.Desk.Search` at `/io/github/OlehDzhumyk/Desk/search/`.
+#[derive(Clone, Debug)]
+pub struct SearchSettings(pub gio::Settings);
+
+impl SearchSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Search";
+    pub const ENABLED: &'static str = "enabled";
+    pub const SEARCH_SHORTCUT: &'static str = "search-shortcut";
+    pub const WEB_SEARCH: &'static str = "web-search";
+    pub const MAX_RESULTS: &'static str = "max-results";
+    pub const REMEMBER_USAGE: &'static str = "remember-usage";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable the own search engine
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Shortcut that opens the search box (in force)
+    pub fn search_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::SEARCH_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_search_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::SEARCH_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Offer a result that opens the query in the web browser
+    pub fn web_search(&self) -> bool {
+        self.0.boolean(Self::WEB_SEARCH)
+    }
+
+    pub fn set_web_search(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::WEB_SEARCH, v)
+    }
+
+    /// The largest number of results of one query
+    pub fn max_results(&self) -> u32 {
+        self.0.uint(Self::MAX_RESULTS)
+    }
+
+    pub fn set_max_results(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::MAX_RESULTS, v)
+    }
+
+    /// Remember launched results to rank them higher
+    pub fn remember_usage(&self) -> bool {
+        self.0.boolean(Self::REMEMBER_USAGE)
+    }
+
+    pub fn set_remember_usage(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::REMEMBER_USAGE, v)
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -983,6 +1046,7 @@ impl ShortcutSettings {
     pub const CAPTURE_RECORD: &'static str = "capture-record";
     pub const LAYOUT_PICKER: &'static str = "layout-picker";
     pub const ALWAYS_ON_TOP: &'static str = "always-on-top";
+    pub const SEARCH_TOGGLE: &'static str = "search-toggle";
     pub const SHORTCUT_GUIDE_TOGGLE: &'static str = "shortcut-guide-toggle";
     pub const QUICK_LOOK_TOGGLE: &'static str = "quick-look-toggle";
 
@@ -1088,6 +1152,15 @@ impl ShortcutSettings {
 
     pub fn set_always_on_top(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::ALWAYS_ON_TOP, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the search box (override)
+    pub fn search_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::SEARCH_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_search_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::SEARCH_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 
     /// Your shortcut for the shortcut guide (override)

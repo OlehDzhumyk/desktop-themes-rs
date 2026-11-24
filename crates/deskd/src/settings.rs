@@ -106,6 +106,21 @@ pub fn read_layouts(s: &desk_settings::accessors::LayoutsSettings) -> crate::lay
     }
 }
 
+/// GSettings `io.github.OlehDzhumyk.Desk.Search` (None while the schema is not installed).
+pub fn search_settings() -> Option<desk_settings::accessors::SearchSettings> {
+    desk_settings::accessors::SearchSettings::new()
+}
+
+/// The search engine's part of its settings (the shortcut is the bridge's).
+pub fn read_search(s: &desk_settings::accessors::SearchSettings) -> crate::search::Config {
+    crate::search::Config {
+        enabled: s.enabled(),
+        web_search: s.web_search(),
+        max_results: s.max_results(),
+        remember_usage: s.remember_usage(),
+    }
+}
+
 /// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
 pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
     desk_settings::accessors::MixerSettings::new()

@@ -254,6 +254,28 @@ Skins: **windows11** a compact Fluent popover at the top of the monitor, miniatu
 translucent «Move & Resize» popover at the top; **default** the shell theme's popup surface in the middle. High
 contrast gives opaque surfaces, outlines and a thick focus ring in every skin.
 
+## Search
+
+Status: **core only** (stage 4). deskd answers queries; the launcher box in the bridge comes in a later change, and
+until then the macOS look keeps `spotlight@nin`. Spec: [search.md](spec/features/search.md).
+
+| | |
+|---|---|
+| Query language | plain text: all providers; `= expr` (or a bare expression such as `2+2*3`): calculator; `> text`: system actions; `. text` or `file:text`: files; `# text`: clipboard history; `: text`: emoji. Only the first 256 characters are matched |
+| Providers now | applications (XDG desktop entries, localized `Name[uk]`, `GenericName`, `Keywords`; hidden, `NoDisplay` and other-desktop entries skipped), system actions (lock screen, suspend, log out, restart, power off, toggle dark mode, toggle clipboard private mode), calculator, emoji (the emoji picker's data). Files and clipboard history answer nothing yet |
+| Calculator | `+ - * / % ^`, parentheses, unary signs, decimals (point or comma); `= 12*(3+4)` gives `84`; arithmetic only, never shell or script input (AC-SRCH-03) |
+| Ranking | exact > prefix > word prefix > substring > fuzzy (typos, letters in order); Unicode case folding; a query typed in the wrong layout (Ukrainian ЙЦУКЕН ↔ QWERTY, both ways) matches too (AC-SRCH-04); ties broken by usage with a 14-day half-life, then applications before actions |
+| Usage | `~/.local/share/deskd/search-usage.json` (0600, atomic); with `remember-usage=false` nothing is written and the file is deleted (AC-SRCH-07); `ClearUsage` forgets everything |
+| Web | off by default (`web-search`, AC-SRCH-06); when on, the last result only carries the query for the browser; deskd makes no request |
+| Shortcut | `search-shortcut` (empty by default, so it does not clash with `spotlight@nin` or the overview); override `search-toggle` in `io.github.OlehDzhumyk.Desk.Shortcuts` |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Search` at `/io/github/OlehDzhumyk/Desk/Search`: `Query(s, u) → s` (JSON results), `RecordLaunch(s)`, `ClearUsage()` |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Search`: `enabled`, `search-shortcut`, `web-search`, `max-results` (5 to 50, 12), `remember-usage` |
+| Idle cost | none: applications are read once and dropped when an `applications/` folder changes (GIO file monitor, no polling) |
+| Core | crate `desk-search`: pure Rust (only `serde`), no GTK, GLib or D-Bus, so KDE or wlroots adapters can reuse it (ADR 0011) |
+
+Skins: none yet; the bridge part will draw the box per skin (`macos` Spotlight panel, `windows11` start-menu
+flyout, `default` overview search provider).
+
 ## Automatic light/dark
 
 | | |

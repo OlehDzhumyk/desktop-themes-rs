@@ -1,0 +1,15 @@
+[package]
+name = "desk-search"
+description = "Search engine core of desktop-themes-rs: query parser, safe calculator, layout-tolerant fuzzy ranking, desktop entries, system actions and a usage store (pure Rust, no desktop dependency)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true

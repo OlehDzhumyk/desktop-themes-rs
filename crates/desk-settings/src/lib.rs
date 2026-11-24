@@ -20,6 +20,7 @@ pub mod ocr;
 pub mod osd;
 pub mod quick_look;
 pub mod registry;
+pub mod search;
 pub mod shortcut_guide;
 pub mod shortcuts;
 pub mod stable_hash;
@@ -43,6 +44,7 @@ pub use ocr::*;
 pub use osd::*;
 pub use quick_look::*;
 pub use registry::*;
+pub use search::*;
 pub use shortcut_guide::*;
 
 /// Every schema of the registry: ours ([`SCHEMAS`]) and those of the repository's extensions
