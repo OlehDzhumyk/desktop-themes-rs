@@ -21,6 +21,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- macOS skin: the focused application's name, in bold, right after the logo menu, with a small
+  menu (New Window, Hide, Hide Others, Quit); it follows the focus and is removed with the logo menu.
+- macOS skin: dock icon magnification on dash-to-dock (1.45× under the pointer, cosine falloff over
+  2.5 icons); off when animations are off or reduced motion is set, and silent without dash-to-dock.
 - Incremental update script `scripts/update.sh`: pulls latest `main` (`--ff-only`), reuses the
   existing build toolbox (refreshing dnf packages, third-party assets and extensions automatically
   when `scripts/versions.sh` changes or when `--with-assets` / `--with-extensions` / `--all` is
@@ -262,6 +266,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- Theme `macos`: the dock shows when the pointer touches the screen edge, without pressure, after
+  0.1 s, and hides 0.2 s after the pointer leaves.
 - The bridge's shared UI parts live in `bridge/src/ui/`: primitives (orientations, motion setting,
   system style classes, icon button, label), one skin-aware toast (`.desk-toast`, used by the
   colour picker and the text extractor; it now follows `.desk-light` and the macOS skin) and the
