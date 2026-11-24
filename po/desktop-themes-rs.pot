@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:07+0000\n"
+"POT-Creation-Date: 2026-11-24 04:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4723,7 +4723,7 @@ msgid "Output"
 msgstr ""
 
 #: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
-#: bridge/src/shortcutGuide/reader.ts:197
+#: bridge/src/shortcutGuide/reader.ts:203
 msgid "Input"
 msgstr ""
 
@@ -4843,6 +4843,19 @@ msgstr ""
 
 #: bridge/src/osd/popup.ts:74 bridge/src/osd/popup.ts:119
 msgid "above 100 %"
+msgstr ""
+
+#: bridge/src/quickLook/feature.ts:167
+msgid "Quick Look shows only files on this computer."
+msgstr ""
+
+#: bridge/src/quickLook/feature.ts:168
+msgid ""
+"No files to preview. Copy files in Files, then press the shortcut again."
+msgstr ""
+
+#: bridge/src/quickLook/feature.ts:182
+msgid "Could not open Quick Look: {error}"
 msgstr ""
 
 #: bridge/src/quickSettings.ts:80 bridge/src/quickSettings.ts:81
@@ -5064,15 +5077,15 @@ msgstr ""
 msgid "Record screen"
 msgstr ""
 
-#: bridge/src/shortcutGuide/reader.ts:191
+#: bridge/src/shortcutGuide/reader.ts:197
 msgid "Windows and apps"
 msgstr ""
 
-#: bridge/src/shortcutGuide/reader.ts:199
+#: bridge/src/shortcutGuide/reader.ts:205
 msgid "Custom"
 msgstr ""
 
-#: bridge/src/shortcutGuide/reader.ts:332
+#: bridge/src/shortcutGuide/reader.ts:338
 msgid "Custom shortcut"
 msgstr ""
 

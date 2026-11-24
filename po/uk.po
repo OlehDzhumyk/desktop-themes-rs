@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:07+0000\n"
+"POT-Creation-Date: 2026-11-24 04:39+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -550,7 +550,7 @@ msgid "Output"
 msgstr "Виведення"
 
 #: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
-#: bridge/src/shortcutGuide/reader.ts:197
+#: bridge/src/shortcutGuide/reader.ts:203
 msgid "Input"
 msgstr "Введення"
 
@@ -673,6 +673,21 @@ msgstr "Рівень {level} %"
 #: bridge/src/osd/popup.ts:74 bridge/src/osd/popup.ts:119
 msgid "above 100 %"
 msgstr "понад 100 %"
+
+#: bridge/src/quickLook/feature.ts:167
+msgid "Quick Look shows only files on this computer."
+msgstr "Швидкий перегляд показує лише файли на цьому комп'ютері."
+
+#: bridge/src/quickLook/feature.ts:168
+msgid ""
+"No files to preview. Copy files in Files, then press the shortcut again."
+msgstr ""
+"Немає файлів для перегляду. Скопіюйте файли у «Файлах» і знову натисніть "
+"скорочення."
+
+#: bridge/src/quickLook/feature.ts:182
+msgid "Could not open Quick Look: {error}"
+msgstr "Не вдалося відкрити швидкий перегляд: {error}"
 
 #: bridge/src/quickSettings.ts:80 bridge/src/quickSettings.ts:81
 #: bridge/src/quickSettings.ts:169 bridge/src/quickSettings.ts:203
@@ -893,15 +908,15 @@ msgstr "Знімок екрана"
 msgid "Record screen"
 msgstr "Запис екрана"
 
-#: bridge/src/shortcutGuide/reader.ts:191
+#: bridge/src/shortcutGuide/reader.ts:197
 msgid "Windows and apps"
 msgstr "Вікна і програми"
 
-#: bridge/src/shortcutGuide/reader.ts:199
+#: bridge/src/shortcutGuide/reader.ts:205
 msgid "Custom"
 msgstr "Власні"
 
-#: bridge/src/shortcutGuide/reader.ts:332
+#: bridge/src/shortcutGuide/reader.ts:338
 msgid "Custom shortcut"
 msgstr "Власне скорочення"
 
@@ -3523,7 +3538,8 @@ msgstr "Файл PNG; «Зберегти» замінює його (прихов
 
 #: crates/themes/src/cli.rs:56
 msgid "Preview files in a Quick Look window (files are never run)"
-msgstr "Переглянути файли у вікні швидкого перегляду (файли ніколи не запускаються)"
+msgstr ""
+"Переглянути файли у вікні швидкого перегляду (файли ніколи не запускаються)"
 
 #: crates/themes/src/cli.rs:57
 msgid "The files or folders; arrow keys move between them"
@@ -4472,7 +4488,9 @@ msgstr "До (ГГ:ХХ)"
 #: crates/themes/src/gui/quick_look/mod.rs:71
 msgid ""
 "Quick Look is turned off: turn it on in the Themes window, page «Quick Look»."
-msgstr "Швидкий перегляд вимкнено: увімкніть його у вікні «Теми», сторінка «Швидкий перегляд»."
+msgstr ""
+"Швидкий перегляд вимкнено: увімкніть його у вікні «Теми», сторінка «Швидкий "
+"перегляд»."
 
 #: crates/themes/src/gui/quick_look/mod.rs:83
 msgid "No file to preview."
