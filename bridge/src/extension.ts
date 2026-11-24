@@ -20,6 +20,7 @@ import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
 import {OcrFeature} from './ocr/feature.js';
 import {OsdFeature} from './osd/feature.js';
+import {ShortcutGuideFeature} from './shortcutGuide/feature.js';
 import type {Skin} from './accentPicker.js';
 import {DeskIndicator, launchGui} from './quickSettings.js';
 
@@ -33,6 +34,7 @@ const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
 const FOCUS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Focus';
 const OCR_SCHEMA = 'io.github.OlehDzhumyk.Desk.Ocr';
 const OSD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Osd';
+const SHORTCUT_GUIDE_SCHEMA = 'io.github.OlehDzhumyk.Desk.ShortcutGuide';
 
 export default class DeskBridge extends Extension {
     private _settings: Gio.Settings | null = null;
@@ -54,6 +56,8 @@ export default class DeskBridge extends Extension {
     private _focusSettings: Gio.Settings | null = null;
     private _osd: OsdFeature | null = null;
     private _osdSettings: Gio.Settings | null = null;
+    private _shortcutGuide: ShortcutGuideFeature | null = null;
+    private _shortcutGuideSettings: Gio.Settings | null = null;
     private _appearanceSettings: Gio.Settings | null = null;
     private _skinId = 0;
     private _langId = 0;
@@ -69,6 +73,14 @@ export default class DeskBridge extends Extension {
         if (!schema)
             throw new Error(`GSettings schema ${id} not found`);
         return new Gio.Settings({settings_schema: schema});
+    }
+
+    private _trySchema(id: string): Gio.Settings | null {
+        try {
+            return this._schema(id);
+        } catch {
+            return null;
+        }
     }
 
     override enable(): void {
@@ -91,6 +103,11 @@ export default class DeskBridge extends Extension {
             this._osdSettings = this._schema(OSD_SCHEMA);
         } catch (e) {
             console.warn(`desk-bridge: on-screen displays are unavailable: ${String(e)}`);
+        }
+        try {
+            this._shortcutGuideSettings = this._schema(SHORTCUT_GUIDE_SCHEMA);
+        } catch (e) {
+            console.warn(`desk-bridge: the shortcut guide is unavailable: ${String(e)}`);
         }
         initI18n(this, settings.get_string('language'));
         this._build(clipSettings);
@@ -170,10 +187,23 @@ export default class DeskBridge extends Extension {
                 console.warn(`desk-bridge: on-screen displays are unavailable: ${String(e)}`);
             }
         }
+        if (this._shortcutGuideSettings) {
+            try {
+                this._shortcutGuide = new ShortcutGuideFeature(
+                    this._shortcutGuideSettings,
+                    this._skin(),
+                    id => this._trySchema(id),
+                );
+            } catch (e) {
+                console.warn(`desk-bridge: the shortcut guide is unavailable: ${String(e)}`);
+            }
+        }
         this._applySkin();
     }
 
     private _teardown(): void {
+        this._shortcutGuide?.destroy();
+        this._shortcutGuide = null;
         this._osd?.destroy();
         this._osd = null;
         this._focus?.destroy();
@@ -214,6 +244,7 @@ export default class DeskBridge extends Extension {
         this._indicator?.setSkin(skin);
         this._focus?.setSkin(skin);
         this._osd?.setSkin(skin);
+        this._shortcutGuide?.setSkin(skin);
         this._indicator?.setClipboard(skin === 'default' ? this._clipboard : null);
     }
 
@@ -234,6 +265,7 @@ export default class DeskBridge extends Extension {
         this._logoMenuSettings = null;
         this._focusSettings = null;
         this._osdSettings = null;
+        this._shortcutGuideSettings = null;
         this._appearanceSettings = null;
     }
 }

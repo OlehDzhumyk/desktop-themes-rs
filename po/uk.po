@@ -113,6 +113,7 @@ msgid "Delay: {seconds} s"
 msgstr "Затримка: {seconds} с"
 
 #: bridge/src/capture/toolbar.ts:70 bridge/src/capture/toolbar.ts:76
+#: bridge/src/shortcutGuide/reader.ts:170
 msgid "Screenshot toolbar"
 msgstr "Панель знімків екрана"
 
@@ -141,7 +142,7 @@ msgid "Clipboard settings"
 msgstr "Налаштування буфера обміну"
 
 #: bridge/src/clipboard/listPanel.ts:60 bridge/src/clipboard/panel.ts:100
-#: bridge/src/clipboard/winFlyout.ts:77
+#: bridge/src/clipboard/winFlyout.ts:77 bridge/src/shortcutGuide/reader.ts:128
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
 
@@ -485,6 +486,7 @@ msgid "Output"
 msgstr "Виведення"
 
 #: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
+#: bridge/src/shortcutGuide/reader.ts:197
 msgid "Input"
 msgstr "Введення"
 
@@ -654,6 +656,190 @@ msgstr "приватний режим"
 #: bridge/src/quickSettings.ts:337
 msgid "The history is empty"
 msgstr "Історія порожня"
+
+#: bridge/src/shortcutGuide/overlay.ts:36
+msgid "theme"
+msgstr "тема"
+
+#: bridge/src/shortcutGuide/overlay.ts:36
+msgid "your setting"
+msgstr "ваше налаштування"
+
+#: bridge/src/shortcutGuide/overlay.ts:124
+msgid "Type to filter · Up/Down to scroll · Esc to close"
+msgstr "Вводьте для фільтрування · ↑/↓ прокрутка · Esc закрити"
+
+#: bridge/src/shortcutGuide/overlay.ts:125
+msgid "Release Super to close"
+msgstr "Відпустіть Super, щоб закрити"
+
+#: bridge/src/shortcutGuide/overlay.ts:138
+msgid "Search shortcuts…"
+msgstr "Пошук скорочень…"
+
+#: bridge/src/shortcutGuide/overlay.ts:142
+msgid "Search shortcuts"
+msgstr "Пошук скорочень"
+
+#: bridge/src/shortcutGuide/overlay.ts:153
+msgid "Some shortcuts are unavailable"
+msgstr "Деякі скорочення недоступні"
+
+#: bridge/src/shortcutGuide/overlay.ts:358
+msgid "No active shortcuts found"
+msgstr "Чинних скорочень не знайдено"
+
+#: bridge/src/shortcutGuide/overlay.ts:358
+msgid "No matching shortcuts"
+msgstr "Відповідних скорочень не знайдено"
+
+#: bridge/src/shortcutGuide/reader.ts:61
+msgid "Switch applications"
+msgstr "Перемкнути програми"
+
+#: bridge/src/shortcutGuide/reader.ts:62
+msgid "Switch windows"
+msgstr "Перемкнути вікна"
+
+#: bridge/src/shortcutGuide/reader.ts:63
+msgid "Switch windows of an app"
+msgstr "Перемкнути вікна програми"
+
+#: bridge/src/shortcutGuide/reader.ts:64
+msgid "Close window"
+msgstr "Закрити вікно"
+
+#: bridge/src/shortcutGuide/reader.ts:65
+msgid "Minimise window"
+msgstr "Згорнути вікно"
+
+#: bridge/src/shortcutGuide/reader.ts:66
+msgid "Maximise window"
+msgstr "Розгорнути вікно"
+
+#: bridge/src/shortcutGuide/reader.ts:67
+msgid "Toggle full screen"
+msgstr "На весь екран"
+
+#: bridge/src/shortcutGuide/reader.ts:68
+msgid "Show desktop"
+msgstr "Показати стільницю"
+
+#: bridge/src/shortcutGuide/reader.ts:69
+msgid "Move window"
+msgstr "Перемістити вікно"
+
+#: bridge/src/shortcutGuide/reader.ts:70
+msgid "Resize window"
+msgstr "Змінити розмір вікна"
+
+#: bridge/src/shortcutGuide/reader.ts:75
+msgid "Tile window left"
+msgstr "Прикріпити вікно ліворуч"
+
+#: bridge/src/shortcutGuide/reader.ts:82
+msgid "Tile window right"
+msgstr "Прикріпити вікно праворуч"
+
+#: bridge/src/shortcutGuide/reader.ts:87
+msgid "Activities overview"
+msgstr "Огляд активностей"
+
+#: bridge/src/shortcutGuide/reader.ts:88
+msgid "Show all apps"
+msgstr "Показати всі програми"
+
+#: bridge/src/shortcutGuide/reader.ts:89
+msgid "Notifications and calendar"
+msgstr "Сповіщення і календар"
+
+#: bridge/src/shortcutGuide/reader.ts:90
+msgid "Quick settings"
+msgstr "Швидкі налаштування"
+
+#: bridge/src/shortcutGuide/reader.ts:91
+msgid "Focus notification"
+msgstr "Фокус на сповіщенні"
+
+#: bridge/src/shortcutGuide/reader.ts:92
+msgid "Run a command"
+msgstr "Виконати команду"
+
+#: bridge/src/shortcutGuide/reader.ts:93
+msgid "Previous workspace"
+msgstr "Попередній робочий простір"
+
+#: bridge/src/shortcutGuide/reader.ts:94
+msgid "Next workspace"
+msgstr "Наступний робочий простір"
+
+#: bridge/src/shortcutGuide/reader.ts:99
+msgid "Move window to previous workspace"
+msgstr "Перенести вікно на попередній робочий простір"
+
+#: bridge/src/shortcutGuide/reader.ts:105
+msgid "Move window to next workspace"
+msgstr "Перенести вікно на наступний робочий простір"
+
+#: bridge/src/shortcutGuide/reader.ts:108
+msgid "Open Files"
+msgstr "Відкрити «Файли»"
+
+#: bridge/src/shortcutGuide/reader.ts:109
+msgid "Open Settings"
+msgstr "Відкрити «Налаштування»"
+
+#: bridge/src/shortcutGuide/reader.ts:110
+msgid "Open web browser"
+msgstr "Відкрити веббраузер"
+
+#: bridge/src/shortcutGuide/reader.ts:111
+msgid "Open email"
+msgstr "Відкрити пошту"
+
+#: bridge/src/shortcutGuide/reader.ts:112
+msgid "Open terminal"
+msgstr "Відкрити термінал"
+
+#: bridge/src/shortcutGuide/reader.ts:115
+msgid "GNOME screenshot"
+msgstr "Знімок екрана GNOME"
+
+#: bridge/src/shortcutGuide/reader.ts:116
+msgid "GNOME screen recording"
+msgstr "Запис екрана GNOME"
+
+#: bridge/src/shortcutGuide/reader.ts:119
+msgid "Next input source"
+msgstr "Наступна розкладка"
+
+#: bridge/src/shortcutGuide/reader.ts:120
+msgid "Previous input source"
+msgstr "Попередня розкладка"
+
+#: bridge/src/shortcutGuide/reader.ts:158
+msgid "Capture region"
+msgstr "Знімок ділянки"
+
+#: bridge/src/shortcutGuide/reader.ts:164
+msgid "Capture screen"
+msgstr "Знімок екрана"
+
+#: bridge/src/shortcutGuide/reader.ts:176
+msgid "Record screen"
+msgstr "Запис екрана"
+
+#: bridge/src/shortcutGuide/reader.ts:191
+msgid "Windows and apps"
+msgstr "Вікна і програми"
+
+#: bridge/src/shortcutGuide/reader.ts:199
+msgid "Custom"
+msgstr "Власні"
+
+#: bridge/src/shortcutGuide/reader.ts:332
+msgid "Custom shortcut"
+msgstr "Власне скорочення"
 
 #: crates/desk-settings/src/appearance.rs:11
 #: crates/desk-settings/src/appearance.rs:194

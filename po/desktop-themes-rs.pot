@@ -4124,6 +4124,7 @@ msgid "Delay: {seconds} s"
 msgstr ""
 
 #: bridge/src/capture/toolbar.ts:70 bridge/src/capture/toolbar.ts:76
+#: bridge/src/shortcutGuide/reader.ts:170
 msgid "Screenshot toolbar"
 msgstr ""
 
@@ -4152,7 +4153,7 @@ msgid "Clipboard settings"
 msgstr ""
 
 #: bridge/src/clipboard/listPanel.ts:60 bridge/src/clipboard/panel.ts:100
-#: bridge/src/clipboard/winFlyout.ts:77
+#: bridge/src/clipboard/winFlyout.ts:77 bridge/src/shortcutGuide/reader.ts:128
 msgid "Clipboard history"
 msgstr ""
 
@@ -4494,6 +4495,7 @@ msgid "Output"
 msgstr ""
 
 #: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
+#: bridge/src/shortcutGuide/reader.ts:197
 msgid "Input"
 msgstr ""
 
@@ -4660,6 +4662,190 @@ msgstr ""
 
 #: bridge/src/quickSettings.ts:337
 msgid "The history is empty"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:36
+msgid "theme"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:36
+msgid "your setting"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:124
+msgid "Type to filter · Up/Down to scroll · Esc to close"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:125
+msgid "Release Super to close"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:138
+msgid "Search shortcuts…"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:142
+msgid "Search shortcuts"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:153
+msgid "Some shortcuts are unavailable"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:358
+msgid "No active shortcuts found"
+msgstr ""
+
+#: bridge/src/shortcutGuide/overlay.ts:358
+msgid "No matching shortcuts"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:61
+msgid "Switch applications"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:62
+msgid "Switch windows"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:63
+msgid "Switch windows of an app"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:64
+msgid "Close window"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:65
+msgid "Minimise window"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:66
+msgid "Maximise window"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:67
+msgid "Toggle full screen"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:68
+msgid "Show desktop"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:69
+msgid "Move window"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:70
+msgid "Resize window"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:75
+msgid "Tile window left"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:82
+msgid "Tile window right"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:87
+msgid "Activities overview"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:88
+msgid "Show all apps"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:89
+msgid "Notifications and calendar"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:90
+msgid "Quick settings"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:91
+msgid "Focus notification"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:92
+msgid "Run a command"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:93
+msgid "Previous workspace"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:94
+msgid "Next workspace"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:99
+msgid "Move window to previous workspace"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:105
+msgid "Move window to next workspace"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:108
+msgid "Open Files"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:109
+msgid "Open Settings"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:110
+msgid "Open web browser"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:111
+msgid "Open email"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:112
+msgid "Open terminal"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:115
+msgid "GNOME screenshot"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:116
+msgid "GNOME screen recording"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:119
+msgid "Next input source"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:120
+msgid "Previous input source"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:158
+msgid "Capture region"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:164
+msgid "Capture screen"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:176
+msgid "Record screen"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:191
+msgid "Windows and apps"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:199
+msgid "Custom"
+msgstr ""
+
+#: bridge/src/shortcutGuide/reader.ts:332
+msgid "Custom shortcut"
 msgstr ""
 
 #: data/io.github.OlehDzhumyk.Themes.desktop.in:4

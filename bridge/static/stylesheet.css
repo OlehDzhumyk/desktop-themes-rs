@@ -607,3 +607,215 @@
 .desk-capture-recording-box { spacing: 4px; }
 .desk-capture-recording-dot { color: #e01b24; }
 .desk-capture-recording-time { font-feature-settings: "tnum"; }
+
+/* ------------------------------------------------------------------ shortcut guide (shortcutGuide/*.ts)
+   windows11: dimmed full-screen multi-column grid with rounded square keycaps;
+   macos / default: centred translucent cheat-sheet panel with optional search entry. */
+.desk-guide-backdrop {
+  background-color: rgba(0,0,0,0.45);
+}
+.desk-guide-backdrop.desk-skin-windows11 {
+  background-color: rgba(0,0,0,0.62);
+}
+.desk-guide-backdrop.desk-skin-macos {
+  background-color: rgba(0,0,0,0.28);
+}
+
+.desk-guide-panel {
+  spacing: 12px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  color: #f2f2f2;
+  background-color: rgba(28,28,30,0.94);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+}
+.desk-guide-panel.desk-skin-windows11 {
+  border-radius: 10px;
+  padding: 24px 28px;
+  background-color: rgba(32,32,32,0.92);
+  border-color: rgba(255,255,255,0.12);
+}
+.desk-guide-panel.desk-skin-macos {
+  border-radius: 16px;
+  background-color: rgba(36,36,38,0.88);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.desk-guide-header {
+  spacing: 12px;
+}
+.desk-guide-title {
+  font-size: 14pt;
+  font-weight: 700;
+  color: inherit;
+}
+.desk-guide-hint {
+  font-size: 9.5pt;
+  color: rgba(255,255,255,0.65);
+}
+
+.desk-guide-search {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 10.5pt;
+  color: inherit;
+  background-color: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+.desk-guide-search:focus {
+  border-color: -st-accent-color;
+}
+.desk-skin-windows11 .desk-guide-search:focus {
+  border-color: #60cdff;
+}
+
+.desk-guide-notice {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 9.5pt;
+  color: #ffd88a;
+  background-color: rgba(255,190,60,0.14);
+  border: 1px solid rgba(255,190,60,0.32);
+}
+
+.desk-guide-columns {
+  spacing: 24px;
+}
+.desk-guide-column {
+  spacing: 16px;
+}
+.desk-guide-list {
+  spacing: 14px;
+}
+.desk-guide-group {
+  spacing: 6px;
+}
+.desk-guide-group-title {
+  font-size: 10pt;
+  font-weight: 700;
+  color: rgba(255,255,255,0.72);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.desk-guide-row {
+  spacing: 10px;
+  padding: 4px 2px;
+}
+.desk-guide-row-text {
+  spacing: 8px;
+}
+.desk-guide-action {
+  font-size: 10pt;
+  color: inherit;
+}
+.desk-guide-owner {
+  font-size: 8.5pt;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.62);
+  background-color: rgba(255,255,255,0.08);
+}
+.desk-guide-owner-user {
+  color: #8fd3ff;
+  background-color: rgba(96,205,255,0.16);
+}
+
+.desk-guide-keys {
+  spacing: 4px;
+}
+.desk-guide-combo-sep {
+  font-size: 9pt;
+  padding: 0 3px;
+  color: rgba(255,255,255,0.55);
+}
+.desk-guide-keycap {
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-size: 9.5pt;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  background-color: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+}
+.desk-skin-windows11 .desk-guide-keycap {
+  border-radius: 4px;
+  padding: 3px 8px;
+  background-color: rgba(255,255,255,0.12);
+  border-bottom-width: 2px;
+}
+.desk-skin-macos .desk-guide-keycap {
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+.desk-guide-empty {
+  padding: 32px 12px;
+  font-size: 11pt;
+  color: rgba(255,255,255,0.65);
+}
+
+/* light colour scheme */
+.desk-light.desk-guide-panel {
+  color: #1f1f1f;
+  background-color: rgba(246,246,248,0.96);
+  border-color: rgba(0,0,0,0.14);
+}
+.desk-light.desk-guide-panel.desk-skin-windows11 {
+  background-color: rgba(243,243,243,0.95);
+}
+.desk-light.desk-guide-panel.desk-skin-macos {
+  background-color: rgba(250,250,252,0.92);
+}
+.desk-light.desk-guide-panel .desk-guide-hint,
+.desk-light.desk-guide-panel .desk-guide-empty {
+  color: rgba(0,0,0,0.62);
+}
+.desk-light.desk-guide-panel .desk-guide-search {
+  background-color: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.16);
+}
+.desk-light.desk-guide-panel .desk-guide-group-title {
+  color: rgba(0,0,0,0.68);
+  border-bottom-color: rgba(0,0,0,0.10);
+}
+.desk-light.desk-guide-panel .desk-guide-owner {
+  color: rgba(0,0,0,0.62);
+  background-color: rgba(0,0,0,0.06);
+}
+.desk-light.desk-guide-panel .desk-guide-owner-user {
+  color: #005fb8;
+  background-color: rgba(0,95,184,0.12);
+}
+.desk-light.desk-guide-panel .desk-guide-keycap {
+  color: #1f1f1f;
+  background-color: rgba(0,0,0,0.07);
+  border-color: rgba(0,0,0,0.20);
+}
+.desk-light.desk-guide-panel .desk-guide-notice {
+  color: #7a4b00;
+  background-color: rgba(255,190,60,0.20);
+  border-color: rgba(180,120,0,0.35);
+}
+
+/* high contrast: opaque surfaces and strong borders */
+.desk-hc.desk-guide-panel {
+  color: #ffffff;
+  background-color: #000000;
+  border: 2px solid #ffffff;
+  box-shadow: none;
+}
+.desk-hc.desk-light.desk-guide-panel {
+  color: #000000;
+  background-color: #ffffff;
+  border-color: #000000;
+}
+.desk-hc.desk-guide-panel .desk-guide-keycap {
+  border: 2px solid currentColor;
+  background-color: transparent;
+}
+.desk-hc.desk-guide-panel .desk-guide-search:focus {
+  border: 3px solid currentColor;
+}

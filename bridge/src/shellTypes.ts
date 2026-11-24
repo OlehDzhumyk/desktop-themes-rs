@@ -30,6 +30,12 @@ export function focusWindow(): Meta.Window | null {
     return global.display.focus_window;
 }
 
+/** The shell's current action mode (the typings give it the literal type of its initial value). */
+export function actionMode(): Shell.ActionMode {
+    const mode: Shell.ActionMode = Main.actionMode;
+    return mode;
+}
+
 /** The screen is locked (the typings give `isLocked` only to some session modes). */
 export function sessionLocked(): boolean {
     return (Main.sessionMode as {isLocked?: boolean}).isLocked === true;
