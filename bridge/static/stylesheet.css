@@ -543,3 +543,67 @@
 /* high contrast: opaque hint and a thick frame */
 .desk-hc .desk-region-selection { border: 3px solid #ffffff; }
 .desk-hc .desk-region-hint { background-color: #000000; border: 2px solid #ffffff; }
+
+/* ------------------------------------------------------------------ screenshots (capture/*.ts)
+   The toolbar sits on a light dim layer. windows11: a compact Fluent bar at the top, icons only;
+   macos: a translucent capsule near the bottom (Shift+Cmd+5); default: a shell-styled bar.
+   :focus shows a visible ring (keyboard path, AC-SHOT-10). The thumbnail (macos) floats at the
+   bottom right; the recording item in the top bar has a red dot and the elapsed time. */
+.desk-capture-layer { background-color: rgba(0,0,0,0.25); }
+.desk-capture-toolbar {
+  spacing: 4px;
+  padding: 6px;
+  border-radius: 14px;
+  color: #f2f2f2;
+  background-color: rgba(30,30,32,0.95);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.desk-capture-button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: inherit;
+  border: 2px solid transparent;
+}
+.desk-capture-button:hover { background-color: rgba(255,255,255,0.10); }
+.desk-capture-button:active { background-color: rgba(255,255,255,0.18); }
+.desk-capture-button:focus { border-color: -st-accent-color; }
+.desk-capture-button-box { spacing: 6px; }
+.desk-capture-button-icon { icon-size: 16px; }
+.desk-capture-button-label { color: inherit; font-size: 10pt; }
+.desk-capture-separator { width: 1px; margin: 4px 4px; background-color: rgba(255,255,255,0.18); }
+/* windows11: Fluent surface, 8 px corners, square icon buttons */
+.desk-capture-toolbar.desk-skin-windows11 { border-radius: 8px; padding: 4px; background-color: #2b2b2b; }
+.desk-capture-toolbar.desk-skin-windows11 .desk-capture-button { padding: 8px; border-radius: 4px; }
+.desk-capture-toolbar.desk-skin-windows11 .desk-capture-button:focus { border-color: #60cdff; }
+/* macos: capsule, translucent, larger targets */
+.desk-capture-toolbar.desk-skin-macos { border-radius: 999px; padding: 6px 12px; background-color: rgba(40,40,40,0.88); }
+.desk-capture-toolbar.desk-skin-macos .desk-capture-button { border-radius: 999px; padding: 6px 12px; }
+.desk-capture-layer.desk-skin-macos { background-color: rgba(0,0,0,0.12); }
+.desk-light.desk-capture-toolbar { color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14); }
+.desk-light.desk-capture-toolbar.desk-skin-windows11 { background-color: #f3f3f3; }
+.desk-light.desk-capture-toolbar .desk-capture-button:hover { background-color: rgba(0,0,0,0.06); }
+.desk-light.desk-capture-toolbar .desk-capture-button:active { background-color: rgba(0,0,0,0.12); }
+.desk-light.desk-capture-toolbar .desk-capture-separator { background-color: rgba(0,0,0,0.16); }
+.desk-light.desk-capture-toolbar.desk-skin-windows11 .desk-capture-button:focus { border-color: #005fb8; }
+/* high contrast: opaque surface, outline, thick focus ring */
+.desk-hc.desk-capture-toolbar { color: #ffffff; background-color: #000000; border: 2px solid #ffffff; box-shadow: none; }
+.desk-hc.desk-light.desk-capture-toolbar { color: #000000; background-color: #ffffff; border-color: #000000; }
+.desk-hc.desk-capture-toolbar .desk-capture-button:focus { border: 3px solid currentColor; }
+
+.desk-capture-thumbnail {
+  padding: 4px;
+  border-radius: 10px;
+  background-color: rgba(30,30,32,0.92);
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.desk-capture-thumbnail:hover { border-color: rgba(255,255,255,0.6); }
+.desk-capture-thumbnail:focus { border: 2px solid -st-accent-color; }
+.desk-light.desk-capture-thumbnail { background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.18); }
+.desk-hc.desk-capture-thumbnail { background-color: #000000; border: 2px solid #ffffff; box-shadow: none; }
+.desk-capture-thumbnail-image { border-radius: 6px; }
+
+.desk-capture-recording-box { spacing: 4px; }
+.desk-capture-recording-dot { color: #e01b24; }
+.desk-capture-recording-time { font-feature-settings: "tnum"; }

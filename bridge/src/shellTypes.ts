@@ -30,6 +30,11 @@ export function focusWindow(): Meta.Window | null {
     return global.display.focus_window;
 }
 
+/** The screen is locked (the typings give `isLocked` only to some session modes). */
+export function sessionLocked(): boolean {
+    return (Main.sessionMode as {isLocked?: boolean}).isLocked === true;
+}
+
 /** Text of anything that was thrown. */
 export function errorText(e: unknown): string {
     return e instanceof Error ? e.message : String(e);

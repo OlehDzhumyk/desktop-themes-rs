@@ -18,6 +18,8 @@ export const INTERNAL_MIME = 'application/x-desk-internal';
 export const MIXER_PATH = '/io/github/OlehDzhumyk/Desk/Mixer';
 export const OCR_PATH = '/io/github/OlehDzhumyk/Desk/Ocr';
 export const OCR_IFACE = 'io.github.OlehDzhumyk.Desk.Ocr';
+export const CAPTURE_PATH = '/io/github/OlehDzhumyk/Desk/Capture';
+export const CAPTURE_IFACE = 'io.github.OlehDzhumyk.Desk.Capture';
 const THEMES_BUS = 'io.github.OlehDzhumyk.Themes';
 const THEMES_PATH = '/io/github/OlehDzhumyk/Themes';
 
