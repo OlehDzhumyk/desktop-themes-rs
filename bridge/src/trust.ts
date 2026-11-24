@@ -68,12 +68,13 @@ function deskdPaths(busName: string): string[] {
     return out;
 }
 
-/** A method call on the session bus as a promise. */
+/** A method call on the session bus as a promise; `cancellable` rejects it when cancelled. */
 export function dbusCall(dest: string, path: string, iface: string, method: string, params: GLib.Variant,
-    replyType: string, flags = Gio.DBusCallFlags.NONE): Promise<GLib.Variant> {
+    replyType: string, flags = Gio.DBusCallFlags.NONE, cancellable: Gio.Cancellable | null = null,
+): Promise<GLib.Variant> {
     return new Promise((resolve, reject) => {
         Gio.DBus.session.call(dest, path, iface, method, params, new GLib.VariantType(replyType), flags, -1,
-            null, (_c: Gio.DBusConnection | null, res: Gio.AsyncResult) => {
+            cancellable, (_c: Gio.DBusConnection | null, res: Gio.AsyncResult) => {
                 try {
                     resolve(Gio.DBus.session.call_finish(res));
                 } catch (e) {
