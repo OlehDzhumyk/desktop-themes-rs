@@ -95,6 +95,28 @@ Other files in that directory are replaced on the next login.
 | Ctrl+Shift+Esc | System monitor |
 | Alt+F4 | Close the window |
 
+## Tests
+
+`just e2e-wayland` (`tools/e2e-wayland.sh`) runs the end-to-end tests in `tests/e2e-wayland/`.
+They need podman or Docker; no systemd and no GPU. The steps:
+
+1. The script builds `deskd` and `desk-shell` (`--no-build` uses `target/debug` as it is).
+2. A Fedora 45 container gets the binaries, `data/` and the tests, all read-only.
+3. In the container, labwc starts with `WLR_BACKENDS=headless` and `WLR_RENDERER=pixman`, with
+   the bundled `rc.xml`. Then `deskd` and `desk-shell --skin windows11` start, on a private
+   session bus and in their own `XDG_RUNTIME_DIR` and `XDG_CONFIG_HOME`.
+4. The tests check these items:
+   - `desk-shell` loads `libgtk4-layer-shell.so.0`, and the taskbar is a layer surface with an
+     exclusive zone.
+   - `deskd` owns `io.github.OlehDzhumyk.Desk` and `desk-shell` owns `io.github.OlehDzhumyk.DeskShell`.
+   - `--toggle-start`, `--toggle-quick-settings` and `--toggle-clipboard` open and close their
+     flyouts in the running shell, and exit 0.
+   - Both processes stay alive, and their logs have no critical errors and no panics.
+
+`desk-shell` runs with `WAYLAND_DEBUG=client`, so the tests see the layer surfaces in its log.
+The logs of labwc, deskd and desk-shell go to `target/e2e-wayland`. CI runs the suite in
+`.github/workflows/e2e-wayland.yml` when desk-shell, deskd or `data/labwc` change.
+
 ## Remove
 
 ```sh

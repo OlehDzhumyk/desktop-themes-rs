@@ -95,6 +95,11 @@ context-budget:
 e2e *args:
     tools/e2e.sh "$@"
 
+# labwc + desk-shell + deskd Wayland end-to-end tests in a container (tests/e2e-wayland): just e2e-wayland -k toggle
+[positional-arguments]
+e2e-wayland *args:
+    tools/e2e-wayland.sh "$@"
+
 # enable the repository's git hooks
 install-hooks:
     git config core.hooksPath .githooks
