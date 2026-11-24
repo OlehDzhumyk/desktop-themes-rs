@@ -29,6 +29,7 @@ The repository is a Cargo workspace:
 | `crates/desk-capture` | library | the screenshot core, pure Rust with no desktop dependency (ADR 0011): PNG checks with a 100 MP cap, removal of text/time metadata, collision-safe atomic saving, and destructive redaction, crop and annotations rendered into RGBA |
 | `crates/desk-layouts` | library | the window layouts core, pure Rust with no desktop dependency (ADR 0011): six built-in snap layouts, fractional zone validation, portrait adaptation, even-pixel zone geometry with outer/inner gaps, minimum-size fitting and atomic 0600 `layouts.json` |
 | `crates/desk-search` | library | the search core, pure Rust with no desktop dependency (ADR 0011): query language, safe arithmetic calculator, tiered layout-tolerant fuzzy ranking (Ukrainian ↔ QWERTY), XDG desktop entries, system actions and the decayed 0600 `search-usage.json` |
+| `crates/desk-shell` | binary `desk-shell` | the DE-agnostic Wayland shell (ADR 0012): Windows 11 taskbar and Start/Search flyout as `wlr-layer-shell` surfaces on labwc, niri, sway, KWin or COSMIC; GTK 4 without libadwaita, `libgtk4-layer-shell.so.0` opened with `dlopen` (normal windows without it, or with `--windowed`); search through `desk-search` in process, clipboard, appearance and usage through deskd, screenshots through the XDG portal |
 | `crates/deskd` | binary `deskd` | desktop features daemon: hosts engines (clipboard history, automatic light/dark appearance, emoji and symbol picker, screenshots, window layouts, search, focus modes, volume mixer over PipeWire; cargo feature `pipewire`, on by default) |
 | `bridge/` | npm project | the GNOME Shell extension `desk-bridge@desktop-themes-rs`, TypeScript compiled with `tsc` (TypeScript 7, native) to ES2025 modules for gjs 1.90 / SpiderMonkey 140, strict flags incl. `noUncheckedIndexedAccess`, linted with typescript-eslint `strictTypeChecked` (types from `@girs/gnome-shell` 51 / ts-for-gir) |
 
@@ -47,6 +48,13 @@ watch the clipboard. The bridge listens to `Meta.Selection::owner-changed`, read
 duplicates) and stores it. Panels ask deskd for items (`List`) and paste through `Activate` + a
 synthesized Shift+Insert. Everything the user configures is in GSettings and is read by deskd,
 the bridge and the window alike: there is no second settings dialog.
+
+**Outside GNOME: desk-shell.** On compositors with `wlr-layer-shell` the bridge is replaced by
+`desk-shell` ([ADR 0012](adr/0012-wayland-layer-shell-desk-shell.md)), a Rust adapter that talks
+to the same deskd. Run one instance per session from the compositor's autostart, and bind
+`desk-shell --toggle-start` to a key (for example `Super`); the second process only forwards the
+toggle to the running one over D-Bus (`io.github.OlehDzhumyk.DeskShell`). `desk-shell --windowed`
+shows the same surfaces as normal windows, for previews on GNOME.
 
 **Settings schema.** `data/io.github.OlehDzhumyk.Desk.gschema.xml` is compiled into
 `~/.local/share/glib-2.0/schemas` (GLib searches the user data dir, so deskd, the window and

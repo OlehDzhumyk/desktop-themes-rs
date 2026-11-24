@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 05:06+0000\n"
+"POT-Creation-Date: 2026-11-24 08:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1150,6 +1150,7 @@ msgstr ""
 
 #: crates/desk-settings/src/ocr.rs:176 crates/desk-settings/src/registry.rs:22
 #: crates/desk-settings/src/registry.rs:454
+#: crates/desk-shell/src/start_menu.rs:94
 msgid "Clipboard"
 msgstr ""
 
@@ -1289,6 +1290,7 @@ msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
 #: crates/desk-settings/src/registry.rs:446
+#: crates/desk-shell/src/start_menu.rs:90
 msgid "Application"
 msgstr ""
 
@@ -1493,6 +1495,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
+#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:86
+#: crates/desk-shell/src/taskbar.rs:89
 msgid "Search"
 msgstr ""
 
@@ -1608,6 +1612,83 @@ msgid ""
 "follows the skin of the current theme."
 msgstr ""
 
+#: crates/desk-shell/src/main.rs:107 crates/deskd/src/search/mod.rs:179
+#, rust-format
+msgid "Search the web for “{query}”"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:89
+msgid "Calculator: press Enter to copy the result"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:91
+msgid "System action"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:92
+msgid "Search the web"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:93
+msgid "File"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:95
+msgid "Emoji"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:76
+msgid "Start menu"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:132
+msgid "Type here to search"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:183
+msgid "Pinned"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:199
+msgid "No applications found"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:274
+msgid "Power"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:294
+msgid "Settings"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:299
+msgid "Lock the screen"
+msgstr ""
+
+#: crates/desk-shell/src/start_menu.rs:418 crates/themes/src/gui/window.rs:353
+msgid "No results"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:126
+msgid "The clipboard history is empty"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:153
+msgid "Clipboard history"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:207
+msgid "Desktop themes and settings"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:212
+msgid "Take a screenshot"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:228
+msgid "Taskbar"
+msgstr ""
+
 #: crates/deskd/src/clipboard.rs:249
 #, rust-format
 msgid "{format} image {width}×{height}"
@@ -1651,11 +1732,6 @@ msgstr ""
 #: crates/deskd/src/main.rs:113 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
-msgstr ""
-
-#: crates/deskd/src/search/mod.rs:179
-#, rust-format
-msgid "Search the web for “{query}”"
 msgstr ""
 
 #: crates/themes-core/src/apply.rs:129
@@ -3866,10 +3942,6 @@ msgstr ""
 msgid "Search settings…"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:353
-msgid "No results"
-msgstr ""
-
 #: crates/themes/src/gui/window.rs:354
 msgid "Try a different search term"
 msgstr ""
@@ -4391,11 +4463,6 @@ msgstr ""
 msgid "Clipboard settings"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:60 bridge/src/clipboard/panel.ts:100
-#: bridge/src/clipboard/winFlyout.ts:77 bridge/src/shortcutGuide/reader.ts:128
-msgid "Clipboard history"
-msgstr ""
-
 #: bridge/src/clipboard/listPanel.ts:80
 msgid "close"
 msgstr ""
@@ -4451,10 +4518,6 @@ msgstr ""
 
 #: bridge/src/clipboard/panel.ts:46
 msgid "{text}, pinned"
-msgstr ""
-
-#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:53
-msgid "Emoji"
 msgstr ""
 
 #: bridge/src/clipboard/winFlyout.ts:60

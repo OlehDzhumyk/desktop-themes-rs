@@ -37,7 +37,8 @@ deskd checks the caller of every method that returns or changes user content
 3. it is the current owner of `org.gnome.Shell` (asked with `GetNameOwner` on each call, so a
    restarted shell is followed and a process that lost the name loses the trust), **or** its
    executable (`/proc/<pid>/exe`, by device and inode, so links and renames do not matter) is
-   deskd itself or the `themes` binary next to it.
+   deskd itself or the `themes` or `desk-shell` binary next to it (`desk-shell`:
+   [ADR 0012](0012-wayland-layer-shell-desk-shell.md)).
 
 When the bus passes a pidfd (`ProcessFD`), the pid must still belong to that process after
 `/proc` was read, so a reused pid cannot lend another process's identity.

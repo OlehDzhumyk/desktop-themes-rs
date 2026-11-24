@@ -17,5 +17,6 @@ ADR that supersedes the old one; do not rewrite history.
 | [0009](0009-deskd-writes-do-not-disturb-keys.md) | deskd writes the do-not-disturb keys for focus modes; the bridge only adds exceptions |
 | [0010](0010-live-wallpaper-palette-overlay.md) | The live wallpaper palette is a recorded overlay in the generated gtk.css copy |
 | [0011](0011-wayland-agnostic-rust-core.md) | A Wayland-agnostic Rust core, a desktop backend boundary and thin compositor adapters |
+| [0012](0012-wayland-layer-shell-desk-shell.md) | desk-shell: a Rust GTK 4 shell on wlr-layer-shell, with gtk4-layer-shell loaded at run time |
 
 New ADR: copy `0000-template.md`, take the next number, add a row above.

@@ -21,6 +21,16 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- `desk-shell`, a DE-agnostic Wayland desktop shell for compositors with `wlr-layer-shell` (labwc,
+  niri, sway, KWin, COSMIC), Windows 11 first ([ADR 0012](docs/adr/0012-wayland-layer-shell-desk-shell.md)):
+  a 48 px taskbar with the Start button, the Search pill, pinned applications chosen from the
+  installed desktop entries, quick actions (settings hub, portal screenshot into the editor,
+  clipboard history from deskd) and a clock with the date; and a Start/Search flyout with a 4 × 3
+  pinned grid, a user/Settings/Lock/Power footer and instant `desk-search` results (calculator,
+  Ukrainian ↔ QWERTY layout tolerance, applications, `>` system actions) driven by
+  `Up`/`Down`/`Return`/`Esc`. `libgtk4-layer-shell.so.0` is loaded at run time; without it, or with
+  `--windowed`, the surfaces open as normal windows. `desk-shell --toggle-start` toggles the flyout
+  of the running instance from a key binding. deskd trusts the `desk-shell` binary next to it.
 - Optional Windows 11 Wayland session on labwc: `data/labwc/windows11/` (labwc `rc.xml` with
   Windows 11 key bindings, cascade placement and edge snapping; the Fluent dark `desk-win11`
   window theme; `autostart` for the wallpaper, `deskd` and `desk-shell`), the launcher

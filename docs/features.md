@@ -304,6 +304,21 @@ All skins follow the light colour scheme, high contrast (opaque surface, outline
 row) and reduced motion (a fade of 100 ms, none when animations are off). The box opens on the monitor with the
 pointer, and each row's accessible name carries its group.
 
+## Desktop shell outside GNOME
+
+Status: **partial** (first version, Windows 11 layout). `desk-shell` draws a taskbar and a Start/Search
+flyout as `wlr-layer-shell` surfaces on labwc, niri, sway, KWin or COSMIC, without GNOME Shell
+([ADR 0012](adr/0012-wayland-layer-shell-desk-shell.md)).
+
+| | |
+|---|---|
+| Start | from the compositor's autostart: `desk-shell` (one instance per session); `desk-shell --windowed` previews it as normal windows (GNOME, no `libgtk4-layer-shell.so.0`) |
+| Taskbar | 48 px at the bottom, exclusive zone; centre: Start, Search pill, pinned apps (file manager, terminal, default browser, settings hub, text editor; missing ones are skipped); right: settings hub, screenshot (XDG portal, then the editor), clipboard history (deskd), clock and date (calendar on click) |
+| Start/Search | `desk-shell --toggle-start` (bind it to `Super`), the Start button or the Search pill; empty field: 4 × 3 pinned grid and a footer (user, Settings, Lock, Power menu); typing: `desk-search` results with the query language above; `↑`/`↓` move, `Enter` opens, `Esc` clears the field, then closes; a click outside closes |
+| Open a result | application: launched from its desktop entry; calculator: copied; system action: lock, suspend, log out, restart, power off through logind, dark mode and clipboard private mode through deskd; web: DuckDuckGo in the default browser; then `RecordLaunch` |
+| Settings | `skin` (or `--skin`), `web-search` and `max-results` of the search schema; light, dark and high contrast follow the GTK interface settings |
+| Not yet | running-window list (needs `wlr-foreign-toplevel-management`), clipboard capture (needs a data-control protocol), own `macos` and `default` layouts (both reuse the Windows 11 layout with their palette) |
+
 ## Automatic light/dark
 
 | | |
