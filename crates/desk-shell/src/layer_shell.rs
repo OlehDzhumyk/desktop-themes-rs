@@ -79,6 +79,7 @@ pub struct Api {
     set_margin: unsafe extern "C" fn(GtkWindowPtr, c_int, c_int),
     set_keyboard_mode: unsafe extern "C" fn(GtkWindowPtr, c_int),
     set_namespace: unsafe extern "C" fn(GtkWindowPtr, *const c_char),
+    set_monitor: unsafe extern "C" fn(GtkWindowPtr, *mut c_void),
 }
 
 /// Resolve `name` in `handle` as a function pointer of type `F`.
@@ -120,6 +121,7 @@ impl Api {
                 set_margin: symbol(handle, c"gtk_layer_set_margin")?,
                 set_keyboard_mode: symbol(handle, c"gtk_layer_set_keyboard_mode")?,
                 set_namespace: symbol(handle, c"gtk_layer_set_namespace")?,
+                set_monitor: symbol(handle, c"gtk_layer_set_monitor")?,
             })
         }
     }
@@ -152,6 +154,15 @@ impl Api {
             }
             (self.set_keyboard_mode)(w, p.keyboard as c_int);
         }
+    }
+
+    /// Put the layer surface of `window` (after [`Api::apply`]) on `monitor`.
+    pub fn set_monitor(&self, window: &gtk::Window, monitor: &gtk::gdk::Monitor) {
+        let w: *mut gtk::ffi::GtkWindow = window.to_glib_none().0;
+        let m: *mut gtk::gdk::ffi::GdkMonitor = monitor.to_glib_none().0;
+        // SAFETY: both are live GObjects for the duration of the call; the library takes its
+        // own reference to the monitor.
+        unsafe { (self.set_monitor)(w.cast::<c_void>(), m.cast::<c_void>()) }
     }
 }
 
@@ -187,6 +198,17 @@ pub fn place(window: &impl IsA<gtk::Window>, p: &Placement) -> bool {
     match api() {
         Some(api) => {
             api.apply(window.upcast_ref(), p);
+            true
+        }
+        None => false,
+    }
+}
+
+/// Put the layer surface `window` on `monitor`. Returns `false` (nothing done) in the fallback.
+pub fn set_monitor(window: &impl IsA<gtk::Window>, monitor: &gtk::gdk::Monitor) -> bool {
+    match api() {
+        Some(api) => {
+            api.set_monitor(window.upcast_ref(), monitor);
             true
         }
         None => false,

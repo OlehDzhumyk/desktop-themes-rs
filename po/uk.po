@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 08:31+0000\n"
+"POT-Creation-Date: 2026-11-24 09:25+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -1978,7 +1978,7 @@ msgstr "Верхня панель"
 
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
-#: crates/desk-shell/src/quick_settings.rs:138
+#: crates/desk-shell/src/quick_settings.rs:139
 msgid "Volume mixer"
 msgstr "Мікшер гучності"
 
@@ -2151,7 +2151,7 @@ msgstr "Потрібен пакунок tesseract і дані мов."
 
 #: crates/desk-settings/src/ocr.rs:176 crates/desk-settings/src/registry.rs:22
 #: crates/desk-settings/src/registry.rs:454
-#: crates/desk-shell/src/start_menu.rs:94
+#: crates/desk-shell/src/start_menu.rs:95
 msgid "Clipboard"
 msgstr "Буфер обміну"
 
@@ -2303,7 +2303,7 @@ msgstr "Перегляд"
 
 #: crates/desk-settings/src/registry.rs:34
 #: crates/desk-settings/src/registry.rs:446
-#: crates/desk-shell/src/start_menu.rs:90
+#: crates/desk-shell/src/start_menu.rs:91
 msgid "Application"
 msgstr "Програма"
 
@@ -2520,8 +2520,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
-#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:83
-#: crates/desk-shell/src/taskbar.rs:86
+#: crates/desk-shell/src/start_menu.rs:139 crates/desk-shell/src/taskbar.rs:94
+#: crates/desk-shell/src/taskbar.rs:97
 msgid "Search"
 msgstr "Пошук"
 
@@ -2652,49 +2652,49 @@ msgstr ""
 "Скорочення для доступності змінюється на сторінці «Клавіатурні скорочення»; "
 "вигляд наслідує стиль поточної теми."
 
-#: crates/desk-shell/src/clipboard_flyout.rs:62
-#: crates/desk-shell/src/clipboard_flyout.rs:84
-#: crates/desk-shell/src/clipboard_flyout.rs:104
-#: crates/desk-shell/src/taskbar.rs:111
+#: crates/desk-shell/src/clipboard_flyout.rs:65
+#: crates/desk-shell/src/clipboard_flyout.rs:88
+#: crates/desk-shell/src/clipboard_flyout.rs:108
+#: crates/desk-shell/src/taskbar.rs:107
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:68
+#: crates/desk-shell/src/clipboard_flyout.rs:71
 msgid "Private mode is on: new items are not recorded"
 msgstr "Приватний режим увімкнено: нові елементи не записуються"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:73
+#: crates/desk-shell/src/clipboard_flyout.rs:76
 msgid "Clear all"
 msgstr "Очистити все"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:161
+#: crates/desk-shell/src/clipboard_flyout.rs:165
 msgid ""
 "The clipboard history is not available: the desktop service is not running"
 msgstr "Історія буфера обміну недоступна: служба стільниці не працює"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:163
+#: crates/desk-shell/src/clipboard_flyout.rs:167
 msgid "The clipboard history is empty"
 msgstr "Історія буфера обміну порожня"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:194
-#: crates/desk-shell/src/clipboard_flyout.rs:225
+#: crates/desk-shell/src/clipboard_flyout.rs:198
+#: crates/desk-shell/src/clipboard_flyout.rs:229
 msgid "Pinned item"
 msgstr "Закріплений елемент"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:199
+#: crates/desk-shell/src/clipboard_flyout.rs:203
 msgid "Pin"
 msgstr "Закріпити"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:199
+#: crates/desk-shell/src/clipboard_flyout.rs:203
 msgid "Unpin"
 msgstr "Відкріпити"
 
-#: crates/desk-shell/src/clipboard_flyout.rs:212
+#: crates/desk-shell/src/clipboard_flyout.rs:216
 #: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
 msgid "Delete"
 msgstr "Видалити"
 
-#: crates/desk-shell/src/main.rs:121 crates/deskd/src/search/mod.rs:179
+#: crates/desk-shell/src/main.rs:245 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr "Шукати «{query}» в інтернеті"
@@ -2707,108 +2707,134 @@ msgstr "Вимкнути звук"
 msgid "Unmute"
 msgstr "Увімкнути звук"
 
-#: crates/desk-shell/src/quick_settings.rs:123
-#: crates/desk-shell/src/taskbar.rs:126
+#: crates/desk-shell/src/quick_settings.rs:124
+#: crates/desk-shell/src/taskbar.rs:122
 msgid "Quick settings"
 msgstr "Швидкі налаштування"
 
-#: crates/desk-shell/src/quick_settings.rs:124
+#: crates/desk-shell/src/quick_settings.rs:125
 msgid "Dark mode"
 msgstr "Темний режим"
 
-#: crates/desk-shell/src/quick_settings.rs:125
+#: crates/desk-shell/src/quick_settings.rs:126
 #: crates/deskd/src/focus/model.rs:186
 msgid "Do not disturb"
 msgstr "Не турбувати"
 
-#: crates/desk-shell/src/quick_settings.rs:126
+#: crates/desk-shell/src/quick_settings.rs:127
 msgid "Private clipboard"
 msgstr "Приватний буфер"
 
-#: crates/desk-shell/src/quick_settings.rs:157
+#: crates/desk-shell/src/quick_settings.rs:158
 msgid "Screenshot"
 msgstr "Знімок екрана"
 
-#: crates/desk-shell/src/quick_settings.rs:160
+#: crates/desk-shell/src/quick_settings.rs:161
 msgid "Settings hub"
 msgstr "Центр налаштувань"
 
-#: crates/desk-shell/src/quick_settings.rs:192
+#: crates/desk-shell/src/quick_settings.rs:193
 msgid "Sound"
 msgstr "Звук"
 
-#: crates/desk-shell/src/quick_settings.rs:202
+#: crates/desk-shell/src/quick_settings.rs:203
 msgid "Volume"
 msgstr "Гучність"
 
-#: crates/desk-shell/src/quick_settings.rs:315
+#: crates/desk-shell/src/quick_settings.rs:316
 msgid "Sound is not available: the desktop service is not running"
 msgstr "Звук недоступний: служба стільниці не працює"
 
-#: crates/desk-shell/src/quick_settings.rs:317
+#: crates/desk-shell/src/quick_settings.rs:318
 msgid "No output device"
 msgstr "Немає пристрою виведення"
 
-#: crates/desk-shell/src/quick_settings.rs:370
+#: crates/desk-shell/src/quick_settings.rs:373
 #, rust-format
 msgid "Volume of {app}"
 msgstr "Гучність {app}"
 
-#: crates/desk-shell/src/start_menu.rs:89
+#: crates/desk-shell/src/start_menu.rs:90
 msgid "Calculator: press Enter to copy the result"
 msgstr "Калькулятор: натисніть Enter, щоб скопіювати результат"
 
-#: crates/desk-shell/src/start_menu.rs:91
+#: crates/desk-shell/src/start_menu.rs:92
 msgid "System action"
 msgstr "Системна дія"
 
-#: crates/desk-shell/src/start_menu.rs:92
+#: crates/desk-shell/src/start_menu.rs:93
 msgid "Search the web"
 msgstr "Пошук в інтернеті"
 
-#: crates/desk-shell/src/start_menu.rs:93
+#: crates/desk-shell/src/start_menu.rs:94
 msgid "File"
 msgstr "Файл"
 
-#: crates/desk-shell/src/start_menu.rs:95
+#: crates/desk-shell/src/start_menu.rs:96
 msgid "Emoji"
 msgstr "Емодзі"
 
-#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:73
+#: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:84
 msgid "Start menu"
 msgstr "Пуск"
 
-#: crates/desk-shell/src/start_menu.rs:132
+#: crates/desk-shell/src/start_menu.rs:136
 msgid "Type here to search"
 msgstr "Введіть текст для пошуку"
 
-#: crates/desk-shell/src/start_menu.rs:183
+#: crates/desk-shell/src/start_menu.rs:188
 msgid "Pinned"
 msgstr "Закріплені"
 
-#: crates/desk-shell/src/start_menu.rs:199
+#: crates/desk-shell/src/start_menu.rs:204
 msgid "No applications found"
 msgstr "Програм не знайдено"
 
-#: crates/desk-shell/src/start_menu.rs:274
+#: crates/desk-shell/src/start_menu.rs:279
 msgid "Power"
 msgstr "Живлення"
 
-#: crates/desk-shell/src/start_menu.rs:294
+#: crates/desk-shell/src/start_menu.rs:299
 msgid "Settings"
 msgstr "Налаштування"
 
-#: crates/desk-shell/src/start_menu.rs:299
+#: crates/desk-shell/src/start_menu.rs:304
 msgid "Lock the screen"
 msgstr "Заблокувати екран"
 
-#: crates/desk-shell/src/start_menu.rs:418 crates/themes/src/gui/window.rs:353
+#: crates/desk-shell/src/start_menu.rs:441 crates/themes/src/gui/window.rs:353
 msgid "No results"
 msgstr "Нічого не знайдено"
 
-#: crates/desk-shell/src/taskbar.rs:195
+#: crates/desk-shell/src/taskbar.rs:281
+msgid "Restore"
+msgstr "Відновити"
+
+#: crates/desk-shell/src/taskbar.rs:283
+msgid "Minimize"
+msgstr "Згорнути"
+
+#: crates/desk-shell/src/taskbar.rs:289
+msgid "Unmaximize"
+msgstr "Відновити розмір"
+
+#: crates/desk-shell/src/taskbar.rs:291
+msgid "Maximize"
+msgstr "Розгорнути"
+
+#: crates/desk-shell/src/taskbar.rs:295
+#: crates/themes/src/gui/capture_editor/mod.rs:848
+#: crates/themes/src/gui/window.rs:1369
+msgid "Close"
+msgstr "Закрити"
+
+#: crates/desk-shell/src/taskbar.rs:438
 msgid "Taskbar"
 msgstr "Панель завдань"
+
+#: crates/desk-shell/src/taskbar.rs:576
+msgid "Window"
+msgstr "Вікно"
 
 #: crates/deskd/src/clipboard.rs:249
 #, rust-format
@@ -2854,7 +2880,7 @@ msgstr ""
 "replace, і дозволити наступному забрати її\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:113 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:115 crates/themes/src/service.rs:410
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
@@ -4323,11 +4349,6 @@ msgstr "Не вдалося зберегти знімок екрана"
 msgid "PNG images"
 msgstr "Зображення PNG"
 
-#: crates/themes/src/gui/capture_editor/mod.rs:848
-#: crates/themes/src/gui/window.rs:1369
-msgid "Close"
-msgstr "Закрити"
-
 #: crates/themes/src/gui/capture_editor/mod.rs:855
 msgid "Save changes?"
 msgstr "Зберегти зміни?"
@@ -5242,7 +5263,7 @@ msgstr "Усе одно застосувати"
 msgid "Allow “{name}” to run commands?"
 msgstr "Дозволити темі «{name}» запускати команди?"
 
-#: crates/themes/src/gui/window.rs:1095 crates/themes/src/service.rs:137
+#: crates/themes/src/gui/window.rs:1095 crates/themes/src/service.rs:163
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"
@@ -5261,7 +5282,7 @@ msgstr "Дозволити й застосувати"
 msgid "Error: the apply thread crashed"
 msgstr "Помилка: потік застосування впав"
 
-#: crates/themes/src/gui/window.rs:1153 crates/themes/src/service.rs:186
+#: crates/themes/src/gui/window.rs:1153 crates/themes/src/service.rs:212
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr "Тему «{name}» застосовано"
@@ -5371,15 +5392,15 @@ msgstr "Розширення знову ввімкнено"
 msgid "Failed: {error}"
 msgstr "Не вдалося: {error}"
 
-#: crates/themes/src/service.rs:96
+#: crates/themes/src/service.rs:122
 msgid "internal error of the theme service"
 msgstr "внутрішня помилка служби тем"
 
-#: crates/themes/src/service.rs:174
+#: crates/themes/src/service.rs:200
 msgid "Themes: extensions turned off"
 msgstr "Теми: розширення вимкнено"
 
-#: crates/themes/src/service.rs:176
+#: crates/themes/src/service.rs:202
 #, rust-format
 msgid ""
 "After the theme was applied these extensions went into an error state and "
@@ -5388,7 +5409,7 @@ msgstr ""
 "Після застосування теми розширення перейшли в стан помилки й були вимкнені: "
 "{list}"
 
-#: crates/themes/src/service.rs:190
+#: crates/themes/src/service.rs:216
 #, rust-format
 msgid "You need to log in again: {reasons}"
 msgstr "Потрібен перевхід: {reasons}"

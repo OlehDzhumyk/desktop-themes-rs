@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `desk-shell`: the DE-agnostic Wayland desktop shell of desktop-themes-rs (ADR 0012).
 //!
-//! A taskbar, a Start/Search flyout, a quick settings flyout (toggles and the volume mixer) and a
+//! A taskbar on every monitor (with the running windows, over wlr foreign toplevel management),
+//! a Start/Search flyout, a quick settings flyout (toggles and the volume mixer) and a
 //! clipboard history flyout drawn as `wlr-layer-shell` surfaces on labwc, niri, sway,
 //! Hyprland, KWin or COSMIC, with `deskd` and `desk-search` behind them. Without layer-shell
 //! (GNOME, `--windowed`) the same surfaces open as normal windows for previews and tests.
@@ -22,9 +23,11 @@ mod launch;
 mod layer_shell;
 mod pinned;
 mod quick_settings;
+mod running;
 mod start_menu;
 mod style;
 mod taskbar;
+mod toplevels;
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -116,6 +119,7 @@ struct Shell {
     quick: Rc<QuickSettings>,
     clip: Rc<ClipboardFlyout>,
     _look: Rc<LiveLook>,
+    _taskbars: Rc<taskbar::Taskbars>,
 }
 
 impl Shell {
@@ -171,6 +175,13 @@ impl LiveLook {
             gtk_settings.connect_gtk_interface_color_scheme_notify(sync.clone());
             gtk_settings.connect_gtk_interface_contrast_notify(sync);
         }
+        // taskbars of monitors plugged in later get the look too
+        let me = Rc::downgrade(&look);
+        app.connect_window_added(move |_, w| {
+            if let Some(l) = me.upgrade() {
+                l.look().apply(w);
+            }
+        });
         let me = Rc::downgrade(&look);
         deskd::watch_appearance(move || {
             if let Some(l) = me.upgrade() {
@@ -180,12 +191,16 @@ impl LiveLook {
         look
     }
 
+    fn look(&self) -> style::Look {
+        style::current(self.skin.get(), self.deskd_dark.get())
+    }
+
     /// Put the current look on every window of the shell.
     fn apply(&self) {
         let Some(app) = self.app.upgrade() else {
             return;
         };
-        let look = style::current(self.skin.get(), self.deskd_dark.get());
+        let look = self.look();
         for w in app.windows() {
             look.apply(&w);
         }
@@ -234,16 +249,17 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
     let menu = StartMenu::new(app, Catalog::new(apps.clone(), gettext), usage, opts, &grid);
     let quick = QuickSettings::new(app);
     let clip = ClipboardFlyout::new(app);
-    let bar = taskbar::build(app, &menu, &quick, &clip, &pins);
     let look = LiveLook::new(app, args.skin);
+    let taskbars = taskbar::Taskbars::new(app, &menu, &quick, &clip, &pins, &apps);
+    taskbars.start();
     look.apply();
     look.sync();
-    bar.present();
     Shell {
         menu,
         quick,
         clip,
         _look: look,
+        _taskbars: taskbars,
     }
 }
 

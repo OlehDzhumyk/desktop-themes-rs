@@ -37,7 +37,8 @@ pub fn may_reopen(now_usec: i64, closed_at_usec: i64) -> bool {
 /// A hidden flyout window and the taskbar button that mirrors it.
 pub struct Flyout {
     pub window: gtk::Window,
-    button: RefCell<Option<glib::WeakRef<gtk::ToggleButton>>>,
+    /// The toggle button of each taskbar (one per monitor).
+    buttons: RefCell<Vec<glib::WeakRef<gtk::ToggleButton>>>,
     /// When a focus loss last closed the flyout (monotonic µs).
     closed_at: Cell<i64>,
 }
@@ -65,7 +66,7 @@ impl Flyout {
         window.set_child(Some(&surface));
         let flyout = Rc::new(Flyout {
             window,
-            button: RefCell::default(),
+            buttons: RefCell::default(),
             closed_at: Cell::new(0),
         });
         flyout.connect();
@@ -104,19 +105,22 @@ impl Flyout {
     }
 
     fn set_button_state(&self, active: bool) {
-        if let Some(b) = self
-            .button
+        for b in self
+            .buttons
             .borrow()
-            .as_ref()
-            .and_then(glib::WeakRef::upgrade)
+            .iter()
+            .filter_map(glib::WeakRef::upgrade)
         {
             b.set_active(active);
         }
     }
 
     /// The taskbar button mirrors whether the flyout is open.
+    /// Add the toggle button of a taskbar (buttons of closed taskbars are dropped).
     pub fn set_button(&self, button: &gtk::ToggleButton) {
-        *self.button.borrow_mut() = Some(button.downgrade());
+        let mut buttons = self.buttons.borrow_mut();
+        buttons.retain(|b| b.upgrade().is_some());
+        buttons.push(button.downgrade());
     }
 
     pub fn is_open(&self) -> bool {
