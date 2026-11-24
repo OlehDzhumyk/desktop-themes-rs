@@ -92,6 +92,20 @@ pub fn read_capture(s: &desk_settings::accessors::CaptureSettings) -> crate::cap
     }
 }
 
+/// GSettings `io.github.OlehDzhumyk.Desk.Layouts` (None while the schema is not installed).
+pub fn layouts_settings() -> Option<desk_settings::accessors::LayoutsSettings> {
+    desk_settings::accessors::LayoutsSettings::new()
+}
+
+/// The layouts engine's part of its settings: on/off and the gaps (the rest is the bridge's).
+pub fn read_layouts(s: &desk_settings::accessors::LayoutsSettings) -> crate::layouts::Config {
+    crate::layouts::Config {
+        enabled: s.enabled(),
+        gap_outer: s.gap_outer(),
+        gap_inner: s.gap_inner(),
+    }
+}
+
 /// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
 pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
     desk_settings::accessors::MixerSettings::new()

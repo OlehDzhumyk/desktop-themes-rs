@@ -26,6 +26,7 @@ desk-proto = { path = "crates/desk-proto" }
 theme-tokens = { path = "crates/theme-tokens" }
 desk-settings = { path = "crates/desk-settings" }
 desk-capture = { path = "crates/desk-capture" }
+desk-layouts = { path = "crates/desk-layouts" }
 
 # Selected clippy::pedantic lints (audit Q-7); the rest of pedantic stays off on purpose. Threshold of
 # too_many_lines: clippy.toml. Fix the finding, or `#[allow(..., reason = "...")]` on the item.

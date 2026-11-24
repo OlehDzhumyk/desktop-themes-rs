@@ -205,6 +205,24 @@ Skins:
   an outline and a thick focus ring; `show-preview=false` shows nothing after a capture. The editor follows the
   libadwaita style and the accent colour in every skin.
 
+## Window layouts
+
+Status: **core only** (stage 4). deskd answers the layouts and their geometry; the bridge picker, snap assist and
+always-on-top come in a later change. Spec: [window-layouts.md](spec/features/window-layouts.md).
+
+| | |
+|---|---|
+| Layouts | built-in `halves`, `thirds`, `two-thirds` (2/3 + 1/3), `quarters`, `focus` (25 % / 50 % / 25 %), `stack` (main 60 % left, two stacked on the right); custom layouts in `~/.local/share/deskd/layouts.json` (0600) |
+| Geometry | zones are fractions of the work area; a portrait work area turns columns into rows; `gap-outer` stays free along the edges and `gap-inner` separates neighbours exactly; coordinates and sizes are even logical pixels and never leave the work area; a window larger than its zone is fitted inside the work area (AC-WIN-07) |
+| Per monitor | the active layout of each monitor key (default `halves`) is saved in `layouts.json` |
+| Shortcuts | `layout-picker-shortcut` (Windows 11 and Fedora: **Super+Z**; macOS: **Ctrl+Super+Up**), `always-on-top-shortcut` (**Ctrl+Super+T**); overrides `layout-picker`, `always-on-top` in `io.github.OlehDzhumyk.Desk.Shortcuts` |
+| D-Bus | `io.github.OlehDzhumyk.Desk.Layouts` at `/io/github/OlehDzhumyk/Desk/Layouts`: `ListLayouts() → s`, `ActiveLayout(s) → s`, `SetActiveLayout(s, s)`, `ResolveZones(s, i, i, i, i) → s`, signal `Changed` |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.Layouts`: `enabled`, `layout-picker-shortcut`, `always-on-top-shortcut`, `gap-outer`, `gap-inner`, `snap-assist`, `hover-picker` |
+| Theme defaults | `windows11`: gaps 8 / 6 px, snap assist and hover picker on; `macos`: snap assist and hover picker off; `fedora`: gaps 0, hover picker off |
+| Core | crate `desk-layouts`: pure Rust (only `serde`), no GTK, GLib or D-Bus, so KDE or wlroots adapters can reuse it (ADR 0011) |
+
+Skins: none yet; the bridge part will draw the picker per skin (`windows11`, `macos`, `default`).
+
 ## Automatic light/dark
 
 | | |

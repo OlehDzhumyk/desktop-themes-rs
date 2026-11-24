@@ -21,6 +21,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Window layouts core (stage 4): the pure-Rust crate `desk-layouts` (no desktop dependency) with
+  six built-in layouts (halves, thirds, two-thirds, quarters, focus, stack), portrait adaptation,
+  even-pixel zone geometry with exact outer and inner gaps inside the work area, minimum-size
+  fitting and an atomic 0600 `layouts.json` for custom layouts and the active layout per monitor.
+  `deskd` serves it as `io.github.OlehDzhumyk.Desk.Layouts` (`ListLayouts`, `ActiveLayout`,
+  `SetActiveLayout`, `ResolveZones`, signal `Changed`) to trusted callers only (ADR 0008).
+  Settings `io.github.OlehDzhumyk.Desk.Layouts` (`enabled`, `layout-picker-shortcut`,
+  `always-on-top-shortcut`, `gap-outer`, `gap-inner`, `snap-assist`, `hover-picker`) with
+  per-theme defaults and a «Розкладки вікон» page. The bridge UI follows separately.
 - Screenshot annotation editor (stage 3): `themes capture-edit <path.png>` opens a short-lived
   GTK 4 / libadwaita window with pen, highlighter, arrow, line, rectangle, ellipse, redaction
   (solid or pixelate) and crop, an accent-first colour palette, line widths, undo/redo
