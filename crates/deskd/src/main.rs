@@ -77,6 +77,8 @@ fn features() -> Vec<String> {
 /// Make the engines, in start order. Shutdown runs in reverse: the schedulers (appearance, focus)
 /// stop first, then the clipboard history and the mixer memory are written.
 fn engines(setup: &Setup) -> Engines {
+    let clipboard = ClipboardFeature::new(setup);
+    let history = clipboard.history();
     Engines::new(vec![
         Box::new(MixerFeature::new(setup)),
         Box::new(EmojiFeature::new(setup)),
@@ -84,8 +86,8 @@ fn engines(setup: &Setup) -> Engines {
         Box::new(OcrEngine::new(setup)),
         Box::new(CaptureFeature::new(setup)),
         Box::new(LayoutsEngine::new(setup)),
-        Box::new(SearchEngine::new(setup)),
-        Box::new(ClipboardFeature::new(setup)),
+        Box::new(SearchEngine::new(setup, history)),
+        Box::new(clipboard),
         Box::new(FocusFeature::new(setup)),
         Box::new(AppearanceFeature::new(setup)),
     ])

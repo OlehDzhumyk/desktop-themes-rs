@@ -67,6 +67,13 @@ impl ClipboardFeature {
     }
 }
 
+impl ClipboardFeature {
+    /// The history, shared with the search engine (`# text`).
+    pub fn history(&self) -> Shared {
+        self.eng.clone()
+    }
+}
+
 impl Engine for ClipboardFeature {
     fn register<'a>(&mut self, builder: Builder<'a>) -> Builder<'a> {
         builder.serve_at(

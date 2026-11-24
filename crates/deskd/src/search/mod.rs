@@ -2,8 +2,15 @@
 //! Search engine of deskd (`docs/spec/features/search.md`): the settings that matter here and
 //! the glue around the pure-Rust core `desk-search`. The application list is read once and kept
 //! in memory; a change in an `applications/` folder only drops it (the next query reads it
-//! again), so nothing runs while nobody searches. Emoji come from the emoji engine's data.
+//! again), so nothing runs while nobody searches.
+//!
+//! The other providers: the clipboard history (the clipboard engine's in-memory history, shared
+//! with it), emoji (the emoji engine's offline data) and files (a bounded index of the XDG user
+//! folders, `desk_search::files`). The file index is built on the first query that needs it and
+//! dropped when a watched folder changes or when it is older than [`FILES_MAX_AGE`] (checked on a
+//! query, never by a timer).
 
+pub mod providers;
 pub mod service;
 
 use std::fmt;
@@ -12,9 +19,18 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use desk_search::query::{self, Scope};
 use desk_search::{
-    Catalog, ParseOptions, ResultKind, SearchOptions, SearchResult, UsageStore, desktop,
+    Catalog, FileIndex, FileLimits, ParseOptions, Provider, SearchOptions, SearchResult,
+    UsageStore, desktop, files,
 };
 use desk_settings::i18n::gettext;
+
+use self::providers::{ClipboardProvider, EmojiProvider};
+
+/// The oldest a file index may be when a query uses it, in seconds. The folder watchers see only
+/// the roots and their direct subfolders; deeper changes show up after this.
+pub const FILES_MAX_AGE: u64 = 10 * 60;
+/// The most folders watched for the file index.
+pub const MAX_FILE_WATCHES: usize = 64;
 
 /// What the search settings give the engine (the shortcut is the bridge's).
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -76,6 +92,14 @@ pub struct Search {
     parse: ParseOptions,
     /// `None` until the first query and after an `applications/` folder changed.
     catalog: Option<Catalog>,
+    /// The XDG user folders the file index scans.
+    file_roots: Vec<PathBuf>,
+    file_limits: FileLimits,
+    /// The file index and when it was built (unix seconds); `None` until a query needs it and
+    /// after a watched folder changed.
+    files: Option<(FileIndex, u64)>,
+    /// The clipboard engine's history; `None` in a build or test without it.
+    clipboard: Option<crate::service::Shared>,
 }
 
 impl Search {
@@ -83,6 +107,7 @@ impl Search {
         config: Config,
         usage_path: PathBuf,
         app_dirs: Vec<PathBuf>,
+        file_roots: Vec<PathBuf>,
         parse: ParseOptions,
     ) -> Search {
         let usage = UsageStore::load(usage_path, config.remember_usage);
@@ -92,17 +117,52 @@ impl Search {
             app_dirs,
             parse,
             catalog: None,
+            file_roots,
+            file_limits: FileLimits::default(),
+            files: None,
+            clipboard: None,
         }
     }
 
-    /// The engine of this session: the XDG data dirs and the session's language.
-    pub fn for_session(config: Config) -> Search {
-        Search::new(
+    /// The engine of this session: the XDG data and user dirs, the session's language and the
+    /// clipboard history of the clipboard engine.
+    pub fn for_session(config: Config, clipboard: crate::service::Shared) -> Search {
+        let mut s = Search::new(
             config,
             UsageStore::default_path(),
             desktop::application_dirs(&desktop::data_dirs()),
+            files::session_roots(),
             ParseOptions::from_env(),
-        )
+        );
+        s.clipboard = Some(clipboard);
+        s
+    }
+
+    /// Search this clipboard history too.
+    #[cfg(test)]
+    pub fn set_clipboard(&mut self, clipboard: crate::service::Shared) {
+        self.clipboard = Some(clipboard);
+    }
+
+    /// The folders to watch for the file index: the roots and their direct subfolders (not
+    /// hidden, not skipped, not links), at most [`MAX_FILE_WATCHES`].
+    pub fn file_watch_dirs(&self) -> Vec<PathBuf> {
+        let top = FileIndex::scan(
+            &self.file_roots,
+            FileLimits {
+                max_depth: 0,
+                max_entries: MAX_FILE_WATCHES,
+            },
+        );
+        let mut dirs = self.file_roots.clone();
+        dirs.extend(
+            top.entries()
+                .iter()
+                .filter(|e| e.is_dir)
+                .map(|e| PathBuf::from(&e.path)),
+        );
+        dirs.truncate(MAX_FILE_WATCHES);
+        dirs
     }
 
     /// The `applications/` folders to watch.
@@ -125,9 +185,28 @@ impl Search {
         self.catalog = None;
     }
 
-    /// Read the applications now if they are not cached (so the first query is fast).
+    /// A watched user folder changed: scan the files again on the next query that needs them.
+    pub fn invalidate_files(&mut self) {
+        self.files = None;
+    }
+
+    /// Read the applications and the files now if they are not cached (so the first query is
+    /// fast).
     pub fn warm(&mut self) {
         cached(&mut self.catalog, &self.app_dirs, &self.parse);
+        self.refresh_files(now());
+    }
+
+    /// Build the file index when there is none or it is older than [`FILES_MAX_AGE`] (or from
+    /// the future: the clock moved back).
+    fn refresh_files(&mut self, now: u64) {
+        let fresh = self
+            .files
+            .as_ref()
+            .is_some_and(|(_, built)| *built <= now && now - built < FILES_MAX_AGE);
+        if !fresh {
+            self.files = Some((FileIndex::scan(&self.file_roots, self.file_limits), now));
+        }
     }
 
     fn check_enabled(&self) -> Result<(), SearchError> {
@@ -169,9 +248,9 @@ impl Search {
     ) -> Result<Vec<SearchResult>, SearchError> {
         self.check_enabled()?;
         let limit = self.limit(max_results);
-        let parsed = query::parse(text);
-        if parsed.scope == Scope::Emoji {
-            return Ok(emoji_results(&parsed.text, limit));
+        let scope = query::parse(text).scope;
+        if matches!(scope, Scope::All | Scope::Files) {
+            self.refresh_files(now);
         }
         let opts = SearchOptions {
             max_results: limit,
@@ -179,7 +258,25 @@ impl Search {
             web_title: gettext("Search the web for “{query}”"),
         };
         let catalog = cached(&mut self.catalog, &self.app_dirs, &self.parse);
-        Ok(catalog.search(text, &self.usage, &opts, now))
+        // lock order: search, then clipboard (the clipboard engine never locks search)
+        let clipboard = self.clipboard.as_ref().map(crate::service::lock);
+        let clip = clipboard.as_deref().map(ClipboardProvider);
+        let emoji = EmojiProvider {
+            entries: crate::emoji::data::dataset(),
+            lang: if desk_settings::i18n::ui_language() == "uk" {
+                "uk"
+            } else {
+                "en"
+            },
+        };
+        let mut providers: Vec<&dyn Provider> = vec![&emoji];
+        if let Some((index, _)) = &self.files {
+            providers.push(index);
+        }
+        if let Some(c) = &clip {
+            providers.push(c);
+        }
+        Ok(catalog.search_with(text, &self.usage, &opts, now, &providers))
     }
 
     /// Count one activation (nothing is written with `remember-usage` off). Returns true when
@@ -204,31 +301,12 @@ fn cached<'a>(
     slot.get_or_insert_with(|| Catalog::new(desktop::scan(dirs, parse), gettext))
 }
 
-/// The emoji scope (`: text`), from the emoji engine's offline data.
-fn emoji_results(text: &str, limit: usize) -> Vec<SearchResult> {
-    let lang = if desk_settings::i18n::ui_language() == "uk" {
-        "uk"
-    } else {
-        "en"
-    };
-    let limit = u32::try_from(limit).unwrap_or(12);
-    crate::emoji::search::search(crate::emoji::data::dataset(), text, lang, limit, &[])
-        .into_iter()
-        .map(|e| SearchResult {
-            id: format!("emoji:{}", e.id),
-            kind: ResultKind::Emoji,
-            title: e.glyph.clone(),
-            subtitle: e.name,
-            icon: String::new(),
-            activate: e.glyph,
-            score: 0,
-        })
-        .collect()
-}
-
 #[cfg(test)]
 pub(crate) mod tests {
     use std::path::Path;
+    use std::sync::{Arc, Mutex};
+
+    use desk_search::ResultKind;
 
     use super::*;
 
@@ -255,6 +333,7 @@ pub(crate) mod tests {
             config,
             dir.join("data/search-usage.json"),
             vec![dir.join("applications")],
+            vec![dir.join("Documents")],
             ParseOptions::default(),
         )
     }
@@ -281,6 +360,102 @@ pub(crate) mod tests {
         assert!(
             r.iter()
                 .all(|x| x.kind == ResultKind::Emoji && !x.activate.is_empty())
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    fn touch(p: &Path) {
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, b"x").unwrap();
+    }
+
+    #[test]
+    fn files_scope_and_plain_queries_find_documents() {
+        let dir = tmp("files");
+        touch(&dir.join("Documents/Quarterly report.odt"));
+        touch(&dir.join("Documents/.hidden report.odt"));
+        touch(&dir.join("Documents/node_modules/report.js"));
+        let mut s = engine_in(&dir, Config::default());
+        let want = dir.join("Documents/Quarterly report.odt");
+        for q in [". report", "file:report", "FILE: quarterly"] {
+            let r = s.query(q, 0, 0).unwrap();
+            assert_eq!(ids(&r).len(), 1, "{q}: {:?}", ids(&r));
+            assert_eq!(r[0].kind, ResultKind::File);
+            assert_eq!(r[0].activate, want.to_str().unwrap());
+            assert_eq!(r[0].subtitle, dir.join("Documents").to_str().unwrap());
+        }
+        // plain text: the file is found, below a matching application
+        write_app(&dir, "org.example.Reporter.desktop", "Report Studio");
+        s.invalidate();
+        let r = s.query("report", 0, 0).unwrap();
+        let kinds: Vec<ResultKind> = r.iter().map(|x| x.kind).collect();
+        assert_eq!(kinds[..2], [ResultKind::App, ResultKind::File], "{kinds:?}");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn file_index_is_cached_until_invalidated_or_old() {
+        let dir = tmp("files-cache");
+        touch(&dir.join("Documents/first.txt"));
+        let mut s = engine_in(&dir, Config::default());
+        assert_eq!(s.query(". first", 0, 100).unwrap().len(), 1);
+        touch(&dir.join("Documents/second.txt"));
+        assert!(s.query(". second", 0, 100).unwrap().is_empty(), "cached");
+        s.invalidate_files();
+        assert_eq!(s.query(". second", 0, 100).unwrap().len(), 1);
+        touch(&dir.join("Documents/third.txt"));
+        assert!(s.query(". third", 0, 100).unwrap().is_empty(), "cached");
+        // older than the limit, or the clock moved back: scanned again
+        assert_eq!(s.query(". third", 0, 100 + FILES_MAX_AGE).unwrap().len(), 1);
+        touch(&dir.join("Documents/fourth.txt"));
+        assert_eq!(s.query(". fourth", 0, 5).unwrap().len(), 1);
+        // the watch list: the root and its direct subfolders
+        std::fs::create_dir_all(dir.join("Documents/Work")).unwrap();
+        assert_eq!(
+            s.file_watch_dirs(),
+            [dir.join("Documents"), dir.join("Documents/Work")]
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn clipboard_results_respect_private_mode() {
+        let dir = tmp("clip");
+        let mut s = engine_in(&dir, Config::default());
+        let mut history = crate::clipboard::Engine::new(
+            crate::clipboard::Config::default(),
+            dir.join("clip-data"),
+            dir.join("clip-run"),
+        );
+        history.push("text/plain", b"deploy token 42", &[], "", 1);
+        let shared = Arc::new(Mutex::new(history));
+        s.set_clipboard(shared.clone());
+        let id = crate::service::lock(&shared).entries()[0].id;
+
+        let r = s.query("# token", 0, 0).unwrap();
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].kind, ResultKind::Clipboard);
+        assert_eq!(r[0].activate, id.to_string());
+        assert_eq!(r[0].title, "deploy token 42");
+        let r = s.query("deploy", 0, 0).unwrap();
+        assert!(r.iter().any(|x| x.kind == ResultKind::Clipboard));
+
+        crate::service::lock(&shared).cfg.private = true;
+        assert!(s.query("# token", 0, 0).unwrap().is_empty());
+        let r = s.query("deploy", 0, 0).unwrap();
+        assert!(r.iter().all(|x| x.kind != ResultKind::Clipboard));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn plain_queries_include_emoji() {
+        let dir = tmp("emoji-plain");
+        let mut s = engine_in(&dir, Config::default());
+        let r = s.query("heart", 0, 0).unwrap();
+        assert!(
+            r.iter().any(|x| x.kind == ResultKind::Emoji),
+            "{:?}",
+            ids(&r)
         );
         let _ = std::fs::remove_dir_all(&dir);
     }
