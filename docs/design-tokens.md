@@ -10,6 +10,8 @@ dconf files. When the theme is applied, the manager generates from them:
 | Ptyxis palette | `.../<id>/ptyxis/desktop-themes-<id>.palette`, linked into `~/.local/share/org.gnome.Ptyxis/palettes/` | Ptyxis |
 | wallpaper (optional) | `.../<id>/wallpaper/{light,dark}.svg` | `org.gnome.desktop.background` |
 | dconf keys | merged into the look / sounds / apps modules | the usual apply pipeline |
+| labwc `themerc` (on request) | `.../<id>/labwc/openbox-3/themerc` | labwc window decorations (desktop shell session) |
+| desk-shell CSS (on request) | `.../<id>/desk-shell/desk-shell.css` | desk-shell (desktop shell session) |
 
 So a theme can be just `theme.conf` + `tokens.toml` (+ `extensions.txt`, `behavior.dconf` if it
 wants them): see `themes/lavender`. Nothing generated is ever written into the repository or the
@@ -118,6 +120,34 @@ media queries, so the layer uses one scheme (dark by default, like the bundled s
 `Foreground`, `Background`, `Cursor`, `Color0`..`Color15`. Ptyxis loads user palettes from
 `$XDG_DATA_HOME/org.gnome.Ptyxis/palettes/` and the palette id is the file name without
 `.palette`: `desktop-themes-<id>`.
+
+**labwc and desk-shell (on request).** These two outputs serve the desktop shell session, not
+GNOME, so `generate::render` never writes them; a caller asks for one with
+`generate::render_extra(tokens, target, ExtraTarget::LabwcTheme | ExtraTarget::DeskShellCss)`. Both
+are always complete: an unset token keeps the consumer's default.
+
+* `LabwcTheme`: an Openbox-style `themerc` (labwc-theme(5)) in one scheme, the shell scheme
+  (`shell.scheme`, dark by default). Active titlebar = `headerbar_bg`/`headerbar_fg`, inactive =
+  `headerbar_backdrop` (else `window_bg`) with the text at 60 %; the 1 px border is
+  `headerbar_border` or the text colour at `border_opacity`; the close button hover is
+  `destructive_bg`/`destructive_fg`; menus and the window switcher use `popover_bg`/`popover_fg`,
+  the selected item a 10 % text tint, the switcher border and the snap overlay the accent (a GNOME
+  accent name gives its colour). `spacing.sm` → `padding.width` and menu item `padding.y`,
+  `spacing.md` → menu item `padding.x`, `spacing.xs` → titlebar padding and button spacing,
+  `radii.button` → the button hover corner radius, `shadows.popover` → window shadows. Unset
+  colours are libadwaita's; translucent colours are composited on the window background, so the
+  decorations stay solid. `titlebar.height` is not written (deprecated in labwc 0.20); the window
+  corner radius belongs to labwc's `rc.xml`.
+* `DeskShellCss`: the `--ds-*` custom properties of desk-shell's stylesheet
+  (`crates/desk-shell/src/style.rs`) for `.desk-shell.light` and `.desk-shell.dark`, the same
+  values as `@define-color desk_shell_<scheme>_<name>`, `radii.button` → `--ds-radius`,
+  `radii.popover` → `--ds-flyout-radius`, and the surface rules of the taskbar, Start menu and
+  flyouts (background, border, hover, active, checked). `window_bg` × `surface.panel_opacity` is
+  the taskbar, `popover_bg` × `surface.popover_opacity` the flyouts, `window_fg` the text and the
+  tints of dim, hover, active and border (`border_opacity`) text; `shadows.popover` sets the
+  flyout shadow. An exact accent sets `--ds-accent`/`--ds-on-accent`; a GNOME accent name keeps
+  desk-shell's per-skin accent. Unset tokens keep desk-shell's Windows 11 values, and the palette
+  rules skip `.hc`, so high contrast always wins.
 
 ## Cache and performance
 

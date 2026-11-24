@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Generators: tokens → files (libadwaita CSS, GNOME Shell CSS, Ptyxis palette, wallpaper SVG)
 //! and dconf keys. All output is a pure, deterministic function of the tokens and [`Target`].
+//! The desktop-shell artefacts ([`ExtraTarget`]: labwc `themerc`, desk-shell CSS) are rendered
+//! only on request ([`render_extra`]), never by [`render`].
 
+pub mod desk_shell;
 pub mod gtk;
+pub mod labwc;
 pub mod ptyxis;
 pub mod settings;
 pub mod shell;
@@ -72,6 +76,44 @@ pub fn ptyxis_palette_id(theme_id: &str) -> String {
 
 pub fn ptyxis_rel(theme_id: &str) -> String {
     format!("ptyxis/{}.palette", ptyxis_palette_id(theme_id))
+}
+
+pub const LABWC_THEMERC: &str = "labwc/openbox-3/themerc";
+pub const DESK_SHELL_CSS: &str = "desk-shell/desk-shell.css";
+
+/// An artefact for the desktop shell session (labwc + desk-shell), rendered on request by
+/// [`render_extra`]. Not part of [`render`] or [`Outputs`]: GNOME sessions do not need it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ExtraTarget {
+    /// labwc window decorations: an Openbox-style `themerc` ([`labwc`]).
+    LabwcTheme,
+    /// desk-shell `--ds-*` palette, `@define-color` names and surface rules ([`desk_shell`]).
+    DeskShellCss,
+}
+
+impl ExtraTarget {
+    pub const ALL: [ExtraTarget; 2] = [ExtraTarget::LabwcTheme, ExtraTarget::DeskShellCss];
+
+    /// Path of the file, relative to the theme's cache directory.
+    pub fn rel(self) -> &'static str {
+        match self {
+            ExtraTarget::LabwcTheme => LABWC_THEMERC,
+            ExtraTarget::DeskShellCss => DESK_SHELL_CSS,
+        }
+    }
+}
+
+/// The file of one [`ExtraTarget`]. Always produced: unset tokens keep the defaults of the
+/// consumer (libadwaita colours for labwc, desk-shell's built-in palette).
+pub fn render_extra(t: &Tokens, tg: &Target, kind: ExtraTarget) -> File {
+    let contents = match kind {
+        ExtraTarget::LabwcTheme => labwc::themerc(t, &tg.theme_id),
+        ExtraTarget::DeskShellCss => desk_shell::css(t, &tg.theme_id),
+    };
+    File {
+        rel: kind.rel().into(),
+        contents,
+    }
 }
 
 /// A generated file, relative to the theme's cache directory.

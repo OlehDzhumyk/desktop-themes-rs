@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Reviewable snapshots (insta) of the generated libadwaita CSS and the Ptyxis palette for bundled
-//! themes. After an intended generator change run `cargo insta review` (or
+//! Reviewable snapshots (insta) of the generated libadwaita CSS, the Ptyxis palette and the
+//! desktop-shell artefacts (labwc `themerc`, desk-shell CSS) for bundled themes. After an intended generator change run `cargo insta review` (or
 //! `INSTA_UPDATE=always cargo test -p theme-tokens --test insta_snapshots`) and read the diff.
 //! The older `tests/snapshots.rs` keeps byte-exact copies of every output; these add readable
 //! diffs for the two outputs people review most.
 
 use std::path::{Path, PathBuf};
 
-use theme_tokens::generate::{self, Target};
+use theme_tokens::generate::{self, ExtraTarget, Target};
 use theme_tokens::load_chain;
 
 fn render(id: &str, name: &str) -> Vec<generate::File> {
@@ -16,6 +16,23 @@ fn render(id: &str, name: &str) -> Vec<generate::File> {
 
 /// `over`: a layer above the theme (the live wallpaper palette).
 fn render_over(id: &str, name: &str, over: Option<String>) -> Vec<generate::File> {
+    let (tokens, target) = load(id, name, over);
+    generate::render(&tokens, &target)
+}
+
+fn extra(id: &str, name: &str, kind: ExtraTarget) -> String {
+    let (tokens, target) = load(id, name, None);
+    let f = generate::render_extra(&tokens, &target, kind);
+    assert_eq!(f.rel, kind.rel());
+    assert_eq!(
+        f,
+        generate::render_extra(&tokens, &target, kind),
+        "not deterministic"
+    );
+    f.contents
+}
+
+fn load(id: &str, name: &str, over: Option<String>) -> (theme_tokens::Tokens, Target) {
     let path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../themes")
         .join(id)
@@ -35,7 +52,7 @@ fn render_over(id: &str, name: &str, over: Option<String>) -> Vec<generate::File
         handmade_gtk4: false,
         handmade_shell_theme: false,
     };
-    generate::render(&loaded.tokens, &target)
+    (loaded.tokens, target)
 }
 
 fn file(outputs: &[generate::File], suffix: &str) -> String {
@@ -91,4 +108,24 @@ fn lavender_wallpaper_overlay_css() {
             "gtk.css"
         )
     );
+}
+
+/// The desktop-shell artefacts of every bundled token theme: a full palette (lavender) and
+/// accent-only themes that fall back to the consumers' defaults (windows11, macos).
+#[test]
+fn desktop_shell_artefacts() {
+    for (id, name) in [
+        ("lavender", "Lavender"),
+        ("windows11", "Windows 11"),
+        ("macos", "macOS"),
+    ] {
+        snap!(
+            format!("{id}_labwc_themerc"),
+            extra(id, name, ExtraTarget::LabwcTheme)
+        );
+        snap!(
+            format!("{id}_desk_shell_css"),
+            extra(id, name, ExtraTarget::DeskShellCss)
+        );
+    }
 }

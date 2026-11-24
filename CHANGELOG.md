@@ -34,6 +34,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- theme-tokens: two generators for the desktop shell session, rendered on request with
+  `generate::render_extra` (`ExtraTarget::LabwcTheme`, `ExtraTarget::DeskShellCss`): a labwc
+  `themerc` (titlebars, 1 px border, buttons with a red close hover, menus, the window switcher,
+  the snap overlay; spacing and button radius from the tokens; no deprecated `titlebar.height`)
+  and desk-shell CSS (`--ds-*` light and dark palettes, `@define-color` names, radii and the
+  taskbar, Start menu and flyout surfaces; high contrast stays desk-shell's own). `render` and the
+  GNOME outputs are unchanged.
 - Wayland end-to-end tests (`just e2e-wayland`, `tests/e2e-wayland/`, CI `e2e-wayland.yml`):
   headless labwc (wlroots headless backend, pixman renderer) with `deskd` and
   `desk-shell --skin windows11` in a Fedora 45 container without systemd. They check that the
