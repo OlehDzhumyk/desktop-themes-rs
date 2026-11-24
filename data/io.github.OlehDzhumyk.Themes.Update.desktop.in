@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# The update launcher of git checkout installs (data/install.sh); not in the RPM: a package
+# install updates with the package manager. `themes update --pause` runs scripts/update.sh of the
+# checkout recorded in ~/.local/share/desktop-themes/repo-path and waits for Enter at the end.
+[Desktop Entry]
+Type=Application
+Name=Update Desktop Themes
+Comment=Download, build and install the latest desktop-themes-rs from its git checkout
+Exec=@BIN@/themes update --pause
+Icon=software-update-available-symbolic
+Terminal=true
+Categories=Settings;
+# TRANSLATORS: search keywords, separated and terminated by semicolons; keep the English ones too
+Keywords=update;upgrade;git;theme;
+StartupNotify=false

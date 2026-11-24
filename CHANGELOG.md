@@ -34,6 +34,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Update to the latest git version in one click: the launcher «Update Desktop Themes» («Оновити
+  теми») in the app grid, and the same action on the Desktop icon, opens a terminal with
+  `themes update --pause`. `themes update` runs `scripts/update.sh` of the checkout that
+  `data/install.sh` now records in `~/.local/share/desktop-themes/repo-path`, after checking that the
+  checkout is clean and not diverged; `--check` fetches and lists the new commits, `--dry-run` and
+  `--json` work as elsewhere. `themes doctor` reports a recorded checkout that is missing or dirty.
+  Git checkout installs only: the RPM and release archives leave the launcher and action out. A
+  button in the window follows after the GTK 4 settings hub.
 - desk-shell: built-in system tray (`org.kde.StatusNotifierWatcher` / `StatusNotifierItem` icons in
   the taskbar with left/right/middle click and ARGB32 pixmap support, degrading silently if another
   watcher owns the name), built-in `org.freedesktop.Notifications` daemon with Windows 11 Fluent
@@ -403,6 +411,9 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- `data/install.sh` replaces a hand-made `~/.local/bin/desktop-themes-update` launcher (and its
+  `desktop-themes-update.desktop`) with «Update Desktop Themes»; it removes them only when the
+  script starts with the comment "Update desktop-themes-rs from GitHub".
 - CI: npm downloads are cached in the bridge, E2E build and install smoke jobs; the GNOME Shell
   E2E workflow runs on pull requests only when they touch code or data under test (not docs or
   labwc only); every job has a timeout; `cargo test` also runs `cargo xtask check`, and the labwc

@@ -30,6 +30,10 @@ Both layouts obey the trust boundary of [ADR 0008](adr/0008-deskd-serves-content
   and `data/io.github.OlehDzhumyk.Themes.desktop.in` all use `@BIN@`, substituted with
   `%{_bindir}` by the RPM spec and with `~/.local/bin` (or `%h/.local/bin` in user units) by
   `data/install.sh`.
+- Updating from git (`themes update`, the launcher `data/io.github.OlehDzhumyk.Themes.Update.desktop.in`
+  and the `Update` action of the main entry) is for git checkout installs only. The RPM spec does not
+  ship the launcher and removes the action from the main entry; a package install updates with the
+  package manager. `themes update` then says that no checkout is recorded.
 
 ## Validate spec and AppStream metadata
 

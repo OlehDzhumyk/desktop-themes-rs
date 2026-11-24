@@ -8,7 +8,9 @@
 #   3. a second install over the first still works (upgrade path),
 #   4. an install without a built desk-shell skips it,
 #   5. desk-win11-session --dry-run refreshes a bundled themerc and keeps a token-generated one,
-#   6. --no-gnome-bridge installs core, desk-shell and labwc without desk-bridge or npm.
+#   6. --no-gnome-bridge installs core, desk-shell and labwc without desk-bridge or npm,
+#   7. from a git checkout: repo-path, the Update launcher and action, the old hand-made launcher
+#      replaced (a foreign script of the same name kept); from an archive: none of them.
 # Needs glib-compile-schemas, msgfmt and a built bridge (bridge/build, see `npm run build`).
 # Safe to run on a developer machine: HOME, XDG_* and PATH point into a temporary directory.
 set -euo pipefail
@@ -81,8 +83,27 @@ check "no @BIN@ placeholder left" test -z "$(grep -rl '@BIN@' "$D/applications" 
 
 check "labwc autostart stays executable" test -x "$D/desktop-themes/labwc/windows11/autostart"
 
+if [ -e "$SRC/.git" ]; then
+  check "repo-path records the checkout" test "$(cat "$D/desktop-themes/repo-path")" = "$SRC"
+  check "Update launcher installed" has "$D/applications/$APP_ID.Update.desktop"
+  check "Update launcher has Name[uk]" has_text "$D/applications/$APP_ID.Update.desktop" '^Name\[uk\]='
+  check "main entry has the Update action" has_text "$D/applications/$APP_ID.desktop" '^Actions=Update;'
+fi
+
 echo "== second install over the first"
+# the hand-made launcher of older setups, and a foreign script with the same name
+legacy_bin="$HOME/.local/bin/desktop-themes-update"
+legacy_desktop="$D/applications/desktop-themes-update.desktop"
+printf '#!/usr/bin/env bash\n# Update desktop-themes-rs from GitHub, build it and install it.\n' > "$legacy_bin"
+printf '[Desktop Entry]\nType=Application\nName=Update\nExec=desktop-themes-update\n' > "$legacy_desktop"
 "$SRC/data/install.sh" "${args[@]}" > "$tmp/install2.log"
+if [ -e "$SRC/.git" ]; then
+  check "old update script removed" test ! -e "$legacy_bin"
+  check "old update launcher removed" test ! -e "$legacy_desktop"
+  printf '#!/bin/sh\n# my own script\n' > "$legacy_bin"
+  "$SRC/data/install.sh" "${args[@]}" > /dev/null
+  check "a foreign desktop-themes-update is kept" has "$legacy_bin"
+fi
 check "upgrade keeps the compiled schemas" has "$D/glib-2.0/schemas/gschemas.compiled"
 check "upgrade keeps the labwc config" has "$D/desktop-themes/labwc/windows11/rc.xml"
 
@@ -124,6 +145,11 @@ ln -s "$SRC/po" "$SRC/extensions" "$tmp/src-nobridge/"
 "$tmp/src-nobridge/data/install.sh" --no-gnome-bridge "${args[@]}" > "$tmp/nobridge-missing.log"
 check "--no-gnome-bridge works without bridge/build or npm" \
   has "$XDG_DATA_HOME/glib-2.0/schemas/gschemas.compiled"
+# this source tree has no .git: an archive install, which updates without `themes update`
+check "archive install records no checkout" test ! -e "$XDG_DATA_HOME/desktop-themes/repo-path"
+check "archive install has no Update launcher" test ! -e "$XDG_DATA_HOME/applications/$APP_ID.Update.desktop"
+check "archive install drops the Update action" \
+  test -z "$(grep -E '^Actions=|Desktop Action' "$XDG_DATA_HOME/applications/$APP_ID.desktop" || true)"
 
 rm -rf "$HOME"
 mkdir -p "$HOME"

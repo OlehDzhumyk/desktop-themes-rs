@@ -144,8 +144,10 @@ done
 # Translated desktop entry and AppStream metainfo
 install -dm0755 %{buildroot}%{_datadir}/applications
 msgfmt --desktop -d po --template data/%{app_id}.desktop.in -o "%{_builddir}/%{app_id}.desktop"
-sed "s|@BIN@|%{_bindir}|g" "%{_builddir}/%{app_id}.desktop" \
-    > %{buildroot}%{_datadir}/applications/%{app_id}.desktop
+# without the Update action (the last group): a package install updates with the package manager,
+# `themes update` and data/%{app_id}.Update.desktop.in are for git checkout installs
+sed -e "s|@BIN@|%{_bindir}|g" -e '/^Actions=/d' -e '/^\[Desktop Action Update\]/,$d' \
+    "%{_builddir}/%{app_id}.desktop" > %{buildroot}%{_datadir}/applications/%{app_id}.desktop
 chmod 0644 %{buildroot}%{_datadir}/applications/%{app_id}.desktop
 
 install -dm0755 %{buildroot}%{_metainfodir}

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Командний рядок: themes list|current|apply|reset|snapshot|delete|doctor|gui|capture-edit|quick-look.
+//! Командний рядок: themes list|current|apply|reset|snapshot|delete|doctor|update|gui|capture-edit|quick-look.
 
 use std::time::Duration;
 
@@ -55,6 +55,7 @@ const H31: &str = n_("Annotate and redact a screenshot (PNG) in an editor window
 const H32: &str = n_("The PNG file; Save replaces it (redactions are destructive)");
 const H33: &str = n_("Preview files in a Quick Look window (files are never run)");
 const H34: &str = n_("The files or folders; arrow keys move between them");
+const H35: &str = n_("Update a git checkout install to the latest version (scripts/update.sh)");
 
 #[derive(Parser)]
 #[command(
@@ -136,6 +137,8 @@ enum Cmd {
         )]
         enable_extensions: bool,
     },
+    #[command(about = H35)]
+    Update(crate::update_cli::UpdateArgs),
     #[command(about = H29)]
     Shortcut {
         #[command(subcommand)]
@@ -265,6 +268,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
         Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
         Cmd::Shortcut { cmd } => crate::shortcut_cli::exec(ctx, cmd, json),
         Cmd::Focus { cmd } => crate::focus_cli::exec(cmd, json),
+        Cmd::Update(a) => crate::update_cli::exec(ctx, &a, json),
         Cmd::CaptureEdit { path } => crate::gui::capture_editor::run(&path).map_err(Error),
         Cmd::QuickLook { paths } => crate::gui::quick_look::run(&paths).map_err(Error),
         Cmd::List => {
