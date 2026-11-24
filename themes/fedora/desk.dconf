@@ -25,3 +25,9 @@ capture-region-shortcut=@as []
 capture-screen-shortcut=@as []
 capture-toolbar-shortcut=@as []
 capture-record-shortcut=@as []
+
+# Window layouts: zero gaps and hover picker off by default.
+[io/github/OlehDzhumyk/Desk/layouts]
+gap-outer=uint32 0
+gap-inner=uint32 0
+hover-picker=false

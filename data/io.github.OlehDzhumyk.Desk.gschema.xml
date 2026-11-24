@@ -30,6 +30,7 @@
     <child name="color-picker" schema="io.github.OlehDzhumyk.Desk.ColorPicker"/>
     <child name="ocr" schema="io.github.OlehDzhumyk.Desk.Ocr"/>
     <child name="capture" schema="io.github.OlehDzhumyk.Desk.Capture"/>
+    <child name="layouts" schema="io.github.OlehDzhumyk.Desk.Layouts"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="osd" schema="io.github.OlehDzhumyk.Desk.Osd"/>
@@ -300,6 +301,46 @@
     </key>
   </schema>
 
+  <schema id="io.github.OlehDzhumyk.Desk.Layouts" path="/io/github/OlehDzhumyk/Desk/layouts/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable window snap layouts and always-on-top</summary>
+      <description>Off: deskd refuses layout calls and the bridge binds no layout shortcut.</description>
+    </key>
+    <key name="layout-picker-shortcut" type="as">
+      <default>['&lt;Super&gt;z']</default>
+      <summary>Shortcut that opens the window layout picker (in force)</summary>
+      <description>The accelerators the bridge binds. Themes write their default from desk.dconf (Windows 11 and Fedora: Super+Z; macOS: Ctrl+Super+Up). An override in io.github.OlehDzhumyk.Desk.Shortcuts layout-picker replaces it. The name ends in -shortcut because shell keybinding names are global.</description>
+    </key>
+    <key name="always-on-top-shortcut" type="as">
+      <default>['&lt;Control&gt;&lt;Super&gt;t']</default>
+      <summary>Shortcut that toggles always-on-top for the focused window (in force)</summary>
+      <description>The accelerators the bridge binds (default: Ctrl+Super+T, as PowerToys Always on Top). An override in io.github.OlehDzhumyk.Desk.Shortcuts always-on-top replaces it.</description>
+    </key>
+    <key name="gap-outer" type="u">
+      <range min="0" max="64"/>
+      <default>8</default>
+      <summary>Outer gap around snapped windows, in logical pixels</summary>
+      <description>Even pixels from 0 to 64. Windows 11 uses 8 px; Fedora uses 0 px.</description>
+    </key>
+    <key name="gap-inner" type="u">
+      <range min="0" max="64"/>
+      <default>6</default>
+      <summary>Inner gap between adjacent snapped windows, in logical pixels</summary>
+      <description>Even pixels from 0 to 64. Windows 11 uses 6 px; Fedora uses 0 px.</description>
+    </key>
+    <key name="snap-assist" type="b">
+      <default>true</default>
+      <summary>Offer other windows to fill remaining snap zones</summary>
+      <description>On by default in Windows 11; off by default in macOS.</description>
+    </key>
+    <key name="hover-picker" type="b">
+      <default>true</default>
+      <summary>Show the layout picker when hovering the maximise button</summary>
+      <description>On by default in Windows 11; off by default in macOS and Fedora.</description>
+    </key>
+  </schema>
+
   <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
     <key name="clipboard-toggle" type="as">
       <default>[]</default>
@@ -344,6 +385,16 @@
     <key name="capture-record" type="as">
       <default>[]</default>
       <summary>Your shortcut for screen recording (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="layout-picker" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for the window layout picker (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="always-on-top" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for always-on-top (override)</summary>
       <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
   </schema>
