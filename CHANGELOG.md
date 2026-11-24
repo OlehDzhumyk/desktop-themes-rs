@@ -34,6 +34,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Windows 11 labwc session: `autostart` starts the first installed polkit authentication agent and
+  falls back to `mako` or `dunst` when `org.freedesktop.Notifications` has no owner;
+  `desk-win11-session` keeps a token-generated `themerc` across logins and stops `deskd.service`
+  before clearing the Wayland environment on exit; `data/install.sh --no-gnome-bridge` installs
+  the core programs, `desk-shell` and the labwc session without `desk-bridge@desktop-themes-rs` or
+  `npm`.
 - desk-shell: Windows 11 on-screen display (`Layer::Overlay` pill above the taskbar) that follows
   `deskd`'s `Mixer` volume and mute changes (quiet on start-up) and shows toasts via `--show-osd`;
   Emoji picker (`Win+.`, `--toggle-emoji`, or the header switch in the clipboard history) backed by
