@@ -281,7 +281,12 @@ impl WallpaperEngine {
             if let Some(d) = self.state_path.parent() {
                 std::fs::create_dir_all(d)?;
             }
-            std::fs::write(&self.state_path, serde_json::to_string_pretty(s)?)
+            // atomic and private (0600): a crash never leaves a torn file, and the file is
+            // created fresh instead of written through whatever sits at the path
+            crate::clipboard::write_private(
+                &self.state_path,
+                serde_json::to_string_pretty(s)?.as_bytes(),
+            )
         };
         if let Err(e) = write() {
             eprintln!("deskd: cannot write {}: {e}", self.state_path.display());
