@@ -90,9 +90,20 @@ fi
 run install -m 0644 "$SRC/data/themes-doctor.service" "$HOME/.config/systemd/user/themes-doctor.service"
 run install -m 0644 "$SRC/data/deskd.service" "$HOME/.config/systemd/user/deskd.service"
 
-# GNOME Shell extensions that belong to this repository (the TypeScript bridge is built first)
-if [ ! -f "$SRC/bridge/build/$BRIDGE/extension.js" ]; then
-  run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" sh -c "cd '$SRC/bridge' && npm ci --no-audit --no-fund && npm run build"
+# GNOME Shell extensions that belong to this repository (build/rebuild the TypeScript bridge if missing or stale)
+BRIDGE_JS="$SRC/bridge/build/$BRIDGE/extension.js"
+NEED_BRIDGE_BUILD=0
+if [ ! -f "$BRIDGE_JS" ]; then
+  NEED_BRIDGE_BUILD=1
+elif [ -n "$(find "$SRC/bridge/src" "$SRC/bridge/static" "$SRC/bridge/package.json" -newer "$BRIDGE_JS" 2>/dev/null | head -n 1)" ]; then
+  NEED_BRIDGE_BUILD=1
+fi
+if [ "$NEED_BRIDGE_BUILD" = 1 ]; then
+  if command -v npm >/dev/null 2>&1; then
+    run sh -c "cd '$SRC/bridge' && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build"
+  else
+    run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" sh -c "cd '$SRC/bridge' && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build"
+  fi
 fi
 for d in "$SRC"/extensions/*/ "$SRC/bridge/build/$BRIDGE/"; do
   uuid=$(basename "$d")
