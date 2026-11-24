@@ -48,6 +48,7 @@ pub static FEATURES: &[&Feature] = &[
     &crate::focus::FEATURE_FOCUS,
     &crate::logo_menu::FEATURE_LOGO_MENU,
     &crate::lockscreen::FEATURE_LOCKSCREEN,
+    &crate::shortcut_guide::FEATURE_SHORTCUT_GUIDE,
     &FEATURE_APP,
 ];
 
@@ -132,6 +133,10 @@ pub static DESK: Schema = Schema {
         ("appearance", crate::appearance::APPEARANCE_SCHEMA),
         ("focus", crate::focus::FOCUS_SCHEMA),
         ("logo-menu", crate::logo_menu::LOGO_MENU_SCHEMA),
+        (
+            "shortcut-guide",
+            crate::shortcut_guide::SHORTCUT_GUIDE_SCHEMA,
+        ),
     ],
 };
 
@@ -377,6 +382,7 @@ pub static SHORTCUT_KEYS: Schema = Schema {
         &crate::capture::SC_CAPTURE_RECORD,
         &crate::layouts::SC_LAYOUT_PICKER,
         &crate::layouts::SC_ALWAYS_ON_TOP,
+        &crate::shortcut_guide::SC_SHORTCUT_GUIDE_TOGGLE,
     ],
     children: &[],
 };
@@ -394,6 +400,7 @@ pub static SHORTCUTS: &[&Shortcut] = &[
     &crate::capture::SHORTCUT_CAPTURE_RECORD,
     &crate::layouts::SHORTCUT_LAYOUT_PICKER,
     &crate::layouts::SHORTCUT_ALWAYS_ON_TOP,
+    &crate::shortcut_guide::SHORTCUT_SHORTCUT_GUIDE,
 ];
 
 /// All schemas, parents first (the order of the generated XML).
@@ -411,6 +418,7 @@ pub static SCHEMAS: &[&Schema] = &[
     &crate::appearance::APPEARANCE,
     &crate::focus::FOCUS,
     &crate::logo_menu::LOGO_MENU,
+    &crate::shortcut_guide::SHORTCUT_GUIDE,
 ];
 
 // ------------------------------------------------------------------ pages of the window
@@ -534,6 +542,7 @@ pub static PAGE_SHORTCUTS: Page = Page {
             Item::Shortcut(&crate::capture::SHORTCUT_CAPTURE_RECORD),
             Item::Shortcut(&crate::layouts::SHORTCUT_LAYOUT_PICKER),
             Item::Shortcut(&crate::layouts::SHORTCUT_ALWAYS_ON_TOP),
+            Item::Shortcut(&crate::shortcut_guide::SHORTCUT_SHORTCUT_GUIDE),
         ],
     }],
 };
@@ -568,6 +577,7 @@ pub static PAGES: &[&Page] = &[
     &crate::focus::PAGE_FOCUS,
     &crate::logo_menu::PAGE_LOGO_MENU,
     &crate::lockscreen::PAGE_LOCKSCREEN,
+    &crate::shortcut_guide::PAGE_SHORTCUT_GUIDE,
     &PAGE_SHORTCUTS,
     &PAGE_GENERAL,
     &PAGE_CREDITS,

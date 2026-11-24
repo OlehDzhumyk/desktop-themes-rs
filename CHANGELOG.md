@@ -30,6 +30,19 @@ All notable changes to this project are documented in this file. The format is b
   Settings `io.github.OlehDzhumyk.Desk.Layouts` (`enabled`, `layout-picker-shortcut`,
   `always-on-top-shortcut`, `gap-outer`, `gap-inner`, `snap-assist`, `hover-picker`) with
   per-theme defaults and a «Розкладки вікон» page. The bridge UI follows separately.
+- Shortcut guide (stage 4): hold `Super` for `hold-delay` (default 900 ms) to show a skin-aware
+  overlay of the keyboard shortcuts currently active in the session, read live from GNOME
+  (`wm.keybindings`, `shell.keybindings`, `media-keys` including custom keybindings) and
+  `io.github.OlehDzhumyk.Desk.*` schemas plus `Desk.Shortcuts` overrides (labelled «theme» vs
+  «your setting»). Releasing `Super` closes the overlay without opening the overview; pressing any
+  other key cancels or lets the real shortcut run. Accessible shortcut `Ctrl+Shift+Super+/`
+  (`shortcut-guide-shortcut`, override `shortcut-guide-toggle`) and `sticky` mode open a modal
+  searchable view (`Up`/`Down` scroll, `Esc` closes). `windows11` draws a dimmed full-screen
+  multi-column grid with rounded square keycaps and a neutral `Super` label; `macos` draws a
+  centred translucent panel with `⌘ ⌥ ⇧ ⌃` symbols; `default` uses plain-text keycaps and is off
+  by default (`enabled=false` in the schema, `enabled=true` in `windows11` and `macos` themes).
+  Settings `io.github.OlehDzhumyk.Desk.ShortcutGuide` (`enabled`, `hold-delay`, `sticky`,
+  `show-owner`, `shortcut-guide-shortcut`) and a «Довідник скорочень» page in the window.
 - Screenshot annotation editor (stage 3): `themes capture-edit <path.png>` opens a short-lived
   GTK 4 / libadwaita window with pen, highlighter, arrow, line, rectangle, ellipse, redaction
   (solid or pixelate) and crop, an accent-first colour palette, line widths, undo/redo

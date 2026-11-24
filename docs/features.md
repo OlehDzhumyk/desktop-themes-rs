@@ -272,3 +272,20 @@ Skins:
 * **default**: a «Фокус» tile in quick settings with the mode list; a symbolic moon icon in the panel while a mode is on.
 * **macos**: the same tile (like Control Center); a crescent icon in the panel.
 * **windows11**: the tile also starts focus sessions (15/25/45/60 min) and shows the countdown; a bell-slash icon in the panel. GNOME Shell has no Windows-style notification flyout, so these controls live in the tile.
+
+## Shortcut guide
+
+| | |
+|---|---|
+| Open | Hold **Super** alone for `hold-delay` (default 900 ms); or press **Ctrl+Shift+Super+/** (`shortcut-guide-shortcut`; override `shortcut-guide-toggle` on «Keyboard shortcuts») to open directly in sticky searchable mode |
+| Content | Read live at open time from `org.gnome.desktop.wm.keybindings`, `org.gnome.shell.keybindings`, `org.gnome.settings-daemon.plugins.media-keys` (including custom keybindings) and `io.github.OlehDzhumyk.Desk.*` feature schemas + `Desk.Shortcuts` overrides. Grouped into **Windows and apps**, **Desktop**, **Features**, **Input**, **Custom**; unbound entries are hidden; each row shows action name, keycaps and source («theme» or «your setting» when `show-owner` is on) |
+| Interaction | A tap of Super keeps its usual action (overview). Another shortcut pressed before the delay cancels the guide and runs. While shown by the hold: releasing Super closes the guide without opening the overview (the bridge filters mutter's overlay-key binding for that one release); another shortcut closes the guide and still runs; any other key, a click or `Esc` closes it. With `sticky` on or via the accessible shortcut it is modal: type to filter, `Up`/`Down`/`Page Up`/`Page Down` to scroll, `Esc` or click outside to close |
+| Lock screen | Never opens while the session is locked; locking closes an open guide |
+| Animation | 100 ms fade in; instant with reduced motion or animations disabled |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.ShortcutGuide`: `enabled` (false by default; true in `windows11` and `macos` themes), `hold-delay` (400..2000 ms, 900), `sticky` (false), `show-owner` (true), `shortcut-guide-shortcut`; your shortcut: `io.github.OlehDzhumyk.Desk.Shortcuts` `shortcut-guide-toggle` |
+
+Skins:
+
+* **windows11**: dimmed full-screen multi-column grid by group, rounded square keycaps and a neutral `Super` label.
+* **macos**: centred translucent cheat-sheet panel with grouped headings, search field in sticky mode and `⌘ ⌥ ⇧ ⌃` modifier symbols.
+* **default**: same centred panel with plain-text keycaps; off by default until enabled in Settings.

@@ -31,6 +31,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Focus (`focus`) | Available in Windows 11 and macOS |
 | Logo menu (`logo-menu`) | From macOS |
 | Lock screen (`lockscreen`) | Available in Windows 11 and macOS |
+| Shortcut guide (`shortcut-guide`) | From Windows (PowerToys), adapted for macOS style |
 | Application (`app`) | — |
 
 ## `io.github.OlehDzhumyk.Desk`
@@ -149,6 +150,7 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `capture-record` | shortcut list | `[]` |  | Start or stop a screen recording | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
 | `layout-picker` | shortcut list | `[]` |  | Open the window layout picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
 | `always-on-top` | shortcut list | `[]` |  | Pin or unpin the focused window above others | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
+| `shortcut-guide-toggle` | shortcut list | `[]` |  | Open the shortcut guide | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | shortcut-guide | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
 
@@ -211,6 +213,18 @@ Path `/io/github/OlehDzhumyk/Desk/logo-menu/`.
 | `enabled` | boolean | `true` |  | Show logo menu | Show a system menu on the left of the top bar in the macOS skin. | logo-menu | switch on `--page logo-menu` |
 | `hide-activities` | boolean | `true` |  | Hide Activities button | Hide the default Activities indicator while the logo menu is shown. | logo-menu | switch on `--page logo-menu` |
 
+## `io.github.OlehDzhumyk.Desk.ShortcutGuide`
+
+Path `/io/github/OlehDzhumyk/Desk/shortcut-guide/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `false` |  | Shortcut guide | Off by default on the default skin; enabled by the Windows 11 and macOS themes. | shortcut-guide | switch on `--page shortcut-guide` |
+| `hold-delay` | unsigned | `900` | 400…2000 (step 50) | Hold delay (ms) | Pressing any other key before this delay elapses cancels the guide so normal Super shortcuts are never interrupted. | shortcut-guide | spin button on `--page shortcut-guide` |
+| `sticky` | boolean | `false` |  | Keep open after release | Off: releasing Super closes the guide. On: the guide stays open in modal search mode until Esc is pressed. | shortcut-guide | switch on `--page shortcut-guide` |
+| `show-owner` | boolean | `true` |  | Show shortcut source | Label each row as a theme default or your own setting | shortcut-guide | switch on `--page shortcut-guide` |
+| `shortcut-guide-shortcut` | shortcut list | `['<Control><Shift><Super>slash']` |  | Keyboard shortcut | Accessible trigger for users who cannot hold Super; always opens in sticky searchable mode. An override in io.github.OlehDzhumyk.Desk.Shortcuts shortcut-guide-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | shortcut-guide | shortcut row on `--page shortcuts` |
+
 ## `org.gnome.shell.extensions.lockscreen-layout`
 
 Path `/org/gnome/shell/extensions/lockscreen-layout/`.
@@ -254,6 +268,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `capture-record` | Start or stop a screen recording | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-record-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-record` |
 | `layout-picker` | Open the window layout picker | layouts | `/io/github/OlehDzhumyk/Desk/layouts/layout-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/layout-picker` |
 | `always-on-top` | Pin or unpin the focused window above others | layouts | `/io/github/OlehDzhumyk/Desk/layouts/always-on-top-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/always-on-top` |
+| `shortcut-guide-toggle` | Open the shortcut guide | shortcut-guide | `/io/github/OlehDzhumyk/Desk/shortcut-guide/shortcut-guide-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/shortcut-guide-toggle` |
 
 ## Pages of the window
 
@@ -271,6 +286,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `focus` | Focus | State, Options, Focus sessions |
 | `logo-menu` | Logo menu | Top bar |
 | `lockscreen` | Lock screen | Layout, Time and date, Background |
+| `shortcut-guide` | Shortcut guide | Overlay, How to open |
 | `shortcuts` | Keyboard shortcuts | Features |
 | `general` | General | Language |
 | `credits` | Credits | generated from CREDITS.md |

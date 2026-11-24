@@ -37,3 +37,7 @@ gap-outer=uint32 8
 gap-inner=uint32 6
 snap-assist=true
 hover-picker=true
+
+# Shortcut guide: hold Super to show active shortcuts (PowerToys Shortcut Guide).
+[io/github/OlehDzhumyk/Desk/shortcut-guide]
+enabled=true

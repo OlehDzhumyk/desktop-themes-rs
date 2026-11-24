@@ -31,3 +31,7 @@ capture-record-shortcut=@as []
 snap-assist=false
 hover-picker=false
 layout-picker-shortcut=['<Control><Super>Up']
+
+# Shortcut guide: hold Super (Cmd) to show active shortcuts in a centred cheat sheet.
+[io/github/OlehDzhumyk/Desk/shortcut-guide]
+enabled=true
