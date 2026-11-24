@@ -100,6 +100,13 @@ pub fn localedir() -> PathBuf {
 /// Set up gettext. Call first thing in `main`. `setting` reads the `language` key (it may start
 /// threads: the re-exec happens before anything else runs).
 pub fn init(setting: impl FnOnce() -> Option<String>) {
+    // SAFETY: setlocale is not thread-safe, so it runs first, while the process has one thread:
+    // `setting` may create `gio::Settings`, which starts GLib's worker threads. The locale comes
+    // from LC_* / LANG, which the re-exec below leaves alone (it only sets LANGUAGE, read by
+    // gettext at lookup time), so setting it before a possible re-exec is harmless.
+    unsafe {
+        gettextrs::setlocale(gettextrs::LocaleCategory::LcAll, "");
+    }
     if std::env::var_os(ENV_ORIG).is_none() {
         let wanted = std::env::var(ENV_LANGUAGE).ok().or_else(setting);
         if let Some(lang) = wanted.as_deref().and_then(language_env) {
@@ -108,10 +115,6 @@ pub fn init(setting: impl FnOnce() -> Option<String>) {
                 reexec(lang, &cur);
             }
         }
-    }
-    // SAFETY: called at the start of main, before other threads use locale-dependent functions.
-    unsafe {
-        gettextrs::setlocale(gettextrs::LocaleCategory::LcAll, "");
     }
     let _ = gettextrs::bindtextdomain(DOMAIN, localedir());
     let _ = gettextrs::bind_textdomain_codeset(DOMAIN, "UTF-8");
