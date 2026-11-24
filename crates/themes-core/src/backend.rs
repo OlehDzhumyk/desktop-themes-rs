@@ -14,13 +14,19 @@
 
 use desk_settings::tr;
 use std::path::{Path, PathBuf};
+use theme_tokens::generate::ExtraTarget;
 
 use crate::doctor::Issue;
 use crate::error::Result;
 use crate::paths::Ctx;
+use crate::theme::Theme;
 
 /// The `skin` key of `io.github.OlehDzhumyk.Desk`: how the bridge and desk-shell draw panels.
 pub const SKIN_KEY: &str = "/io/github/OlehDzhumyk/Desk/skin";
+/// The labwc theme referenced by `data/labwc/windows11/rc.xml`.
+pub const DEFAULT_LABWC_THEME: &str = "desk-win11";
+/// The skin whose bundled `themerc` backs [`DEFAULT_LABWC_THEME`].
+const DEFAULT_LABWC_SKIN: &str = "windows11";
 
 /// Which desktop the session runs.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -97,6 +103,16 @@ pub fn detect() -> Box<dyn DesktopBackend> {
     }
 }
 
+/// The backend of `ctx`: detected from the environment on a live session, [`GnomeBackend`] with
+/// the in-memory test dconf so unit tests never pick up the host desktop.
+pub(crate) fn default_backend(ctx: &Ctx) -> Box<dyn DesktopBackend> {
+    if ctx.dconf.live() {
+        detect()
+    } else {
+        Box::new(GnomeBackend)
+    }
+}
+
 /// What differs between desktops. Kept small on purpose (ADR 0011): it grows when a backend
 /// needs it, not ahead of time.
 pub trait DesktopBackend {
@@ -107,8 +123,9 @@ pub trait DesktopBackend {
     fn diagnose(&self, ctx: &Ctx) -> Vec<Issue>;
     /// GNOME Shell extensions exist here: the doctor checks and fixes them.
     fn supports_gnome_extensions(&self) -> bool;
-    /// The compositor side of `skin` for `theme_id`. Returns what was done (or, with `dry_run`,
-    /// what would be done). Never fails because an optional part is missing.
+    /// The compositor side of `skin` for `theme_id` (the resolved Look module theme). Returns what
+    /// was done (or, with `dry_run`, what would be done). Never fails because an optional part is
+    /// missing.
     fn apply_compositor_skin(
         &self,
         ctx: &Ctx,
@@ -116,6 +133,37 @@ pub trait DesktopBackend {
         skin: &str,
         dry_run: bool,
     ) -> Result<Vec<String>>;
+    /// Writes or removes token-driven compositor files (`themerc`, `desk-shell.css`) for the
+    /// resolved Look theme without modifying dconf or reconfiguring a live compositor yet.
+    /// Returns `(messages, needs_reconfigure)`. Used inside `apply`'s transaction so a later step
+    /// failure can roll the files back.
+    fn sync_compositor_files(
+        &self,
+        ctx: &Ctx,
+        theme_id: &str,
+        skin: &str,
+        dry_run: bool,
+    ) -> Result<(Vec<String>, bool)> {
+        let _ = (ctx, theme_id, skin, dry_run);
+        Ok((Vec::new(), false))
+    }
+    /// Reconfigures a live compositor after committed changes.
+    fn reconfigure_compositor(&self, ctx: &Ctx, dry_run: bool) -> Result<Vec<String>> {
+        let _ = (ctx, dry_run);
+        Ok(Vec::new())
+    }
+    /// Restores compositor files to `prev_theme_id` (or removes generated files and restores
+    /// bundled defaults when `prev_theme_id` is `None` or has no tokens), reconfiguring a live
+    /// compositor when changed.
+    fn reset_compositor(
+        &self,
+        ctx: &Ctx,
+        prev_theme_id: Option<&str>,
+        dry_run: bool,
+    ) -> Result<Vec<String>> {
+        let _ = (ctx, prev_theme_id, dry_run);
+        Ok(Vec::new())
+    }
 }
 
 /// GNOME Shell: the existing checks in [`crate::doctor`]; dconf carries the skin.
@@ -141,7 +189,8 @@ impl DesktopBackend for GnomeBackend {
     }
 }
 
-/// A Wayland desktop without a backend yet.
+/// A Wayland desktop without a compositor-specific backend yet (`desk-shell` still runs on any
+/// `wlr-layer-shell` compositor, so its generated stylesheet is kept in sync).
 #[derive(Debug, Default)]
 pub struct OtherBackend;
 
@@ -162,9 +211,82 @@ impl DesktopBackend for OtherBackend {
     fn supports_gnome_extensions(&self) -> bool {
         false
     }
-    fn apply_compositor_skin(&self, _: &Ctx, _: &str, _: &str, _: bool) -> Result<Vec<String>> {
-        Ok(Vec::new())
+    fn sync_compositor_files(
+        &self,
+        ctx: &Ctx,
+        theme_id: &str,
+        _skin: &str,
+        dry_run: bool,
+    ) -> Result<(Vec<String>, bool)> {
+        let look_theme = resolve_look_theme(ctx, theme_id);
+        let mut done = Vec::new();
+        sync_desk_shell_css(ctx, look_theme.as_ref(), dry_run, &mut done)?;
+        Ok((done, false))
     }
+    fn apply_compositor_skin(
+        &self,
+        ctx: &Ctx,
+        theme_id: &str,
+        skin: &str,
+        dry_run: bool,
+    ) -> Result<Vec<String>> {
+        self.sync_compositor_files(ctx, theme_id, skin, dry_run)
+            .map(|(done, _)| done)
+    }
+    fn reset_compositor(
+        &self,
+        ctx: &Ctx,
+        prev_theme_id: Option<&str>,
+        dry_run: bool,
+    ) -> Result<Vec<String>> {
+        self.apply_compositor_skin(ctx, prev_theme_id.unwrap_or(""), "", dry_run)
+    }
+}
+
+fn resolve_look_theme(ctx: &Ctx, theme_id: &str) -> Option<Theme> {
+    (!theme_id.is_empty())
+        .then(|| crate::theme::get_theme(ctx, theme_id).ok())
+        .flatten()
+}
+
+/// Writes `$XDG_CONFIG_HOME/desk-shell/desk-shell.css` when `look_theme` produces tokens (along
+/// its `INHERITS` chain), or removes any stale generated file when it does not.
+fn sync_desk_shell_css(
+    ctx: &Ctx,
+    look_theme: Option<&Theme>,
+    dry_run: bool,
+    done: &mut Vec<String>,
+) -> Result<bool> {
+    let dest = ctx.desk_shell_css();
+    let rendered = match look_theme {
+        Some(t) => crate::tokens::render_extra(t, ExtraTarget::DeskShellCss)?,
+        None => None,
+    };
+    if let Some(file) = rendered {
+        let bytes = file.contents.as_bytes();
+        if std::fs::read(&dest).ok().as_deref() != Some(bytes) {
+            if !dry_run {
+                write_atomic(&dest, bytes)?;
+            }
+            done.push(tr!(
+                "desk-shell stylesheet updated ({path})",
+                path = dest.display()
+            ));
+            return Ok(true);
+        }
+        return Ok(false);
+    }
+    if crate::util::lexists(&dest) && !dest.is_dir() {
+        if !dry_run {
+            std::fs::remove_file(&dest)?;
+        }
+        done.push(tr!(
+            "desk-shell stylesheet removed ({path})",
+            path = dest.display()
+        ));
+        return Ok(true);
+    }
+    Ok(false)
 }
 
 fn issue(severity: &'static str, kind: &'static str, message: String) -> Issue {
@@ -254,7 +376,7 @@ impl LabwcEnv {
         self.lib_dirs.iter().any(|d| d.join(name).exists())
     }
 
-    fn installed_themerc(&self, theme: &str) -> PathBuf {
+    pub fn installed_themerc(&self, theme: &str) -> PathBuf {
         self.data_home
             .join("themes")
             .join(theme)
@@ -379,6 +501,63 @@ impl DesktopBackend for LabwcBackend {
         false
     }
 
+    fn sync_compositor_files(
+        &self,
+        ctx: &Ctx,
+        theme_id: &str,
+        skin: &str,
+        dry_run: bool,
+    ) -> Result<(Vec<String>, bool)> {
+        let e = &self.env;
+        let look_theme = resolve_look_theme(ctx, theme_id);
+        let mut done = Vec::new();
+        let mut reconfigure = false;
+
+        let labwc_theme = labwc_theme_of(skin).unwrap_or(DEFAULT_LABWC_THEME);
+        let dest = e.installed_themerc(labwc_theme);
+        let rendered = match &look_theme {
+            Some(t) => crate::tokens::render_extra(t, ExtraTarget::LabwcTheme)?,
+            None => None,
+        };
+        if let Some(file) = rendered {
+            let bytes = file.contents.as_bytes();
+            if std::fs::read(&dest).ok().as_deref() != Some(bytes) {
+                if !dry_run {
+                    write_atomic(&dest, bytes)?;
+                }
+                done.push(tr!("labwc theme {name} updated", name = labwc_theme));
+                reconfigure = true;
+            }
+        } else if let Some(src) = (!skin.is_empty())
+            .then(|| e.bundled_themerc(skin))
+            .flatten()
+            .or_else(|| e.bundled_themerc(DEFAULT_LABWC_SKIN))
+        {
+            let text = std::fs::read(&src)?;
+            if std::fs::read(&dest).ok().as_deref() != Some(text.as_slice()) {
+                if !dry_run {
+                    write_atomic(&dest, &text)?;
+                }
+                done.push(tr!("labwc theme {name} updated", name = labwc_theme));
+                reconfigure = true;
+            }
+        }
+
+        sync_desk_shell_css(ctx, look_theme.as_ref(), dry_run, &mut done)?;
+        Ok((done, reconfigure))
+    }
+
+    fn reconfigure_compositor(&self, ctx: &Ctx, dry_run: bool) -> Result<Vec<String>> {
+        // only a live labwc of this session, never the in-memory dconf of tests
+        if let Some(pid) = self.env.live_pid.filter(|_| ctx.dconf.live()) {
+            if !dry_run {
+                crate::util::run("labwc", &["--reconfigure"], None)?;
+            }
+            return Ok(vec![tr!("labwc (pid {pid}) reconfigured", pid = pid)]);
+        }
+        Ok(Vec::new())
+    }
+
     fn apply_compositor_skin(
         &self,
         ctx: &Ctx,
@@ -386,43 +565,42 @@ impl DesktopBackend for LabwcBackend {
         skin: &str,
         dry_run: bool,
     ) -> Result<Vec<String>> {
-        let e = &self.env;
         let mut done = Vec::new();
-        let mut changed = false;
+        let mut reconfigure = false;
 
-        let want = format!("'{skin}'");
-        if ctx.dconf.dump()?.get(SKIN_KEY) != Some(&want) {
-            if !dry_run {
-                ctx.dconf.write(SKIN_KEY, &want)?;
-            }
-            done.push(tr!(
-                "skin → {skin} (theme {theme})",
-                skin = skin,
-                theme = theme_id
-            ));
-            changed = true;
-        }
-
-        if let (Some(theme), Some(src)) = (labwc_theme_of(skin), e.bundled_themerc(skin)) {
-            let dest = e.installed_themerc(theme);
-            let text = std::fs::read(&src)?;
-            if std::fs::read(&dest).ok().as_deref() != Some(text.as_slice()) {
+        if !skin.is_empty() {
+            let want = format!("'{skin}'");
+            if ctx.dconf.dump()?.get(SKIN_KEY) != Some(&want) {
                 if !dry_run {
-                    write_atomic(&dest, &text)?;
+                    ctx.dconf.write(SKIN_KEY, &want)?;
                 }
-                done.push(tr!("labwc theme {name} updated", name = theme));
-                changed = true;
+                done.push(tr!(
+                    "skin → {skin} (theme {theme})",
+                    skin = skin,
+                    theme = theme_id
+                ));
+                reconfigure = true;
             }
         }
 
-        // only a live labwc of this session, never the in-memory dconf of tests
-        if changed && let Some(pid) = e.live_pid.filter(|_| ctx.dconf.live()) {
-            if !dry_run {
-                crate::util::run("labwc", &["--reconfigure"], None)?;
-            }
-            done.push(tr!("labwc (pid {pid}) reconfigured", pid = pid));
+        let (file_done, files_reconfigure) =
+            self.sync_compositor_files(ctx, theme_id, skin, dry_run)?;
+        done.extend(file_done);
+        reconfigure |= files_reconfigure;
+
+        if reconfigure {
+            done.extend(self.reconfigure_compositor(ctx, dry_run)?);
         }
         Ok(done)
+    }
+
+    fn reset_compositor(
+        &self,
+        ctx: &Ctx,
+        prev_theme_id: Option<&str>,
+        dry_run: bool,
+    ) -> Result<Vec<String>> {
+        self.apply_compositor_skin(ctx, prev_theme_id.unwrap_or(""), "", dry_run)
     }
 }
 
@@ -632,5 +810,329 @@ mod tests {
                 .unwrap()
                 .is_empty()
         );
+    }
+
+    const LAV_TOKENS: &str = r##"
+schema = 1
+[colors.light]
+accent = "#6d4fc2"
+window_bg = "#f7f5fc"
+window_fg = "#221c35"
+[colors.dark]
+accent = "#8f74e6"
+window_bg = "#1d1a27"
+window_fg = "#ebe7f5"
+headerbar_bg = "#262232"
+headerbar_fg = "#ebe7f5"
+[radii]
+button = 8
+popover = 12
+"##;
+
+    const WIN_TOKENS: &str = r##"
+schema = 1
+[colors]
+accent = "blue"
+[colors.dark]
+headerbar_bg = "#202020"
+headerbar_fg = "#ffffff"
+[radii]
+button = 4
+"##;
+
+    const BUNDLED_THEMERC: &str = "# bundled default\nborder.width: 1\n";
+
+    fn apply_fx(tag: &str) -> (PathBuf, Ctx, Arc<Mutex<Db>>, LabwcBackend) {
+        let (root, b) = fixture(tag, &[]);
+        let mut ctx = Ctx::new(root.join("home"), root.clone());
+        let db = Arc::new(Mutex::new(Db::default()));
+        ctx.dconf = Backend::Memory(db.clone());
+        crate::theme::tests::write(&root.join("baseline-t/full.dconf"), "");
+        crate::theme::tests::write(&root.join("bundled/windows11/themerc"), BUNDLED_THEMERC);
+        // Builtin fedora theme (no tokens.toml, sets skin='default')
+        crate::theme::tests::write(&ctx.themes.join("fedora/theme.conf"), "NAME=Fedora\n");
+        crate::theme::tests::write(
+            &ctx.themes.join("fedora/desk.dconf"),
+            "[io/github/OlehDzhumyk/Desk]\nskin='default'\n",
+        );
+        // Non-token theme
+        crate::theme::tests::write(&ctx.themes.join("plain/theme.conf"), "NAME=Plain\n");
+        crate::theme::tests::write(
+            &ctx.themes.join("plain/settings.dconf"),
+            "[org/example/test]\nval='plain'\n",
+        );
+        // Token theme without desk.dconf (like lavender)
+        crate::theme::tests::write(&ctx.themes.join("lav/theme.conf"), "NAME=Lav\n");
+        crate::theme::tests::write(&ctx.themes.join("lav/tokens.toml"), LAV_TOKENS);
+        crate::theme::tests::write(
+            &ctx.themes.join("lav/settings.dconf"),
+            "[org/example/test]\nval='lav'\n",
+        );
+        // Token theme with skin='windows11' and behavior module
+        crate::theme::tests::write(&ctx.themes.join("win/theme.conf"), "NAME=Win\n");
+        crate::theme::tests::write(&ctx.themes.join("win/tokens.toml"), WIN_TOKENS);
+        crate::theme::tests::write(
+            &ctx.themes.join("win/desk.dconf"),
+            "[io/github/OlehDzhumyk/Desk]\nskin='windows11'\n",
+        );
+        crate::theme::tests::write(
+            &ctx.themes.join("win/behavior.dconf"),
+            "[org/example/behavior]\nflag=true\n",
+        );
+        // Child theme inheriting from lav and overriding button radius & dark accent
+        crate::theme::tests::write(
+            &ctx.themes.join("lav-child/theme.conf"),
+            "NAME=\"Lav Child\"\nINHERITS=lav\n",
+        );
+        crate::theme::tests::write(
+            &ctx.themes.join("lav-child/tokens.toml"),
+            "[colors.dark]\naccent = \"#aa3355\"\n[radii]\nbutton = 10\n",
+        );
+        (root, ctx, db, b)
+    }
+
+    #[test]
+    fn labwc_apply_tokens_inherits_and_dry_run() {
+        use crate::apply::{Options, apply_on};
+        let (root, ctx, _, b) = apply_fx("tokens-apply");
+        let themerc = b.env.installed_themerc(DEFAULT_LABWC_THEME);
+        let css = ctx.desk_shell_css();
+        assert!(
+            css.starts_with(&root),
+            "must stay inside temp root: {css:?}"
+        );
+
+        // dry run writes neither file and reports planned updates
+        let dry = Options {
+            dry_run: true,
+            ..Default::default()
+        };
+        let planned = apply_on(&ctx, "lav", &[], &dry, &b).unwrap();
+        assert_eq!(planned.compositor.len(), 2, "{:?}", planned.compositor);
+        assert!(!themerc.exists());
+        assert!(!css.exists());
+
+        // real apply generates both files matching render_extra
+        let res = apply_on(&ctx, "lav", &[], &Options::default(), &b).unwrap();
+        assert_eq!(res.compositor.len(), 2, "{:?}", res.compositor);
+        let lav_theme = crate::theme::get_theme(&ctx, "lav").unwrap();
+        let want_rc = crate::tokens::render_extra(&lav_theme, ExtraTarget::LabwcTheme)
+            .unwrap()
+            .unwrap()
+            .contents;
+        let want_css = crate::tokens::render_extra(&lav_theme, ExtraTarget::DeskShellCss)
+            .unwrap()
+            .unwrap()
+            .contents;
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), want_rc);
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), want_css);
+        assert!(want_rc.contains("window.active.title.bg.color: #262232"));
+        assert!(want_css.contains("--ds-accent: #8f74e6;"));
+
+        // idempotent re-apply
+        let again = apply_on(&ctx, "lav", &[], &Options::default(), &b).unwrap();
+        assert!(again.compositor.is_empty(), "{:?}", again.compositor);
+
+        // INHERITS merges parent tokens with child overrides in both outputs
+        apply_on(&ctx, "lav-child", &[], &Options::default(), &b).unwrap();
+        let child_rc = std::fs::read_to_string(&themerc).unwrap();
+        let child_css = std::fs::read_to_string(&css).unwrap();
+        assert!(
+            child_rc.contains("window.active.title.bg.color: #262232"),
+            "{child_rc}"
+        );
+        assert!(
+            child_rc.contains("window.button.hover.bg.corner-radius: 10"),
+            "{child_rc}"
+        );
+        assert!(
+            child_rc.contains("snapping.overlay.edge.border.color: #aa3355"),
+            "{child_rc}"
+        );
+        assert!(child_css.contains("--ds-accent: #aa3355;"), "{child_css}");
+        assert!(child_css.contains("--ds-radius: 10px;"), "{child_css}");
+        assert!(
+            child_css.contains("--ds-flyout-radius: 12px;"),
+            "{child_css}"
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn labwc_non_token_theme_and_reset_restore_bundled_and_clear_css() {
+        use crate::apply::{Options, apply_on};
+        let (root, ctx, _, b) = apply_fx("tokens-reset");
+        let themerc = b.env.installed_themerc(DEFAULT_LABWC_THEME);
+        let css = ctx.desk_shell_css();
+
+        apply_on(&ctx, "lav", &[], &Options::default(), &b).unwrap();
+        let lav_rc = std::fs::read_to_string(&themerc).unwrap();
+        let lav_css = std::fs::read_to_string(&css).unwrap();
+        assert!(css.is_file());
+
+        // dry run of a non-token theme leaves generated files untouched
+        let dry = Options {
+            dry_run: true,
+            ..Default::default()
+        };
+        let planned = apply_on(&ctx, "plain", &[], &dry, &b).unwrap();
+        assert_eq!(planned.compositor.len(), 2, "{:?}", planned.compositor);
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), lav_rc);
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), lav_css);
+
+        // real apply of non-token theme restores bundled themerc and removes desk-shell.css
+        let res = apply_on(&ctx, "plain", &[], &Options::default(), &b).unwrap();
+        assert_eq!(res.compositor.len(), 2, "{:?}", res.compositor);
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), BUNDLED_THEMERC);
+        assert!(!css.exists());
+
+        // re-apply token theme, then reset (apply fedora)
+        apply_on(&ctx, "lav", &[], &Options::default(), &b).unwrap();
+        assert!(css.is_file());
+        assert_ne!(std::fs::read_to_string(&themerc).unwrap(), BUNDLED_THEMERC);
+
+        apply_on(&ctx, crate::BUILTIN_THEME, &[], &Options::default(), &b).unwrap();
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), BUNDLED_THEMERC);
+        assert!(!css.exists());
+
+        // idempotent second reset
+        let again = apply_on(&ctx, crate::BUILTIN_THEME, &[], &Options::default(), &b).unwrap();
+        assert!(again.compositor.is_empty(), "{:?}", again.compositor);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn module_mixing_follows_look_module_tokens() {
+        use crate::apply::{Options, apply_on};
+        use crate::modules::Module;
+        let (root, ctx, _, b) = apply_fx("tokens-mix");
+        let themerc = b.env.installed_themerc(DEFAULT_LABWC_THEME);
+        let css = ctx.desk_shell_css();
+
+        // apply look from lav, then behavior from win -> outputs stay lav's
+        apply_on(&ctx, "lav", &[Module::Look], &Options::default(), &b).unwrap();
+        let lav_rc = std::fs::read_to_string(&themerc).unwrap();
+        let lav_css = std::fs::read_to_string(&css).unwrap();
+
+        let mix = apply_on(&ctx, "win", &[Module::Behavior], &Options::default(), &b).unwrap();
+        assert!(mix.compositor.is_empty(), "{:?}", mix.compositor);
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), lav_rc);
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), lav_css);
+
+        // switching only behavior to fedora (reset --only behavior) keeps lav's look files
+        apply_on(
+            &ctx,
+            crate::BUILTIN_THEME,
+            &[Module::Behavior],
+            &Options::default(),
+            &b,
+        )
+        .unwrap();
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), lav_rc);
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), lav_css);
+
+        // switching look to win updates both outputs to win's tokens
+        apply_on(&ctx, "win", &[Module::Look], &Options::default(), &b).unwrap();
+        let win_rc = std::fs::read_to_string(&themerc).unwrap();
+        let win_css = std::fs::read_to_string(&css).unwrap();
+        assert!(
+            win_rc.contains("window.active.title.bg.color: #202020"),
+            "{win_rc}"
+        );
+        assert!(win_css.contains("--ds-radius: 4px;"), "{win_css}");
+
+        // switching only look to plain clears desk-shell.css and restores bundled themerc
+        apply_on(&ctx, "plain", &[Module::Look], &Options::default(), &b).unwrap();
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), BUNDLED_THEMERC);
+        assert!(!css.exists());
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn other_backend_syncs_desk_shell_css_only() {
+        use crate::apply::{Options, apply_on};
+        let (root, ctx, _, _) = apply_fx("other-backend");
+        let css = ctx.desk_shell_css();
+
+        // dry run writes nothing
+        let dry = Options {
+            dry_run: true,
+            ..Default::default()
+        };
+        let planned = apply_on(&ctx, "lav", &[], &dry, &OtherBackend).unwrap();
+        assert_eq!(planned.compositor.len(), 1, "{:?}", planned.compositor);
+        assert!(!css.exists());
+
+        // real apply writes desk-shell.css only (no labwc themerc)
+        apply_on(&ctx, "lav", &[], &Options::default(), &OtherBackend).unwrap();
+        let content = std::fs::read_to_string(&css).unwrap();
+        assert!(content.contains("--ds-accent: #8f74e6;"), "{content}");
+        assert!(!root.join("data/themes").exists());
+
+        // reset removes desk-shell.css cleanly
+        apply_on(
+            &ctx,
+            crate::BUILTIN_THEME,
+            &[],
+            &Options::default(),
+            &OtherBackend,
+        )
+        .unwrap();
+        assert!(!css.exists());
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn failed_apply_rolls_back_compositor_files() {
+        use crate::apply::{Options, apply_on};
+        let (root, ctx, db, b) = apply_fx("tokens-rollback");
+        let themerc = b.env.installed_themerc(DEFAULT_LABWC_THEME);
+        let css = ctx.desk_shell_css();
+
+        // 1. Fresh state with bundled themerc: failed apply of lav rolls back to bundled + no css
+        crate::theme::tests::write(&themerc, BUNDLED_THEMERC);
+        db.lock().unwrap().fail_key = Some("/org/example/test/val".into());
+        let err = apply_on(&ctx, "lav", &[], &Options::default(), &b).unwrap_err();
+        assert!(err.0.contains("rolled back"), "{err}");
+        db.lock().unwrap().fail_key = None;
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), BUNDLED_THEMERC);
+        assert!(!css.exists());
+
+        // 2. Active token theme lav -> failed apply of win restores lav's themerc and css
+        apply_on(&ctx, "lav", &[], &Options::default(), &b).unwrap();
+        let lav_rc = std::fs::read_to_string(&themerc).unwrap();
+        let lav_css = std::fs::read_to_string(&css).unwrap();
+
+        db.lock().unwrap().fail_key = Some(SKIN_KEY.into());
+        let err = apply_on(&ctx, "win", &[], &Options::default(), &b).unwrap_err();
+        assert!(err.0.contains("rolled back"), "{err}");
+        db.lock().unwrap().fail_key = None;
+        assert_eq!(std::fs::read_to_string(&themerc).unwrap(), lav_rc);
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), lav_css);
+
+        // 3. OtherBackend rollback from lav -> failed plain restores lav's desk-shell.css
+        db.lock().unwrap().fail_key = Some("/org/example/test/val".into());
+        let err = apply_on(&ctx, "plain", &[], &Options::default(), &OtherBackend).unwrap_err();
+        assert!(err.0.contains("rolled back"), "{err}");
+        db.lock().unwrap().fail_key = None;
+        assert_eq!(std::fs::read_to_string(&css).unwrap(), lav_css);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn gnome_backend_leaves_compositor_and_json_unchanged() {
+        use crate::apply::{Options, apply_on};
+        let (root, ctx, _, _) = apply_fx("gnome-unchanged");
+        let res = apply_on(&ctx, "lav", &[], &Options::default(), &GnomeBackend).unwrap();
+        assert!(res.compositor.is_empty());
+        assert!(!ctx.desk_shell_css().exists());
+        let json = serde_json::to_value(&res).unwrap();
+        assert!(json.get("compositor").is_none(), "{json}");
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

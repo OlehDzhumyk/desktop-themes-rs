@@ -7,6 +7,7 @@ use std::time::Duration;
 
 use serde::Serialize;
 
+use crate::backend::DesktopBackend;
 use crate::dconf::{self, Settings};
 use crate::error::{Error, Result};
 use crate::lock::Lock;
@@ -71,32 +72,20 @@ pub struct ApplyResult {
     pub compositor: Vec<String>,
 }
 
-/// The compositor side of the theme's skin on a non-GNOME desktop ([`crate::backend`]). Only for
-/// the live dconf (never in unit tests); a failure is a warning, the apply stands.
-fn compositor_skin(
+/// The compositor side of the theme's skin on a non-GNOME desktop ([`crate::backend`]) for a dry
+/// run (planned actions only). A failure is a warning, the dry run stands.
+fn compositor_dry_run(
     ctx: &Ctx,
-    id: &str,
-    desired: &BTreeMap<String, Option<String>>,
-    dry_run: bool,
+    backend: &dyn DesktopBackend,
+    look_theme_id: &str,
+    skin: &str,
     res: &mut ApplyResult,
     warnings: &mut Vec<String>,
 ) {
-    if !ctx.dconf.live() {
-        return;
-    }
-    let backend = crate::backend::detect();
     if backend.supports_gnome_extensions() {
         return;
     }
-    let Some(skin) = desired
-        .get(crate::backend::SKIN_KEY)
-        .cloned()
-        .flatten()
-        .and_then(|v| dconf::unquote_str(&v))
-    else {
-        return;
-    };
-    match backend.apply_compositor_skin(ctx, id, &skin, dry_run) {
+    match backend.apply_compositor_skin(ctx, look_theme_id, skin, true) {
         Ok(done) => res.compositor = done,
         Err(e) => warnings.push(tr!(
             "{desktop}: the skin was not applied to the compositor: {error}",
@@ -174,11 +163,28 @@ pub fn experimental_refusal(t: &Theme) -> String {
 ///
 /// Transactional: the steps with side effects are journaled in `state.json` (see [`crate::txn`]);
 /// when one fails, the steps done so far are undone and the old selection stays.
+pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<ApplyResult> {
+    apply_on(
+        ctx,
+        id,
+        modules,
+        opts,
+        crate::backend::default_backend(ctx).as_ref(),
+    )
+}
+
+/// [`apply`] for a specific desktop backend (used by [`apply`] and backend-isolated tests).
 #[allow(
     clippy::too_many_lines,
     reason = "plan, journal and steps of one transaction; the steps share many locals"
 )]
-pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<ApplyResult> {
+pub fn apply_on(
+    ctx: &Ctx,
+    id: &str,
+    modules: &[Module],
+    opts: &Options,
+    backend: &dyn DesktopBackend,
+) -> Result<ApplyResult> {
     let dry_run = opts.dry_run;
     let purge_ext_state = opts.purge_ext_state;
     let target = get_theme(ctx, id)?;
@@ -198,7 +204,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     match &st.pending {
         Some(p) if dry_run => warnings.push(crate::txn::describe(p)),
         Some(_) => {
-            if let Some(r) = crate::txn::recover_locked(ctx, &mut st)? {
+            if let Some(r) = crate::txn::recover_locked_on(ctx, &mut st, backend)? {
                 warnings.push(r.message());
                 warnings.extend(r.warnings);
             }
@@ -356,6 +362,17 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     }
 
     let look = affected.contains(&Module::Look);
+    let look_theme_id = sel.get(&Module::Look).map_or("", String::as_str);
+    let desired_skin = dplan
+        .desired
+        .get(crate::backend::SKIN_KEY)
+        .cloned()
+        .flatten()
+        .and_then(|v| dconf::unquote_str(&v))
+        .unwrap_or_default();
+    let skin_changed = dplan.writes.contains_key(crate::backend::SKIN_KEY)
+        || dplan.resets.iter().any(|k| k == crate::backend::SKIN_KEY);
+    let compositor_affected = look || skin_changed;
     let mut res = ApplyResult {
         ok: true,
         dry_run,
@@ -407,7 +424,16 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
             }
         }
         res.shell_running = ctx.shell().is_some();
-        compositor_skin(ctx, id, &dplan.desired, true, &mut res, &mut warnings);
+        if compositor_affected {
+            compositor_dry_run(
+                ctx,
+                backend,
+                look_theme_id,
+                &desired_skin,
+                &mut res,
+                &mut warnings,
+            );
+        }
         res.warnings = warnings;
         return Ok(res);
     }
@@ -467,6 +493,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     // before extensions were toggled (None: no wait was needed)
     let mut reset_batched = true;
     let mut settled: Option<bool> = None;
+    let mut compositor_reconfigure = false;
     let mut steps = || -> Result<()> {
         // 0. files generated from tokens (content-hashed cache) and their links; before dconf,
         // so the shell theme exists when user-theme reads its new name
@@ -490,6 +517,12 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
                     &mut warnings,
                 )?);
             }
+        }
+        if compositor_affected && !backend.supports_gnome_extensions() {
+            let (done, reconf) =
+                backend.sync_compositor_files(ctx, look_theme_id, &desired_skin, false)?;
+            res.compositor = done;
+            compositor_reconfigure = reconf;
         }
         res.tokens_ms = t0.elapsed().as_secs_f64() * 1000.0;
 
@@ -571,7 +604,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
         Ok(())
     };
     if let Err(e) = steps() {
-        let rec = txn::recover_locked(ctx, &mut st)?;
+        let rec = txn::recover_locked_on(ctx, &mut st, backend)?;
         let completed = rec.as_ref().is_some_and(|r| r.completed);
         let problems = rec.map_or_default(|r| r.warnings);
         log(
@@ -655,7 +688,16 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     let mut protected: BTreeSet<String> = theme_keys.values().flatten().cloned().collect();
     protected.extend(targets.values().flat_map(|t| t.keys().cloned()));
     res.cleanup = cleanup(ctx, &dplan.desired, &baseline, &protected, &purge);
-    compositor_skin(ctx, id, &dplan.desired, false, &mut res, &mut warnings);
+    if (compositor_reconfigure || skin_changed) && !backend.supports_gnome_extensions() {
+        match backend.reconfigure_compositor(ctx, false) {
+            Ok(done) => res.compositor.extend(done),
+            Err(e) => warnings.push(tr!(
+                "{desktop}: the skin was not applied to the compositor: {error}",
+                desktop = backend.name(),
+                error = e
+            )),
+        }
+    }
     res.warnings = warnings;
     log(
         ctx,

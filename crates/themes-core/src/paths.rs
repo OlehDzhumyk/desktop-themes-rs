@@ -9,6 +9,8 @@ use crate::error::Result;
 pub struct Ctx {
     pub home: PathBuf,
     pub root: PathBuf,
+    /// `$XDG_CONFIG_HOME` in a live process, else `<home>/.config` (always isolated in tests).
+    pub config_home: PathBuf,
     pub themes: PathBuf,
     pub state: PathBuf,
     pub current: PathBuf,
@@ -28,10 +30,17 @@ impl Ctx {
         let home = std::env::var_os("HOME").map_or_else(|| "/".into(), PathBuf::from);
         let root = std::env::var_os("DESKTOP_THEMES_ROOT")
             .map_or_else(|| home.join(".local/share/desktop-themes"), PathBuf::from);
-        Ctx::new(home, root)
+        let mut ctx = Ctx::new(home, root);
+        if let Some(p) = std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from)
+            && p.is_absolute()
+        {
+            ctx.config_home = p;
+        }
+        ctx
     }
 
     pub fn new(home: PathBuf, root: PathBuf) -> Ctx {
+        let config_home = home.join(".config");
         Ctx {
             themes: root.join("themes"),
             state: root.join("state.json"),
@@ -44,9 +53,17 @@ impl Ctx {
             gtk3: home.join(".config/gtk-3.0"),
             flatpak_overrides: home.join(".local/share/flatpak/overrides"),
             dconf: Default::default(),
+            config_home,
             home,
             root,
         }
+    }
+
+    /// Generated desk-shell stylesheet (`$XDG_CONFIG_HOME/desk-shell/desk-shell.css`; in tests
+    /// `<home>/.config/desk-shell/desk-shell.css`).
+    pub fn desk_shell_css(&self) -> PathBuf {
+        self.config_home
+            .join(theme_tokens::generate::DESK_SHELL_CSS)
     }
 
     pub fn baseline_dir(&self) -> Result<PathBuf> {

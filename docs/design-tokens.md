@@ -10,8 +10,8 @@ dconf files. When the theme is applied, the manager generates from them:
 | Ptyxis palette | `.../<id>/ptyxis/desktop-themes-<id>.palette`, linked into `~/.local/share/org.gnome.Ptyxis/palettes/` | Ptyxis |
 | wallpaper (optional) | `.../<id>/wallpaper/{light,dark}.svg` | `org.gnome.desktop.background` |
 | dconf keys | merged into the look / sounds / apps modules | the usual apply pipeline |
-| labwc `themerc` (on request) | `.../<id>/labwc/openbox-3/themerc` | labwc window decorations (desktop shell session) |
-| desk-shell CSS (on request) | `.../<id>/desk-shell/desk-shell.css` | desk-shell (desktop shell session) |
+| labwc `themerc` (on request) | `~/.local/share/themes/desk-win11/openbox-3/themerc` (`$XDG_DATA_HOME`) | labwc window decorations (`LabwcBackend`) |
+| desk-shell CSS (on request) | `~/.config/desk-shell/desk-shell.css` (`$XDG_CONFIG_HOME`) | desk-shell (`LabwcBackend` and other Wayland desktops) |
 
 So a theme can be just `theme.conf` + `tokens.toml` (+ `extensions.txt`, `behavior.dconf` if it
 wants them): see `themes/lavender`. Nothing generated is ever written into the repository or the
@@ -122,9 +122,25 @@ media queries, so the layer uses one scheme (dark by default, like the bundled s
 `.palette`: `desktop-themes-<id>`.
 
 **labwc and desk-shell (on request).** These two outputs serve the desktop shell session, not
-GNOME, so `generate::render` never writes them; a caller asks for one with
-`generate::render_extra(tokens, target, ExtraTarget::LabwcTheme | ExtraTarget::DeskShellCss)`. Both
-are always complete: an unset token keeps the consumer's default.
+GNOME, so `generate::render` never writes them and GNOME sessions never touch them; a caller asks
+for one with `generate::render_extra(tokens, target, ExtraTarget::LabwcTheme |
+ExtraTarget::DeskShellCss)`. Both are always complete: an unset token keeps the consumer's default.
+
+During `themes apply` outside GNOME, `themes-core` resolves the active `look` module theme along
+its `INHERITS` chain (so module mixing follows `look`, not `behavior` or `apps`):
+
+* On `LabwcBackend`, when the resolved `look` theme has `tokens.toml`, `ExtraTarget::LabwcTheme`
+  is written atomically to `$XDG_DATA_HOME/themes/desk-win11/openbox-3/themerc` (default
+  `~/.local/share/themes/desk-win11/openbox-3/themerc`) and `ExtraTarget::DeskShellCss` to
+  `$XDG_CONFIG_HOME/desk-shell/desk-shell.css` (default `~/.config/desk-shell/desk-shell.css`).
+  In a live labwc session, `labwc --reconfigure` runs only when the `themerc` or `skin` changed
+  and `--dry-run` is off.
+* On other Wayland compositors (`OtherBackend`), `ExtraTarget::DeskShellCss` is written atomically
+  to `$XDG_CONFIG_HOME/desk-shell/desk-shell.css` (without touching labwc files).
+* When applying a `look` theme without `tokens.toml`, running `themes reset`, or rolling back a
+  failed apply, the generated `$XDG_CONFIG_HOME/desk-shell/desk-shell.css` is removed cleanly and
+  (on `LabwcBackend`) the bundled `themerc` is restored (with `labwc --reconfigure` in a live
+  session when changed). `--dry-run` reports planned changes and writes or deletes nothing.
 
 * `LabwcTheme`: an Openbox-style `themerc` (labwc-theme(5)) in one scheme, the shell scheme
   (`shell.scheme`, dark by default). Active titlebar = `headerbar_bg`/`headerbar_fg`, inactive =
