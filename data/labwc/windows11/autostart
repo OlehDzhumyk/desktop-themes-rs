@@ -17,6 +17,39 @@ if command -v dbus-update-activation-environment >/dev/null 2>&1; then
   dbus-update-activation-environment --systemd $SESSION_VARS >/dev/null 2>&1
 fi
 
+# Polkit authentication agent: first installed one, for privileged actions.
+for agent in \
+  /usr/libexec/lxqt-policykit-agent \
+  /usr/libexec/polkit-gnome-authentication-agent-1 \
+  /usr/libexec/polkit-mate-authentication-agent-1 \
+  /usr/libexec/xfce-polkit \
+  /usr/libexec/kf6/polkit-kde-authentication-agent-1; do
+  if [ -x "$agent" ]; then
+    "$agent" >/dev/null 2>&1 &
+    break
+  fi
+done
+
+# Notifications: mako, else dunst, only when org.freedesktop.Notifications has no owner yet.
+notifications_owned() {
+  if command -v gdbus >/dev/null 2>&1; then
+    case "$(gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+      --method org.freedesktop.DBus.NameHasOwner org.freedesktop.Notifications 2>/dev/null)" in
+      *true*) return 0 ;;
+      *false*) return 1 ;;
+    esac
+  fi
+  command -v busctl >/dev/null 2>&1 &&
+    busctl --user status org.freedesktop.Notifications >/dev/null 2>&1
+}
+notify_daemon=
+for d in mako dunst; do
+  if command -v "$d" >/dev/null 2>&1; then notify_daemon=$d; break; fi
+done
+if [ -n "$notify_daemon" ] && ! notifications_owned; then
+  "$notify_daemon" >/dev/null 2>&1 &
+fi
+
 # Screen lock: "Lock" in the Start menu runs `loginctl lock-session`; swayidle turns that (and
 # suspend) into swaylock. -w: suspend waits until the lock is drawn.
 if command -v swayidle >/dev/null 2>&1 && command -v swaylock >/dev/null 2>&1; then

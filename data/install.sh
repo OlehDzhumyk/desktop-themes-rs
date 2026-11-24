@@ -13,7 +13,8 @@
 #   labwc/windows11; the session entry needs sudo, see docs/wayland-session.md).
 # Run on the host after `cargo build --release` (scripts/bootstrap.sh does all of it).
 #
-# Usage: data/install.sh [--dry-run] [--bin PATH] [--deskd PATH] [--desk-shell PATH]
+# Usage: data/install.sh [--dry-run] [--no-gnome-bridge] [--bin PATH] [--deskd PATH] [--desk-shell PATH]
+#   --no-gnome-bridge  do not build or install desk-bridge@desktop-themes-rs (no npm needed)
 #   --bin PATH         install this binary instead of target/release/themes
 #   --deskd PATH       install this binary instead of target/release/deskd
 #   --desk-shell PATH  install this binary instead of target/release/desk-shell (optional: skipped
@@ -24,13 +25,15 @@ BIN_SRC="$SRC/target/release/themes"
 DESKD_SRC="$SRC/target/release/deskd"
 SHELL_SRC="$SRC/target/release/desk-shell"
 DRY=0
+GNOME_BRIDGE=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run|-n) DRY=1; shift ;;
+    --no-gnome-bridge) GNOME_BRIDGE=0; shift ;;
     --bin) BIN_SRC=$2; shift 2 ;;
     --deskd) DESKD_SRC=$2; shift 2 ;;
     --desk-shell) SHELL_SRC=$2; shift 2 ;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done
@@ -113,23 +116,27 @@ run install -m 0644 "$SRC/data/themes-doctor.service" "$HOME/.config/systemd/use
 run install -m 0644 "$SRC/data/deskd.service" "$HOME/.config/systemd/user/deskd.service"
 
 # GNOME Shell extensions that belong to this repository (build/rebuild the TypeScript bridge if missing or stale)
-BRIDGE_JS="$SRC/bridge/build/$BRIDGE/extension.js"
-NEED_BRIDGE_BUILD=0
-if [ ! -f "$BRIDGE_JS" ]; then
-  NEED_BRIDGE_BUILD=1
-elif [ -n "$(find "$SRC/bridge/src" "$SRC/bridge/static" "$SRC/bridge/package.json" -newer "$BRIDGE_JS" 2>/dev/null | head -n 1)" ]; then
-  NEED_BRIDGE_BUILD=1
-fi
-if [ "$NEED_BRIDGE_BUILD" = 1 ]; then
-  if command -v npm >/dev/null 2>&1; then
-    # the path goes in as $1, never inside the script text (a quote in it cannot break out)
-    run sh -c 'cd "$1" && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build' _ "$SRC/bridge"
-  else
-    run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" \
-      sh -c 'cd "$1" && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build' _ "$SRC/bridge"
+ext_dirs=("$SRC"/extensions/*/)
+if [ "$GNOME_BRIDGE" = 1 ]; then
+  BRIDGE_JS="$SRC/bridge/build/$BRIDGE/extension.js"
+  NEED_BRIDGE_BUILD=0
+  if [ ! -f "$BRIDGE_JS" ]; then
+    NEED_BRIDGE_BUILD=1
+  elif [ -n "$(find "$SRC/bridge/src" "$SRC/bridge/static" "$SRC/bridge/package.json" -newer "$BRIDGE_JS" 2>/dev/null | head -n 1)" ]; then
+    NEED_BRIDGE_BUILD=1
   fi
+  if [ "$NEED_BRIDGE_BUILD" = 1 ]; then
+    if command -v npm >/dev/null 2>&1; then
+      # the path goes in as $1, never inside the script text (a quote in it cannot break out)
+      run sh -c 'cd "$1" && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build' _ "$SRC/bridge"
+    else
+      run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" \
+        sh -c 'cd "$1" && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build' _ "$SRC/bridge"
+    fi
+  fi
+  ext_dirs+=("$SRC/bridge/build/$BRIDGE/")
 fi
-for d in "$SRC"/extensions/*/ "$SRC/bridge/build/$BRIDGE/"; do
+for d in "${ext_dirs[@]}"; do
   uuid=$(basename "$d")
   [ "$DRY" = 1 ] || [ -d "$d" ] || continue
   run rm -rf "${DATA:?}/gnome-shell/extensions/${uuid:?}"
@@ -149,9 +156,14 @@ run systemctl --user enable themes-doctor.service
 if command -v update-desktop-database >/dev/null 2>&1; then run update-desktop-database "$DATA/applications"; fi
 # a running deskd (older build) is replaced; the next D-Bus call activates the new one
 run systemctl --user try-restart deskd.service
-if [ "$SHELL_INSTALLED" = 1 ]; then
-  echo "Installed: $BIN/themes, $BIN/deskd, $BIN/desk-shell, $BIN/desk-win11-session, $BRIDGE (theme root: $ROOT)"
-else
-  echo "Installed: $BIN/themes, $BIN/deskd, $BIN/desk-win11-session, $BRIDGE (theme root: $ROOT)"
+installed="$BIN/themes, $BIN/deskd"
+if [ "$SHELL_INSTALLED" = 1 ]; then installed="$installed, $BIN/desk-shell"; fi
+installed="$installed, $BIN/desk-win11-session"
+if [ "$GNOME_BRIDGE" = 1 ]; then installed="$installed, $BRIDGE"; fi
+echo "Installed: $installed (theme root: $ROOT)"
+if [ "$SHELL_INSTALLED" = 0 ]; then
   echo "Not installed: desk-shell (not built: $SHELL_SRC)"
+fi
+if [ "$GNOME_BRIDGE" = 0 ]; then
+  echo "Not installed: $BRIDGE (--no-gnome-bridge)"
 fi
