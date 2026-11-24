@@ -8,6 +8,7 @@
 mod appearance;
 mod capture;
 mod clipboard;
+mod clipboard_wayland;
 mod color_picker;
 mod emoji;
 mod engine;

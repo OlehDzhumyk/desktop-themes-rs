@@ -21,6 +21,23 @@ labwc runs `autostart` from that directory: it imports `WAYLAND_DISPLAY` and
 (`systemctl --user start deskd.service` when the systemd user manager runs) and `desk-shell`.
 When labwc exits, `desk-win11-session` removes these variables from the user manager again.
 
+## Clipboard history
+
+Under GNOME the bridge reads the clipboard. labwc has no bridge, so `deskd` reads the clipboard
+itself through the `ext-data-control-v1` protocol (or `wlr-data-control-unstable-v1` when the
+compositor has only that one). The same capture works on other compositors with one of these
+protocols: sway, niri, Hyprland, KWin and COSMIC. No package is necessary.
+
+- `deskd` reads each new clipboard selection once: text first, then PNG, JPEG, GIF or WebP when
+  the `images` setting is on. SVG is not read.
+- `deskd` does not read a selection that has a password-manager type (for example
+  `x-kde-passwordManagerHint`). It does not read in private mode or when the history is off.
+- A read stops after 3 seconds or at the size limit (256 KiB of text, `image-max-bytes` for an
+  image), so an app that does not answer cannot stop `deskd`.
+- Wayland does not tell which app owns the clipboard, so `excluded-apps` has no effect here.
+- Under GNOME Shell (Mutter) the compositor has neither protocol. The watcher stops at once and
+  writes no message; the bridge captures the clipboard.
+
 ## 1. Layer the packages (Fedora Silverblue)
 
 ```sh

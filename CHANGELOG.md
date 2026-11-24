@@ -34,6 +34,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Clipboard history without GNOME Shell: deskd captures the clipboard itself on compositors with
+  `ext-data-control-v1` or `wlr-data-control-unstable-v1` (labwc, sway, niri, Hyprland, KWin,
+  COSMIC), with the bridge's rules: password-manager hints and our own paste are never read, reads
+  are bounded in size and time. Under GNOME Shell the watcher ends at once and the bridge captures.
 - theme-tokens: two generators for the desktop shell session, rendered on request with
   `generate::render_extra` (`ExtraTarget::LabwcTheme`, `ExtraTarget::DeskShellCss`): a labwc
   `themerc` (titlebars, 1 px border, buttons with a red close hover, menus, the window switcher,
