@@ -75,21 +75,6 @@ impl Tool {
         Tool::ALL.into_iter().find(|t| t.key() == c)
     }
 
-    /// Short id for widget and action names.
-    pub fn id(self) -> &'static str {
-        match self {
-            Tool::RedactSolid => "redact-solid",
-            Tool::RedactPixelate => "redact-pixelate",
-            Tool::Pen => "pen",
-            Tool::Highlighter => "highlighter",
-            Tool::Arrow => "arrow",
-            Tool::Line => "line",
-            Tool::Rect => "rect",
-            Tool::Ellipse => "ellipse",
-            Tool::Crop => "crop",
-        }
-    }
-
     /// Whether the tool uses the colour and the width (redaction and crop do not).
     pub fn uses_color(self) -> bool {
         !matches!(self, Tool::RedactSolid | Tool::RedactPixelate | Tool::Crop)
@@ -119,9 +104,6 @@ pub fn palette(accent: [u8; 4]) -> Vec<NamedColor> {
         c(n_("White"), [255, 255, 255, 255]),
     ]
 }
-
-/// The GNOME default accent (blue), when the desktop gives none.
-pub const DEFAULT_ACCENT: [u8; 4] = [0x35, 0x84, 0xe4, 255];
 
 /// Stroke widths in pixels with their names (gettext ids).
 pub const WIDTHS: [(u32, &str); 4] = [
@@ -180,6 +162,7 @@ impl EditorState {
     }
 
     /// The committed annotations, oldest first.
+    #[cfg(test)]
     pub fn annotations(&self) -> &[Annotation] {
         &self.done
     }
@@ -466,6 +449,26 @@ impl EditorState {
     }
 }
 
+/// Write a PNG to `path` atomically (a temporary file renamed over it, see
+/// [`desk_capture::save::replace`]). An existing file keeps its permissions; a new file (Save As)
+/// gets the default ones and is removed again if the write fails.
+pub fn write_png(path: &std::path::Path, png: &[u8]) -> desk_capture::Result<()> {
+    let created = match std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+    {
+        Ok(_) => true,
+        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => false,
+        Err(e) => return Err(e.into()),
+    };
+    let res = desk_capture::save::replace(path, png);
+    if res.is_err() && created {
+        let _ = std::fs::remove_file(path);
+    }
+    res
+}
+
 /// Darken the pixels outside the rectangle to half (the crop preview).
 pub fn dim_outside(img: &mut Image, (x, y, w, h): (i32, i32, u32, u32)) {
     let to_index = |v: i64| usize::try_from(v.max(0)).unwrap_or(usize::MAX);
@@ -722,12 +725,29 @@ mod tests {
     }
 
     #[test]
+    fn write_png_replaces_or_creates_and_leaves_no_temporary_file() {
+        let dir = std::env::temp_dir().join(format!("capture-editor-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let old = dir.join("old.png");
+        std::fs::write(&old, b"old").unwrap();
+        write_png(&old, b"new").unwrap();
+        assert_eq!(std::fs::read(&old).unwrap(), b"new");
+        let new = dir.join("new.png");
+        write_png(&new, b"png").unwrap();
+        assert_eq!(std::fs::read(&new).unwrap(), b"png");
+        assert!(write_png(&dir.join("missing/x.png"), b"png").is_err());
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 2);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
     fn tool_keys_are_unique() {
         for t in Tool::ALL {
             assert_eq!(Tool::from_key(t.key()), Some(t));
             assert_eq!(Tool::from_key(t.key().to_ascii_uppercase()), Some(t));
         }
         assert_eq!(Tool::from_key('z'), None);
-        assert_eq!(palette(DEFAULT_ACCENT)[0].rgba, DEFAULT_ACCENT);
+        assert_eq!(palette([1, 2, 3, 4])[0].rgba, [1, 2, 3, 255]);
     }
 }

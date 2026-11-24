@@ -21,6 +21,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Screenshot annotation editor (stage 3): `themes capture-edit <path.png>` opens a short-lived
+  GTK 4 / libadwaita window with pen, highlighter, arrow, line, rectangle, ellipse, redaction
+  (solid or pixelate) and crop, an accent-first colour palette, line widths, undo/redo
+  (`Ctrl+Z`, `Ctrl+Shift+Z`), zoom, Copy (`Ctrl+C`, PNG), Save (`Ctrl+S`) and Save as. Saving
+  renders every annotation through `desk-capture` and replaces the file atomically with one plain
+  RGBA PNG: redacted pixels are destroyed, no metadata, layer or undo history is kept
+  (AC-SHOT-05). `Esc` closes, with a «Зберегти зміни?» question only when edited.
 - Skin-aware on-screen displays (stage 3): with the `windows11` and `macos` skins the bridge draws
   the volume, mute, microphone, brightness and keyboard backlight OSD itself (Windows 11: acrylic
   bar at the bottom centre; macOS: translucent centred square or a pill), click-through, with a

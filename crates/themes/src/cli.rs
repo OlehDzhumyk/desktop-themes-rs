@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Командний рядок: themes list|current|apply|reset|snapshot|delete|doctor|gui.
+//! Командний рядок: themes list|current|apply|reset|snapshot|delete|doctor|gui|capture-edit.
 
 use std::time::Duration;
 
@@ -51,6 +51,8 @@ const H26: &str = n_(
 );
 const H29: &str = n_("Keyboard shortcuts of the features (the theme gives the default)");
 const H30: &str = n_("Focus modes: do not disturb, schedules, focus sessions");
+const H31: &str = n_("Annotate and redact a screenshot (PNG) in an editor window");
+const H32: &str = n_("The PNG file; Save replaces it (redactions are destructive)");
 
 #[derive(Parser)]
 #[command(
@@ -141,6 +143,11 @@ enum Cmd {
     Focus {
         #[command(subcommand)]
         cmd: crate::focus_cli::FocusCmd,
+    },
+    #[command(about = H31)]
+    CaptureEdit {
+        #[arg(help = H32)]
+        path: std::path::PathBuf,
     },
     #[command(about = H28)]
     Tokens {
@@ -251,6 +258,7 @@ fn exec(ctx: &Ctx, cmd: Cmd, json: bool) -> Result<i32, Error> {
         Cmd::Tokens { cmd } => crate::tokens_cli::exec(ctx, cmd, json),
         Cmd::Shortcut { cmd } => crate::shortcut_cli::exec(ctx, cmd, json),
         Cmd::Focus { cmd } => crate::focus_cli::exec(cmd, json),
+        Cmd::CaptureEdit { path } => crate::gui::capture_editor::run(&path).map_err(Error),
         Cmd::List => {
             let st = State::load(ctx);
             let look = st.source(Module::Look).map(String::from);
