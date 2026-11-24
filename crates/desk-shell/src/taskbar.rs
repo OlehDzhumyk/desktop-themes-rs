@@ -111,18 +111,29 @@ fn clipboard_button(clip: &Rc<ClipboardFlyout>) -> gtk::ToggleButton {
     button
 }
 
-/// The Windows 11 system tray pill: the output volume; a click opens the quick settings.
+/// The Windows 11 system tray pill: Wi-Fi (when present), output volume, and battery (when
+/// present); a click opens the quick settings.
 fn quick_settings_pill(quick: &Rc<QuickSettings>) -> gtk::ToggleButton {
     let content = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    let wifi = gtk::Image::builder()
+        .icon_name("network-wireless-symbolic")
+        .visible(false)
+        .build();
     let volume = gtk::Image::from_icon_name("audio-volume-high-symbolic");
+    let battery = gtk::Image::builder()
+        .icon_name("battery-level-100-symbolic")
+        .visible(false)
+        .build();
+    content.append(&wifi);
     content.append(&volume);
+    content.append(&battery);
     content.append(&gtk::Image::from_icon_name("emblem-system-symbolic"));
     let button = gtk::ToggleButton::builder().child(&content).build();
     button.add_css_class("desk-shell-tray-pill");
     name_widget(&button, &tr!("Quick settings"));
     let q = Rc::clone(quick);
     button.connect_clicked(move |_| q.toggle());
-    quick.attach_pill(&button, &volume);
+    quick.attach_pill(&button, &volume, &wifi, &battery);
     button
 }
 

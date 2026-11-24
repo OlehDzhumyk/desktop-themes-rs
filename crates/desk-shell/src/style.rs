@@ -7,9 +7,14 @@
 //! skins reuse the Windows 11 layout in this first version and only change the palette and the
 //! corner radii (ADR 0012).
 
+use std::cell::RefCell;
+use std::ffi::OsStr;
+use std::path::{Path, PathBuf};
+use std::rc::Rc;
+
 use desk_settings::accessors::Skin;
-use gtk::gdk;
 use gtk::prelude::*;
+use gtk::{gdk, gio};
 
 /// What the classes of a shell window depend on.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -68,6 +73,7 @@ pub const CSS: &str = r#"
   --ds-field: rgba(255, 255, 255, 0.85);
   --ds-accent: #005fb8;
   --ds-on-accent: #ffffff;
+  --ds-danger: #c42b1c;
   --ds-radius: 4px;
   --ds-flyout-radius: 8px;
   font-family: "Segoe UI Variable", "Segoe UI", "Inter", "Cantarell", sans-serif;
@@ -84,6 +90,7 @@ pub const CSS: &str = r#"
   --ds-field: rgba(255, 255, 255, 0.06);
   --ds-accent: #60cdff;
   --ds-on-accent: #000000;
+  --ds-danger: #ff99a4;
 }
 .desk-shell.skin-windows11 { --ds-radius: 4px; --ds-flyout-radius: 8px; }
 .desk-shell.skin-macos { --ds-accent: #007aff; --ds-radius: 6px; --ds-flyout-radius: 12px; }
@@ -100,6 +107,7 @@ pub const CSS: &str = r#"
   --ds-field: #000000;
   --ds-accent: #ffff00;
   --ds-on-accent: #000000;
+  --ds-danger: #ffff00;
 }
 .desk-shell.hc.light {
   --ds-bg: #ffffff;
@@ -112,6 +120,7 @@ pub const CSS: &str = r#"
   --ds-field: #ffffff;
   --ds-accent: #37006e;
   --ds-on-accent: #ffffff;
+  --ds-danger: #37006e;
 }
 
 window.desk-shell { background: none; }
@@ -222,6 +231,8 @@ window.desk-shell { background: none; }
 .desk-shell-start-menu .start-footer button:hover { background-color: var(--ds-hover); }
 
 .desk-shell-tray-pill { padding: 0 10px; }
+.desk-shell-taskbar .battery-low,
+.desk-shell-flyout .battery-low { color: var(--ds-danger); }
 
 .desk-shell-window-menu > contents {
   background-color: var(--ds-flyout);
@@ -279,10 +290,25 @@ window.desk-shell { background: none; }
   border-color: var(--ds-accent);
 }
 .desk-shell-flyout .qs-tile:disabled { opacity: 0.5; }
+.desk-shell-flyout .qs-brightness {
+  border-top: 1px solid var(--ds-stroke);
+  padding-top: 12px;
+}
+.desk-shell-flyout .qs-brightness image { min-width: 32px; }
 .desk-shell-flyout .qs-audio {
   border-top: 1px solid var(--ds-stroke);
   padding-top: 12px;
 }
+.desk-shell-flyout .qs-footer {
+  border-top: 1px solid var(--ds-stroke);
+  padding-top: 10px;
+}
+.desk-shell-flyout .qs-battery {
+  padding: 4px 8px;
+  border-radius: var(--ds-radius);
+  background-color: var(--ds-field);
+}
+.desk-shell-flyout .qs-battery label { font-size: 12px; }
 .desk-shell-flyout scale trough { min-height: 4px; border-radius: 2px; background-color: var(--ds-stroke); }
 .desk-shell-flyout scale highlight { background-color: var(--ds-accent); border-radius: 2px; }
 .desk-shell-flyout scale slider {
@@ -371,8 +397,152 @@ window.desk-shell { background: none; }
 .desk-shell.hc .qs-tile:checked { color: var(--ds-on-accent); }
 "#;
 
-/// Load [`CSS`] for the display (once, at start-up).
-pub fn install(display: &gdk::Display) {
+/// Subdirectory under `$XDG_CONFIG_HOME` holding the theme-generated stylesheet.
+pub const USER_CSS_DIR: &str = "desk-shell";
+/// Filename of the theme-generated stylesheet.
+pub const USER_CSS_FILE: &str = "desk-shell.css";
+/// Priority for user/theme CSS overrides: above built-in CSS while `.hc` stays protected.
+pub const USER_CSS_PRIORITY: u32 = gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1;
+/// Bound on the user stylesheet size (1 MiB).
+const MAX_USER_CSS_BYTES: u64 = 1024 * 1024;
+
+/// Resolve `$XDG_CONFIG_HOME/desk-shell/desk-shell.css`, falling back to
+/// `$HOME/.config/desk-shell/desk-shell.css`.
+pub fn desk_shell_css_path_from(
+    xdg_config_home: Option<&str>,
+    home: Option<&str>,
+) -> Option<PathBuf> {
+    if let Some(xdg) = xdg_config_home.filter(|s| !s.is_empty()) {
+        return Some(PathBuf::from(xdg).join(USER_CSS_DIR).join(USER_CSS_FILE));
+    }
+    home.filter(|s| !s.is_empty()).map(|h| {
+        PathBuf::from(h)
+            .join(".config")
+            .join(USER_CSS_DIR)
+            .join(USER_CSS_FILE)
+    })
+}
+
+/// Resolve the user stylesheet path from the process environment.
+pub fn desk_shell_css_path() -> Option<PathBuf> {
+    desk_shell_css_path_from(
+        std::env::var("XDG_CONFIG_HOME").ok().as_deref(),
+        std::env::var("HOME").ok().as_deref(),
+    )
+}
+
+/// Read the user stylesheet from `path`, returning an empty string when absent or unreadable.
+pub fn read_user_css(path: &Path) -> String {
+    let Ok(meta) = std::fs::metadata(path) else {
+        return String::new();
+    };
+    if !meta.is_file() || meta.len() > MAX_USER_CSS_BYTES {
+        return String::new();
+    }
+    std::fs::read_to_string(path).unwrap_or_default()
+}
+
+/// Whether a directory monitor event touching `file` / `other` affects `target_name`.
+pub fn matches_file_name(file: Option<&Path>, other: Option<&Path>, target_name: &str) -> bool {
+    let target = OsStr::new(target_name);
+    [file, other]
+        .into_iter()
+        .flatten()
+        .any(|p| p.file_name() == Some(target))
+}
+
+/// Live watcher for the optional theme-generated `desk-shell.css`.
+///
+/// Must be kept alive for the lifetime of the shell so its `gio::FileMonitor` handles stay active.
+pub struct CssWatcher {
+    provider: gtk::CssProvider,
+    path: PathBuf,
+    dir_monitor: RefCell<Option<gio::FileMonitor>>,
+    _parent_monitor: Option<gio::FileMonitor>,
+}
+
+impl CssWatcher {
+    fn new(display: &gdk::Display, path: PathBuf) -> Rc<CssWatcher> {
+        let provider = gtk::CssProvider::new();
+        provider.load_from_string(&read_user_css(&path));
+        gtk::style_context_add_provider_for_display(display, &provider, USER_CSS_PRIORITY);
+
+        let parent_monitor = path.parent().and_then(Path::parent).and_then(|cfg| {
+            gio::File::for_path(cfg)
+                .monitor_directory(gio::FileMonitorFlags::WATCH_MOVES, gio::Cancellable::NONE)
+                .ok()
+        });
+
+        let watcher = Rc::new(CssWatcher {
+            provider,
+            path,
+            dir_monitor: RefCell::default(),
+            _parent_monitor: parent_monitor,
+        });
+        watcher.watch_dir();
+
+        if let Some(pm) = &watcher._parent_monitor {
+            let me = Rc::downgrade(&watcher);
+            pm.connect_changed(move |_, file, other, _| {
+                if matches_file_name(
+                    file.path().as_deref(),
+                    other.and_then(gio::File::path).as_deref(),
+                    USER_CSS_DIR,
+                ) && let Some(w) = me.upgrade()
+                {
+                    w.watch_dir();
+                    w.reload();
+                }
+            });
+        }
+        watcher
+    }
+
+    fn watch_dir(self: &Rc<Self>) {
+        let Some(dir) = self.path.parent() else {
+            return;
+        };
+        if !dir.is_dir() {
+            *self.dir_monitor.borrow_mut() = None;
+            return;
+        }
+        let Ok(monitor) = gio::File::for_path(dir)
+            .monitor_directory(gio::FileMonitorFlags::WATCH_MOVES, gio::Cancellable::NONE)
+        else {
+            return;
+        };
+        let me = Rc::downgrade(self);
+        monitor.connect_changed(move |_, file, other, event| {
+            let deleted_dir = matches!(
+                event,
+                gio::FileMonitorEvent::Deleted | gio::FileMonitorEvent::Unmounted
+            ) && file.path().as_deref()
+                == me
+                    .upgrade()
+                    .and_then(|w| w.path.parent().map(Path::to_path_buf))
+                    .as_deref();
+            if (deleted_dir
+                || matches_file_name(
+                    file.path().as_deref(),
+                    other.and_then(gio::File::path).as_deref(),
+                    USER_CSS_FILE,
+                ))
+                && let Some(w) = me.upgrade()
+            {
+                w.reload();
+            }
+        });
+        *self.dir_monitor.borrow_mut() = Some(monitor);
+    }
+
+    /// Reload `desk-shell.css` from disk, clearing overrides when the file is missing.
+    pub fn reload(&self) {
+        self.provider.load_from_string(&read_user_css(&self.path));
+    }
+}
+
+/// Load built-in [`CSS`] and attach a live watcher for `$XDG_CONFIG_HOME/desk-shell/desk-shell.css`.
+pub fn install(display: &gdk::Display) -> Option<Rc<CssWatcher>> {
     let provider = gtk::CssProvider::new();
     provider.load_from_string(CSS);
     gtk::style_context_add_provider_for_display(
@@ -380,6 +550,7 @@ pub fn install(display: &gdk::Display) {
         &provider,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
+    desk_shell_css_path().map(|path| CssWatcher::new(display, path))
 }
 
 /// The current look: `skin`, the scheme deskd reports (`deskd_dark`, it wins: on labwc GTK may
@@ -489,8 +660,69 @@ mod tests {
             ".osd-in",
             ".emoji-cell",
             ".emoji-tabs",
+            ".battery-low",
+            ".qs-brightness",
+            ".qs-footer",
+            ".qs-battery",
         ] {
             assert!(CSS.contains(surface), "{surface}");
         }
+    }
+
+    #[test]
+    fn desk_shell_css_path_respects_xdg_config_home_and_home() {
+        assert_eq!(
+            desk_shell_css_path_from(Some("/tmp/xdg"), Some("/home/user")),
+            Some(PathBuf::from("/tmp/xdg/desk-shell/desk-shell.css"))
+        );
+        // Empty XDG_CONFIG_HOME falls back to $HOME/.config
+        assert_eq!(
+            desk_shell_css_path_from(Some(""), Some("/home/user")),
+            Some(PathBuf::from(
+                "/home/user/.config/desk-shell/desk-shell.css"
+            ))
+        );
+        assert_eq!(
+            desk_shell_css_path_from(None, Some("/home/user")),
+            Some(PathBuf::from(
+                "/home/user/.config/desk-shell/desk-shell.css"
+            ))
+        );
+        assert_eq!(desk_shell_css_path_from(None, None), None);
+        assert_eq!(desk_shell_css_path_from(Some(""), Some("")), None);
+    }
+
+    #[test]
+    fn user_css_reader_and_event_matcher_handle_missing_and_renames() {
+        let dir = std::env::temp_dir().join(format!("desk-shell-css-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let file = dir.join(USER_CSS_FILE);
+        assert_eq!(read_user_css(&file), "");
+        std::fs::write(&file, ".desk-shell { --ds-accent: #123456; }").unwrap();
+        assert_eq!(
+            read_user_css(&file),
+            ".desk-shell { --ds-accent: #123456; }"
+        );
+        std::fs::remove_file(&file).unwrap();
+        assert_eq!(read_user_css(&file), "");
+        let _ = std::fs::remove_dir_all(&dir);
+
+        assert!(matches_file_name(
+            Some(Path::new("/home/user/.config/desk-shell/desk-shell.css")),
+            None,
+            USER_CSS_FILE
+        ));
+        // Atomic rename: temp file -> desk-shell.css
+        assert!(matches_file_name(
+            Some(Path::new("/home/user/.config/desk-shell/.tmp123")),
+            Some(Path::new("/home/user/.config/desk-shell/desk-shell.css")),
+            USER_CSS_FILE
+        ));
+        assert!(!matches_file_name(
+            Some(Path::new("/home/user/.config/desk-shell/other.css")),
+            None,
+            USER_CSS_FILE
+        ));
     }
 }

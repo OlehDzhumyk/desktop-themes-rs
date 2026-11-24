@@ -994,7 +994,7 @@ msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
-#: crates/desk-shell/src/quick_settings.rs:139
+#: crates/desk-shell/src/quick_settings.rs:276
 msgid "Volume mixer"
 msgstr ""
 
@@ -1717,7 +1717,7 @@ msgstr ""
 msgid "No emoji found"
 msgstr ""
 
-#: crates/desk-shell/src/main.rs:299 crates/deskd/src/search/mod.rs:258
+#: crates/desk-shell/src/main.rs:303 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr ""
@@ -1812,65 +1812,101 @@ msgstr ""
 msgid "Volume {percent} %"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:93
+#: crates/desk-shell/src/quick_settings.rs:71
+msgid "Wi-Fi connected"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:73
+msgid "Wi-Fi off"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:81
+#, rust-format
+msgid "Battery {percent}% (charging)"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:83
+#, rust-format
+msgid "Battery {percent}%"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:91
+#, rust-format
+msgid "{percent}% (charging)"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:160
 msgid "Mute"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:93
+#: crates/desk-shell/src/quick_settings.rs:160
 msgid "Unmute"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:124
-#: crates/desk-shell/src/taskbar.rs:122
+#: crates/desk-shell/src/quick_settings.rs:240
+msgid "Wi-Fi"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:242
+msgid "Bluetooth"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:246
+#: crates/desk-shell/src/taskbar.rs:133
 msgid "Quick settings"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:125
+#: crates/desk-shell/src/quick_settings.rs:251
 msgid "Dark mode"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:126
+#: crates/desk-shell/src/quick_settings.rs:252
 #: crates/deskd/src/focus/model.rs:186
 msgid "Do not disturb"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:127
+#: crates/desk-shell/src/quick_settings.rs:253
 msgid "Private clipboard"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:158
+#: crates/desk-shell/src/quick_settings.rs:254
 msgid "Screenshot"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:159
+#: crates/desk-shell/src/quick_settings.rs:255
 msgid "Color picker"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:160
+#: crates/desk-shell/src/quick_settings.rs:256
 msgid "Screen text"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:163
+#: crates/desk-shell/src/quick_settings.rs:259
 msgid "Settings hub"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:207
+#: crates/desk-shell/src/quick_settings.rs:337
+#: crates/desk-shell/src/quick_settings.rs:339
+msgid "Brightness"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:348
 msgid "Sound"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:217
+#: crates/desk-shell/src/quick_settings.rs:358
 msgid "Volume"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:330
+#: crates/desk-shell/src/quick_settings.rs:573
 msgid "Sound is not available: the desktop service is not running"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:332
+#: crates/desk-shell/src/quick_settings.rs:575
 msgid "No output device"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:392
+#: crates/desk-shell/src/quick_settings.rs:646
 #, rust-format
 msgid "Volume of {app}"
 msgstr ""
@@ -1923,33 +1959,33 @@ msgstr ""
 msgid "No results"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:281
+#: crates/desk-shell/src/taskbar.rs:292
 msgid "Restore"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:283
+#: crates/desk-shell/src/taskbar.rs:294
 msgid "Minimize"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:289
+#: crates/desk-shell/src/taskbar.rs:300
 msgid "Unmaximize"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:291
+#: crates/desk-shell/src/taskbar.rs:302
 msgid "Maximize"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:295
+#: crates/desk-shell/src/taskbar.rs:306
 #: crates/themes/src/gui/capture_editor/mod.rs:848
 #: crates/themes/src/gui/window.rs:1369
 msgid "Close"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:438
+#: crates/desk-shell/src/taskbar.rs:449
 msgid "Taskbar"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:576
+#: crates/desk-shell/src/taskbar.rs:587
 msgid "Window"
 msgstr ""
 

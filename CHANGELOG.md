@@ -34,6 +34,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- desk-shell: live token CSS reloading (`$XDG_CONFIG_HOME/desk-shell/desk-shell.css` loaded at
+  `APPLICATION + 1` priority and watched via `gio::FileMonitor`, clearing overrides cleanly when
+  removed) and live system status indicators on the taskbar tray pill and in Quick Settings:
+  UPower battery icon and footer badge (with low-battery warning at ≤ 15 %), NetworkManager Wi-Fi
+  icon and toggle, BlueZ Bluetooth adapter toggle, and sysfs/`systemd-logind` display brightness
+  slider watched live for hardware key changes (all hidden silently when hardware or services are
+  absent).
 - `themes-core`: wire `theme-tokens` extra generators (`ExtraTarget::LabwcTheme`,
   `ExtraTarget::DeskShellCss`) into `apply`, `LabwcBackend`, `OtherBackend` and transaction
   rollback. Applying a token-based `look` theme (honouring `INHERITS`, module mixing and
