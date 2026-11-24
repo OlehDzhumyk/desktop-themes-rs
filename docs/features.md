@@ -373,6 +373,16 @@ Skins:
 * **macos**: the same tile (like Control Center); a crescent icon in the panel.
 * **windows11**: the tile also starts focus sessions (15/25/45/60 min) and shows the countdown; a bell-slash icon in the panel. GNOME Shell has no Windows-style notification flyout, so these controls live in the tile.
 
+## Update from git
+
+| | |
+|---|---|
+| Entry points | the launcher «Update Desktop Themes» in the app grid and the same action of the Desktop entry (`themes update --pause` in a terminal), `themes update [--check] [--dry-run] [--json]`. A button in the window follows after the GTK 4 settings hub |
+| How | `data/install.sh` (so `scripts/bootstrap.sh` and `scripts/update.sh`) writes the absolute path of the git checkout to `~/.local/share/desktop-themes/repo-path`. `themes update` checks that it is this project, clean, on a branch with an upstream and not diverged, then runs its `scripts/update.sh` and returns its exit code. `--check` runs `git fetch` and lists up to 10 new commit subjects; `--pause` waits for Enter at the end |
+| State | `themes doctor` adds an info line when the recorded checkout is missing, dirty or diverged |
+| Not for | RPM installs (the package manager updates them; the spec ships neither the launcher nor the action) and release archives (no `.git`: no record, no launcher) |
+| Way out | `scripts/uninstall.sh` removes the launcher and `repo-path`; an archive install over a checkout install removes them too |
+
 ## Shortcut guide
 
 | | |

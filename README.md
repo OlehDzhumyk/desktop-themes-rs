@@ -46,8 +46,14 @@ extensions, installs the binary, `.desktop` file, D-Bus service and systemd unit
 snapshot and runs `themes list`. Log out and in once afterwards so the shell loads the new extensions.
 
 Each step is also available separately: `scripts/install-themes.sh`, `install-assets.sh`,
-`generate-assets.sh`, `install-extensions.sh`, `data/install.sh`. To update an existing install
-after pulling new commits, run `scripts/update.sh`. All accept `--dry-run`.
+`generate-assets.sh`, `install-extensions.sh`, `data/install.sh`. All accept `--dry-run`.
+
+To update to the latest git version, click **Update Desktop Themes** in the app grid (or the same
+action on the Desktop icon). It opens a terminal, runs `themes update` and waits for Enter at the
+end. `themes update` runs `scripts/update.sh` of the checkout that the install recorded in
+`~/.local/share/desktop-themes/repo-path`; it stops with a clear message when the checkout has local
+changes. `themes update --check` only fetches and lists the new commits. An RPM install updates with
+the package manager instead. A button in the window follows after the GTK 4 settings hub.
 
 ```sh
 themes list                          # themes and their modules
@@ -146,8 +152,12 @@ scripts/bootstrap.sh             # виконати
 Скрипт збирає програму в toolbox, встановлює теми, завантажує сторонні ресурси (WhiteSur, Fluent,
 значки, курсори, шрифти, шпалери) з оригінальних сховищ за зафіксованими комітами, генерує звуки й
 шпалери, встановлює розширення, програму, службу D-Bus і юніт systemd, робить знімок baseline вашого
-dconf. Після цього один раз вийдіть із сесії й увійдіть знову. Для швидкого оновлення вже встановленої
-системи запускайте `scripts/update.sh` (підтримує `--dry-run`).
+dconf. Після цього один раз вийдіть із сесії й увійдіть знову.
+
+Щоб оновитися до свіжої версії з git, натисніть **«Оновити теми»** у сітці програм (або ту саму дію
+на значку «Desktop»). Відкриється термінал, `themes update` запустить `scripts/update.sh` записаної
+копії і наприкінці чекатиме на Enter. `themes update --check` лише показує нові коміти. Встановлення з
+RPM оновлює менеджер пакетів. Кнопка у вікні з'явиться після нового центру налаштувань GTK 4.
 
 Повний посібник користувача (команди, як додати тему, що робити, якщо щось зламалося):
 [docs/README.uk.md](docs/README.uk.md). Ліцензія: GPL-3.0-or-later; сторонні проєкти й їхні ліцензії
