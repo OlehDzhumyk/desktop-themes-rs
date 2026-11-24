@@ -59,11 +59,11 @@ UI strings are quoted in English; the shipped texts are Ukrainian and English (s
 | 1 | `deskd` + `desk-bridge`, skins, clipboard history | done |
 | 1.5 | foundations: design tokens, settings registry, i18n and accessibility, CI and performance budgets, these specs | done (follow-ups: see below) |
 | 2 | settings hub, emoji and symbols, volume mixer, focus modes, automatic light/dark, theme from wallpaper | implemented |
-| 3 | capture family: screenshots, annotation, recording, OCR, colour picker | proposed |
-| 4 | own search engine, Quick Look, shortcut guide, window layouts | proposed |
+| 3 | capture family: screenshots, annotation, recording, OCR, colour picker | implemented |
+| 4 | own search engine, Quick Look, shortcut guide, window layouts | implemented |
 | 5 | phone integration | proposed |
 
-The order of stages 3 to 5 is a proposal (see the open questions in each spec).
+Stage 5 is a proposal (see the open questions in its spec).
 
 ## Origin badges
 
@@ -88,6 +88,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Lock screen layouts | Implemented | 0 | In Windows 11 and macOS | [lock-screen](features/lock-screen.md) |
 | Clipboard history | Implemented | 1 | In Windows 11 and macOS; based on Clipboard Indicator (MIT) | [clipboard](features/clipboard.md) |
 | Spotlight-style launcher (third-party today) | Partial | 0 | Based on Spotlight by itsnin (GPL-3.0-or-later) | [search](features/search.md) |
+| Own search engine and search box | Partial | 4 | In Windows 11 and macOS | [search](features/search.md) |
 | Liquid Glass variant (`macos-glass`) | Removed | 0 | Based on Liquid Glass extension | [liquid-glass](features/liquid-glass.md) |
 | Volume mixer and audio device switching | Implemented | 2 | From Windows, adapted for macOS | [mixer](features/mixer.md) |
 | Emoji and symbol picker | Implemented | 2 | In Windows 11 and macOS | [emoji](features/emoji.md) |
