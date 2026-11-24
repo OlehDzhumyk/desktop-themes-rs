@@ -11,6 +11,7 @@ You pick the session on the login screen (gear button) and go back to GNOME the 
 | --- | --- |
 | `labwc` | Wayland compositor: windows, decorations, key bindings, snapping (`data/labwc/windows11/rc.xml`, `themerc`). |
 | `desk-shell` | Taskbar, Start menu, quick settings and clipboard history, a GTK 4 layer-shell client (`gtk4-layer-shell`). It follows the `skin` setting and the light/dark changes of `deskd` live; the GNOME `default` skin draws as Windows 11. labwc calls `desk-shell --toggle-start` on the Windows key, `--toggle-quick-settings` on Win+A and `--toggle-clipboard` on Win+V; these calls go to the running shell over D-Bus at once. |
+| Taskbar | One 48 px taskbar on every monitor; taskbars come and go when monitors are plugged in or out. The running windows come from `zwlr_foreign_toplevel_management_v1`: a pinned application gets a bar on its icon, other applications get a button after the pins. A click brings the window forward or minimizes it; a right click (or `Menu`, `Shift+F10`) opens Restore/Minimize, Maximize/Unmaximize and Close. |
 | `deskd` | The session daemon of this project (clipboard history, search, ...), on the session D-Bus, the same as under GNOME. `desk-shell` sends calls only to the `deskd` next to it or `/usr/bin/deskd`, of the same user and outside a sandbox ([ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md)). Without `deskd`, search uses the built-in catalog (no files, clipboard or emoji). |
 | `swaybg`, `swaylock`, `swayidle` | Wallpaper (the dark "bloom", else `#0b192c`) and lock screen (Win+L). `swayidle` locks the screen for `loginctl lock-session` (Lock in the Start menu) and before suspend. |
 | `desk-win11-session` | Launcher: copies the config, installs the `desk-win11` labwc theme, sets the environment, runs labwc. |
@@ -124,14 +125,27 @@ They need podman or Docker; no systemd and no GPU. The steps:
    session bus and in their own `XDG_RUNTIME_DIR` and `XDG_CONFIG_HOME`.
 4. The tests check these items:
    - `desk-shell` loads `libgtk4-layer-shell.so.0`, and the taskbar is a layer surface with an
-     exclusive zone.
+     exclusive zone of exactly 48 px.
+   - The labwc log has no `[ERROR]` line: labwc 0.20 accepts every option of the bundled `rc.xml`
+     and `themerc`.
    - `deskd` owns `io.github.OlehDzhumyk.Desk` and `desk-shell` owns `io.github.OlehDzhumyk.DeskShell`.
    - `--toggle-start`, `--toggle-quick-settings` and `--toggle-clipboard` open and close their
      flyouts in the running shell, and exit 0.
-   - Both processes stay alive, and their logs have no critical errors and no panics.
+   - Clipboard capture: text copied with `wl-copy` causes the `Clipboard.Changed` signal of
+     `deskd` and goes into `$XDG_DATA_HOME/deskd/clipboard/history.json`, a `0600` file.
+   - A copy with the `x-kde-passwordManagerHint` type is never recorded. The test then copies
+     a sentinel text and checks that the file has the sentinel and not the secret.
+   - A client that is not trusted (the test process) gets `AccessDenied` from `Clipboard.List`
+     ([ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md)).
+   - Running windows: a GTK 4 window opens and closes. Each time, `desk-shell` draws its taskbar
+     again (a new `wl_surface.commit`), and the window exits with status 0.
+   - labwc, `deskd` and `desk-shell` stay alive, and their logs have no critical errors and no
+     panics.
 
 `desk-shell` runs with `WAYLAND_DEBUG=client`, so the tests see the layer surfaces in its log.
-The logs of labwc, deskd and desk-shell go to `target/e2e-wayland`. CI runs the suite in
+The tests do not sleep and do not poll. They wait for D-Bus signals, log lines, file changes
+(inotify) and process exits; a timeout only stops a hang. The logs of labwc, deskd, desk-shell
+and the test clients (`wl-copy-*`, `gtk-window`) go to `target/e2e-wayland`. CI runs the suite in
 `.github/workflows/e2e-wayland.yml` when desk-shell, deskd or `data/labwc` change.
 
 ## Remove

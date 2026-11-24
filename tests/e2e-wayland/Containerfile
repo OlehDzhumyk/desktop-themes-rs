@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Image of the Wayland end-to-end harness (tests/e2e-wayland, `just e2e-wayland`): labwc with the
 # wlroots headless backend and the pixman renderer, gtk4-layer-shell, a session bus and pytest on
-# Fedora 45. No systemd and no GNOME Shell: the tests start labwc, deskd and desk-shell as plain
-# processes, so the container runs in plain Docker or rootless podman without cgroup set-up.
+# Fedora 45. wl-clipboard (wl-copy) drives the clipboard tests, gobject-introspection gives the
+# cairo typelib of the GTK 4 test window, and Xwayland keeps labwc's log free of errors (labwc
+# starts it lazily, only for an X client). No systemd and no GNOME Shell: the tests start labwc,
+# deskd and desk-shell as plain processes, so the container runs in plain Docker or rootless
+# podman without cgroup set-up.
 # Our binaries are NOT baked in: tools/e2e-wayland.sh mounts them and data/ read-only.
 # The base is the Fedora 45 image of CI (ci.yml, e2e.yml); bump tag and digest together.
 FROM registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
 
 RUN dnf install -y --nodocs --setopt=install_weak_deps=False \
-        labwc gtk4 gtk4-layer-shell dbus-daemon glib2 pipewire-libs \
-        python3 python3-gobject python3-pytest \
+        labwc xorg-x11-server-Xwayland gtk4 gtk4-layer-shell dbus-daemon glib2 pipewire-libs \
+        python3 python3-gobject python3-pytest gobject-introspection wl-clipboard \
         mesa-dri-drivers mesa-libEGL dejavu-sans-fonts adwaita-icon-theme \
     && dnf clean all -y

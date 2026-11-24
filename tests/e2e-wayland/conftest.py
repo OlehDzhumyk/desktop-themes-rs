@@ -36,6 +36,8 @@ OUT = pathlib.Path(os.environ.get('E2E_OUT', '/tmp/e2e-wayland-out'))
 TIMEOUT = 60
 
 DESK = 'io.github.OlehDzhumyk.Desk'
+CLIPBOARD_PATH = '/io/github/OlehDzhumyk/Desk/Clipboard'
+CLIPBOARD_IFACE = 'io.github.OlehDzhumyk.Desk.Clipboard'
 DESK_SHELL = 'io.github.OlehDzhumyk.DeskShell'
 # the soname desk-shell opens; /proc/PID/maps shows the file it resolves to (….so.1.3.0)
 LAYER_LIBRARY = 'libgtk4-layer-shell.so'
@@ -217,8 +219,10 @@ class Session:
             'GTK_A11Y': 'none',
         }
 
-    def _spawn(self, name, argv, env=None):
-        proc = subprocess.Popen(argv, env=env or self.env, stdin=subprocess.DEVNULL,
+    def _spawn(self, name, argv, env=None, stdin=subprocess.DEVNULL):
+        if name in self.procs:
+            raise HarnessError(f'a process named {name} was already spawned')
+        proc = subprocess.Popen(argv, env=env or self.env, stdin=stdin,
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self.procs[name] = proc
         self.logs[name] = LineLog(proc.stdout, self.out / f'{name}.log')
@@ -317,6 +321,65 @@ class Session:
             raise HarnessError(f'{proc_name} exited before it owned {name} '
                                f'(see {proc_name}.log)')
         return owner
+
+    def wait_signal(self, iface, member, path, trigger, what):
+        """Subscribe to `member` of `iface` from deskd, then call trigger(); wait for the signal.
+
+        The subscription is made before the trigger runs, so a signal sent at once is not missed.
+        """
+        sender = self.name_owner(DESK)
+        if not sender:
+            raise HarnessError(f'{DESK} has no owner')
+
+        def setup(done):
+            def received(_conn, _sender, _path, _iface, _member, params):
+                done(params)
+
+            sid = self.bus.signal_subscribe(sender, iface, member, path, None,
+                                            Gio.DBusSignalFlags.NONE, received)
+            trigger()
+            return lambda: self.bus.signal_unsubscribe(sid)
+        return wait_for(setup, TIMEOUT, what)
+
+    # ---- files deskd writes
+    @property
+    def clipboard_history(self):
+        """deskd's history file: $XDG_DATA_HOME/deskd/clipboard/history.json (clipboard.rs)."""
+        return self.data / 'deskd/clipboard/history.json'
+
+    def wait_file(self, path, accept, what):
+        """Wait until the text of `path` satisfies accept(text); return the text.
+
+        A GIO file monitor (inotify) wakes the check on every change of the file, also on the
+        atomic rename that deskd's saver ends with. The monitor is made before the first check.
+        """
+        path = pathlib.Path(path)
+
+        def setup(done):
+            monitor = Gio.File.new_for_path(str(path)).monitor_file(
+                Gio.FileMonitorFlags.NONE, None)
+
+            def check(*_args):
+                try:
+                    text = path.read_text(encoding='utf-8')
+                except FileNotFoundError:
+                    return
+                if accept(text):
+                    done(text)
+
+            monitor.connect('changed', check)
+            check()
+            return monitor.cancel
+        return wait_for(setup, TIMEOUT, what)
+
+    # ---- clients of the session
+    def spawn_client(self, name, argv, stdin=subprocess.DEVNULL):
+        """A Wayland or D-Bus client of the session; stop() ends it if it still runs."""
+        return self._spawn(name, argv, stdin=stdin)
+
+    def wait_exit(self, name):
+        """Wait for a spawned process to exit; its exit status."""
+        return self.procs[name].wait(TIMEOUT)
 
     # ---- the running shell
     def run_shell(self, *args):
