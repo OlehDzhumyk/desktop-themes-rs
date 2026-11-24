@@ -84,13 +84,29 @@ MIT, compatible with GPL-3.0-or-later), `src/wirehose/` → `crates/deskd/src/mi
 |---|---|
 | Open | left side of the top bar (shown only in the `macos` skin) |
 | Items | About This System, System Settings…, Applications, Force Quit… (asks for confirmation before killing the focused window), Sleep, Restart…, Shut Down…, Lock Screen, Log Out… |
+| Application name | right after the logo: the focused application's name in bold (`Desktop` when no window has the focus), updated when the focus changes. Its menu: New Window (when the application can open one), Hide (minimizes the focused window), Hide Others (minimizes the other normal windows on the current workspace), Quit |
 | Activities | hides the default Activities indicator while shown (`hide-activities`) and restores it when disabled, hidden or on any other skin |
 | Settings | GSettings `io.github.OlehDzhumyk.Desk.LogoMenu`: `enabled`, `hide-activities` |
 
 Skins:
 
-* **macos**: shown on the left of the top bar (`start-here-symbolic`), replacing the third-party `logomenu@aryan_k` extension.
+* **macos**: shown on the left of the top bar (`start-here-symbolic`), replacing the third-party `logomenu@aryan_k` extension, followed by the application name.
 * **windows11** and **default**: not shown; the standard Activities indicator is left untouched.
+
+## Dock magnification
+
+| | |
+|---|---|
+| Where | the dash-to-dock dock (theme `macos`: bottom, auto-hide with no pressure, `show-delay` 0.1 s, `hide-delay` 0.2 s) |
+| Effect | the icon under the pointer grows to 1.45×; neighbours grow less (cosine falloff over 2.5 icons); icons grow away from the screen edge and shrink back when the pointer leaves |
+| Motion | off when animations are off (`enable-animations`) or reduced motion is set; every scale goes back to 1 |
+| Without dash-to-dock | does nothing; no errors |
+| Settings | none; follows the skin |
+
+Skins:
+
+* **macos**: on.
+* **windows11** and **default**: off; the dock is left untouched.
 
 ## Emoji and symbol picker
 

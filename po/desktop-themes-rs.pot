@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 05:07+0000\n"
+"POT-Creation-Date: 2026-11-24 05:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4413,7 +4413,7 @@ msgid "pin"
 msgstr ""
 
 #: bridge/src/clipboard/listPanel.ts:135 bridge/src/emoji/panel.ts:296
-#: bridge/src/search/panel.ts:230
+#: bridge/src/search/panel.ts:237
 msgid "Nothing found for “{query}”"
 msgstr ""
 
@@ -4453,7 +4453,7 @@ msgstr ""
 msgid "{text}, pinned"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:52
+#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:53
 msgid "Emoji"
 msgstr ""
 
@@ -4491,7 +4491,7 @@ msgstr ""
 msgid "Picked {value}"
 msgstr ""
 
-#: bridge/src/colorPicker/feature.ts:117 bridge/src/search/feature.ts:158
+#: bridge/src/colorPicker/feature.ts:117 bridge/src/search/feature.ts:164
 msgid "Copied {value}"
 msgstr ""
 
@@ -4754,36 +4754,56 @@ msgstr ""
 msgid "Force Quit"
 msgstr ""
 
-#: bridge/src/logoMenu/feature.ts:71
-msgid "About This System"
+#: bridge/src/logoMenu/appMenu.ts:46
+msgid "Application menu"
+msgstr ""
+
+#: bridge/src/logoMenu/appMenu.ts:78 bridge/src/logoMenu/appMenu.ts:86
+msgid "Hide Others"
+msgstr ""
+
+#: bridge/src/logoMenu/appMenu.ts:82
+msgid "New Window"
+msgstr ""
+
+#: bridge/src/logoMenu/appMenu.ts:85
+msgid "Hide"
+msgstr ""
+
+#: bridge/src/logoMenu/appMenu.ts:88
+msgid "Quit"
 msgstr ""
 
 #: bridge/src/logoMenu/feature.ts:73
-msgid "System Settings…"
-msgstr ""
-
-#: bridge/src/logoMenu/feature.ts:74 bridge/src/mixer/feature.ts:197
-#: bridge/src/search/panel.ts:44
-msgid "Applications"
+msgid "About This System"
 msgstr ""
 
 #: bridge/src/logoMenu/feature.ts:75
+msgid "System Settings…"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:76 bridge/src/mixer/feature.ts:197
+#: bridge/src/search/panel.ts:45
+msgid "Applications"
+msgstr ""
+
+#: bridge/src/logoMenu/feature.ts:77
 msgid "Force Quit…"
 msgstr ""
 
-#: bridge/src/logoMenu/feature.ts:78
+#: bridge/src/logoMenu/feature.ts:80
 msgid "Restart…"
 msgstr ""
 
-#: bridge/src/logoMenu/feature.ts:79
+#: bridge/src/logoMenu/feature.ts:81
 msgid "Shut Down…"
 msgstr ""
 
-#: bridge/src/logoMenu/feature.ts:81
+#: bridge/src/logoMenu/feature.ts:83
 msgid "Lock Screen"
 msgstr ""
 
-#: bridge/src/logoMenu/feature.ts:82
+#: bridge/src/logoMenu/feature.ts:84
 msgid "Log Out…"
 msgstr ""
 
@@ -4982,47 +5002,47 @@ msgstr ""
 msgid "The history is empty"
 msgstr ""
 
-#: bridge/src/search/feature.ts:227
+#: bridge/src/search/feature.ts:233
 msgid "Dark style is off"
 msgstr ""
 
-#: bridge/src/search/feature.ts:227
+#: bridge/src/search/feature.ts:233
 msgid "Dark style is on"
 msgstr ""
 
-#: bridge/src/search/feature.ts:236
+#: bridge/src/search/feature.ts:242
 msgid "Clipboard private mode is off"
 msgstr ""
 
-#: bridge/src/search/feature.ts:236
+#: bridge/src/search/feature.ts:242
 msgid "Clipboard private mode is on"
 msgstr ""
 
-#: bridge/src/search/panel.ts:42
+#: bridge/src/search/panel.ts:43
 msgid "Calculator"
 msgstr ""
 
-#: bridge/src/search/panel.ts:46
+#: bridge/src/search/panel.ts:47
 msgid "System actions"
 msgstr ""
 
-#: bridge/src/search/panel.ts:48
+#: bridge/src/search/panel.ts:49
 msgid "Files"
 msgstr ""
 
-#: bridge/src/search/panel.ts:54
+#: bridge/src/search/panel.ts:55
 msgid "Web"
 msgstr ""
 
-#: bridge/src/search/panel.ts:79
+#: bridge/src/search/panel.ts:80
 msgid "Top hit"
 msgstr ""
 
-#: bridge/src/search/panel.ts:138
+#: bridge/src/search/panel.ts:143
 msgid "Type to search"
 msgstr ""
 
-#: bridge/src/search/panel.ts:154
+#: bridge/src/search/panel.ts:159
 msgid "Search results"
 msgstr ""
 

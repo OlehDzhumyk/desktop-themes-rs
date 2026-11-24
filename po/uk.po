@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 05:07+0000\n"
+"POT-Creation-Date: 2026-11-24 05:06+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -159,7 +159,7 @@ msgid "pin"
 msgstr "закріпити"
 
 #: bridge/src/clipboard/listPanel.ts:135 bridge/src/emoji/panel.ts:296
-#: bridge/src/search/panel.ts:230
+#: bridge/src/search/panel.ts:237
 msgid "Nothing found for “{query}”"
 msgstr "Нічого не знайдено за «{query}»"
 
@@ -199,7 +199,7 @@ msgstr "{n} д тому"
 msgid "{text}, pinned"
 msgstr "{text}, закріплено"
 
-#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:52
+#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:53
 msgid "Emoji"
 msgstr "Емодзі"
 
@@ -239,7 +239,7 @@ msgstr "Більше"
 msgid "Picked {value}"
 msgstr "Вибрано {value}"
 
-#: bridge/src/colorPicker/feature.ts:117 bridge/src/search/feature.ts:158
+#: bridge/src/colorPicker/feature.ts:117 bridge/src/search/feature.ts:164
 msgid "Copied {value}"
 msgstr "Скопійовано {value}"
 
@@ -502,36 +502,56 @@ msgstr "Незбережені зміни в цьому вікні буде вт
 msgid "Force Quit"
 msgstr "Примусово завершити"
 
-#: bridge/src/logoMenu/feature.ts:71
+#: bridge/src/logoMenu/appMenu.ts:46
+msgid "Application menu"
+msgstr "Меню програми"
+
+#: bridge/src/logoMenu/appMenu.ts:78 bridge/src/logoMenu/appMenu.ts:86
+msgid "Hide Others"
+msgstr "Сховати інші"
+
+#: bridge/src/logoMenu/appMenu.ts:82
+msgid "New Window"
+msgstr "Нове вікно"
+
+#: bridge/src/logoMenu/appMenu.ts:85
+msgid "Hide"
+msgstr "Сховати"
+
+#: bridge/src/logoMenu/appMenu.ts:88
+msgid "Quit"
+msgstr "Завершити"
+
+#: bridge/src/logoMenu/feature.ts:73
 msgid "About This System"
 msgstr "Про систему"
 
-#: bridge/src/logoMenu/feature.ts:73
+#: bridge/src/logoMenu/feature.ts:75
 msgid "System Settings…"
 msgstr "Налаштування системи…"
 
-#: bridge/src/logoMenu/feature.ts:74 bridge/src/mixer/feature.ts:197
-#: bridge/src/search/panel.ts:44
+#: bridge/src/logoMenu/feature.ts:76 bridge/src/mixer/feature.ts:197
+#: bridge/src/search/panel.ts:45
 msgid "Applications"
 msgstr "Програми"
 
-#: bridge/src/logoMenu/feature.ts:75
+#: bridge/src/logoMenu/feature.ts:77
 msgid "Force Quit…"
 msgstr "Примусово завершити…"
 
-#: bridge/src/logoMenu/feature.ts:78
+#: bridge/src/logoMenu/feature.ts:80
 msgid "Restart…"
 msgstr "Перезапустити…"
 
-#: bridge/src/logoMenu/feature.ts:79
+#: bridge/src/logoMenu/feature.ts:81
 msgid "Shut Down…"
 msgstr "Вимкнути…"
 
-#: bridge/src/logoMenu/feature.ts:81
+#: bridge/src/logoMenu/feature.ts:83
 msgid "Lock Screen"
 msgstr "Заблокувати екран"
 
-#: bridge/src/logoMenu/feature.ts:82
+#: bridge/src/logoMenu/feature.ts:84
 msgid "Log Out…"
 msgstr "Вийти із сеансу…"
 
@@ -734,47 +754,47 @@ msgstr "приватний режим"
 msgid "The history is empty"
 msgstr "Історія порожня"
 
-#: bridge/src/search/feature.ts:227
+#: bridge/src/search/feature.ts:233
 msgid "Dark style is off"
 msgstr "Темний режим вимкнено"
 
-#: bridge/src/search/feature.ts:227
+#: bridge/src/search/feature.ts:233
 msgid "Dark style is on"
 msgstr "Темний режим увімкнено"
 
-#: bridge/src/search/feature.ts:236
+#: bridge/src/search/feature.ts:242
 msgid "Clipboard private mode is off"
 msgstr "Приватний режим буфера обміну вимкнено"
 
-#: bridge/src/search/feature.ts:236
+#: bridge/src/search/feature.ts:242
 msgid "Clipboard private mode is on"
 msgstr "Приватний режим буфера обміну увімкнено"
 
-#: bridge/src/search/panel.ts:42
+#: bridge/src/search/panel.ts:43
 msgid "Calculator"
 msgstr "Калькулятор"
 
-#: bridge/src/search/panel.ts:46
+#: bridge/src/search/panel.ts:47
 msgid "System actions"
 msgstr "Системні дії"
 
-#: bridge/src/search/panel.ts:48
+#: bridge/src/search/panel.ts:49
 msgid "Files"
 msgstr "Файли"
 
-#: bridge/src/search/panel.ts:54
+#: bridge/src/search/panel.ts:55
 msgid "Web"
 msgstr "Інтернет"
 
-#: bridge/src/search/panel.ts:79
+#: bridge/src/search/panel.ts:80
 msgid "Top hit"
 msgstr "Найкращий збіг"
 
-#: bridge/src/search/panel.ts:138
+#: bridge/src/search/panel.ts:143
 msgid "Type to search"
 msgstr "Введіть текст для пошуку"
 
-#: bridge/src/search/panel.ts:154
+#: bridge/src/search/panel.ts:159
 msgid "Search results"
 msgstr "Результати пошуку"
 
