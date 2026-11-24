@@ -313,6 +313,53 @@ window.desk-shell { background: none; }
   background-color: var(--ds-active);
   border-left: 3px solid var(--ds-accent);
 }
+.desk-shell-flyout .emoji-tabs button { min-width: 32px; padding: 0; }
+.desk-shell-flyout .emoji-tabs button:checked {
+  background-color: var(--ds-active);
+  box-shadow: inset 0 -2px 0 var(--ds-accent);
+}
+.desk-shell-flyout .emoji-cell {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  font-size: 22px;
+  font-family: "Noto Color Emoji", "Segoe UI Emoji", "Twemoji", sans-serif;
+}
+.desk-shell-flyout flowboxchild { padding: 0; }
+.desk-shell-flyout entry {
+  min-height: 32px;
+  border-radius: var(--ds-radius);
+  background-color: var(--ds-field);
+  border: 1px solid var(--ds-stroke);
+  border-bottom: 2px solid var(--ds-accent);
+  color: var(--ds-fg);
+}
+
+.desk-shell-osd {
+  min-height: 48px;
+  min-width: 192px;
+  padding: 0 16px;
+  border-radius: var(--ds-flyout-radius);
+  background-color: var(--ds-flyout);
+  border: 1px solid var(--ds-stroke);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  color: var(--ds-fg);
+}
+.desk-shell-osd image { -gtk-icon-size: 20px; }
+.desk-shell-osd.osd-level { min-width: 240px; }
+.desk-shell-osd levelbar { min-width: 120px; }
+.desk-shell-osd levelbar trough { min-height: 4px; border-radius: 2px; background-color: var(--ds-stroke); border: none; box-shadow: none; padding: 0; }
+.desk-shell-osd levelbar block { border-radius: 2px; border: none; box-shadow: none; min-height: 4px; }
+.desk-shell-osd levelbar block.filled { background-color: var(--ds-accent); }
+.desk-shell-osd levelbar block.empty { background-color: transparent; }
+.desk-shell-osd.osd-muted label { color: var(--ds-dim); }
+.desk-shell-osd label { font-size: 14px; }
+.desk-shell-osd.osd-in { animation: desk-shell-osd-in 160ms ease-out; }
+@keyframes desk-shell-osd-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.desk-shell.hc .desk-shell-osd { border: 2px solid var(--ds-stroke); box-shadow: none; }
 
 .desk-shell button:focus-visible,
 .desk-shell row:focus-visible {
@@ -438,6 +485,10 @@ mod tests {
             ".desk-shell.dark",
             ".app-indicator.active",
             ".desk-shell-window-menu",
+            ".desk-shell-osd",
+            ".osd-in",
+            ".emoji-cell",
+            ".emoji-tabs",
         ] {
             assert!(CSS.contains(surface), "{surface}");
         }

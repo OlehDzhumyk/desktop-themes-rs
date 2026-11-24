@@ -12,11 +12,13 @@
   uses it instead of this file.
 
   Commands of the session:
-    desk-shell   the Windows 11 taskbar, Start menu, quick settings and clipboard history
-                 (layer-shell client)
+    desk-shell   the Windows 11 taskbar, Start menu, quick settings, clipboard history, emoji
+                 panel and on-screen display (layer-shell client); with grim and slurp also the
+                 region screenshot, the text extractor and the colour picker
     deskd        the desktop features daemon (clipboard history, search, ...)
     swaylock     the lock screen
-    grim, slurp  the region screenshot (see the "capture" helper)
+    grim, slurp  the region screenshot (see the "capture" helper), text extractor and colour
+                 picker
 -->
 <labwc_config>
 
@@ -119,6 +121,18 @@
     <!-- Win+V: clipboard history -->
     <keybind key="W-v">
       <action name="Execute" command="desk-shell --toggle-clipboard"/>
+    </keybind>
+    <!-- Win+. : emoji panel -->
+    <keybind key="W-period">
+      <action name="Execute" command="desk-shell --toggle-emoji"/>
+    </keybind>
+    <!-- Win+Shift+C: colour picker (copies the colour of a pixel) -->
+    <keybind key="W-S-c">
+      <action name="Execute" command="desk-shell --pick-color"/>
+    </keybind>
+    <!-- Win+Shift+T: text extractor (copies the text in a region) -->
+    <keybind key="W-S-t">
+      <action name="Execute" command="desk-shell --ocr-region"/>
     </keybind>
 
     <!-- Alt+Tab and Alt+Shift+Tab: switch windows -->

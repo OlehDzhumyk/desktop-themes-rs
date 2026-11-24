@@ -175,6 +175,68 @@ pub fn property_bool(reply: &Variant) -> Option<bool> {
     value.as_variant()?.get::<bool>()
 }
 
+/// One emoji, symbol or text face, as `Emoji.Search`, `Category` and `Recents` return it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EmojiRow {
+    pub id: String,
+    pub glyph: String,
+    pub name: String,
+}
+
+type EmojiItem = (String, String, String, String, String, bool);
+
+/// The items of an `Emoji` list answer (`(a(sssssb))`); `None` for another type.
+pub fn emoji_rows(reply: &Variant) -> Option<Vec<EmojiRow>> {
+    let (items,) = reply.get::<(Vec<EmojiItem>,)>()?;
+    Some(
+        items
+            .into_iter()
+            .map(|(id, glyph, name, ..)| EmojiRow { id, glyph, name })
+            .collect(),
+    )
+}
+
+/// The one string of an answer such as `Emoji.Pick` or `Capture.SaveScreenshot` (`(s)`).
+pub fn single_string(reply: &Variant) -> Option<String> {
+    reply.get::<(String,)>().map(|(s,)| s)
+}
+
+/// What `Ocr.Recognize` found.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OcrText {
+    pub text: String,
+    pub preview: String,
+    pub missing_langs: Vec<String>,
+}
+
+/// The answer of `Ocr.Recognize` (`(ssas)`); `None` for another type.
+pub fn ocr_text(reply: &Variant) -> Option<OcrText> {
+    let (text, preview, missing_langs) = reply.get::<(String, String, Vec<String>)>()?;
+    Some(OcrText {
+        text,
+        preview,
+        missing_langs,
+    })
+}
+
+/// A recorded colour, as `ColorPicker.Record` returns it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ColorRecord {
+    pub formatted: String,
+    pub hex: String,
+    pub name: String,
+}
+
+/// The answer of `ColorPicker.Record` (`(sss)`); `None` for another type.
+pub fn color_record(reply: &Variant) -> Option<ColorRecord> {
+    let (formatted, hex, name) = reply.get::<(String, String, String)>()?;
+    Some(ColorRecord {
+        formatted,
+        hex,
+        name,
+    })
+}
+
 /// One line of at most `max` characters for a menu: whitespace runs collapsed, `…` when cut.
 pub fn preview(text: &str, max: usize) -> String {
     let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
@@ -591,17 +653,43 @@ pub fn watch_signal(
     });
 }
 
-/// Call deskd; `done` gets the answer, or `None` (logged) when deskd or the bus is missing.
-fn try_call(
+/// Why a call to deskd gave no answer.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CallError {
+    /// No session bus, deskd is not running, or its owner failed the ADR 0008 check.
+    Unavailable,
+    /// deskd answered with an error: its D-Bus name (when it has one) and its message.
+    Remote {
+        name: Option<String>,
+        message: String,
+    },
+}
+
+/// The [`CallError`] of a failed call.
+fn call_error(e: &glib::Error) -> CallError {
+    if owner_gone(e) {
+        return CallError::Unavailable;
+    }
+    let mut stripped = e.clone();
+    gio::DBusError::strip_remote_error(&mut stripped);
+    CallError::Remote {
+        name: gio::DBusError::remote_error(e).map(|n| n.to_string()),
+        message: stripped.message().to_owned(),
+    }
+}
+
+/// Call deskd with a `timeout_ms`; `done` gets the answer or why there is none (logged).
+fn call_full(
     path: &'static str,
     iface: &'static str,
     method: &'static str,
     args: Option<Variant>,
-    done: impl FnOnce(Option<Variant>) + 'static,
+    timeout_ms: i32,
+    done: impl FnOnce(Result<Variant, CallError>) + 'static,
 ) {
     with_owner(move |link| {
         let Some((bus, owner)) = link else {
-            return done(None);
+            return done(Err(CallError::Unavailable));
         };
         bus.call(
             Some(&owner),
@@ -611,20 +699,57 @@ fn try_call(
             args.as_ref(),
             None,
             gio::DBusCallFlags::NONE,
-            TIMEOUT_MS,
+            timeout_ms,
             gio::Cancellable::NONE,
             move |reply| match reply {
-                Ok(v) => done(Some(v)),
+                Ok(v) => done(Ok(v)),
                 Err(e) => {
                     if owner_gone(&e) {
                         invalidate();
                     }
                     eprintln!("desk-shell: deskd {iface}.{method}: {e}");
-                    done(None);
+                    done(Err(call_error(&e)));
                 }
             },
         );
     });
+}
+
+/// Call deskd; `done` gets the answer, or `None` (logged) when deskd or the bus is missing.
+fn try_call(
+    path: &'static str,
+    iface: &'static str,
+    method: &'static str,
+    args: Option<Variant>,
+    done: impl FnOnce(Option<Variant>) + 'static,
+) {
+    call_full(path, iface, method, args, TIMEOUT_MS, |r| done(r.ok()));
+}
+
+/// Call deskd and wait for the answer, running the default main context meanwhile: for the
+/// one-shot commands (`--capture-region`, ...), which have no GTK main loop. The checks of
+/// ADR 0008 apply as for every other call.
+pub fn call_blocking(
+    path: &'static str,
+    iface: &'static str,
+    method: &'static str,
+    args: Option<Variant>,
+    timeout_ms: i32,
+) -> Result<Variant, CallError> {
+    let main_loop = glib::MainLoop::new(None, false);
+    let slot: std::rc::Rc<RefCell<Option<Result<Variant, CallError>>>> = std::rc::Rc::default();
+    let (ml, out) = (main_loop.clone(), std::rc::Rc::clone(&slot));
+    call_full(path, iface, method, args, timeout_ms, move |r| {
+        *out.borrow_mut() = Some(r);
+        ml.quit();
+    });
+    // the answer may have come already (a refused owner answers at once): then do not wait
+    if slot.borrow().is_none() {
+        main_loop.run();
+    }
+    slot.borrow_mut()
+        .take()
+        .unwrap_or(Err(CallError::Unavailable))
 }
 
 /// Call deskd; `done` runs only on success.
@@ -960,6 +1085,64 @@ pub fn set_app_mute(key: &str, mute: bool) {
     );
 }
 
+/// Run `changed` on each `Mixer.Changed` of deskd (devices, applications, defaults).
+pub fn watch_mixer(changed: impl Fn() + 'static) {
+    watch_signal(proto::MIXER_PATH, proto::MIXER_IFACE, "Changed", changed);
+}
+
+fn emoji_list(
+    method: &'static str,
+    args: Option<Variant>,
+    done: impl FnOnce(Option<Vec<EmojiRow>>) + 'static,
+) {
+    try_call(
+        proto::EMOJI_PATH,
+        proto::EMOJI_IFACE,
+        method,
+        args,
+        move |r| {
+            done(r.as_ref().and_then(emoji_rows));
+        },
+    );
+}
+
+/// Emoji that match `query` in English and Ukrainian, names in `lang` (`None`: deskd is not
+/// running).
+pub fn emoji_search(
+    query: &str,
+    lang: &str,
+    limit: u32,
+    done: impl FnOnce(Option<Vec<EmojiRow>>) + 'static,
+) {
+    emoji_list("Search", Some((query, lang, limit).to_variant()), done);
+}
+
+/// The emoji of a category (`smileys`, `people`, ...; limit 0 = all).
+pub fn emoji_category(
+    category: &str,
+    limit: u32,
+    done: impl FnOnce(Option<Vec<EmojiRow>>) + 'static,
+) {
+    emoji_list("Category", Some((category, limit).to_variant()), done);
+}
+
+/// The recently picked emoji, newest first.
+pub fn emoji_recents(done: impl FnOnce(Option<Vec<EmojiRow>>) + 'static) {
+    emoji_list("Recents", None, done);
+}
+
+/// Pick an emoji (deskd records it in the recents and applies the default skin tone); `done`
+/// gets the text to insert (`None`: deskd did not answer).
+pub fn emoji_pick(id: &str, done: impl FnOnce(Option<String>) + 'static) {
+    try_call(
+        proto::EMOJI_PATH,
+        proto::EMOJI_IFACE,
+        "Pick",
+        Some((id, "").to_variant()),
+        move |r| done(r.as_ref().and_then(single_string)),
+    );
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1282,5 +1465,96 @@ mod tests {
         assert_eq!(preview("abcdefghij", 5), "abcd…");
         assert_eq!(preview("abcde", 5), "abcde");
         assert_eq!(preview("", 5), "");
+    }
+
+    #[test]
+    fn emoji_capture_ocr_and_color_replies_are_parsed() {
+        let items: Vec<EmojiItem> = vec![
+            (
+                "grinning".into(),
+                "😀".into(),
+                "Grinning face".into(),
+                "smileys".into(),
+                "smile happy".into(),
+                false,
+            ),
+            (
+                "thumbs-up".into(),
+                "👍".into(),
+                "Thumbs up".into(),
+                "people".into(),
+                "ok".into(),
+                true,
+            ),
+        ];
+        assert_eq!(
+            emoji_rows(&(items,).to_variant()).unwrap(),
+            [
+                EmojiRow {
+                    id: "grinning".into(),
+                    glyph: "😀".into(),
+                    name: "Grinning face".into(),
+                },
+                EmojiRow {
+                    id: "thumbs-up".into(),
+                    glyph: "👍".into(),
+                    name: "Thumbs up".into(),
+                },
+            ]
+        );
+        assert_eq!(
+            emoji_rows(&(Vec::<EmojiItem>::new(),).to_variant()),
+            Some(vec![])
+        );
+        assert!(emoji_rows(&("wrong",).to_variant()).is_none());
+
+        // Emoji.Pick and Capture.SaveScreenshot answer one string
+        assert_eq!(single_string(&("👍🏽",).to_variant()).as_deref(), Some("👍🏽"));
+        assert_eq!(
+            single_string(&("/home/user/Pictures/Screenshots/a.png",).to_variant()).as_deref(),
+            Some("/home/user/Pictures/Screenshots/a.png")
+        );
+        assert!(single_string(&(7_u32,).to_variant()).is_none());
+        assert!(single_string(&"bare".to_variant()).is_none());
+
+        let ocr = ("Hello\nworld", "Hello", vec!["ukr".to_owned()]).to_variant();
+        assert_eq!(
+            ocr_text(&ocr).unwrap(),
+            OcrText {
+                text: "Hello\nworld".into(),
+                preview: "Hello".into(),
+                missing_langs: vec!["ukr".into()],
+            }
+        );
+        assert!(ocr_text(&("a", "b").to_variant()).is_none());
+
+        let color = ("rgb(255, 0, 0)", "#FF0000", "red").to_variant();
+        assert_eq!(
+            color_record(&color).unwrap(),
+            ColorRecord {
+                formatted: "rgb(255, 0, 0)".into(),
+                hex: "#FF0000".into(),
+                name: "red".into(),
+            }
+        );
+        assert!(color_record(&("a", "b").to_variant()).is_none());
+    }
+
+    #[test]
+    fn remote_errors_keep_their_d_bus_name() {
+        let e = glib::Error::new(
+            gio::IOErrorEnum::DbusError,
+            "GDBus.Error:io.github.OlehDzhumyk.Desk.Ocr.Error.MissingEngine: tesseract is not installed",
+        );
+        assert_eq!(
+            call_error(&e),
+            CallError::Remote {
+                name: Some("io.github.OlehDzhumyk.Desk.Ocr.Error.MissingEngine".into()),
+                message: "tesseract is not installed".into(),
+            }
+        );
+        // an owner that left is "not available", not a remote error
+        let gone = glib::Error::new(gio::DBusError::ServiceUnknown, "gone");
+        assert_eq!(call_error(&gone), CallError::Unavailable);
     }
 }
