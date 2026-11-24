@@ -146,6 +146,17 @@ pub fn check(theme: &Theme) -> Result<Option<Loaded>> {
     }
 }
 
+/// Renders one extra desktop-shell target (labwc `themerc`, desk-shell CSS) from the theme's
+/// `tokens.toml` chain (`INHERITS` merged). `Ok(None)` when the theme has no tokens; `Err` when
+/// its tokens are invalid.
+pub fn render_extra(theme: &Theme, kind: generate::ExtraTarget) -> Result<Option<generate::File>> {
+    let Some(l) = check(theme)? else {
+        return Ok(None);
+    };
+    let tg = target(theme, theme.handmade_shell_theme());
+    Ok(Some(generate::render_extra(&l.tokens, &tg, kind)))
+}
+
 /// Generated files of a theme without writing anything.
 pub fn plan(theme: &Theme) -> Result<Vec<GeneratedFile>> {
     let Some(l) = check(theme)? else {

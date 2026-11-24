@@ -34,6 +34,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- `themes-core`: wire `theme-tokens` extra generators (`ExtraTarget::LabwcTheme`,
+  `ExtraTarget::DeskShellCss`) into `apply`, `LabwcBackend`, `OtherBackend` and transaction
+  rollback. Applying a token-based `look` theme (honouring `INHERITS`, module mixing and
+  `--dry-run`) writes the generated `openbox-3/themerc` (on `LabwcBackend`) and
+  `$XDG_CONFIG_HOME/desk-shell/desk-shell.css` (on `LabwcBackend` and other Wayland desktops)
+  atomically, and reconfigures a live labwc only when changed. Applying a theme without
+  `tokens.toml`, running `themes reset`, or rolling back a failed apply removes the generated
+  `desk-shell.css` and restores the bundled `themerc`. GNOME behaviour and JSON output stay
+  unchanged.
 - Windows 11 labwc session: `autostart` starts the first installed polkit authentication agent and
   falls back to `mako` or `dunst` when `org.freedesktop.Notifications` has no owner;
   `desk-win11-session` keeps a token-generated `themerc` across logins and stops `deskd.service`

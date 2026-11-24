@@ -1059,7 +1059,7 @@ pub fn doctor_on(
             true,
         );
         if opt.fix
-            && let Some(r) = crate::txn::recover(ctx)?
+            && let Some(r) = crate::txn::recover_on(ctx, backend)?
         {
             rep.fixed.push(r.message());
             rep.fixed.extend(r.warnings);

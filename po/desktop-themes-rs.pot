@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 13:43+0000\n"
+"POT-Creation-Date: 2026-11-24 13:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1994,174 +1994,184 @@ msgstr ""
 msgid "cannot own {name}: {error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:102
+#: crates/themes-core/src/apply.rs:91 crates/themes-core/src/apply.rs:695
 #, rust-format
 msgid "{desktop}: the skin was not applied to the compositor: {error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:167
+#: crates/themes-core/src/apply.rs:156
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme and is applied only after an explicit "
 "confirmation: {warning}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:230
+#: crates/themes-core/src/apply.rs:236
 #, rust-format
 msgid ""
 "theme “{theme}” (module {module}) not found; its keys go back to the "
 "standard values"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:275
+#: crates/themes-core/src/apply.rs:281
 #, rust-format
 msgid ""
 "shortcut conflict: {conflict}; the feature keeps it, the system shortcut "
 "loses it"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:280
+#: crates/themes-core/src/apply.rs:286
 #, rust-format
 msgid "shortcut conflict: {conflict}; change one of them (themes shortcut set)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:417
+#: crates/themes-core/src/apply.rs:443
 #, rust-format
 msgid "extension {uuid} is not installed"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:421
+#: crates/themes-core/src/apply.rs:447
 #, rust-format
 msgid "extension {uuid} is turned off as broken (see “themes doctor”)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:587
+#: crates/themes-core/src/apply.rs:620
 #, rust-format
 msgid ""
 "applying “{theme}” hit an error after its hooks ran, so it was completed: "
 "{error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:593
+#: crates/themes-core/src/apply.rs:626
 #, rust-format
 msgid "could not apply “{theme}”: {error}. The changes were rolled back."
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:601
+#: crates/themes-core/src/apply.rs:634
 #, rust-format
 msgid "Not everything could be undone: {problems}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:736
+#: crates/themes-core/src/apply.rs:778
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): the theme's extensions will not work until you turn them "
 "on (themes doctor --enable-extensions or the button in the Themes window)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:744
+#: crates/themes-core/src/apply.rs:786
 msgid "the session is locked; new extensions turn on after unlocking"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:765
+#: crates/themes-core/src/apply.rs:807
 #, rust-format
 msgid ""
 "the shell does not know the extension {uuid} yet (installed after login)"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:771
+#: crates/themes-core/src/apply.rs:813
 #, rust-format
 msgid "extension {uuid}: {state} {error}"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:780
+#: crates/themes-core/src/apply.rs:822
 #, rust-format
 msgid "extension {uuid} did not turn on live (state {state})"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:791
+#: crates/themes-core/src/apply.rs:833
 #, rust-format
 msgid "extension {uuid} did not turn off live"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:799
+#: crates/themes-core/src/apply.rs:841
 #, rust-format
 msgid "swapping {old} ↔ {new} live leaves panel artefacts"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:835
+#: crates/themes-core/src/apply.rs:877
 msgid "automatic rollback after applying"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:902
+#: crates/themes-core/src/apply.rs:944
 msgid "the theme “fedora” cannot be deleted: it is the standard look"
 msgstr ""
 
-#: crates/themes-core/src/apply.rs:915
+#: crates/themes-core/src/apply.rs:957
 #, rust-format
 msgid ""
 "the theme “{theme}” is active now (modules: {modules}); apply another one "
 "first (themes reset)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:159
+#: crates/themes-core/src/backend.rs:208
 msgid "this desktop has no backend yet: GNOME Shell checks are skipped"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:319
+#: crates/themes-core/src/backend.rs:272
+#, rust-format
+msgid "desk-shell stylesheet updated ({path})"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:284
+#, rust-format
+msgid "desk-shell stylesheet removed ({path})"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:441
 msgid "labwc is not installed (rpm-ostree install labwc)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:325
+#: crates/themes-core/src/backend.rs:447
 msgid ""
 "labwc is not running in this session; run the check inside the labwc session"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:332
+#: crates/themes-core/src/backend.rs:454
 msgid ""
 "desk-shell is not installed: no taskbar and Start menu (run data/install.sh)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:340
+#: crates/themes-core/src/backend.rs:462
 msgid ""
 "libgtk4-layer-shell.so.0 is not found: desk-shell draws normal windows "
 "instead of a taskbar (install gtk4-layer-shell)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:348
+#: crates/themes-core/src/backend.rs:470
 msgid ""
 "deskd is not installed: no clipboard history or search (run data/install.sh)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:355
+#: crates/themes-core/src/backend.rs:477
 msgid ""
 "swaylock is not installed: the screen cannot be locked (install swaylock)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:362
+#: crates/themes-core/src/backend.rs:484
 msgid "swaybg is not installed: the desktop has no wallpaper (install swaybg)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:370
+#: crates/themes-core/src/backend.rs:492
 #, rust-format
 msgid ""
 "the labwc session config {path} is missing (log in with the “Desk (Windows "
 "11 / labwc)” session)"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:399
-#, rust-format
-msgid "skin → {skin} (theme {theme})"
-msgstr ""
-
-#: crates/themes-core/src/backend.rs:413
+#: crates/themes-core/src/backend.rs:528 crates/themes-core/src/backend.rs:541
 #, rust-format
 msgid "labwc theme {name} updated"
 msgstr ""
 
-#: crates/themes-core/src/backend.rs:423
+#: crates/themes-core/src/backend.rs:556
 #, rust-format
 msgid "labwc (pid {pid}) reconfigured"
+msgstr ""
+
+#: crates/themes-core/src/backend.rs:578
+#, rust-format
+msgid "skin → {skin} (theme {theme})"
 msgstr ""
 
 #: crates/themes-core/src/crash.rs:65
@@ -2564,7 +2574,7 @@ msgid "{path} was changed by hand; not updated"
 msgstr ""
 
 #: crates/themes-core/src/gtklinks.rs:99 crates/themes-core/src/gtklinks.rs:119
-#: crates/themes-core/src/overlay.rs:216 crates/themes-core/src/tokens.rs:225
+#: crates/themes-core/src/overlay.rs:216 crates/themes-core/src/tokens.rs:236
 #, rust-format
 msgid "{path} was changed by hand; left as it is"
 msgstr ""
@@ -2634,7 +2644,7 @@ msgid ""
 "follows the wallpaper"
 msgstr ""
 
-#: crates/themes-core/src/paths.rs:68
+#: crates/themes-core/src/paths.rs:85
 #, rust-format
 msgid "no baseline-* found in {path}"
 msgstr ""
@@ -2738,25 +2748,25 @@ msgstr ""
 msgid "theme “{theme}” not found in {path}"
 msgstr ""
 
-#: crates/themes-core/src/tokens.rs:247
+#: crates/themes-core/src/tokens.rs:258
 #, rust-format
 msgid ""
 "{path} already exists and is not a link of the manager; the generated file "
 "is not linked"
 msgstr ""
 
-#: crates/themes-core/src/txn.rs:217
+#: crates/themes-core/src/txn.rs:225
 #, rust-format
 msgid "the interrupted apply of “{theme}” ({modules}, {started}) was completed"
 msgstr ""
 
-#: crates/themes-core/src/txn.rs:224
+#: crates/themes-core/src/txn.rs:232
 #, rust-format
 msgid ""
 "the interrupted apply of “{theme}” ({modules}, {started}) was rolled back"
 msgstr ""
 
-#: crates/themes-core/src/txn.rs:236
+#: crates/themes-core/src/txn.rs:244
 #, rust-format
 msgid ""
 "an apply of “{theme}” started {started} was interrupted at the step {step}; "

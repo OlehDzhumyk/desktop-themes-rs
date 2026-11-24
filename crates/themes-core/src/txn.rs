@@ -16,6 +16,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use crate::backend::DesktopBackend;
 use crate::error::Result;
 use crate::lock::Lock;
 use crate::modules::Module;
@@ -115,7 +116,7 @@ fn finish(st: &mut State, p: Pending) {
 /// Undoes the begun steps of the pending apply (newest first), clears the record and saves.
 /// Returns what could not be undone (as warnings); the record is cleared in any case, so a
 /// broken rollback is not retried forever.
-pub(crate) fn rollback(ctx: &Ctx, st: &mut State) -> Vec<String> {
+pub(crate) fn rollback_on(ctx: &Ctx, st: &mut State, backend: &dyn DesktopBackend) -> Vec<String> {
     let Some(p) = st.pending.take() else {
         return vec![];
     };
@@ -186,6 +187,13 @@ pub(crate) fn rollback(ctx: &Ctx, st: &mut State) -> Vec<String> {
                 );
             }
         }
+        if p.modules.contains(&Module::Look) && !backend.supports_gnome_extensions() {
+            let prev_look_id = p.prev_modules.get(&Module::Look).map(String::as_str);
+            note(
+                backend.reset_compositor(ctx, prev_look_id, false).map(drop),
+                &mut w,
+            );
+        }
     }
     note(st.save(ctx), &mut w);
     w
@@ -245,7 +253,11 @@ pub fn describe(p: &Pending) -> String {
 
 /// Finishes an interrupted apply recorded in `st` (the caller holds the lock): completes it
 /// when its hooks had begun, else rolls it back.
-pub(crate) fn recover_locked(ctx: &Ctx, st: &mut State) -> Result<Option<Recovery>> {
+pub(crate) fn recover_locked_on(
+    ctx: &Ctx,
+    st: &mut State,
+    backend: &dyn DesktopBackend,
+) -> Result<Option<Recovery>> {
     let Some(p) = st.pending.clone() else {
         return Ok(None);
     };
@@ -254,7 +266,7 @@ pub(crate) fn recover_locked(ctx: &Ctx, st: &mut State) -> Result<Option<Recover
         commit(ctx, st)?;
         vec![]
     } else {
-        rollback(ctx, st)
+        rollback_on(ctx, st, backend)
     };
     let r = Recovery {
         theme: p.theme,
@@ -274,11 +286,16 @@ pub(crate) fn recover_locked(ctx: &Ctx, st: &mut State) -> Result<Option<Recover
     Ok(Some(r))
 }
 
-/// [`recover_locked`] under the lock.
-pub fn recover(ctx: &Ctx) -> Result<Option<Recovery>> {
+/// [`recover_locked_on`] under the lock, for a specific desktop backend.
+pub fn recover_on(ctx: &Ctx, backend: &dyn DesktopBackend) -> Result<Option<Recovery>> {
     let _lock = Lock::acquire(ctx)?;
     let mut st = State::load(ctx);
-    recover_locked(ctx, &mut st)
+    recover_locked_on(ctx, &mut st, backend)
+}
+
+/// [`recover_locked_on`] under the lock for the detected desktop.
+pub fn recover(ctx: &Ctx) -> Result<Option<Recovery>> {
+    recover_on(ctx, crate::backend::default_backend(ctx).as_ref())
 }
 
 #[cfg(test)]

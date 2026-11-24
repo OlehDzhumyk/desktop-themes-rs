@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 13:43+0000\n"
+"POT-Creation-Date: 2026-11-24 13:52+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -2997,12 +2997,12 @@ msgstr ""
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
 
-#: crates/themes-core/src/apply.rs:102
+#: crates/themes-core/src/apply.rs:91 crates/themes-core/src/apply.rs:695
 #, rust-format
 msgid "{desktop}: the skin was not applied to the compositor: {error}"
 msgstr "{desktop}: оформлення не застосовано до композитора: {error}"
 
-#: crates/themes-core/src/apply.rs:167
+#: crates/themes-core/src/apply.rs:156
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme and is applied only after an explicit "
@@ -3011,7 +3011,7 @@ msgstr ""
 "«{name}» — експериментальна тема, її застосовують лише після явного "
 "підтвердження: {warning}"
 
-#: crates/themes-core/src/apply.rs:230
+#: crates/themes-core/src/apply.rs:236
 #, rust-format
 msgid ""
 "theme “{theme}” (module {module}) not found; its keys go back to the "
@@ -3020,7 +3020,7 @@ msgstr ""
 "тему «{theme}» (модуль {module}) не знайдено — її ключі повертаються до "
 "стандартних"
 
-#: crates/themes-core/src/apply.rs:275
+#: crates/themes-core/src/apply.rs:281
 #, rust-format
 msgid ""
 "shortcut conflict: {conflict}; the feature keeps it, the system shortcut "
@@ -3029,23 +3029,23 @@ msgstr ""
 "конфлікт скорочень: {conflict}; скорочення лишається функції, системне його "
 "втрачає"
 
-#: crates/themes-core/src/apply.rs:280
+#: crates/themes-core/src/apply.rs:286
 #, rust-format
 msgid "shortcut conflict: {conflict}; change one of them (themes shortcut set)"
 msgstr ""
 "конфлікт скорочень: {conflict}; змініть одне з них (themes shortcut set)"
 
-#: crates/themes-core/src/apply.rs:417
+#: crates/themes-core/src/apply.rs:443
 #, rust-format
 msgid "extension {uuid} is not installed"
 msgstr "розширення {uuid} не встановлене"
 
-#: crates/themes-core/src/apply.rs:421
+#: crates/themes-core/src/apply.rs:447
 #, rust-format
 msgid "extension {uuid} is turned off as broken (see “themes doctor”)"
 msgstr "розширення {uuid} вимкнено як несправне (див. «themes doctor»)"
 
-#: crates/themes-core/src/apply.rs:587
+#: crates/themes-core/src/apply.rs:620
 #, rust-format
 msgid ""
 "applying “{theme}” hit an error after its hooks ran, so it was completed: "
@@ -3054,17 +3054,17 @@ msgstr ""
 "під час застосування «{theme}» сталася помилка вже після хуків, тому "
 "застосування завершено: {error}"
 
-#: crates/themes-core/src/apply.rs:593
+#: crates/themes-core/src/apply.rs:626
 #, rust-format
 msgid "could not apply “{theme}”: {error}. The changes were rolled back."
 msgstr "не вдалося застосувати «{theme}»: {error}. Зміни скасовано."
 
-#: crates/themes-core/src/apply.rs:601
+#: crates/themes-core/src/apply.rs:634
 #, rust-format
 msgid "Not everything could be undone: {problems}"
 msgstr "Не все вдалося скасувати: {problems}"
 
-#: crates/themes-core/src/apply.rs:736
+#: crates/themes-core/src/apply.rs:778
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): the theme's extensions will not work until you turn them "
@@ -3074,45 +3074,45 @@ msgstr ""
 "розширення теми не працюватимуть, доки ви їх не ввімкнете (themes doctor --"
 "enable-extensions або кнопка у вікні «Теми»)"
 
-#: crates/themes-core/src/apply.rs:744
+#: crates/themes-core/src/apply.rs:786
 msgid "the session is locked; new extensions turn on after unlocking"
 msgstr "сеанс заблоковано — нові розширення ввімкнуться після розблокування"
 
-#: crates/themes-core/src/apply.rs:765
+#: crates/themes-core/src/apply.rs:807
 #, rust-format
 msgid ""
 "the shell does not know the extension {uuid} yet (installed after login)"
 msgstr "оболонка ще не знає про розширення {uuid} (встановлене після входу)"
 
-#: crates/themes-core/src/apply.rs:771
+#: crates/themes-core/src/apply.rs:813
 #, rust-format
 msgid "extension {uuid}: {state} {error}"
 msgstr "розширення {uuid}: {state} {error}"
 
-#: crates/themes-core/src/apply.rs:780
+#: crates/themes-core/src/apply.rs:822
 #, rust-format
 msgid "extension {uuid} did not turn on live (state {state})"
 msgstr "розширення {uuid} не ввімкнулося наживо (стан {state})"
 
-#: crates/themes-core/src/apply.rs:791
+#: crates/themes-core/src/apply.rs:833
 #, rust-format
 msgid "extension {uuid} did not turn off live"
 msgstr "розширення {uuid} не вимкнулося наживо"
 
-#: crates/themes-core/src/apply.rs:799
+#: crates/themes-core/src/apply.rs:841
 #, rust-format
 msgid "swapping {old} ↔ {new} live leaves panel artefacts"
 msgstr "заміна {old} ↔ {new} наживо лишає артефакти панелі"
 
-#: crates/themes-core/src/apply.rs:835
+#: crates/themes-core/src/apply.rs:877
 msgid "automatic rollback after applying"
 msgstr "автовідкат після застосування"
 
-#: crates/themes-core/src/apply.rs:902
+#: crates/themes-core/src/apply.rs:944
 msgid "the theme “fedora” cannot be deleted: it is the standard look"
 msgstr "тему «fedora» видаляти не можна — це стандартний вигляд"
 
-#: crates/themes-core/src/apply.rs:915
+#: crates/themes-core/src/apply.rs:957
 #, rust-format
 msgid ""
 "the theme “{theme}” is active now (modules: {modules}); apply another one "
@@ -3121,28 +3121,38 @@ msgstr ""
 "тема «{theme}» зараз активна (модулі: {modules}) — спершу застосуйте іншу "
 "(themes reset)"
 
-#: crates/themes-core/src/backend.rs:159
+#: crates/themes-core/src/backend.rs:208
 msgid "this desktop has no backend yet: GNOME Shell checks are skipped"
 msgstr ""
 "для цього робочого столу ще немає модуля: перевірки GNOME Shell пропущено"
 
-#: crates/themes-core/src/backend.rs:319
+#: crates/themes-core/src/backend.rs:272
+#, rust-format
+msgid "desk-shell stylesheet updated ({path})"
+msgstr "стиль desk-shell оновлено ({path})"
+
+#: crates/themes-core/src/backend.rs:284
+#, rust-format
+msgid "desk-shell stylesheet removed ({path})"
+msgstr "стиль desk-shell вилучено ({path})"
+
+#: crates/themes-core/src/backend.rs:441
 msgid "labwc is not installed (rpm-ostree install labwc)"
 msgstr "labwc не встановлено (rpm-ostree install labwc)"
 
-#: crates/themes-core/src/backend.rs:325
+#: crates/themes-core/src/backend.rs:447
 msgid ""
 "labwc is not running in this session; run the check inside the labwc session"
 msgstr "labwc не працює в цьому сеансі; запустіть перевірку в сеансі labwc"
 
-#: crates/themes-core/src/backend.rs:332
+#: crates/themes-core/src/backend.rs:454
 msgid ""
 "desk-shell is not installed: no taskbar and Start menu (run data/install.sh)"
 msgstr ""
 "desk-shell не встановлено: немає панелі завдань і меню «Пуск» (запустіть "
 "data/install.sh)"
 
-#: crates/themes-core/src/backend.rs:340
+#: crates/themes-core/src/backend.rs:462
 msgid ""
 "libgtk4-layer-shell.so.0 is not found: desk-shell draws normal windows "
 "instead of a taskbar (install gtk4-layer-shell)"
@@ -3150,24 +3160,24 @@ msgstr ""
 "libgtk4-layer-shell.so.0 не знайдено: desk-shell малює звичайні вікна "
 "замість панелі завдань (встановіть gtk4-layer-shell)"
 
-#: crates/themes-core/src/backend.rs:348
+#: crates/themes-core/src/backend.rs:470
 msgid ""
 "deskd is not installed: no clipboard history or search (run data/install.sh)"
 msgstr ""
 "deskd не встановлено: немає історії буфера обміну і пошуку (запустіть data/"
 "install.sh)"
 
-#: crates/themes-core/src/backend.rs:355
+#: crates/themes-core/src/backend.rs:477
 msgid ""
 "swaylock is not installed: the screen cannot be locked (install swaylock)"
 msgstr ""
 "swaylock не встановлено: екран не можна заблокувати (встановіть swaylock)"
 
-#: crates/themes-core/src/backend.rs:362
+#: crates/themes-core/src/backend.rs:484
 msgid "swaybg is not installed: the desktop has no wallpaper (install swaybg)"
 msgstr "swaybg не встановлено: робочий стіл без шпалер (встановіть swaybg)"
 
-#: crates/themes-core/src/backend.rs:370
+#: crates/themes-core/src/backend.rs:492
 #, rust-format
 msgid ""
 "the labwc session config {path} is missing (log in with the “Desk (Windows "
@@ -3176,20 +3186,20 @@ msgstr ""
 "немає конфігурації сеансу labwc {path} (увійдіть у сеанс «Desk (Windows 11 / "
 "labwc)»)"
 
-#: crates/themes-core/src/backend.rs:399
-#, rust-format
-msgid "skin → {skin} (theme {theme})"
-msgstr "оформлення → {skin} (тема {theme})"
-
-#: crates/themes-core/src/backend.rs:413
+#: crates/themes-core/src/backend.rs:528 crates/themes-core/src/backend.rs:541
 #, rust-format
 msgid "labwc theme {name} updated"
 msgstr "тему labwc {name} оновлено"
 
-#: crates/themes-core/src/backend.rs:423
+#: crates/themes-core/src/backend.rs:556
 #, rust-format
 msgid "labwc (pid {pid}) reconfigured"
 msgstr "labwc (pid {pid}) переналаштовано"
+
+#: crates/themes-core/src/backend.rs:578
+#, rust-format
+msgid "skin → {skin} (theme {theme})"
+msgstr "оформлення → {skin} (тема {theme})"
 
 #: crates/themes-core/src/crash.rs:65
 #, rust-format
@@ -3633,7 +3643,7 @@ msgid "{path} was changed by hand; not updated"
 msgstr "{path} змінено вручну — не оновлено"
 
 #: crates/themes-core/src/gtklinks.rs:99 crates/themes-core/src/gtklinks.rs:119
-#: crates/themes-core/src/overlay.rs:216 crates/themes-core/src/tokens.rs:225
+#: crates/themes-core/src/overlay.rs:216 crates/themes-core/src/tokens.rs:236
 #, rust-format
 msgid "{path} was changed by hand; left as it is"
 msgstr "{path} змінено вручну — залишено як є"
@@ -3707,7 +3717,7 @@ msgstr ""
 "тема «{theme}» не має стилів, згенерованих із токенів; за шпалерами "
 "змінюється лише акцент"
 
-#: crates/themes-core/src/paths.rs:68
+#: crates/themes-core/src/paths.rs:85
 #, rust-format
 msgid "no baseline-* found in {path}"
 msgstr "не знайдено baseline-* у {path}"
@@ -3811,7 +3821,7 @@ msgstr "некоректний id теми: {id}"
 msgid "theme “{theme}” not found in {path}"
 msgstr "тему «{theme}» не знайдено у {path}"
 
-#: crates/themes-core/src/tokens.rs:247
+#: crates/themes-core/src/tokens.rs:258
 #, rust-format
 msgid ""
 "{path} already exists and is not a link of the manager; the generated file "
@@ -3820,18 +3830,18 @@ msgstr ""
 "{path} уже існує і не є посиланням менеджера — згенерований файл не "
 "підключено"
 
-#: crates/themes-core/src/txn.rs:217
+#: crates/themes-core/src/txn.rs:225
 #, rust-format
 msgid "the interrupted apply of “{theme}” ({modules}, {started}) was completed"
 msgstr "перерване застосування «{theme}» ({modules}, {started}) завершено"
 
-#: crates/themes-core/src/txn.rs:224
+#: crates/themes-core/src/txn.rs:232
 #, rust-format
 msgid ""
 "the interrupted apply of “{theme}” ({modules}, {started}) was rolled back"
 msgstr "перерване застосування «{theme}» ({modules}, {started}) скасовано"
 
-#: crates/themes-core/src/txn.rs:236
+#: crates/themes-core/src/txn.rs:244
 #, rust-format
 msgid ""
 "an apply of “{theme}” started {started} was interrupted at the step {step}; "
