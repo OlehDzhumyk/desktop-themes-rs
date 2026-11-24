@@ -25,6 +25,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Text extractor (`ocr`) | In Windows 11 (PowerToys Text Extractor) and macOS (Live Text) |
 | Screenshots (`capture`) | In Windows 11 and macOS |
 | Window layouts (`layouts`) | In Windows 11 and macOS |
+| Quick Look (`quick-look`) | From macOS, adapted for Windows 11 style |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | On-screen displays (`osd`) | In Windows 11 and macOS |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
@@ -133,6 +134,18 @@ Path `/io/github/OlehDzhumyk/Desk/layouts/`.
 | `snap-assist` | boolean | `true` |  | Snap assist | On by default in Windows 11; off by default in macOS. | layouts | switch on `--page layouts` |
 | `hover-picker` | boolean | `true` |  | Show layout picker on hover | On by default in Windows 11; off by default in macOS and Fedora. | layouts | switch on `--page layouts` |
 
+## `io.github.OlehDzhumyk.Desk.QuickLook`
+
+Path `/io/github/OlehDzhumyk/Desk/quick-look/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Quick Look | Off: the bridge binds no Quick Look shortcut and `themes quick-look` refuses to open. | quick-look | switch on `--page quick-look` |
+| `quick-look-shortcut` | shortcut list | `['<Control>space']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default from desk.dconf (Windows 11: Ctrl+Space, as PowerToys Peek; macOS: Super+Y, as Cmd+Y; Fedora: none, the Space key of Files stays). Plain Space is never bound: shell keybindings are global. An override in io.github.OlehDzhumyk.Desk.Shortcuts quick-look-toggle replaces it. The name ends in -shortcut because shell keybinding names are global. | quick-look | shortcut row on `--page shortcuts` |
+| `max-text-kb` | unsigned | `1024` | 64…8192 (step 64) | Largest text shown, KiB | The previewer reads at most this many KiB of a text or code file and shows a notice that only the start of the file is shown. The rest is never read into memory. | quick-look | spin button on `--page quick-look` |
+| `autoplay-media` | boolean | `false` |  | Play video and audio at once | Reserved for the media player of the previewer (not implemented yet). | quick-look | switch on `--page quick-look` |
+| `follow-selection` | boolean | `true` |  | Follow the selection | Off: the arrow keys do nothing and the preview stays on the first file. | quick-look | switch on `--page quick-look` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -151,6 +164,7 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `layout-picker` | shortcut list | `[]` |  | Open the window layout picker | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
 | `always-on-top` | shortcut list | `[]` |  | Pin or unpin the focused window above others | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | layouts | shortcut row on `--page shortcuts` |
 | `shortcut-guide-toggle` | shortcut list | `[]` |  | Open the shortcut guide | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | shortcut-guide | shortcut row on `--page shortcuts` |
+| `quick-look-toggle` | shortcut list | `[]` |  | Preview the selected files (Quick Look) | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | quick-look | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
 
@@ -269,6 +283,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `layout-picker` | Open the window layout picker | layouts | `/io/github/OlehDzhumyk/Desk/layouts/layout-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/layout-picker` |
 | `always-on-top` | Pin or unpin the focused window above others | layouts | `/io/github/OlehDzhumyk/Desk/layouts/always-on-top-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/always-on-top` |
 | `shortcut-guide-toggle` | Open the shortcut guide | shortcut-guide | `/io/github/OlehDzhumyk/Desk/shortcut-guide/shortcut-guide-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/shortcut-guide-toggle` |
+| `quick-look-toggle` | Preview the selected files (Quick Look) | quick-look | `/io/github/OlehDzhumyk/Desk/quick-look/quick-look-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/quick-look-toggle` |
 
 ## Pages of the window
 
@@ -280,6 +295,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `ocr` | Text extractor | Recognition, Clipboard, How to open |
 | `capture` | Screenshots | Screenshots, Screen recording, How to open |
 | `layouts` | Window layouts | Layouts and gaps, Behaviour, How to open |
+| `quick-look` | Quick Look | Preview, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `osd` | On-screen displays | Display, Style |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |

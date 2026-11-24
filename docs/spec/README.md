@@ -99,7 +99,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | OCR text extractor | Implemented | 3 | In Windows 11 and macOS | [ocr](features/ocr.md) |
 | Colour picker | Implemented | 3 | In Windows 11 (PowerToys) and macOS | [color-picker](features/color-picker.md) |
 | On-screen displays (volume, brightness, mute, keyboard backlight) | Implemented | 3 | In Windows 11 and macOS | [osd](features/osd.md) |
-| Quick Look | Planned | 4 | From macOS, adapted for Windows 11 style | [quick-look](features/quick-look.md) |
+| Quick Look | Partial | 4 | From macOS, adapted for Windows 11 style | [quick-look](features/quick-look.md) |
 | Snap layouts and always-on-top | Implemented | 4 | In Windows 11 and macOS (tiling); always-on-top from Windows | [window-layouts](features/window-layouts.md) |
 | Shortcut guide (hold Super) | Implemented | 4 | From Windows, adapted for macOS style | [shortcut-guide](features/shortcut-guide.md) |
 | Phone integration | Planned | 5 | In Windows 11 and macOS; based on GSConnect (GPL-2.0-or-later) | [phone](features/phone.md) |

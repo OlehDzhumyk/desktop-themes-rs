@@ -205,6 +205,26 @@ Skins:
   an outline and a thick focus ring; `show-preview=false` shows nothing after a capture. The editor follows the
   libadwaita style and the accent colour in every skin.
 
+## Quick Look
+
+Status: **partial** (stage 4). `themes quick-look <paths>…` opens the previewer; the bridge key and the hand-over from
+Files come later. Spec: [quick-look.md](spec/features/quick-look.md).
+
+| | |
+|---|---|
+| Open | `themes quick-look FILE…` (a separate, short-lived process, so a crashing decoder never touches the shell); shortcut `quick-look-shortcut` (Windows 11 theme: **Ctrl+Space**; macOS theme: **Super+Y**, as Cmd+Y; Fedora: none, the Space key of Files and Sushi stay); override `quick-look-toggle`. Plain Space is never bound: shell keybindings are global |
+| Content | images (fit to the window, **+**/**−** zoom, **0** fit; SVG as an image), text and code (monospace, read-only; only the first `max-text-kb` KiB are read, then «Показано початок файлу»), folders (folders first, with sizes, up to 5000 entries), a details card for other types; FIFOs and devices are never opened |
+| Keys | **Space** or **Esc** closes; **Left**/**Right** (**Up**/**Down**) move through the given files with a «3 з 3» counter (`follow-selection`); **Return** opens in the default application and closes; **I** toggles the details (type, size, date, link target, location) |
+| Safety | files are only read: scripts and HTML are shown as text, never run or rendered; a missing or unreadable file shows «Не вдається прочитати файл» with the reason |
+| Settings | GSettings `io.github.OlehDzhumyk.Desk.QuickLook`: `enabled`, `quick-look-shortcut`, `max-text-kb` (64 to 8192, 1024), `autoplay-media` (reserved), `follow-selection` |
+| Gaps | no hand-over from Files yet (`org.gnome.NautilusPreviewer` D-Bus), no video or audio player (GStreamer), no PDF or archive view; no open/close animation at all, so reduced motion needs nothing |
+
+Skins:
+
+* **macos**: a compact dark title strip with the name and «Відкрити в…», no navigation buttons (arrows only).
+* **windows11**: a Peek-style header with `<` `>` buttons, the name and counter, and an accented «Відкрити в…».
+* **default**: a plain libadwaita window with the name, the counter and «Відкрити в…».
+
 ## Window layouts
 
 Status: **implemented** (stage 4). deskd answers the layouts and their geometry; the bridge draws the picker, the

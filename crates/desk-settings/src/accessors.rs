@@ -903,6 +903,69 @@ impl LayoutsSettings {
     }
 }
 
+/// `io.github.OlehDzhumyk.Desk.QuickLook` at `/io/github/OlehDzhumyk/Desk/quick-look/`.
+#[derive(Clone, Debug)]
+pub struct QuickLookSettings(pub gio::Settings);
+
+impl QuickLookSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.QuickLook";
+    pub const ENABLED: &'static str = "enabled";
+    pub const QUICK_LOOK_SHORTCUT: &'static str = "quick-look-shortcut";
+    pub const MAX_TEXT_KB: &'static str = "max-text-kb";
+    pub const AUTOPLAY_MEDIA: &'static str = "autoplay-media";
+    pub const FOLLOW_SELECTION: &'static str = "follow-selection";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable Quick Look
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Shortcut that opens Quick Look for the selected files (in force)
+    pub fn quick_look_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::QUICK_LOOK_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_quick_look_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::QUICK_LOOK_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// How much of a text file is read for the preview, in KiB
+    pub fn max_text_kb(&self) -> u32 {
+        self.0.uint(Self::MAX_TEXT_KB)
+    }
+
+    pub fn set_max_text_kb(&self, v: u32) -> Result<(), gio::glib::BoolError> {
+        self.0.set_uint(Self::MAX_TEXT_KB, v)
+    }
+
+    /// Start video and audio playback when the preview opens
+    pub fn autoplay_media(&self) -> bool {
+        self.0.boolean(Self::AUTOPLAY_MEDIA)
+    }
+
+    pub fn set_autoplay_media(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::AUTOPLAY_MEDIA, v)
+    }
+
+    /// Arrow keys move to the previous or next selected file
+    pub fn follow_selection(&self) -> bool {
+        self.0.boolean(Self::FOLLOW_SELECTION)
+    }
+
+    pub fn set_follow_selection(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::FOLLOW_SELECTION, v)
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -921,6 +984,7 @@ impl ShortcutSettings {
     pub const LAYOUT_PICKER: &'static str = "layout-picker";
     pub const ALWAYS_ON_TOP: &'static str = "always-on-top";
     pub const SHORTCUT_GUIDE_TOGGLE: &'static str = "shortcut-guide-toggle";
+    pub const QUICK_LOOK_TOGGLE: &'static str = "quick-look-toggle";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -1033,6 +1097,15 @@ impl ShortcutSettings {
 
     pub fn set_shortcut_guide_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::SHORTCUT_GUIDE_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for Quick Look (override)
+    pub fn quick_look_toggle(&self) -> Vec<String> {
+        self.0.strv(Self::QUICK_LOOK_TOGGLE).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_quick_look_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::QUICK_LOOK_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
 

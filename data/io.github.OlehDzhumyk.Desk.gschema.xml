@@ -31,6 +31,7 @@
     <child name="ocr" schema="io.github.OlehDzhumyk.Desk.Ocr"/>
     <child name="capture" schema="io.github.OlehDzhumyk.Desk.Capture"/>
     <child name="layouts" schema="io.github.OlehDzhumyk.Desk.Layouts"/>
+    <child name="quick-look" schema="io.github.OlehDzhumyk.Desk.QuickLook"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="osd" schema="io.github.OlehDzhumyk.Desk.Osd"/>
@@ -342,6 +343,35 @@
     </key>
   </schema>
 
+  <schema id="io.github.OlehDzhumyk.Desk.QuickLook" path="/io/github/OlehDzhumyk/Desk/quick-look/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable Quick Look</summary>
+      <description>Off: the bridge binds no Quick Look shortcut and `themes quick-look` refuses to open.</description>
+    </key>
+    <key name="quick-look-shortcut" type="as">
+      <default>['&lt;Control&gt;space']</default>
+      <summary>Shortcut that opens Quick Look for the selected files (in force)</summary>
+      <description>The accelerators the bridge binds. Themes write their default from desk.dconf (Windows 11: Ctrl+Space, as PowerToys Peek; macOS: Super+Y, as Cmd+Y; Fedora: none, the Space key of Files stays). Plain Space is never bound: shell keybindings are global. An override in io.github.OlehDzhumyk.Desk.Shortcuts quick-look-toggle replaces it. The name ends in -shortcut because shell keybinding names are global.</description>
+    </key>
+    <key name="max-text-kb" type="u">
+      <range min="64" max="8192"/>
+      <default>1024</default>
+      <summary>How much of a text file is read for the preview, in KiB</summary>
+      <description>The previewer reads at most this many KiB of a text or code file and shows a notice that only the start of the file is shown. The rest is never read into memory.</description>
+    </key>
+    <key name="autoplay-media" type="b">
+      <default>false</default>
+      <summary>Start video and audio playback when the preview opens</summary>
+      <description>Reserved for the media player of the previewer (not implemented yet).</description>
+    </key>
+    <key name="follow-selection" type="b">
+      <default>true</default>
+      <summary>Arrow keys move to the previous or next selected file</summary>
+      <description>Off: the arrow keys do nothing and the preview stays on the first file.</description>
+    </key>
+  </schema>
+
   <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
     <key name="clipboard-toggle" type="as">
       <default>[]</default>
@@ -401,6 +431,11 @@
     <key name="shortcut-guide-toggle" type="as">
       <default>[]</default>
       <summary>Your shortcut for the shortcut guide (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="quick-look-toggle" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for Quick Look (override)</summary>
       <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
   </schema>

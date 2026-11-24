@@ -18,6 +18,7 @@ pub mod mixer;
 pub mod model;
 pub mod ocr;
 pub mod osd;
+pub mod quick_look;
 pub mod registry;
 pub mod shortcut_guide;
 pub mod shortcuts;
@@ -40,6 +41,7 @@ pub use mixer::*;
 pub use model::*;
 pub use ocr::*;
 pub use osd::*;
+pub use quick_look::*;
 pub use registry::*;
 pub use shortcut_guide::*;
 
