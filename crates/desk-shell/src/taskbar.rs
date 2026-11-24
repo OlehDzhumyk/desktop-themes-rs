@@ -21,8 +21,10 @@ use gtk::{gdk, gio, glib};
 
 use crate::clipboard_flyout::ClipboardFlyout;
 use crate::layer_shell::{Edge, KeyboardMode, Layer, Placement};
+use crate::notifications::{Notification, NotificationDaemon};
 use crate::quick_settings::QuickSettings;
 use crate::running::{self, Indicator};
+use crate::sni::{SniItem, SniWatcher, TRAY_ICON_PX};
 use crate::toplevels::{Command, Toplevel, Toplevels, Update};
 use crate::{deskd, launch, layer_shell, start_menu::StartMenu};
 
@@ -137,18 +139,263 @@ fn quick_settings_pill(quick: &Rc<QuickSettings>) -> gtk::ToggleButton {
     button
 }
 
-/// A clock that updates at the start of every minute; a click shows a calendar.
-fn clock() -> gtk::MenuButton {
+/// Build one compact 16 px SNI tray button with left/right/middle click handlers.
+fn sni_button(sni: &Rc<SniWatcher>, item: &SniItem) -> gtk::Button {
+    let image = if !item.icon_name.is_empty() {
+        gtk::Image::from_gicon(&icon_of(&item.icon_name))
+    } else if let Some(tex) = item.texture() {
+        gtk::Image::from_paintable(Some(&tex))
+    } else {
+        gtk::Image::from_icon_name("application-x-executable-symbolic")
+    };
+    image.set_pixel_size(TRAY_ICON_PX);
+    let button = gtk::Button::builder().child(&image).build();
+    button.add_css_class("sni-item");
+    name_widget(&button, item.display_tooltip());
+
+    // Left-click: Activate(0, 0), or ContextMenu(0, 0) when ItemIsMenu == true
+    {
+        let s = Rc::clone(sni);
+        let item_c = item.clone();
+        button.connect_clicked(move |_| s.activate(&item_c));
+    }
+    // Right-click: ContextMenu(0, 0)
+    {
+        let gesture = gtk::GestureClick::builder()
+            .button(gdk::BUTTON_SECONDARY)
+            .build();
+        let s = Rc::clone(sni);
+        let item_c = item.clone();
+        gesture.connect_pressed(move |g, _, _, _| {
+            g.set_state(gtk::EventSequenceState::Claimed);
+            s.context_menu(&item_c);
+        });
+        button.add_controller(gesture);
+    }
+    // Middle-click: SecondaryActivate(0, 0)
+    {
+        let gesture = gtk::GestureClick::builder()
+            .button(gdk::BUTTON_MIDDLE)
+            .build();
+        let s = Rc::clone(sni);
+        let item_c = item.clone();
+        gesture.connect_pressed(move |g, _, _, _| {
+            g.set_state(gtk::EventSequenceState::Claimed);
+            s.secondary_activate(&item_c);
+        });
+        button.add_controller(gesture);
+    }
+    button
+}
+
+/// Container for visible SNI tray icons; collapses cleanly when empty.
+fn sni_tray(sni: &Rc<SniWatcher>) -> gtk::Box {
+    let container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+    container.add_css_class("desk-shell-sni-tray");
+    container.set_visible(false);
+    let weak_box = container.downgrade();
+    let sni_ref = Rc::clone(sni);
+    sni.subscribe(move |items| {
+        let Some(bx) = weak_box.upgrade() else {
+            return;
+        };
+        while let Some(child) = bx.first_child() {
+            bx.remove(&child);
+        }
+        for item in items {
+            bx.append(&sni_button(&sni_ref, item));
+        }
+        bx.set_visible(!items.is_empty());
+    });
+    container
+}
+
+/// Build one row in the notification history list inside the clock popover.
+fn notif_history_row(notif: &Notification, notifications: &Rc<NotificationDaemon>) -> gtk::Box {
+    let row = gtk::Box::new(gtk::Orientation::Vertical, 4);
+    row.add_css_class("notif-item");
+
+    let header = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+    let icon = if notif.app_icon.is_empty() {
+        gtk::Image::from_icon_name("preferences-system-notifications-symbolic")
+    } else {
+        gtk::Image::from_gicon(&icon_of(&notif.app_icon))
+    };
+    icon.set_pixel_size(14);
+    header.append(&icon);
+
+    let app = gtk::Label::builder()
+        .label(if notif.app_name.is_empty() {
+            tr!("Notification")
+        } else {
+            notif.app_name.clone()
+        })
+        .xalign(0.0)
+        .hexpand(true)
+        .ellipsize(gtk::pango::EllipsizeMode::End)
+        .build();
+    app.add_css_class("dim");
+    header.append(&app);
+
+    if !notif.time.is_empty() {
+        let ts = gtk::Label::new(Some(&notif.time));
+        ts.add_css_class("dim");
+        header.append(&ts);
+    }
+
+    let dismiss = gtk::Button::from_icon_name("window-close-symbolic");
+    dismiss.add_css_class("notif-dismiss");
+    name_widget(&dismiss, &tr!("Dismiss notification"));
+    {
+        let n = Rc::clone(notifications);
+        let id = notif.id;
+        dismiss.connect_clicked(move |_| n.dismiss_history_item(id));
+    }
+    header.append(&dismiss);
+    row.append(&header);
+
+    if !notif.summary.is_empty() {
+        let summary = gtk::Label::builder()
+            .label(&notif.summary)
+            .xalign(0.0)
+            .wrap(true)
+            .wrap_mode(gtk::pango::WrapMode::WordChar)
+            .max_width_chars(38)
+            .build();
+        summary.add_css_class("notif-summary");
+        row.append(&summary);
+    }
+
+    if !notif.body.is_empty() {
+        let body = gtk::Label::builder()
+            .label(&notif.body)
+            .xalign(0.0)
+            .wrap(true)
+            .wrap_mode(gtk::pango::WrapMode::WordChar)
+            .max_width_chars(40)
+            .lines(3)
+            .ellipsize(gtk::pango::EllipsizeMode::End)
+            .build();
+        body.add_css_class("dim");
+        row.append(&body);
+    }
+
+    row
+}
+
+/// A clock that updates at the start of every minute; a click shows the notification history and
+/// a calendar. An unread dot appears when unread notifications exist.
+fn clock(notifications: &Rc<NotificationDaemon>) -> gtk::MenuButton {
     let time = gtk::Label::builder().xalign(1.0).build();
     let date = gtk::Label::builder().xalign(1.0).build();
     let column = gtk::Box::new(gtk::Orientation::Vertical, 0);
     column.set_valign(gtk::Align::Center);
     column.append(&time);
     column.append(&date);
-    let calendar = gtk::Popover::builder().child(&gtk::Calendar::new()).build();
+
+    let unread_dot = gtk::Box::builder()
+        .halign(gtk::Align::End)
+        .valign(gtk::Align::Start)
+        .visible(false)
+        .can_target(false)
+        .build();
+    unread_dot.add_css_class("clock-unread-dot");
+
+    let overlay = gtk::Overlay::builder().child(&column).build();
+    overlay.add_overlay(&unread_dot);
+
+    // Popover content: Notification history + Clear all + Calendar
+    let pop_box = gtk::Box::new(gtk::Orientation::Vertical, 10);
+    pop_box.set_size_request(320, -1);
+
+    let notif_header = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    notif_header.add_css_class("notif-header");
+    let title = gtk::Label::builder()
+        .label(tr!("Notifications"))
+        .xalign(0.0)
+        .hexpand(true)
+        .build();
+    title.add_css_class("section-title");
+    let clear_btn = gtk::Button::builder()
+        .label(tr!("Clear all"))
+        .visible(false)
+        .build();
+    clear_btn.add_css_class("notif-clear");
+    {
+        let n = Rc::clone(notifications);
+        clear_btn.connect_clicked(move |_| n.clear_all());
+    }
+    notif_header.append(&title);
+    notif_header.append(&clear_btn);
+    pop_box.append(&notif_header);
+
+    let empty_label = gtk::Label::builder()
+        .label(tr!("No notifications"))
+        .halign(gtk::Align::Center)
+        .build();
+    empty_label.add_css_class("notif-empty");
+    pop_box.append(&empty_label);
+
+    let list_box = gtk::Box::new(gtk::Orientation::Vertical, 6);
+    let scrolled = gtk::ScrolledWindow::builder()
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .max_content_height(240)
+        .propagate_natural_height(true)
+        .child(&list_box)
+        .visible(false)
+        .build();
+    pop_box.append(&scrolled);
+
+    pop_box.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
+    pop_box.append(&gtk::Calendar::new());
+
+    let popover = gtk::Popover::builder().child(&pop_box).build();
+    popover.add_css_class("desk-shell-notif-popover");
+    {
+        let n = Rc::clone(notifications);
+        popover.connect_visible_notify(move |p| {
+            if p.is_visible() {
+                n.mark_all_read();
+            }
+        });
+    }
+
+    {
+        let w_dot = unread_dot.downgrade();
+        let w_list = list_box.downgrade();
+        let w_scrolled = scrolled.downgrade();
+        let w_empty = empty_label.downgrade();
+        let w_clear = clear_btn.downgrade();
+        let n_ref = Rc::clone(notifications);
+        notifications.subscribe(move |items, unread| {
+            if let Some(dot) = w_dot.upgrade() {
+                dot.set_visible(unread > 0);
+            }
+            let Some(list) = w_list.upgrade() else {
+                return;
+            };
+            while let Some(child) = list.first_child() {
+                list.remove(&child);
+            }
+            for item in items {
+                list.append(&notif_history_row(item, &n_ref));
+            }
+            let has_items = !items.is_empty();
+            if let Some(s) = w_scrolled.upgrade() {
+                s.set_visible(has_items);
+            }
+            if let Some(e) = w_empty.upgrade() {
+                e.set_visible(!has_items);
+            }
+            if let Some(c) = w_clear.upgrade() {
+                c.set_visible(has_items);
+            }
+        });
+    }
+
     let button = gtk::MenuButton::builder()
-        .child(&column)
-        .popover(&calendar)
+        .child(&overlay)
+        .popover(&popover)
         .build();
     button.add_css_class("desk-shell-clock");
     tick(&button, &time, &date);
@@ -171,11 +418,17 @@ fn tick(button: &gtk::MenuButton, time: &gtk::Label, date: &gtk::Label) {
     });
 }
 
-fn tray(quick: &Rc<QuickSettings>, clip: &Rc<ClipboardFlyout>) -> gtk::Box {
+fn tray(
+    quick: &Rc<QuickSettings>,
+    clip: &Rc<ClipboardFlyout>,
+    sni: &Rc<SniWatcher>,
+    notifications: &Rc<NotificationDaemon>,
+) -> gtk::Box {
     let tray = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+    tray.append(&sni_tray(sni));
     tray.append(&clipboard_button(clip));
     tray.append(&quick_settings_pill(quick));
-    tray.append(&clock());
+    tray.append(&clock(notifications));
     tray
 }
 
@@ -357,6 +610,8 @@ pub struct Taskbars {
     menu: Rc<StartMenu>,
     quick: Rc<QuickSettings>,
     clip: Rc<ClipboardFlyout>,
+    sni: Rc<SniWatcher>,
+    notifications: Rc<NotificationDaemon>,
     pins: Vec<DesktopEntry>,
     /// Every installed application, for the icon and name of unpinned windows.
     apps: Vec<DesktopEntry>,
@@ -369,11 +624,17 @@ pub struct Taskbars {
 }
 
 impl Taskbars {
+    #[allow(
+        clippy::too_many_arguments,
+        reason = "the taskbar aggregates the shell's flyouts, tray watcher and notifications"
+    )]
     pub fn new(
         app: &gtk::Application,
         menu: &Rc<StartMenu>,
         quick: &Rc<QuickSettings>,
         clip: &Rc<ClipboardFlyout>,
+        sni: &Rc<SniWatcher>,
+        notifications: &Rc<NotificationDaemon>,
         pins: &[&DesktopEntry],
         apps: &[DesktopEntry],
     ) -> Rc<Taskbars> {
@@ -382,6 +643,8 @@ impl Taskbars {
             menu: Rc::clone(menu),
             quick: Rc::clone(quick),
             clip: Rc::clone(clip),
+            sni: Rc::clone(sni),
+            notifications: Rc::clone(notifications),
             pins: pins.iter().map(|e| (*e).clone()).collect(),
             apps: apps.to_vec(),
             me: me.clone(),
@@ -472,7 +735,12 @@ impl Taskbars {
         let bar = gtk::CenterBox::new();
         bar.add_css_class("desk-shell-taskbar");
         bar.set_center_widget(Some(&center));
-        bar.set_end_widget(Some(&tray(&self.quick, &self.clip)));
+        bar.set_end_widget(Some(&tray(
+            &self.quick,
+            &self.clip,
+            &self.sni,
+            &self.notifications,
+        )));
         window.set_child(Some(&bar));
         if layer_shell::place(&window, &PLACEMENT) {
             if let Some(m) = &monitor {

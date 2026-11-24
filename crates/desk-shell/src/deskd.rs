@@ -886,6 +886,16 @@ pub fn toggle_dark_mode() {
     });
 }
 
+/// Run `changed` whenever deskd's focus / do-not-disturb state changes.
+pub fn watch_focus(changed: impl Fn() + 'static) {
+    watch_signal(
+        proto::FOCUS_PATH,
+        proto::FOCUS_INTERFACE,
+        "Changed",
+        changed,
+    );
+}
+
 /// Whether a focus mode is active (`None`: deskd is not running).
 pub fn focus_status(done: impl FnOnce(Option<bool>) + 'static) {
     try_call(

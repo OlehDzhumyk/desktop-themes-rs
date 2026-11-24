@@ -170,6 +170,20 @@ window.desk-shell { background: none; }
 
 .desk-shell-clock { padding: 0 8px; }
 .desk-shell-clock label { font-size: 12px; }
+.desk-shell-clock .clock-unread-dot {
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 999px;
+  background-color: var(--ds-accent);
+  margin-top: 4px;
+}
+
+.desk-shell-sni-tray { margin: 0 2px; }
+.desk-shell-taskbar button.sni-item {
+  min-width: 28px;
+  padding: 0 4px;
+}
+.desk-shell-taskbar button.sni-item image { -gtk-icon-size: 16px; }
 
 .desk-shell-start-menu {
   background-color: var(--ds-flyout);
@@ -386,6 +400,82 @@ window.desk-shell { background: none; }
   to { opacity: 1; }
 }
 .desk-shell.hc .desk-shell-osd { border: 2px solid var(--ds-stroke); box-shadow: none; }
+
+.desk-shell-toast-stack { padding: 0; }
+.desk-shell-toast {
+  padding: 12px 14px;
+  border-radius: var(--ds-flyout-radius);
+  background-color: var(--ds-flyout);
+  border: 1px solid var(--ds-stroke);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  color: var(--ds-fg);
+}
+.desk-shell-toast.toast-critical { border-left: 3px solid var(--ds-danger); }
+.desk-shell-toast .toast-app { color: var(--ds-dim); font-size: 12px; }
+.desk-shell-toast .toast-summary { font-weight: 600; font-size: 14px; }
+.desk-shell-toast .toast-body { color: var(--ds-dim); font-size: 13px; }
+.desk-shell-toast .toast-close {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border-radius: var(--ds-radius);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--ds-dim);
+}
+.desk-shell-toast .toast-close:hover { background-color: var(--ds-hover); color: var(--ds-fg); }
+.desk-shell-toast .toast-actions button {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--ds-radius);
+  background-color: var(--ds-field);
+  border: 1px solid var(--ds-stroke);
+  color: var(--ds-fg);
+  font-size: 12px;
+}
+.desk-shell-toast .toast-actions button:hover { background-color: var(--ds-hover); }
+.desk-shell.hc .desk-shell-toast { border: 2px solid var(--ds-stroke); box-shadow: none; }
+
+.desk-shell-notif-popover > contents {
+  background-color: var(--ds-flyout);
+  border: 1px solid var(--ds-stroke);
+  border-radius: var(--ds-flyout-radius);
+  padding: 14px;
+  color: var(--ds-fg);
+}
+.desk-shell-notif-popover .section-title { font-weight: 600; font-size: 14px; }
+.desk-shell-notif-popover .dim { color: var(--ds-dim); font-size: 12px; }
+.desk-shell-notif-popover .notif-empty { color: var(--ds-dim); font-size: 12px; margin: 12px 0; }
+.desk-shell-notif-popover .notif-clear {
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: var(--ds-radius);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--ds-accent);
+  font-size: 12px;
+}
+.desk-shell-notif-popover .notif-clear:hover { background-color: var(--ds-hover); }
+.desk-shell-notif-popover .notif-item {
+  padding: 8px 10px;
+  border-radius: var(--ds-radius);
+  background-color: var(--ds-field);
+  border: 1px solid var(--ds-stroke);
+}
+.desk-shell-notif-popover .notif-summary { font-weight: 600; font-size: 13px; }
+.desk-shell-notif-popover .notif-dismiss {
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border-radius: var(--ds-radius);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--ds-dim);
+}
+.desk-shell-notif-popover .notif-dismiss:hover { background-color: var(--ds-hover); color: var(--ds-fg); }
 
 .desk-shell button:focus-visible,
 .desk-shell row:focus-visible {
@@ -630,6 +720,7 @@ mod tests {
             ".desk-shell-search-pill",
             ".desk-shell-tray-pill",
             ".desk-shell-clock",
+            ".desk-shell-sni-tray",
         ] {
             for body in rules_of(selector) {
                 for bad in ["border-top", "border-bottom", "border: 1px", "border:1px"] {
@@ -664,6 +755,10 @@ mod tests {
             ".qs-brightness",
             ".qs-footer",
             ".qs-battery",
+            ".desk-shell-sni-tray",
+            ".clock-unread-dot",
+            ".desk-shell-toast",
+            ".desk-shell-notif-popover",
         ] {
             assert!(CSS.contains(surface), "{surface}");
         }
