@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 05:06+0000\n"
+"POT-Creation-Date: 2026-11-24 08:23+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -137,11 +137,6 @@ msgstr "Пошук у буфері обміну"
 msgid "Clipboard settings"
 msgstr "Налаштування буфера обміну"
 
-#: bridge/src/clipboard/listPanel.ts:60 bridge/src/clipboard/panel.ts:100
-#: bridge/src/clipboard/winFlyout.ts:77 bridge/src/shortcutGuide/reader.ts:128
-msgid "Clipboard history"
-msgstr "Історія буфера обміну"
-
 #: bridge/src/clipboard/listPanel.ts:80
 msgid "close"
 msgstr "закрити"
@@ -198,10 +193,6 @@ msgstr "{n} д тому"
 #: bridge/src/clipboard/panel.ts:46
 msgid "{text}, pinned"
 msgstr "{text}, закріплено"
-
-#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:53
-msgid "Emoji"
-msgstr "Емодзі"
 
 #: bridge/src/clipboard/winFlyout.ts:60
 msgid "Symbols"
@@ -2179,6 +2170,7 @@ msgstr "Потрібен пакунок tesseract і дані мов."
 
 #: crates/desk-settings/src/ocr.rs:176 crates/desk-settings/src/registry.rs:22
 #: crates/desk-settings/src/registry.rs:454
+#: crates/desk-shell/src/start_menu.rs:94
 msgid "Clipboard"
 msgstr "Буфер обміну"
 
@@ -2330,6 +2322,7 @@ msgstr "Перегляд"
 
 #: crates/desk-settings/src/registry.rs:34
 #: crates/desk-settings/src/registry.rs:446
+#: crates/desk-shell/src/start_menu.rs:90
 msgid "Application"
 msgstr "Програма"
 
@@ -2546,6 +2539,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
+#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:86
+#: crates/desk-shell/src/taskbar.rs:89
 msgid "Search"
 msgstr "Пошук"
 
@@ -2676,6 +2671,83 @@ msgstr ""
 "Скорочення для доступності змінюється на сторінці «Клавіатурні скорочення»; "
 "вигляд наслідує стиль поточної теми."
 
+#: crates/desk-shell/src/main.rs:107 crates/deskd/src/search/mod.rs:179
+#, rust-format
+msgid "Search the web for “{query}”"
+msgstr "Шукати «{query}» в інтернеті"
+
+#: crates/desk-shell/src/start_menu.rs:89
+msgid "Calculator: press Enter to copy the result"
+msgstr "Калькулятор: натисніть Enter, щоб скопіювати результат"
+
+#: crates/desk-shell/src/start_menu.rs:91
+msgid "System action"
+msgstr "Системна дія"
+
+#: crates/desk-shell/src/start_menu.rs:92
+msgid "Search the web"
+msgstr "Пошук в інтернеті"
+
+#: crates/desk-shell/src/start_menu.rs:93
+msgid "File"
+msgstr "Файл"
+
+#: crates/desk-shell/src/start_menu.rs:95
+msgid "Emoji"
+msgstr "Емодзі"
+
+#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:76
+msgid "Start menu"
+msgstr "Пуск"
+
+#: crates/desk-shell/src/start_menu.rs:132
+msgid "Type here to search"
+msgstr "Введіть текст для пошуку"
+
+#: crates/desk-shell/src/start_menu.rs:183
+msgid "Pinned"
+msgstr "Закріплені"
+
+#: crates/desk-shell/src/start_menu.rs:199
+msgid "No applications found"
+msgstr "Програм не знайдено"
+
+#: crates/desk-shell/src/start_menu.rs:274
+msgid "Power"
+msgstr "Живлення"
+
+#: crates/desk-shell/src/start_menu.rs:294
+msgid "Settings"
+msgstr "Налаштування"
+
+#: crates/desk-shell/src/start_menu.rs:299
+msgid "Lock the screen"
+msgstr "Заблокувати екран"
+
+#: crates/desk-shell/src/start_menu.rs:418 crates/themes/src/gui/window.rs:353
+msgid "No results"
+msgstr "Нічого не знайдено"
+
+#: crates/desk-shell/src/taskbar.rs:126
+msgid "The clipboard history is empty"
+msgstr "Історія буфера обміну порожня"
+
+#: crates/desk-shell/src/taskbar.rs:153
+msgid "Clipboard history"
+msgstr "Історія буфера обміну"
+
+#: crates/desk-shell/src/taskbar.rs:207
+msgid "Desktop themes and settings"
+msgstr "Теми та налаштування стільниці"
+
+#: crates/desk-shell/src/taskbar.rs:212
+msgid "Take a screenshot"
+msgstr "Зробити знімок екрана"
+
+#: crates/desk-shell/src/taskbar.rs:228
+msgid "Taskbar"
+msgstr "Панель завдань"
+
 #: crates/deskd/src/clipboard.rs:249
 #, rust-format
 msgid "{format} image {width}×{height}"
@@ -2728,11 +2800,6 @@ msgstr ""
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
-
-#: crates/deskd/src/search/mod.rs:179
-#, rust-format
-msgid "Search the web for “{query}”"
-msgstr "Шукати «{query}» в інтернеті"
 
 #: crates/themes-core/src/apply.rs:129
 #, rust-format
@@ -5062,10 +5129,6 @@ msgstr "Головне меню"
 #: crates/themes/src/gui/window.rs:318
 msgid "Search settings…"
 msgstr "Пошук налаштувань…"
-
-#: crates/themes/src/gui/window.rs:353
-msgid "No results"
-msgstr "Нічого не знайдено"
 
 #: crates/themes/src/gui/window.rs:354
 msgid "Try a different search term"

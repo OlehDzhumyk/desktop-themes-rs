@@ -311,6 +311,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "desk-shell"
+version = "0.3.0"
+dependencies = [
+ "clap",
+ "desk-proto",
+ "desk-search",
+ "desk-settings",
+ "gtk4",
+ "libc",
+]
+
+[[package]]
 name = "deskd"
 version = "0.3.0"
 dependencies = [
