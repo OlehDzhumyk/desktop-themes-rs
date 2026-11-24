@@ -207,8 +207,10 @@ Skins:
 
 ## Window layouts
 
-Status: **core only** (stage 4). deskd answers the layouts and their geometry; the bridge picker, snap assist and
-always-on-top come in a later change. Spec: [window-layouts.md](spec/features/window-layouts.md).
+Status: **implemented** (stage 4). deskd answers the layouts and their geometry; the bridge draws the picker, the
+zone preview and snap assist, moves the windows and toggles always-on-top. Not yet: the hover picker on the
+maximise button and drag zones (GNOME's edge tiling stays in use). Spec:
+[window-layouts.md](spec/features/window-layouts.md).
 
 | | |
 |---|---|
@@ -220,8 +222,16 @@ always-on-top come in a later change. Spec: [window-layouts.md](spec/features/wi
 | Settings | GSettings `io.github.OlehDzhumyk.Desk.Layouts`: `enabled`, `layout-picker-shortcut`, `always-on-top-shortcut`, `gap-outer`, `gap-inner`, `snap-assist`, `hover-picker` |
 | Theme defaults | `windows11`: gaps 8 / 6 px, snap assist and hover picker on; `macos`: snap assist and hover picker off; `fedora`: gaps 0, hover picker off |
 | Core | crate `desk-layouts`: pure Rust (only `serde`), no GTK, GLib or D-Bus, so KDE or wlroots adapters can reuse it (ADR 0011) |
+| Picker | the shortcut opens a modal popover for the focused window with a miniature of every layout; arrows choose a layout, `Enter`/`Space`/`Tab` go into its zones, arrows move between zones (past the edge into the next layout), `Enter`/`Space` snaps, `Tab` goes back, `Esc` or a click outside closes; names «Layout <name>, zone <n> of <m>»; the choice becomes the monitor's active layout |
+| Snapping | only normal windows (never dialogs, tool windows, override-redirect or skip-taskbar surfaces, AC-WIN-05); maximised or fullscreen windows are restored first; a window that cannot be resized is centred in the zone at its own size |
+| Zone preview | hovering or focusing a zone shows a click-through translucent rectangle with a light-inside-dark outline (3:1 on any background); fade 80 ms, none under reduced motion (AC-WIN-06) |
+| Snap assist | with `snap-assist` on, the other normal windows of the workspace (live miniature and title, up to 9) are offered for each empty zone in turn; `1`..`9`, a click or `Enter` places, `Esc` skips |
+| Always on top | the shortcut pins or unpins the focused normal window (Mutter `make_above`) with a toast «Pinned on top» / «Unpinned»; per session only |
+| Monitors | a monitor change or the lock screen closes the picker, assist and preview (AC-WIN-04) |
 
-Skins: none yet; the bridge part will draw the picker per skin (`windows11`, `macos`, `default`).
+Skins: **windows11** a compact Fluent popover at the top of the monitor, miniatures without names; **macos** a
+translucent «Move & Resize» popover at the top; **default** the shell theme's popup surface in the middle. High
+contrast gives opaque surfaces, outlines and a thick focus ring in every skin.
 
 ## Automatic light/dark
 

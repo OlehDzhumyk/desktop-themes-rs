@@ -21,6 +21,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Window layouts in the bridge (stage 4): `Super+Z` (macOS: `Ctrl+Super+Up`) opens a skin-aware
+  layout picker for the focused window with miniature layouts and a full keyboard path; hovering
+  or focusing a zone shows a click-through zone preview (no fade under reduced motion); choosing a
+  zone snaps the window into the zone that deskd resolves and saves the monitor's active layout.
+  Snap assist offers the other windows of the workspace for the empty zones (`1`..`9`, `Esc`).
+  `Ctrl+Super+T` pins the focused window above others or unpins it, with a toast. Dialogs, tool
+  windows and override-redirect surfaces are never snapped. Not yet: hover picker on the maximise
+  button and drag zones.
 - Window layouts core (stage 4): the pure-Rust crate `desk-layouts` (no desktop dependency) with
   six built-in layouts (halves, thirds, two-thirds, quarters, focus, stack), portrait adaptation,
   even-pixel zone geometry with exact outer and inner gaps inside the work area, minimum-size
@@ -29,7 +37,7 @@ All notable changes to this project are documented in this file. The format is b
   `SetActiveLayout`, `ResolveZones`, signal `Changed`) to trusted callers only (ADR 0008).
   Settings `io.github.OlehDzhumyk.Desk.Layouts` (`enabled`, `layout-picker-shortcut`,
   `always-on-top-shortcut`, `gap-outer`, `gap-inner`, `snap-assist`, `hover-picker`) with
-  per-theme defaults and a «Розкладки вікон» page. The bridge UI follows separately.
+  per-theme defaults and a «Розкладки вікон» page.
 - Shortcut guide (stage 4): hold `Super` for `hold-delay` (default 900 ms) to show a skin-aware
   overlay of the keyboard shortcuts currently active in the session, read live from GNOME
   (`wm.keybindings`, `shell.keybindings`, `media-keys` including custom keybindings) and

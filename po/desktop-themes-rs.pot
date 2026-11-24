@@ -4434,6 +4434,70 @@ msgstr ""
 msgid "Focus session ended"
 msgstr ""
 
+#: bridge/src/layouts/assist.ts:106
+msgid "Press 1–9 or click a window; Esc skips"
+msgstr ""
+
+#: bridge/src/layouts/assist.ts:163
+msgid "Choose a window for zone {number} of {count}"
+msgstr ""
+
+#: bridge/src/layouts/assist.ts:172
+msgid "Untitled window"
+msgstr ""
+
+#: bridge/src/layouts/assist.ts:182
+msgid "{number}: {title}"
+msgstr ""
+
+#: bridge/src/layouts/feature.ts:180
+msgid "Unpinned"
+msgstr ""
+
+#: bridge/src/layouts/feature.ts:183
+msgid "Pinned on top"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:36
+msgid "Halves"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:37
+msgid "Thirds"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:38
+msgid "Two-thirds"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:39
+msgid "Quarters"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:41
+msgid "Stack"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:120
+msgid "Move & Resize"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:120
+msgid "Snap layouts"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:153
+msgid "Arrow keys choose, Enter places the window, Esc closes"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:181
+msgid "Layout {name}"
+msgstr ""
+
+#: bridge/src/layouts/picker.ts:199
+msgid "Layout {name}, zone {number} of {count}"
+msgstr ""
+
 #: bridge/src/logoMenu/actions.ts:76
 msgid "this window"
 msgstr ""
