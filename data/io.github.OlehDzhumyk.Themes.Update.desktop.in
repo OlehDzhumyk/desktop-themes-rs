@@ -9,7 +9,7 @@ Comment=Download, build and install the latest desktop-themes-rs from its git ch
 Exec=@BIN@/themes update --pause
 Icon=software-update-available-symbolic
 Terminal=true
-Categories=Settings;System;
+Categories=Settings;
 # TRANSLATORS: search keywords, separated and terminated by semicolons; keep the English ones too
 Keywords=update;upgrade;git;theme;
 StartupNotify=false
