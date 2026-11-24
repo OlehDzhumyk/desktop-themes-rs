@@ -3,7 +3,8 @@
 //!
 //! A theme may contain `tokens.toml` (see docs/design-tokens.md). This crate parses it
 //! (with `INHERITS` deep-merge), validates it (ranges, WCAG AA contrast), and turns it into
-//! files (libadwaita CSS, GNOME Shell CSS, Ptyxis palette, wallpaper SVG) and dconf keys.
+//! files (libadwaita CSS, GNOME Shell CSS, Ptyxis palette, wallpaper SVG; on request a labwc
+//! `themerc` and desk-shell CSS) and dconf keys.
 //! It has no GNOME dependencies: the theme manager (themes-core) decides where files are
 //! linked and which keys are written.
 
@@ -20,7 +21,7 @@ pub mod validate;
 
 pub use cache::{GENERATOR_VERSION, Materialized, is_current, materialize, planned};
 pub use generate::settings::{KeyModule, Keys, USER_THEME_EXTENSION, keys};
-pub use generate::{Outputs, Target};
+pub use generate::{ExtraTarget, Outputs, Target};
 pub use load::{Issue, Layer, Loaded, TokenError, load_chain, load_str};
 pub use schema::Tokens;
 
