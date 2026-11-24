@@ -34,6 +34,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Wayland end-to-end tests (`just e2e-wayland`, `tests/e2e-wayland/`, CI `e2e-wayland.yml`):
+  headless labwc (wlroots headless backend, pixman renderer) with `deskd` and
+  `desk-shell --skin windows11` in a Fedora 45 container without systemd. They check that the
+  taskbar and the flyouts are real layer surfaces, that `--toggle-start`,
+  `--toggle-quick-settings` and `--toggle-clipboard` reach the running shell, and that `deskd`
+  and `desk-shell` own their bus names and log no critical errors. The suite takes about a second
+  after the build.
 - desk-shell: the Start menu searches through deskd (files, clipboard history, emoji, usage
   ranking), with the built-in catalog when deskd is missing; file and clipboard results open.
   The look follows the `skin` setting and deskd's light/dark changes live.
