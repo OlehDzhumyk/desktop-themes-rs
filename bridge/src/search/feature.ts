@@ -55,6 +55,8 @@ export class SearchFeature {
     private _fading: SearchPanel | null = null;
     private _skin: string;
     private _bound = false;
+    /** The keybinding action of `search-shortcut` (0 when not bound): pressed in the open panel, it closes. */
+    private _action = 0;
     private _settingsIds: number[] = [];
     private _destroyed = false;
 
@@ -106,6 +108,10 @@ export class SearchFeature {
         this._dropFading();
         const panel = new SearchPanel(this._skin, {
             query: text => { this._scheduler.request(text, this._limit); },
+            // the modal grab stops the keybinding; the panel asks whether a key press is one of its
+            // accelerators (every one in the list) so the second press closes (AC-SRCH-01)
+            isToggle: (keycode, state) => this._action !== 0
+                && global.display.get_keybinding_action(keycode, state) === this._action,
             activate: item => {
                 this._panel = null;
                 this._scheduler.cancel();
@@ -250,9 +256,10 @@ export class SearchFeature {
         if (this._bound)
             Main.wm.removeKeybinding(SHORTCUT_KEY);
         this._bound = false;
+        this._action = 0;
         if (!this._enabled)
             return;
-        Main.wm.addKeybinding(SHORTCUT_KEY, this._settings, Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+        this._action = Main.wm.addKeybinding(SHORTCUT_KEY, this._settings, Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             Shell.ActionMode.NORMAL, () => { this.toggle(); });
         this._bound = true;
     }
@@ -262,6 +269,7 @@ export class SearchFeature {
         if (this._bound)
             Main.wm.removeKeybinding(SHORTCUT_KEY);
         this._bound = false;
+        this._action = 0;
         for (const id of this._settingsIds)
             this._settings.disconnect(id);
         this._settingsIds = [];

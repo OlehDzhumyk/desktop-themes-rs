@@ -6,8 +6,9 @@
 //
 // Results are grouped: the best result is the top hit, the others follow under the title of their
 // kind, in the order deskd ranked them. Keyboard: the field keeps the focus; Up and Down move the
-// selection, Enter opens the selected result, Super+1..9 open the first nine, Esc clears the
-// field and closes when it is empty. A click outside the panel closes. The panel fades in and out
+// selection, Tab and Shift+Tab go to the first row of the next or previous group (wrapping),
+// Enter opens the selected result, Super+1..9 open the first nine, Esc clears the field and
+// closes when it is empty, and the search shortcut pressed again closes. A click outside the panel closes. The panel fades in and out
 // in at most 120 ms, without any transition when animations are off or reduced.
 import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
@@ -93,6 +94,8 @@ function groupResults(items: SearchItem[]): Group[] {
 export interface SearchPanelHost {
     /** The text of the field changed (also called with '' when the panel opens). */
     query: (text: string) => void;
+    /** Whether a key press (hardware keycode, modifier state) is the search shortcut. */
+    isToggle: (keycode: number, state: number) => boolean;
     /** A result was chosen; the panel is destroyed before this runs. */
     activate: (item: SearchItem) => void;
     /** Closed without a choice; the panel is destroyed before this runs. */
@@ -109,6 +112,8 @@ export class SearchPanel {
     private _skin: string;
     /** The rows in the order shown (the order of Up/Down and Super+<n>). */
     private _rows: {item: SearchItem; button: St.Button}[] = [];
+    /** The index of the first row of each group, in order (the stops of Tab). */
+    private _groupStarts: number[] = [];
     private _selected = 0;
     private _grab: Clutter.Grab | null = null;
     private _host: SearchPanelHost | null;
@@ -214,11 +219,13 @@ export class SearchPanel {
             return;
         this._list.destroy_all_children();
         this._rows = [];
+        this._groupStarts = [];
         this._selected = 0;
         const query = text.trim();
         for (const group of groupResults(items)) {
             const box = new St.BoxLayout({...VERTICAL, style_class: 'desk-search-group'});
             box.add_child(new St.Label({text: group.title, style_class: 'desk-search-group-title'}));
+            this._groupStarts.push(this._rows.length);
             for (const item of group.items)
                 box.add_child(this._row(item, group.title));
             this._list.add_child(box);
@@ -304,9 +311,29 @@ export class SearchPanel {
         this._highlight();
     }
 
+    /** Select the first row of the next (1) or previous (-1) group, wrapping around. */
+    private _moveGroup(dir: 1 | -1): void {
+        const starts = this._groupStarts;
+        const n = starts.length;
+        if (n === 0)
+            return;
+        // the group that holds the selection: the last start at or before it
+        let current = 0;
+        starts.forEach((start, g) => {
+            if (start <= this._selected)
+                current = g;
+        });
+        this._selected = starts[(current + dir + n) % n] ?? 0;
+        this._highlight();
+    }
+
     private _key(ev: Clutter.Event): boolean {
         const sym = ev.get_key_symbol();
         const state = ev.get_state();
+        if (this._host?.isToggle(ev.get_key_code(), state)) {
+            this._close();
+            return Clutter.EVENT_STOP;
+        }
         const superDown = (state & (Clutter.ModifierType.SUPER_MASK | Clutter.ModifierType.MOD4_MASK)) !== 0;
         if (superDown && sym >= Clutter.KEY_1 && sym <= Clutter.KEY_9) {
             const index = sym - Clutter.KEY_1;
@@ -328,6 +355,13 @@ export class SearchPanel {
         case Clutter.KEY_Down:
         case Clutter.KEY_KP_Down:
             this._move(1);
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_Tab:
+        case Clutter.KEY_KP_Tab:
+            this._moveGroup((state & Clutter.ModifierType.SHIFT_MASK) !== 0 ? -1 : 1);
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_ISO_Left_Tab:
+            this._moveGroup(-1);
             return Clutter.EVENT_STOP;
         case Clutter.KEY_Page_Up:
             this._move(-5);
@@ -413,5 +447,6 @@ export class SearchPanel {
             Main.layoutManager.removeChrome(this._layer);
         this._layer.destroy();
         this._rows = [];
+        this._groupStarts = [];
     }
 }

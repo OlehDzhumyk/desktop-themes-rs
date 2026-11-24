@@ -35,8 +35,9 @@ All notable changes to this project are documented in this file. The format is b
   is empty until the bridge launcher replaces `spotlight@nin`.
 - Search box (stage 4, partial): the bridge draws the own search launcher per skin (`macos`
   Spotlight-like pill at 22% of the monitor height, `windows11` Fluent panel, `default` Adwaita
-  popover), with grouped results («Top hit», then by kind), icons, `↑`/`↓`, `Enter`,
-  `Super+1`..`Super+9`, `Esc` that clears first and then closes, and a click outside to close. It
+  popover), with grouped results («Top hit», then by kind), icons, `↑`/`↓`, `Tab`/`Shift+Tab`
+  to the next or previous group, `Enter`, `Super+1`..`Super+9`, `Esc` that clears first and then
+  closes, a second press of the search shortcut and a click outside to close. It
   follows the light scheme, high contrast and reduced motion. Applications launch, calculations
   are copied, the seven system actions run (power actions through the session manager, which
   asks first), files open, clipboard entries are put back, emoji are inserted and a web result
