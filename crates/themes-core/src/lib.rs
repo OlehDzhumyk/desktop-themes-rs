@@ -25,6 +25,7 @@ pub mod state;
 pub mod theme;
 pub mod tokens;
 pub mod txn;
+pub mod update;
 pub mod util;
 pub mod values;
 

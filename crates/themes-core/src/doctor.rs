@@ -1304,6 +1304,17 @@ pub fn doctor_on(
         }
     }
 
+    // a recorded git checkout that `themes update` cannot use (missing, dirty, diverged)
+    if let Some(m) = crate::update::doctor_note(ctx) {
+        rep.push(
+            "info",
+            "update-repo",
+            tr!("update from git: {problem}", problem = m),
+            None,
+            false,
+        );
+    }
+
     // запам'ятати версію
     {
         let _lock = Lock::acquire(ctx)?;
