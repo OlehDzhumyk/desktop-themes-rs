@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:59+0000\n"
+"POT-Creation-Date: 2026-11-24 05:07+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -159,6 +159,7 @@ msgid "pin"
 msgstr "закріпити"
 
 #: bridge/src/clipboard/listPanel.ts:135 bridge/src/emoji/panel.ts:296
+#: bridge/src/search/panel.ts:230
 msgid "Nothing found for “{query}”"
 msgstr "Нічого не знайдено за «{query}»"
 
@@ -198,7 +199,7 @@ msgstr "{n} д тому"
 msgid "{text}, pinned"
 msgstr "{text}, закріплено"
 
-#: bridge/src/clipboard/winFlyout.ts:59
+#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:52
 msgid "Emoji"
 msgstr "Емодзі"
 
@@ -238,7 +239,7 @@ msgstr "Більше"
 msgid "Picked {value}"
 msgstr "Вибрано {value}"
 
-#: bridge/src/colorPicker/feature.ts:117
+#: bridge/src/colorPicker/feature.ts:117 bridge/src/search/feature.ts:158
 msgid "Copied {value}"
 msgstr "Скопійовано {value}"
 
@@ -510,6 +511,7 @@ msgid "System Settings…"
 msgstr "Налаштування системи…"
 
 #: bridge/src/logoMenu/feature.ts:74 bridge/src/mixer/feature.ts:197
+#: bridge/src/search/panel.ts:44
 msgid "Applications"
 msgstr "Програми"
 
@@ -546,7 +548,7 @@ msgid "Output"
 msgstr "Виведення"
 
 #: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
-#: bridge/src/shortcutGuide/reader.ts:203
+#: bridge/src/shortcutGuide/reader.ts:209
 msgid "Input"
 msgstr "Введення"
 
@@ -732,6 +734,50 @@ msgstr "приватний режим"
 msgid "The history is empty"
 msgstr "Історія порожня"
 
+#: bridge/src/search/feature.ts:227
+msgid "Dark style is off"
+msgstr "Темний режим вимкнено"
+
+#: bridge/src/search/feature.ts:227
+msgid "Dark style is on"
+msgstr "Темний режим увімкнено"
+
+#: bridge/src/search/feature.ts:236
+msgid "Clipboard private mode is off"
+msgstr "Приватний режим буфера обміну вимкнено"
+
+#: bridge/src/search/feature.ts:236
+msgid "Clipboard private mode is on"
+msgstr "Приватний режим буфера обміну увімкнено"
+
+#: bridge/src/search/panel.ts:42
+msgid "Calculator"
+msgstr "Калькулятор"
+
+#: bridge/src/search/panel.ts:46
+msgid "System actions"
+msgstr "Системні дії"
+
+#: bridge/src/search/panel.ts:48
+msgid "Files"
+msgstr "Файли"
+
+#: bridge/src/search/panel.ts:54
+msgid "Web"
+msgstr "Інтернет"
+
+#: bridge/src/search/panel.ts:79
+msgid "Top hit"
+msgstr "Найкращий збіг"
+
+#: bridge/src/search/panel.ts:138
+msgid "Type to search"
+msgstr "Введіть текст для пошуку"
+
+#: bridge/src/search/panel.ts:154
+msgid "Search results"
+msgstr "Результати пошуку"
+
 #: bridge/src/shortcutGuide/overlay.ts:36
 msgid "theme"
 msgstr "тема"
@@ -904,15 +950,15 @@ msgstr "Знімок екрана"
 msgid "Record screen"
 msgstr "Запис екрана"
 
-#: bridge/src/shortcutGuide/reader.ts:197
+#: bridge/src/shortcutGuide/reader.ts:203
 msgid "Windows and apps"
 msgstr "Вікна і програми"
 
-#: bridge/src/shortcutGuide/reader.ts:205
+#: bridge/src/shortcutGuide/reader.ts:211
 msgid "Custom"
 msgstr "Власні"
 
-#: bridge/src/shortcutGuide/reader.ts:338
+#: bridge/src/shortcutGuide/reader.ts:344
 msgid "Custom shortcut"
 msgstr "Власне скорочення"
 

@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:59+0000\n"
+"POT-Creation-Date: 2026-11-24 05:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4413,6 +4413,7 @@ msgid "pin"
 msgstr ""
 
 #: bridge/src/clipboard/listPanel.ts:135 bridge/src/emoji/panel.ts:296
+#: bridge/src/search/panel.ts:230
 msgid "Nothing found for “{query}”"
 msgstr ""
 
@@ -4452,7 +4453,7 @@ msgstr ""
 msgid "{text}, pinned"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:59
+#: bridge/src/clipboard/winFlyout.ts:59 bridge/src/search/panel.ts:52
 msgid "Emoji"
 msgstr ""
 
@@ -4490,7 +4491,7 @@ msgstr ""
 msgid "Picked {value}"
 msgstr ""
 
-#: bridge/src/colorPicker/feature.ts:117
+#: bridge/src/colorPicker/feature.ts:117 bridge/src/search/feature.ts:158
 msgid "Copied {value}"
 msgstr ""
 
@@ -4762,6 +4763,7 @@ msgid "System Settings…"
 msgstr ""
 
 #: bridge/src/logoMenu/feature.ts:74 bridge/src/mixer/feature.ts:197
+#: bridge/src/search/panel.ts:44
 msgid "Applications"
 msgstr ""
 
@@ -4798,7 +4800,7 @@ msgid "Output"
 msgstr ""
 
 #: bridge/src/mixer/feature.ts:214 bridge/src/mixer/feature.ts:217
-#: bridge/src/shortcutGuide/reader.ts:203
+#: bridge/src/shortcutGuide/reader.ts:209
 msgid "Input"
 msgstr ""
 
@@ -4980,6 +4982,50 @@ msgstr ""
 msgid "The history is empty"
 msgstr ""
 
+#: bridge/src/search/feature.ts:227
+msgid "Dark style is off"
+msgstr ""
+
+#: bridge/src/search/feature.ts:227
+msgid "Dark style is on"
+msgstr ""
+
+#: bridge/src/search/feature.ts:236
+msgid "Clipboard private mode is off"
+msgstr ""
+
+#: bridge/src/search/feature.ts:236
+msgid "Clipboard private mode is on"
+msgstr ""
+
+#: bridge/src/search/panel.ts:42
+msgid "Calculator"
+msgstr ""
+
+#: bridge/src/search/panel.ts:46
+msgid "System actions"
+msgstr ""
+
+#: bridge/src/search/panel.ts:48
+msgid "Files"
+msgstr ""
+
+#: bridge/src/search/panel.ts:54
+msgid "Web"
+msgstr ""
+
+#: bridge/src/search/panel.ts:79
+msgid "Top hit"
+msgstr ""
+
+#: bridge/src/search/panel.ts:138
+msgid "Type to search"
+msgstr ""
+
+#: bridge/src/search/panel.ts:154
+msgid "Search results"
+msgstr ""
+
 #: bridge/src/shortcutGuide/overlay.ts:36
 msgid "theme"
 msgstr ""
@@ -5152,15 +5198,15 @@ msgstr ""
 msgid "Record screen"
 msgstr ""
 
-#: bridge/src/shortcutGuide/reader.ts:197
+#: bridge/src/shortcutGuide/reader.ts:203
 msgid "Windows and apps"
 msgstr ""
 
-#: bridge/src/shortcutGuide/reader.ts:205
+#: bridge/src/shortcutGuide/reader.ts:211
 msgid "Custom"
 msgstr ""
 
-#: bridge/src/shortcutGuide/reader.ts:338
+#: bridge/src/shortcutGuide/reader.ts:344
 msgid "Custom shortcut"
 msgstr ""
 
