@@ -13,6 +13,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {CaptureFeature} from './capture/feature.js';
 import {ClipboardFeature} from './clipboard/feature.js';
 import {ColorPickerFeature} from './colorPicker/feature.js';
+import {DockMagnifyFeature} from './dockMagnify/feature.js';
 import {FocusFeature} from './focus/feature.js';
 import {EmojiFeature} from './emoji/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
@@ -60,6 +61,7 @@ export default class DeskBridge extends Extension {
     private _layoutsSettings: Gio.Settings | null = null;
     private _logoMenu: LogoMenuFeature | null = null;
     private _logoMenuSettings: Gio.Settings | null = null;
+    private _dockMagnify: DockMagnifyFeature | null = null;
     private _focus: FocusFeature | null = null;
     private _focusSettings: Gio.Settings | null = null;
     private _osd: OsdFeature | null = null;
@@ -208,6 +210,11 @@ export default class DeskBridge extends Extension {
             }
         }
         try {
+            this._dockMagnify = new DockMagnifyFeature(this._skin());
+        } catch (e) {
+            console.warn(`desk-bridge: dock magnification is unavailable: ${String(e)}`);
+        }
+        try {
             this._focus = new FocusFeature(this.path, this._focusSettings, this._skin(),
                 () => { launchGui('focus'); });
         } catch (e) {
@@ -277,6 +284,8 @@ export default class DeskBridge extends Extension {
         this._mixer = null;
         this._logoMenu?.destroy();
         this._logoMenu = null;
+        this._dockMagnify?.destroy();
+        this._dockMagnify = null;
         this._indicator?.destroy();
         this._indicator = null;
     }
@@ -296,6 +305,7 @@ export default class DeskBridge extends Extension {
         this._layouts?.setSkin(skin);
         this._mixer?.setSkin(skin);
         this._logoMenu?.setSkin(skin);
+        this._dockMagnify?.setSkin(skin);
         this._indicator?.setSkin(skin);
         this._focus?.setSkin(skin);
         this._osd?.setSkin(skin);
