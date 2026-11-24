@@ -32,6 +32,7 @@
     <child name="capture" schema="io.github.OlehDzhumyk.Desk.Capture"/>
     <child name="layouts" schema="io.github.OlehDzhumyk.Desk.Layouts"/>
     <child name="quick-look" schema="io.github.OlehDzhumyk.Desk.QuickLook"/>
+    <child name="search" schema="io.github.OlehDzhumyk.Desk.Search"/>
     <child name="shortcuts" schema="io.github.OlehDzhumyk.Desk.Shortcuts"/>
     <child name="mixer" schema="io.github.OlehDzhumyk.Desk.Mixer"/>
     <child name="osd" schema="io.github.OlehDzhumyk.Desk.Osd"/>
@@ -372,6 +373,35 @@
     </key>
   </schema>
 
+  <schema id="io.github.OlehDzhumyk.Desk.Search" path="/io/github/OlehDzhumyk/Desk/search/">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enable the own search engine</summary>
+      <description>Off: deskd refuses search calls and the bridge binds no search shortcut.</description>
+    </key>
+    <key name="search-shortcut" type="as">
+      <default>[]</default>
+      <summary>Shortcut that opens the search box (in force)</summary>
+      <description>The accelerators the bridge binds. Empty by default, so it does not clash with the launcher of the macOS look (spotlight@nin) or the overview until the own launcher ships. An override in io.github.OlehDzhumyk.Desk.Shortcuts search-toggle replaces it. The name ends in -shortcut because shell keybinding names are global.</description>
+    </key>
+    <key name="web-search" type="b">
+      <default>false</default>
+      <summary>Offer a result that opens the query in the web browser</summary>
+      <description>Off by default (AC-SRCH-06). Even when on, deskd makes no network request: activating the result only opens the default browser with the query.</description>
+    </key>
+    <key name="max-results" type="u">
+      <range min="5" max="50"/>
+      <default>12</default>
+      <summary>The largest number of results of one query</summary>
+      <description>From 5 to 50. A caller may ask for fewer in its Query call.</description>
+    </key>
+    <key name="remember-usage" type="b">
+      <default>true</default>
+      <summary>Remember launched results to rank them higher</summary>
+      <description>Kept in ~/.local/share/deskd/search-usage.json (mode 0600). Off: nothing is recorded and the file is deleted (AC-SRCH-07).</description>
+    </key>
+  </schema>
+
   <schema id="io.github.OlehDzhumyk.Desk.Shortcuts" path="/io/github/OlehDzhumyk/Desk/shortcuts/">
     <key name="clipboard-toggle" type="as">
       <default>[]</default>
@@ -426,6 +456,11 @@
     <key name="always-on-top" type="as">
       <default>[]</default>
       <summary>Your shortcut for always-on-top (override)</summary>
+      <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
+    </key>
+    <key name="search-toggle" type="as">
+      <default>[]</default>
+      <summary>Your shortcut for the search box (override)</summary>
       <description>Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes.</description>
     </key>
     <key name="shortcut-guide-toggle" type="as">

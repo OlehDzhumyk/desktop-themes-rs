@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 04:39+0000\n"
+"POT-Creation-Date: 2026-11-24 04:58+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -128,10 +128,6 @@ msgstr "Записати екран"
 #: bridge/src/capture/toolbar.ts:84
 msgid "Stop the recording"
 msgstr "Зупинити запис"
-
-#: bridge/src/clipboard/listPanel.ts:33
-msgid "Search"
-msgstr "Пошук"
 
 #: bridge/src/clipboard/listPanel.ts:33 bridge/src/clipboard/listPanel.ts:37
 msgid "Search the clipboard"
@@ -920,6 +916,36 @@ msgstr "Власні"
 msgid "Custom shortcut"
 msgstr "Власне скорочення"
 
+#: crates/desk-search/src/actions.rs:25
+#: crates/desk-settings/src/lockscreen.rs:19
+#: crates/desk-settings/src/lockscreen.rs:368
+msgid "Lock screen"
+msgstr "Екран блокування"
+
+#: crates/desk-search/src/actions.rs:32
+msgid "Suspend"
+msgstr "Призупинити"
+
+#: crates/desk-search/src/actions.rs:39 crates/themes/src/gui/window.rs:1174
+msgid "Log out"
+msgstr "Вийти з сесії"
+
+#: crates/desk-search/src/actions.rs:46 crates/themes/src/gui/features.rs:845
+msgid "Restart"
+msgstr "Перезапустити"
+
+#: crates/desk-search/src/actions.rs:53
+msgid "Power off"
+msgstr "Вимкнути"
+
+#: crates/desk-search/src/actions.rs:60
+msgid "Toggle dark mode"
+msgstr "Перемкнути темний режим"
+
+#: crates/desk-search/src/actions.rs:67
+msgid "Toggle clipboard private mode"
+msgstr "Перемкнути приватний режим буфера обміну"
+
 #: crates/desk-settings/src/appearance.rs:11
 #: crates/desk-settings/src/appearance.rs:194
 #: crates/themes/src/gui/window.rs:398
@@ -1083,6 +1109,7 @@ msgstr "Знімки екрана"
 
 #: crates/desk-settings/src/capture.rs:14 crates/desk-settings/src/emoji.rs:14
 #: crates/desk-settings/src/layouts.rs:14 crates/desk-settings/src/osd.rs:13
+#: crates/desk-settings/src/search.rs:13
 msgid "In Windows 11 and macOS"
 msgstr "Є в Windows 11 і macOS"
 
@@ -1205,7 +1232,8 @@ msgstr ""
 #: crates/desk-settings/src/layouts.rs:116
 #: crates/desk-settings/src/mixer.rs:139 crates/desk-settings/src/ocr.rs:101
 #: crates/desk-settings/src/quick_look.rs:36
-#: crates/desk-settings/src/registry.rs:283
+#: crates/desk-settings/src/registry.rs:285
+#: crates/desk-settings/src/search.rs:79
 #: crates/desk-settings/src/shortcut_guide.rs:83
 msgid "Keyboard shortcut"
 msgstr "Клавіатурне скорочення"
@@ -1260,7 +1288,8 @@ msgstr "Запис екрана"
 #: crates/desk-settings/src/layouts.rs:218
 #: crates/desk-settings/src/mixer.rs:215 crates/desk-settings/src/ocr.rs:181
 #: crates/desk-settings/src/quick_look.rs:155
-#: crates/desk-settings/src/registry.rs:485
+#: crates/desk-settings/src/registry.rs:490
+#: crates/desk-settings/src/search.rs:152
 #: crates/desk-settings/src/shortcut_guide.rs:155
 msgid "How to open"
 msgstr "Як відкрити"
@@ -1331,7 +1360,7 @@ msgid "The scroll wheel and the + and - keys change it while picking"
 msgstr "Під час вибору його змінюють коліщатко миші та клавіші + і -"
 
 #: crates/desk-settings/src/color_picker.rs:104
-#: crates/desk-settings/src/registry.rs:185
+#: crates/desk-settings/src/registry.rs:187
 msgid "History size"
 msgstr "Розмір історії"
 
@@ -1373,7 +1402,7 @@ msgid "Picker"
 msgstr "Панель вибору"
 
 #: crates/desk-settings/src/color_picker.rs:207
-#: crates/desk-settings/src/registry.rs:461
+#: crates/desk-settings/src/registry.rs:466
 msgid "History"
 msgstr "Історія"
 
@@ -1385,7 +1414,8 @@ msgstr "Вибрані кольори зберігаються лише на ц�
 #: crates/desk-settings/src/emoji.rs:212 crates/desk-settings/src/mixer.rs:216
 #: crates/desk-settings/src/ocr.rs:182
 #: crates/desk-settings/src/quick_look.rs:156
-#: crates/desk-settings/src/registry.rs:486
+#: crates/desk-settings/src/registry.rs:491
+#: crates/desk-settings/src/search.rs:153
 msgid "The shortcut is set on the «Keyboard shortcuts» page."
 msgstr "Скорочення змінюється на сторінці «Клавіатурні скорочення»."
 
@@ -1654,11 +1684,6 @@ msgstr "Розкладки та відступи"
 #: crates/desk-settings/src/layouts.rs:210 crates/themes-core/src/modules.rs:35
 msgid "Behaviour"
 msgstr "Поведінка"
-
-#: crates/desk-settings/src/lockscreen.rs:19
-#: crates/desk-settings/src/lockscreen.rs:368
-msgid "Lock screen"
-msgstr "Екран блокування"
 
 #: crates/desk-settings/src/lockscreen.rs:99
 msgid "Standard (centred)"
@@ -2087,7 +2112,7 @@ msgid "Needs the tesseract package and its language data."
 msgstr "Потрібен пакунок tesseract і дані мов."
 
 #: crates/desk-settings/src/ocr.rs:176 crates/desk-settings/src/registry.rs:22
-#: crates/desk-settings/src/registry.rs:449
+#: crates/desk-settings/src/registry.rs:454
 msgid "Clipboard"
 msgstr "Буфер обміну"
 
@@ -2238,120 +2263,120 @@ msgid "Preview"
 msgstr "Перегляд"
 
 #: crates/desk-settings/src/registry.rs:34
-#: crates/desk-settings/src/registry.rs:441
+#: crates/desk-settings/src/registry.rs:446
 msgid "Application"
 msgstr "Програма"
 
-#: crates/desk-settings/src/registry.rs:66
+#: crates/desk-settings/src/registry.rs:67
 msgid "simple menu (and a toggle in quick settings)"
 msgstr "просте меню (і перемикач у швидких налаштуваннях)"
 
-#: crates/desk-settings/src/registry.rs:70
+#: crates/desk-settings/src/registry.rs:71
 msgid "macOS-style panel (centred, with search)"
 msgstr "панель у стилі macOS (по центру, з пошуком)"
 
-#: crates/desk-settings/src/registry.rs:74
+#: crates/desk-settings/src/registry.rs:75
 msgid "Windows 11-style Win+V panel (next to the cursor)"
 msgstr "панель Win+V у стилі Windows 11 (біля курсора)"
 
-#: crates/desk-settings/src/registry.rs:78
+#: crates/desk-settings/src/registry.rs:79
 msgid "Panel style"
 msgstr "Вигляд панелі"
 
-#: crates/desk-settings/src/registry.rs:96
+#: crates/desk-settings/src/registry.rs:97
 msgid "System default"
 msgstr "Як у системі"
 
-#: crates/desk-settings/src/registry.rs:109
-#: crates/desk-settings/src/registry.rs:517
+#: crates/desk-settings/src/registry.rs:110
+#: crates/desk-settings/src/registry.rs:522
 msgid "Language"
 msgstr "Мова"
 
-#: crates/desk-settings/src/registry.rs:110
+#: crates/desk-settings/src/registry.rs:111
 msgid "Language of the window, the command line and the shell panels"
 msgstr "Мова вікна, командного рядка й панелей оболонки"
 
-#: crates/desk-settings/src/registry.rs:171
+#: crates/desk-settings/src/registry.rs:173
 msgid "Record history"
 msgstr "Записувати історію"
 
-#: crates/desk-settings/src/registry.rs:172
+#: crates/desk-settings/src/registry.rs:174
 msgid "Turn off to disable the feature completely"
 msgstr "Вимкніть, щоб функція не працювала зовсім"
 
-#: crates/desk-settings/src/registry.rs:186
+#: crates/desk-settings/src/registry.rs:188
 msgid "How many unpinned items to keep"
 msgstr "Скільки незакріплених записів зберігати"
 
-#: crates/desk-settings/src/registry.rs:197
+#: crates/desk-settings/src/registry.rs:199
 #: crates/themes/src/gui/wallpaper.rs:138
 msgid "Images"
 msgstr "Зображення"
 
-#: crates/desk-settings/src/registry.rs:198
+#: crates/desk-settings/src/registry.rs:200
 msgid "Also record copied images"
 msgstr "Записувати також скопійовані зображення"
 
-#: crates/desk-settings/src/registry.rs:211
+#: crates/desk-settings/src/registry.rs:213
 msgid "Largest image, KiB"
 msgstr "Найбільше зображення, КіБ"
 
-#: crates/desk-settings/src/registry.rs:212
+#: crates/desk-settings/src/registry.rs:214
 msgid "Bigger images are not recorded"
 msgstr "Більші зображення не записуються"
 
-#: crates/desk-settings/src/registry.rs:229
+#: crates/desk-settings/src/registry.rs:231
 msgid "Image budget, MiB"
 msgstr "Бюджет зображень, МіБ"
 
-#: crates/desk-settings/src/registry.rs:230
+#: crates/desk-settings/src/registry.rs:232
 msgid "When images take more space, the oldest are dropped"
 msgstr "Коли зображень більше, найстаріші видаляються"
 
-#: crates/desk-settings/src/registry.rs:243
+#: crates/desk-settings/src/registry.rs:245
 msgid "Keep between sessions"
 msgstr "Зберігати між сеансами"
 
-#: crates/desk-settings/src/registry.rs:244
+#: crates/desk-settings/src/registry.rs:246
 msgid "Text is stored in ~/.local/share/deskd/clipboard (only you can read it)"
 msgstr ""
 "Текст зберігається у ~/.local/share/deskd/clipboard (доступ лише для вас)"
 
-#: crates/desk-settings/src/registry.rs:255
+#: crates/desk-settings/src/registry.rs:257
 msgid "Keep images between sessions"
 msgstr "Зберігати зображення між сеансами"
 
-#: crates/desk-settings/src/registry.rs:256
+#: crates/desk-settings/src/registry.rs:258
 msgid "Otherwise images live only until you log out"
 msgstr "Інакше зображення живуть лише до виходу з сеансу"
 
-#: crates/desk-settings/src/registry.rs:264
+#: crates/desk-settings/src/registry.rs:266
 msgid "Private mode"
 msgstr "Приватний режим"
 
-#: crates/desk-settings/src/registry.rs:265
+#: crates/desk-settings/src/registry.rs:267
 msgid "Temporarily record nothing"
 msgstr "Тимчасово нічого не записувати"
 
-#: crates/desk-settings/src/registry.rs:272
+#: crates/desk-settings/src/registry.rs:274
 msgid "Paste the chosen item"
 msgstr "Вставляти вибране"
 
-#: crates/desk-settings/src/registry.rs:273
+#: crates/desk-settings/src/registry.rs:275
 msgid ""
 "After you choose an item it is pasted into the window you were working in"
 msgstr "Після вибору запис одразу вставляється у вікно, де ви працювали"
 
-#: crates/desk-settings/src/registry.rs:318
+#: crates/desk-settings/src/registry.rs:320
 msgid "Excluded applications"
 msgstr "Виключені програми"
 
-#: crates/desk-settings/src/registry.rs:353
-#: crates/desk-settings/src/registry.rs:365
+#: crates/desk-settings/src/registry.rs:355
+#: crates/desk-settings/src/registry.rs:367
 msgid "Open the clipboard panel"
 msgstr "Відкрити буфер обміну"
 
-#: crates/desk-settings/src/registry.rs:433
+#: crates/desk-settings/src/registry.rs:438
 msgid ""
 "Features that Windows 11 and macOS have, for GNOME. The deskd service runs "
 "them, and their look follows the current theme."
@@ -2359,20 +2384,20 @@ msgstr ""
 "Функції, які є в Windows 11 і macOS, для GNOME. Їх виконує служба deskd, а "
 "вигляд підлаштовується під поточну тему."
 
-#: crates/desk-settings/src/registry.rs:440
-#: crates/desk-settings/src/registry.rs:536
+#: crates/desk-settings/src/registry.rs:445
+#: crates/desk-settings/src/registry.rs:541
 msgid "Features"
 msgstr "Функції"
 
-#: crates/desk-settings/src/registry.rs:442
+#: crates/desk-settings/src/registry.rs:447
 msgid "About the project"
 msgstr "Про проєкт"
 
-#: crates/desk-settings/src/registry.rs:450
+#: crates/desk-settings/src/registry.rs:455
 msgid "History of copied items: Win+V in Windows 11, Shift+Super+V in macOS"
 msgstr "Історія скопійованого: Win+V у Windows 11, Shift+Super+V у macOS"
 
-#: crates/desk-settings/src/registry.rs:452
+#: crates/desk-settings/src/registry.rs:457
 msgid ""
 "History of copied items: texts and images, pinning, search. Kept by the "
 "deskd service; the shell bridge draws the panel in the style of the current "
@@ -2381,11 +2406,12 @@ msgstr ""
 "Історія скопійованого: тексти й зображення, закріплення, пошук. Зберігається "
 "у службі deskd; панель малює міст оболонки у стилі поточної теми."
 
-#: crates/desk-settings/src/registry.rs:473
+#: crates/desk-settings/src/registry.rs:478
+#: crates/desk-settings/src/search.rs:147
 msgid "Privacy"
 msgstr "Приватність"
 
-#: crates/desk-settings/src/registry.rs:475
+#: crates/desk-settings/src/registry.rs:480
 msgid ""
 "Passwords from password managers (the x-kde-passwordManagerHint mark, "
 "KeePassXC, Bitwarden, 1Password, Secrets and others) are never recorded."
@@ -2393,39 +2419,39 @@ msgstr ""
 "Паролі з менеджерів паролів (позначка x-kde-passwordManagerHint, KeePassXC, "
 "Bitwarden, 1Password, «Секрети» тощо) ніколи не записуються."
 
-#: crates/desk-settings/src/registry.rs:491
+#: crates/desk-settings/src/registry.rs:496
 msgid "deskd service"
 msgstr "Служба deskd"
 
-#: crates/desk-settings/src/registry.rs:500
+#: crates/desk-settings/src/registry.rs:505
 msgid "Clear history"
 msgstr "Очистити історію"
 
-#: crates/desk-settings/src/registry.rs:509
+#: crates/desk-settings/src/registry.rs:514
 msgid "General"
 msgstr "Загальні"
 
-#: crates/desk-settings/src/registry.rs:510
+#: crates/desk-settings/src/registry.rs:515
 msgid "Language of the application"
 msgstr "Мова програми"
 
-#: crates/desk-settings/src/registry.rs:511
+#: crates/desk-settings/src/registry.rs:516
 msgid "Settings of the Themes application itself."
 msgstr "Налаштування самої програми «Теми»."
 
-#: crates/desk-settings/src/registry.rs:518
+#: crates/desk-settings/src/registry.rs:523
 msgid "The change takes effect after the window is restarted."
 msgstr "Зміна набуває чинності після перезапуску вікна."
 
-#: crates/desk-settings/src/registry.rs:525
+#: crates/desk-settings/src/registry.rs:530
 msgid "Keyboard shortcuts"
 msgstr "Клавіатурні скорочення"
 
-#: crates/desk-settings/src/registry.rs:526
+#: crates/desk-settings/src/registry.rs:531
 msgid "All shortcuts of the features in one place"
 msgstr "Усі скорочення функцій в одному місці"
 
-#: crates/desk-settings/src/registry.rs:528
+#: crates/desk-settings/src/registry.rs:533
 msgid ""
 "The theme provides the default shortcut; your own choice wins over it and "
 "stays when you switch themes. A shortcut that another action already uses is "
@@ -2434,15 +2460,15 @@ msgstr ""
 "Тема задає типове скорочення; ваш вибір має перевагу над ним і лишається "
 "після зміни теми. Скорочення, яке вже використовує інша дія, не приймається."
 
-#: crates/desk-settings/src/registry.rs:558
+#: crates/desk-settings/src/registry.rs:564
 msgid "Credits"
 msgstr "Подяки"
 
-#: crates/desk-settings/src/registry.rs:559
+#: crates/desk-settings/src/registry.rs:565
 msgid "Projects the themes and features are based on, and their licences"
 msgstr "Проєкти, на яких засновано теми й функції, та їхні ліцензії"
 
-#: crates/desk-settings/src/registry.rs:561
+#: crates/desk-settings/src/registry.rs:567
 msgid ""
 "desktop-themes-rs stands on the shoulders of other projects. The list comes "
 "from CREDITS.md; the licences are those the authors stated (check the "
@@ -2451,6 +2477,63 @@ msgstr ""
 "desktop-themes-rs стоїть на плечах інших проєктів. Список узято з "
 "CREDITS.md; ліцензії — ті, що вказали автори (перевіряйте файл LICENSE у "
 "їхніх сховищах)."
+
+#: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
+#: crates/desk-settings/src/search.rs:129
+msgid "Search"
+msgstr "Пошук"
+
+#: crates/desk-settings/src/search.rs:21
+msgid "Find applications, system actions and calculations from one search box"
+msgstr "Знаходити застосунки, системні дії та обчислення в одному полі пошуку"
+
+#: crates/desk-settings/src/search.rs:33
+msgid "Offer web search"
+msgstr "Пропонувати пошук в інтернеті"
+
+#: crates/desk-settings/src/search.rs:34
+msgid "Add a result that opens the query in your browser"
+msgstr "Додавати результат, що відкриває запит у браузері"
+
+#: crates/desk-settings/src/search.rs:52
+msgid "Maximum results"
+msgstr "Найбільше результатів"
+
+#: crates/desk-settings/src/search.rs:53
+msgid "How many results the search box lists at most"
+msgstr "Скільки результатів найбільше показує поле пошуку"
+
+#: crates/desk-settings/src/search.rs:65
+msgid "Rank by usage"
+msgstr "Упорядковувати за використанням"
+
+#: crates/desk-settings/src/search.rs:66
+msgid "Remember what you open so that it ranks higher; stays on this computer"
+msgstr ""
+"Запам'ятовувати, що ви відкриваєте, щоб воно було вище; дані лишаються на "
+"цьому комп'ютері"
+
+#: crates/desk-settings/src/search.rs:95 crates/desk-settings/src/search.rs:107
+msgid "Open the search box"
+msgstr "Відкрити поле пошуку"
+
+#: crates/desk-settings/src/search.rs:130
+msgid "Find applications, actions and calculations"
+msgstr "Пошук застосунків, дій та обчислень"
+
+#: crates/desk-settings/src/search.rs:132
+msgid ""
+"One search box finds applications, system actions and calculations, "
+"tolerates typos and a wrong keyboard layout, and ranks what you use more "
+"often higher. Queries never leave this computer."
+msgstr ""
+"Одне поле пошуку знаходить застосунки, системні дії та обчислення, пробачає "
+"помилки й неправильну розкладку клавіатури і ставить вище те, чим ви "
+"користуєтеся частіше. Запити ніколи не залишають цей комп'ютер."
+
+#: crates/desk-settings/src/search.rs:142
+msgid "Search box"
+msgstr "Поле пошуку"
 
 #: crates/desk-settings/src/shortcut_guide.rs:12
 #: crates/desk-settings/src/shortcut_guide.rs:22
@@ -4389,10 +4472,6 @@ msgstr "Схему GSettings {schema} не встановлено. Запуст�
 msgid "The language changes after a restart"
 msgstr "Мову буде змінено після перезапуску"
 
-#: crates/themes/src/gui/features.rs:845
-msgid "Restart"
-msgstr "Перезапустити"
-
 #: crates/themes/src/gui/focus.rs:105
 #, rust-format
 msgid "allowed apps: {count}"
@@ -5013,10 +5092,6 @@ msgstr " (попереджень: {count})"
 #, rust-format
 msgid "{what}. Some shell changes start working after you log in again"
 msgstr "{what}. Частина змін оболонки запрацює після перевходу"
-
-#: crates/themes/src/gui/window.rs:1174
-msgid "Log out"
-msgstr "Вийти з сесії"
 
 #: crates/themes/src/gui/window.rs:1177
 #, rust-format
