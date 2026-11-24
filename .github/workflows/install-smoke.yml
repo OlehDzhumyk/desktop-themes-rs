@@ -29,6 +29,7 @@ jobs:
   install-sh:
     name: data/install.sh (dry run + real install)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
@@ -39,6 +40,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-fedora45-${{ hashFiles('bridge/package-lock.json') }}
+          restore-keys: npm-fedora45-
       - name: Build the bridge (install.sh installs bridge/build)
         working-directory: bridge
         run: |

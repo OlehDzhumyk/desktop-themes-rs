@@ -26,6 +26,7 @@ jobs:
   rust-fmt-clippy:
     name: rustfmt + clippy
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
@@ -76,6 +77,7 @@ jobs:
   rust-test:
     name: cargo test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
@@ -104,10 +106,13 @@ jobs:
         run: cargo nextest run --workspace --locked --profile ci
       - name: Doctests (nextest does not run them)
         run: cargo test --workspace --locked --doc
+      - name: Generated settings files are fresh (schema, accessors, docs/settings.md)
+        run: cargo xtask check
 
   rust-deny:
     name: cargo deny (licences, advisories)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
@@ -122,6 +127,7 @@ jobs:
   bridge:
     name: desk-bridge (tsc, eslint, knip, build)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     defaults:
@@ -135,6 +141,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-fedora45-${{ hashFiles('bridge/package-lock.json') }}
+          restore-keys: npm-fedora45-
       - name: npm ci
         run: npm ci --no-audit --no-fund
       - name: tsc --noEmit
@@ -149,6 +160,7 @@ jobs:
   static-checks:
     name: shellcheck, schemas, desktop file, D-Bus XML
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     container:
       image: registry.fedoraproject.org/fedora:45@sha256:62d5eaec1e8a34f6cb94934f806420754611834c7eef8a4f50b9cdbcd1c90c10
     steps:
@@ -187,9 +199,9 @@ jobs:
             msgfmt --xml -d po --template "$t" -o "$out"
             appstreamcli validate --no-net --explain "$out" || echo "::warning::appstream findings in $t (report only)"
           done
-      - name: D-Bus interface XML and extension metadata
+      - name: D-Bus interface XML, labwc rc.xml and extension metadata
         run: |
-          xmllint --noout data/dbus/*.xml data/*.gschema.xml
+          xmllint --noout data/dbus/*.xml data/*.gschema.xml data/labwc/windows11/rc.xml
           python3 -m json.tool bridge/static/metadata.json > /dev/null
 
   privacy:
@@ -197,6 +209,7 @@ jobs:
     # in untracked files on developers' machines, see tools/privacy-check.sh.
     name: privacy check (generic patterns)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -207,6 +220,7 @@ jobs:
   ast-grep:
     name: ast-grep rules (tools/ast-grep)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -225,6 +239,7 @@ jobs:
   workflows:
     name: actionlint
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -235,6 +250,7 @@ jobs:
   docs:
     name: docs links (offline)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
