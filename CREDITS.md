@@ -68,7 +68,9 @@ upstream repository is authoritative.
 (MIT OR Apache-2.0), [zbus](https://crates.io/crates/zbus) (MIT), [gio](https://crates.io/crates/gio)
 (gtk-rs, MIT), [futures-util](https://crates.io/crates/futures-util) (MIT OR Apache-2.0),
 [toml](https://crates.io/crates/toml) (MIT OR Apache-2.0, design tokens), [pipewire](https://crates.io/crates/pipewire) and
-[libspa](https://crates.io/crates/libspa) (pipewire-rs, MIT, the mixer engine) and their
+[libspa](https://crates.io/crates/libspa) (pipewire-rs, MIT, the mixer engine),
+[png](https://crates.io/crates/png) and [crc32fast](https://crates.io/crates/crc32fast) (MIT OR
+Apache-2.0, the screenshot core `desk-capture`) and their
 transitive dependencies, see `Cargo.lock` and `cargo tree`. GTK 4 and libadwaita themselves are
 LGPL-2.1-or-later.
 

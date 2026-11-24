@@ -1,0 +1,20 @@
+[package]
+name = "desk-capture"
+description = "Screenshot core of desktop-themes-rs: PNG checks, metadata scrubbing, atomic saving, destructive redaction and annotations (pure Rust, no desktop dependency)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# decode and encode RGBA for redaction and annotations (pure Rust; no PNG crate was in the tree)
+png = "0.18"
+# chunk CRCs when the PNG is checked without a decode (already a dependency of png)
+crc32fast = "1"
+serde.workspace = true
+# the JSON form of the annotations that deskd receives over D-Bus
+serde_json.workspace = true

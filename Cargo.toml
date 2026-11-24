@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "xtask"]
-default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings"]
+members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "crates/desk-capture", "xtask"]
+default-members = ["crates/themes-core", "crates/themes", "crates/desk-proto", "crates/deskd", "crates/theme-tokens", "crates/desk-settings", "crates/desk-capture"]
 
 [workspace.package]
 version = "0.3.0"
@@ -25,6 +25,7 @@ themes-core = { path = "crates/themes-core" }
 desk-proto = { path = "crates/desk-proto" }
 theme-tokens = { path = "crates/theme-tokens" }
 desk-settings = { path = "crates/desk-settings" }
+desk-capture = { path = "crates/desk-capture" }
 
 # Selected clippy::pedantic lints (audit Q-7); the rest of pedantic stays off on purpose. Threshold of
 # too_many_lines: clippy.toml. Fix the finding, or `#[allow(..., reason = "...")]` on the item.

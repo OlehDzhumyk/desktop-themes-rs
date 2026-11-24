@@ -17,3 +17,11 @@ color-picker-shortcut=['<Shift><Super>c']
 # Text extractor (OCR): Shift+Super+T, as PowerToys Text Extractor.
 [io/github/OlehDzhumyk/Desk/ocr]
 ocr-shortcut=['<Shift><Super>t']
+
+# Screenshots: none of our own; GNOME's Print (toolbar), Shift+Print (screen) and
+# Ctrl+Shift+Alt+R (recording) stay in force.
+[io/github/OlehDzhumyk/Desk/capture]
+capture-region-shortcut=@as []
+capture-screen-shortcut=@as []
+capture-toolbar-shortcut=@as []
+capture-record-shortcut=@as []

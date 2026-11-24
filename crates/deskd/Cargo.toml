@@ -26,6 +26,8 @@ desk-settings = { workspace = true, features = ["gio"] }
 theme-tokens.workspace = true
 # setrlimit, prctl and unshare for the OCR child process (already a workspace dependency)
 libc.workspace = true
+# screenshot core: PNG checks, metadata scrubbing, saving, redaction (workspace crate, pure Rust)
+desk-capture.workspace = true
 signal-hook = { version = "0.4.6", default-features = false, features = ["iterator"] }
 pipewire = { version = "0.10.1", optional = true }
 

@@ -572,6 +572,254 @@ impl OcrSettings {
     }
 }
 
+/// Values of `io.github.OlehDzhumyk.Desk.Capture` `delay`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Delay {
+    #[default]
+    V0,
+    V3,
+    V10,
+}
+
+impl Delay {
+    pub const ALL: [Delay; 3] = [
+        Delay::V0,
+        Delay::V3,
+        Delay::V10,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Delay::V0 => "0",
+            Delay::V3 => "3",
+            Delay::V10 => "10",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "0" => Delay::V0,
+            "3" => Delay::V3,
+            "10" => Delay::V10,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// Values of `io.github.OlehDzhumyk.Desk.Capture` `record-format`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum RecordFormat {
+    #[default]
+    Webm,
+    Mp4,
+}
+
+impl RecordFormat {
+    pub const ALL: [RecordFormat; 2] = [
+        RecordFormat::Webm,
+        RecordFormat::Mp4,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            RecordFormat::Webm => "webm",
+            RecordFormat::Mp4 => "mp4",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "webm" => RecordFormat::Webm,
+            "mp4" => RecordFormat::Mp4,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// Values of `io.github.OlehDzhumyk.Desk.Capture` `record-audio`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum RecordAudio {
+    #[default]
+    None,
+    System,
+    Mic,
+    Both,
+}
+
+impl RecordAudio {
+    pub const ALL: [RecordAudio; 4] = [
+        RecordAudio::None,
+        RecordAudio::System,
+        RecordAudio::Mic,
+        RecordAudio::Both,
+    ];
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            RecordAudio::None => "none",
+            RecordAudio::System => "system",
+            RecordAudio::Mic => "mic",
+            RecordAudio::Both => "both",
+        }
+    }
+
+    /// Unknown values (e.g. from a newer schema) fall back to the default.
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "none" => RecordAudio::None,
+            "system" => RecordAudio::System,
+            "mic" => RecordAudio::Mic,
+            "both" => RecordAudio::Both,
+            _ => Self::default(),
+        }
+    }
+}
+
+/// `io.github.OlehDzhumyk.Desk.Capture` at `/io/github/OlehDzhumyk/Desk/capture/`.
+#[derive(Clone, Debug)]
+pub struct CaptureSettings(pub gio::Settings);
+
+impl CaptureSettings {
+    pub const ID: &'static str = "io.github.OlehDzhumyk.Desk.Capture";
+    pub const ENABLED: &'static str = "enabled";
+    pub const SAVE_FOLDER: &'static str = "save-folder";
+    pub const COPY_TO_CLIPBOARD: &'static str = "copy-to-clipboard";
+    pub const SHOW_PREVIEW: &'static str = "show-preview";
+    pub const DELAY: &'static str = "delay";
+    pub const INCLUDE_POINTER: &'static str = "include-pointer";
+    pub const RECORD_FORMAT: &'static str = "record-format";
+    pub const RECORD_AUDIO: &'static str = "record-audio";
+    pub const ANNOTATE_AFTER_CAPTURE: &'static str = "annotate-after-capture";
+    pub const CAPTURE_REGION_SHORTCUT: &'static str = "capture-region-shortcut";
+    pub const CAPTURE_SCREEN_SHORTCUT: &'static str = "capture-screen-shortcut";
+    pub const CAPTURE_TOOLBAR_SHORTCUT: &'static str = "capture-toolbar-shortcut";
+    pub const CAPTURE_RECORD_SHORTCUT: &'static str = "capture-record-shortcut";
+
+    /// `None` when the schema is not installed (`gio::Settings::new` would abort).
+    pub fn new() -> Option<Self> {
+        crate::schema_installed(Self::ID).then(|| Self(gio::Settings::new(Self::ID)))
+    }
+
+    /// Enable screenshots and screen recording
+    pub fn enabled(&self) -> bool {
+        self.0.boolean(Self::ENABLED)
+    }
+
+    pub fn set_enabled(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ENABLED, v)
+    }
+
+    /// Folder for saved screenshots (empty = ~/Pictures/Screenshots)
+    pub fn save_folder(&self) -> String {
+        self.0.string(Self::SAVE_FOLDER).to_string()
+    }
+
+    pub fn set_save_folder(&self, v: String) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::SAVE_FOLDER, &v)
+    }
+
+    /// Copy each capture to the clipboard
+    pub fn copy_to_clipboard(&self) -> bool {
+        self.0.boolean(Self::COPY_TO_CLIPBOARD)
+    }
+
+    pub fn set_copy_to_clipboard(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::COPY_TO_CLIPBOARD, v)
+    }
+
+    /// Show the thumbnail or notification after a capture
+    pub fn show_preview(&self) -> bool {
+        self.0.boolean(Self::SHOW_PREVIEW)
+    }
+
+    pub fn set_show_preview(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::SHOW_PREVIEW, v)
+    }
+
+    /// Delay before a capture, in seconds
+    pub fn delay(&self) -> Delay {
+        Delay::parse(&self.0.string(Self::DELAY))
+    }
+
+    pub fn set_delay(&self, v: Delay) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::DELAY, v.as_str())
+    }
+
+    /// Include the mouse pointer
+    pub fn include_pointer(&self) -> bool {
+        self.0.boolean(Self::INCLUDE_POINTER)
+    }
+
+    pub fn set_include_pointer(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::INCLUDE_POINTER, v)
+    }
+
+    /// Container and codec of screen recordings
+    pub fn record_format(&self) -> RecordFormat {
+        RecordFormat::parse(&self.0.string(Self::RECORD_FORMAT))
+    }
+
+    pub fn set_record_format(&self, v: RecordFormat) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::RECORD_FORMAT, v.as_str())
+    }
+
+    /// Audio sources of screen recordings
+    pub fn record_audio(&self) -> RecordAudio {
+        RecordAudio::parse(&self.0.string(Self::RECORD_AUDIO))
+    }
+
+    pub fn set_record_audio(&self, v: RecordAudio) -> Result<(), gio::glib::BoolError> {
+        self.0.set_string(Self::RECORD_AUDIO, v.as_str())
+    }
+
+    /// Open the annotation editor after each capture
+    pub fn annotate_after_capture(&self) -> bool {
+        self.0.boolean(Self::ANNOTATE_AFTER_CAPTURE)
+    }
+
+    pub fn set_annotate_after_capture(&self, v: bool) -> Result<(), gio::glib::BoolError> {
+        self.0.set_boolean(Self::ANNOTATE_AFTER_CAPTURE, v)
+    }
+
+    /// Shortcut that captures a region (in force)
+    pub fn capture_region_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_REGION_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_region_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_REGION_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Shortcut that captures the whole screen (in force)
+    pub fn capture_screen_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_SCREEN_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_screen_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_SCREEN_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Shortcut that opens the capture toolbar (in force)
+    pub fn capture_toolbar_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_TOOLBAR_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_toolbar_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_TOOLBAR_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Shortcut that starts or stops a screen recording (in force)
+    pub fn capture_record_shortcut(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_RECORD_SHORTCUT).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_record_shortcut(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_RECORD_SHORTCUT, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+}
+
 /// `io.github.OlehDzhumyk.Desk.Shortcuts` at `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 #[derive(Clone, Debug)]
 pub struct ShortcutSettings(pub gio::Settings);
@@ -583,6 +831,10 @@ impl ShortcutSettings {
     pub const MIXER_OPEN: &'static str = "mixer-open";
     pub const COLOR_PICKER_TOGGLE: &'static str = "color-picker-toggle";
     pub const OCR_TOGGLE: &'static str = "ocr-toggle";
+    pub const CAPTURE_REGION: &'static str = "capture-region";
+    pub const CAPTURE_SCREEN: &'static str = "capture-screen";
+    pub const CAPTURE_TOOLBAR: &'static str = "capture-toolbar";
+    pub const CAPTURE_RECORD: &'static str = "capture-record";
 
     /// `None` when the schema is not installed (`gio::Settings::new` would abort).
     pub fn new() -> Option<Self> {
@@ -632,6 +884,42 @@ impl ShortcutSettings {
 
     pub fn set_ocr_toggle(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
         self.0.set_strv(Self::OCR_TOGGLE, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for a region capture (override)
+    pub fn capture_region(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_REGION).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_region(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_REGION, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for a full-screen capture (override)
+    pub fn capture_screen(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_SCREEN).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_screen(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_SCREEN, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for the capture toolbar (override)
+    pub fn capture_toolbar(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_TOOLBAR).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_toolbar(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_TOOLBAR, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
+    }
+
+    /// Your shortcut for screen recording (override)
+    pub fn capture_record(&self) -> Vec<String> {
+        self.0.strv(Self::CAPTURE_RECORD).iter().map(|s| s.to_string()).collect()
+    }
+
+    pub fn set_capture_record(&self, v: Vec<String>) -> Result<(), gio::glib::BoolError> {
+        self.0.set_strv(Self::CAPTURE_RECORD, v.iter().map(String::as_str).collect::<Vec<_>>().as_slice())
     }
 }
 

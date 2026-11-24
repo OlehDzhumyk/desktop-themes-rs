@@ -79,6 +79,19 @@ pub fn read_ocr(s: &desk_settings::accessors::OcrSettings) -> crate::ocr::servic
     }
 }
 
+/// GSettings `io.github.OlehDzhumyk.Desk.Capture` (None while the schema is not installed).
+pub fn capture_settings() -> Option<desk_settings::accessors::CaptureSettings> {
+    desk_settings::accessors::CaptureSettings::new()
+}
+
+/// The capture engine's part of its settings: on/off and the save folder.
+pub fn read_capture(s: &desk_settings::accessors::CaptureSettings) -> crate::capture::Config {
+    crate::capture::Config {
+        enabled: s.enabled(),
+        save_folder: s.save_folder(),
+    }
+}
+
 /// GSettings `io.github.OlehDzhumyk.Desk.Mixer` (None while the schema is not installed).
 pub fn mixer_settings() -> Option<desk_settings::accessors::MixerSettings> {
     desk_settings::accessors::MixerSettings::new()

@@ -23,6 +23,7 @@ Colour keys hold a CSS colour or are empty; the window, `themes apply` and the e
 | Emoji and symbols (`emoji`) | In Windows 11 and macOS |
 | Colour picker (`color-picker`) | In Windows 11 (PowerToys) and macOS (Digital Color Meter) |
 | Text extractor (`ocr`) | In Windows 11 (PowerToys Text Extractor) and macOS (Live Text) |
+| Screenshots (`capture`) | In Windows 11 and macOS |
 | Volume mixer (`mixer`) | From Windows, adapted for macOS; Based on wiremix (MIT OR Apache-2.0) |
 | On-screen displays (`osd`) | In Windows 11 and macOS |
 | Appearance (`appearance`) | From macOS, adapted for Windows 11 style |
@@ -96,6 +97,26 @@ Path `/io/github/OlehDzhumyk/Desk/ocr/`.
 | `max-megapixels` | unsigned | `20` | 1…50 (step 1) | Largest region, megapixels | deskd refuses an image with width × height above this value × 1 000 000. | ocr | spin button on `--page ocr` |
 | `ocr-shortcut` | shortcut list | `['<Shift><Super>t']` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default here from desk.dconf (Shift+Super+T for Windows 11 and Fedora, Ctrl+Shift+Super+T for macOS); an override in io.github.OlehDzhumyk.Desk.Shortcuts ocr-toggle replaces it. The key is not called toggle-shortcut because shell keybinding names are global. | ocr | shortcut row on `--page shortcuts` |
 
+## `io.github.OlehDzhumyk.Desk.Capture`
+
+Path `/io/github/OlehDzhumyk/Desk/capture/`.
+
+| Key | Type | Default | Range / choices | Label | Description | Feature | Window |
+|---|---|---|---|---|---|---|---|
+| `enabled` | boolean | `true` |  | Screenshots | Off: the bridge binds no capture shortcut and deskd refuses to save captures. | capture | switch on `--page capture` |
+| `save-folder` | string | `''` |  | Save folder | Empty: Screenshots in the XDG pictures folder (~/Pictures/Screenshots). A leading ~ is the home folder; another relative path is taken from the home folder. The folder is created when needed. | capture | entry on `--page capture` |
+| `copy-to-clipboard` | boolean | `true` |  | Copy to the clipboard | Put each screenshot on the clipboard as well as in the folder | capture | switch on `--page capture` |
+| `show-preview` | boolean | `true` |  | Show a preview | The macos skin shows a floating thumbnail for 6 s, the windows11 skin a notification with an Edit button; the default skin keeps GNOME's notification. | capture | switch on `--page capture` |
+| `delay` | choice | `'0'` | `0`, `3`, `10` | Delay | Wait with a visible countdown before the capture | capture | drop-down on `--page capture` |
+| `include-pointer` | boolean | `false` |  | Show the mouse pointer | Include the pointer in screenshots and recordings | capture | switch on `--page capture` |
+| `record-format` | choice | `'webm'` | `webm`, `mp4` | Video format | Encoded by GNOME's screencast service. MP4 needs an H.264 encoder, which Fedora does not ship by default; WebM always works. | capture | drop-down on `--page capture` |
+| `record-audio` | choice | `'none'` | `none`, `system`, `mic`, `both` | Sound in recordings | Off by default; the microphone is recorded only when you choose it here | capture | drop-down on `--page capture` |
+| `annotate-after-capture` | boolean | `false` |  | Open the editor after a capture | Mark up each screenshot (pen, arrows, redaction, crop) before you keep it | capture | switch on `--page capture` |
+| `capture-region-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | The accelerators the bridge binds. Themes write their default from desk.dconf (Windows 11: Shift+Super+S; macOS: Shift+Super+4; Fedora: none, GNOME's Print stays). An override in io.github.OlehDzhumyk.Desk.Shortcuts capture-region replaces it. The name ends in -shortcut because shell keybinding names are global. | capture | shortcut row on `--page shortcuts` |
+| `capture-screen-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | Windows 11: Super+Print; macOS: Shift+Super+3; Fedora: none, GNOME's Shift+Print stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-screen. | capture | shortcut row on `--page shortcuts` |
+| `capture-toolbar-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | Windows 11: Print; macOS: Shift+Super+5; Fedora: none, GNOME's screenshot UI stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-toolbar. | capture | shortcut row on `--page shortcuts` |
+| `capture-record-shortcut` | shortcut list | `[]` |  | Keyboard shortcut | Windows 11: Shift+Super+R; macOS: none (record from the Shift+Super+5 toolbar); Fedora: none, GNOME's Ctrl+Shift+Alt+R stays. Override: io.github.OlehDzhumyk.Desk.Shortcuts capture-record. | capture | shortcut row on `--page shortcuts` |
+
 ## `io.github.OlehDzhumyk.Desk.Shortcuts`
 
 Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
@@ -107,6 +128,10 @@ Path `/io/github/OlehDzhumyk/Desk/shortcuts/`.
 | `mixer-open` | shortcut list | `[]` |  | Open the volume mixer | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | mixer | shortcut row on `--page shortcuts` |
 | `color-picker-toggle` | shortcut list | `[]` |  | Pick a colour from the screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | color-picker | shortcut row on `--page shortcuts` |
 | `ocr-toggle` | shortcut list | `[]` |  | Copy text from the screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | ocr | shortcut row on `--page shortcuts` |
+| `capture-region` | shortcut list | `[]` |  | Capture a region of the screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
+| `capture-screen` | shortcut list | `[]` |  | Capture the whole screen | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
+| `capture-toolbar` | shortcut list | `[]` |  | Open the screenshot toolbar | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
+| `capture-record` | shortcut list | `[]` |  | Start or stop a screen recording | Empty: follow the active theme. ['disabled']: no shortcut. Anything else wins over the theme default and is kept when the theme changes. | capture | shortcut row on `--page shortcuts` |
 
 ## `io.github.OlehDzhumyk.Desk.Mixer`
 
@@ -206,6 +231,10 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `mixer-open` | Open the volume mixer | mixer | `/io/github/OlehDzhumyk/Desk/mixer/mixer-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/mixer-open` |
 | `color-picker-toggle` | Pick a colour from the screen | color-picker | `/io/github/OlehDzhumyk/Desk/color-picker/color-picker-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/color-picker-toggle` |
 | `ocr-toggle` | Copy text from the screen | ocr | `/io/github/OlehDzhumyk/Desk/ocr/ocr-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/ocr-toggle` |
+| `capture-region` | Capture a region of the screen | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-region-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-region` |
+| `capture-screen` | Capture the whole screen | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-screen-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-screen` |
+| `capture-toolbar` | Open the screenshot toolbar | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-toolbar-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-toolbar` |
+| `capture-record` | Start or stop a screen recording | capture | `/io/github/OlehDzhumyk/Desk/capture/capture-record-shortcut` | `/io/github/OlehDzhumyk/Desk/shortcuts/capture-record` |
 
 ## Pages of the window
 
@@ -215,6 +244,7 @@ The theme default is written into the key in force (what the bridge binds); the 
 | `emoji` | Emoji and symbols | Picker, How to open |
 | `color-picker` | Colour picker | Picker, History, How to open |
 | `ocr` | Text extractor | Recognition, Clipboard, How to open |
+| `capture` | Screenshots | Screenshots, Screen recording, How to open |
 | `mixer` | Volume mixer | Mixer, How to open |
 | `osd` | On-screen displays | Display, Style |
 | `appearance` | Appearance | Mode, Solar schedule, Fixed schedule, Wallpaper |

@@ -6,6 +6,7 @@
 //! служби вказує на юніт systemd --user `deskd.service`).
 
 mod appearance;
+mod capture;
 mod clipboard;
 mod color_picker;
 mod emoji;
@@ -29,6 +30,7 @@ use signal_hook::consts::{SIGHUP, SIGINT, SIGTERM};
 use signal_hook::iterator::Signals;
 
 use engine::appearance::AppearanceFeature;
+use engine::capture::CaptureFeature;
 use engine::clipboard::ClipboardFeature;
 use engine::color_picker::ColorPickerFeature;
 use engine::emoji::EmojiFeature;
@@ -57,6 +59,7 @@ fn features() -> Vec<String> {
         "emoji".to_string(),
         "color-picker".to_string(),
         "ocr".to_string(),
+        "capture".to_string(),
     ];
     f.push("focus".into());
     if cfg!(feature = "pipewire") {
@@ -73,6 +76,7 @@ fn engines(setup: &Setup) -> Engines {
         Box::new(EmojiFeature::new(setup)),
         Box::new(ColorPickerFeature::new(setup)),
         Box::new(OcrEngine::new(setup)),
+        Box::new(CaptureFeature::new(setup)),
         Box::new(ClipboardFeature::new(setup)),
         Box::new(FocusFeature::new(setup)),
         Box::new(AppearanceFeature::new(setup)),
