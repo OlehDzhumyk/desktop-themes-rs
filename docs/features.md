@@ -174,7 +174,8 @@ Skins:
 ## Screenshots (core)
 
 The deskd side of screenshots: the bridge takes the pixels and hands deskd a PNG; deskd checks, cleans and
-saves it, and draws the editor's annotations. The toolbar, preview and editor come in later changes.
+saves it, and draws the editor's annotations. The bridge draws the toolbar, the countdown, the preview and the
+recording indicator; the annotation editor (`themes capture-edit`) comes in a later change.
 
 | | |
 |---|---|
@@ -185,9 +186,23 @@ saves it, and draws the editor's annotations. The toolbar, preview and editor co
 | D-Bus | `io.github.OlehDzhumyk.Desk.Capture` at `/io/github/OlehDzhumyk/Desk/Capture`: `SaveScreenshot(ay) → s`, `ApplyAnnotations(s path, s json) → s` |
 | Settings | GSettings `io.github.OlehDzhumyk.Desk.Capture`: `enabled`, `save-folder`, `copy-to-clipboard`, `show-preview`, `delay`, `include-pointer`, `record-format`, `record-audio`, `annotate-after-capture`, `capture-region-shortcut`, `capture-screen-shortcut`, `capture-toolbar-shortcut`, `capture-record-shortcut` |
 | Core | crate `desk-capture`: pure Rust, no GTK, GLib or D-Bus, so other desktops and a CLI can reuse it (ADR 0011) |
+| Toolbar | Modes Region (`1`), Screen (`2`), Record (`3`), delay off / 3 s / 10 s, Close (`Esc`); `Tab`, `Shift+Tab` and the arrow keys move the focus, `Enter` or `Space` presses; a right click closes |
+| Region | the shared selector: drag, or arrow keys (`Shift`: resize, `Ctrl`: 1 px) and `Enter`; `Esc` cancels and nothing is saved |
+| Delay | a countdown toast; `Esc` (grabbed only while it runs) or the shortcut again cancels; no modal grab, so a menu can be opened and captured |
+| Result | PNG to deskd (`SaveScreenshot`); with `copy-to-clipboard` the same PNG goes to the clipboard as `image/png` first, so a failed save keeps the image there |
+| Editor | `annotate-after-capture`, or a click on the macOS thumbnail, starts `themes capture-edit <path>` (argument vector, no shell) |
+| Recording | GNOME's screencast service (`org.gnome.Shell.Screencast`): full screen, pointer as `include-pointer`; file in `~/Videos/Screencasts`, encoder and extension chosen by GNOME; a top-bar item shows the elapsed time, a click or `Enter` stops it |
+| Lock screen | the shortcuts are bound in normal mode only; locking closes an open toolbar, selector or countdown |
 
-Skins: none yet. The `windows11`, `macos` and `default` toolbar, preview and editor are drawn by the bridge in a
-later change.
+Skins:
+
+* **windows11**: a compact Fluent bar at the top of the monitor (icons only, accessible names), light-blue focus
+  ring; a toast «Screenshot saved» / «Screenshot copied and saved».
+* **macos**: a translucent capsule near the bottom (like Shift+Cmd+5); after a capture a floating thumbnail at the
+  bottom right for 6 s: it stays while the pointer is on it, a click opens the editor, a right click (or `Esc`
+  when it has the focus) dismisses it; it slides in only when animations are enabled.
+* **default**: a shell-styled bar near the bottom and the toast. High contrast gives every skin opaque surfaces,
+  an outline and a thick focus ring; `show-preview=false` shows nothing after a capture.
 
 ## Automatic light/dark
 

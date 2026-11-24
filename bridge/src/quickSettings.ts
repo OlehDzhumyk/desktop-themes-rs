@@ -38,13 +38,19 @@ export function launchGui(page?: string): void {
                 return;
             }
         }
-        const argv = [`${GLib.get_home_dir()}/.local/bin/themes`, 'gui'];
-        if (page)
-            argv.push('--page', page);
-        Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
+        runThemes(page ? ['gui', '--page', page] : ['gui']);
     } catch (e) {
         Main.notifyError(_('Desktop'), String(e));
     }
+}
+
+/**
+ * Start `themes <args>` (the installed binary in ~/.local/bin). The arguments go to the process as
+ * an argument vector, never through a shell, so a path with spaces or quotes stays one argument.
+ * Throws when the process cannot be started.
+ */
+export function runThemes(args: string[]): void {
+    Gio.Subprocess.new([`${GLib.get_home_dir()}/.local/bin/themes`, ...args], Gio.SubprocessFlags.NONE);
 }
 
 /**

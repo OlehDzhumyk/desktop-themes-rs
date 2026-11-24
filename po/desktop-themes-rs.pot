@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 23:57+0000\n"
+"POT-Creation-Date: 2026-11-24 00:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1349,7 +1349,7 @@ msgstr ""
 msgid "Sleep"
 msgstr ""
 
-#: crates/deskd/src/main.rs:45
+#: crates/deskd/src/main.rs:47
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -1360,7 +1360,7 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:101 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:105 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -3741,110 +3741,200 @@ msgstr ""
 msgid "Automatic"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:35
+#: bridge/src/capture/countdown.ts:48
+msgid "Screenshot in {seconds} s. Esc cancels."
+msgstr ""
+
+#: bridge/src/capture/feature.ts:76
+msgid "Recording saved: {name}"
+msgstr ""
+
+#: bridge/src/capture/feature.ts:79
+msgid "Could not record the screen: {error}"
+msgstr ""
+
+#: bridge/src/capture/feature.ts:227
+msgid "Could not take the screenshot: {error}"
+msgstr ""
+
+#: bridge/src/capture/feature.ts:243
+msgid "Could not save the screenshot: {error}. It is on the clipboard."
+msgstr ""
+
+#: bridge/src/capture/feature.ts:244
+msgid "Could not save the screenshot: {error}"
+msgstr ""
+
+#: bridge/src/capture/feature.ts:259
+msgid "Select the region to capture"
+msgstr ""
+
+#: bridge/src/capture/feature.ts:260
+msgid ""
+"Drag over the region to capture it. Arrow keys and Enter select with the "
+"keyboard; Esc cancels."
+msgstr ""
+
+#: bridge/src/capture/feature.ts:288
+msgid "Could not open the editor: {error}"
+msgstr ""
+
+#: bridge/src/capture/preview.ts:44
+msgid "Screenshot copied and saved"
+msgstr ""
+
+#: bridge/src/capture/preview.ts:44
+msgid "Screenshot saved"
+msgstr ""
+
+#: bridge/src/capture/preview.ts:61
+msgid "Screenshot saved. Open it in the editor"
+msgstr ""
+
+#: bridge/src/capture/recorder.ts:67
+msgid "The screen recording stopped because of an error"
+msgstr ""
+
+#: bridge/src/capture/recorder.ts:92
+msgid "GNOME refused to start the recording"
+msgstr ""
+
+#: bridge/src/capture/recorder.ts:129
+msgid "The screen recording could not be saved"
+msgstr ""
+
+#: bridge/src/capture/recorder.ts:147
+msgid "Stop the screen recording"
+msgstr ""
+
+#: bridge/src/capture/toolbar.ts:28
+msgid "Delay: off"
+msgstr ""
+
+#: bridge/src/capture/toolbar.ts:28
+msgid "Delay: {seconds} s"
+msgstr ""
+
+#: bridge/src/capture/toolbar.ts:70 bridge/src/capture/toolbar.ts:76
+msgid "Screenshot toolbar"
+msgstr ""
+
+#: bridge/src/capture/toolbar.ts:81
+msgid "Capture a region"
+msgstr ""
+
+#: bridge/src/capture/toolbar.ts:84
+msgid "Record the screen"
+msgstr ""
+
+#: bridge/src/capture/toolbar.ts:84
+msgid "Stop the recording"
+msgstr ""
+
+#: bridge/src/clipboard/listPanel.ts:33
 msgid "Search"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:35 bridge/src/clipboard/listPanel.ts:39
+#: bridge/src/clipboard/listPanel.ts:33 bridge/src/clipboard/listPanel.ts:37
 msgid "Search the clipboard"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:51
+#: bridge/src/clipboard/listPanel.ts:49
 msgid "Clipboard settings"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:160
-#: bridge/src/clipboard/winFlyout.ts:79
+#: bridge/src/clipboard/listPanel.ts:60 bridge/src/clipboard/panel.ts:100
+#: bridge/src/clipboard/winFlyout.ts:77
 msgid "Clipboard history"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "close"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "delete"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "paste"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "pin"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:137 bridge/src/emoji/panel.ts:296
+#: bridge/src/clipboard/listPanel.ts:135 bridge/src/emoji/panel.ts:296
 msgid "Nothing found for “{query}”"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:138
+#: bridge/src/clipboard/listPanel.ts:136
 msgid "Private mode: nothing is recorded"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:139
+#: bridge/src/clipboard/listPanel.ts:137
 msgid "The history is empty. Copy something (Ctrl+C) and it shows up here."
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:176 bridge/src/clipboard/listPanel.ts:210
+#: bridge/src/clipboard/listPanel.ts:174 bridge/src/clipboard/listPanel.ts:208
 msgid "pinned"
 msgstr ""
 
-#: bridge/src/clipboard/listPanel.ts:209
+#: bridge/src/clipboard/listPanel.ts:207
 msgid "{count} chars · {when}"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:37
+#: bridge/src/clipboard/panel.ts:35
 msgid "just now"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:39
+#: bridge/src/clipboard/panel.ts:37
 msgid "{n} min ago"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:41
+#: bridge/src/clipboard/panel.ts:39
 msgid "{n} h ago"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:42
+#: bridge/src/clipboard/panel.ts:40
 msgid "{n} d ago"
 msgstr ""
 
-#: bridge/src/clipboard/panel.ts:48
+#: bridge/src/clipboard/panel.ts:46
 msgid "{text}, pinned"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:61
+#: bridge/src/clipboard/winFlyout.ts:59
 msgid "Emoji"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:62
+#: bridge/src/clipboard/winFlyout.ts:60
 msgid "Symbols"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:70
+#: bridge/src/clipboard/winFlyout.ts:68
 msgid "Clear all"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:223
+#: bridge/src/clipboard/winFlyout.ts:221
 msgid "Private mode is on: copies are not kept."
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:224
+#: bridge/src/clipboard/winFlyout.ts:222
 msgid ""
 "Copied items will show up here.\n"
 "Press Ctrl+C to copy."
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:249 bridge/src/clipboard/winFlyout.ts:257
+#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
 msgid "Pin"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:249 bridge/src/clipboard/winFlyout.ts:257
+#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
 msgid "Unpin"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:252
+#: bridge/src/clipboard/winFlyout.ts:250
 msgid "More"
 msgstr ""
 
@@ -3890,7 +3980,7 @@ msgstr ""
 msgid "Picked colours"
 msgstr ""
 
-#: bridge/src/colorPicker/panel.ts:254 bridge/src/quickSettings.ts:325
+#: bridge/src/colorPicker/panel.ts:254 bridge/src/quickSettings.ts:331
 msgid "deskd is unavailable"
 msgstr ""
 
@@ -4135,50 +4225,50 @@ msgstr ""
 msgid "{row}, muted"
 msgstr ""
 
-#: bridge/src/ocr/feature.ts:50
+#: bridge/src/ocr/feature.ts:26
 msgid "Copied text: {preview}"
 msgstr ""
 
-#: bridge/src/ocr/feature.ts:50
+#: bridge/src/ocr/feature.ts:26
 msgid "No text found"
 msgstr ""
 
-#: bridge/src/ocr/feature.ts:52
+#: bridge/src/ocr/feature.ts:28
 msgid "No data for language {code}: install tesseract-langpack-{code}"
 msgstr ""
 
-#: bridge/src/ocr/feature.ts:57
+#: bridge/src/ocr/feature.ts:33
 msgid "Text recognition needs tesseract: install the tesseract package"
 msgstr ""
 
-#: bridge/src/ocr/feature.ts:152
+#: bridge/src/ocr/feature.ts:130
 msgid "Recognising text…"
 msgstr ""
 
-#: bridge/src/ocr/feature.ts:196
-msgid "Recognition was interrupted"
-msgstr ""
-
-#: bridge/src/ocr/feature.ts:199
-msgid "The region is too large to recognise"
-msgstr ""
-
-#: bridge/src/ocr/feature.ts:202
-msgid "No language data for text recognition: {error}"
-msgstr ""
-
-#: bridge/src/ocr/feature.ts:206
-msgid "Could not recognise text: {error}"
-msgstr ""
-
-#: bridge/src/ocr/overlay.ts:53
+#: bridge/src/ocr/feature.ts:146
 msgid "Select the text to copy"
 msgstr ""
 
-#: bridge/src/ocr/overlay.ts:62
+#: bridge/src/ocr/feature.ts:147
 msgid ""
 "Drag over the text to copy it. Arrow keys and Enter select with the "
 "keyboard; Esc cancels."
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:177
+msgid "Recognition was interrupted"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:180
+msgid "The region is too large to recognise"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:183
+msgid "No language data for text recognition: {error}"
+msgstr ""
+
+#: bridge/src/ocr/feature.ts:187
+msgid "Could not recognise text: {error}"
 msgstr ""
 
 #: bridge/src/osd/popup.ts:57
@@ -4217,50 +4307,50 @@ msgstr ""
 msgid "above 100 %"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:74 bridge/src/quickSettings.ts:75
-#: bridge/src/quickSettings.ts:163 bridge/src/quickSettings.ts:197
-#: bridge/src/quickSettings.ts:228 bridge/src/quickSettings.ts:230
-#: bridge/src/quickSettings.ts:232
+#: bridge/src/quickSettings.ts:80 bridge/src/quickSettings.ts:81
+#: bridge/src/quickSettings.ts:169 bridge/src/quickSettings.ts:203
+#: bridge/src/quickSettings.ts:234 bridge/src/quickSettings.ts:236
+#: bridge/src/quickSettings.ts:238
 msgid "Theme"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:84
+#: bridge/src/quickSettings.ts:90
 msgid "Open “Desktop”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:150
+#: bridge/src/quickSettings.ts:156
 msgid "service unavailable"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:168
 msgid "{name} (mixed)"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:172
+#: bridge/src/quickSettings.ts:178
 msgid "{count} of {total} modules active"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:174
+#: bridge/src/quickSettings.ts:180
 msgid "{name}: modules {modules}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:197 bridge/src/quickSettings.ts:232
+#: bridge/src/quickSettings.ts:203 bridge/src/quickSettings.ts:238
 msgid "Could not apply “{name}”: {error}"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:224
+#: bridge/src/quickSettings.ts:230
 msgid "applying “{name}”…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:277
+#: bridge/src/quickSettings.ts:283
 msgid "Clipboard settings…"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:304
+#: bridge/src/quickSettings.ts:310
 msgid "private mode"
 msgstr ""
 
-#: bridge/src/quickSettings.ts:331
+#: bridge/src/quickSettings.ts:337
 msgid "The history is empty"
 msgstr ""
 

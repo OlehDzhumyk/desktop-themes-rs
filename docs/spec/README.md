@@ -95,7 +95,7 @@ Every feature carries one badge, shown on its settings page ([glossary](glossary
 | Automatic light/dark by sunset | Implemented | 2 | From macOS, adapted for Windows 11 style | [auto-dark](features/auto-dark.md) |
 | Theme from wallpaper | Implemented | 1.5 / 2 | From Windows, adapted for macOS style | [theme-from-wallpaper](features/theme-from-wallpaper.md) |
 | Settings hub "Desktop" | Implemented | 2 | Original | [settings-hub](features/settings-hub.md) |
-| Screenshots, annotation, screen recording | Planned | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |
+| Screenshots, annotation, screen recording | Partial | 3 | In Windows 11 and macOS | [screenshots](features/screenshots.md) |
 | OCR text extractor | Implemented | 3 | In Windows 11 and macOS | [ocr](features/ocr.md) |
 | Colour picker | Implemented | 3 | In Windows 11 (PowerToys) and macOS | [color-picker](features/color-picker.md) |
 | On-screen displays (volume, brightness, mute, keyboard backlight) | Implemented | 3 | In Windows 11 and macOS | [osd](features/osd.md) |

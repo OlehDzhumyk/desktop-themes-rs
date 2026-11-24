@@ -9,7 +9,12 @@ screencast machinery and adds the annotation editor and the per-skin toolbar and
 
 ## Status
 
-**Planned** (stage 3, with [ocr](ocr.md) and [color-picker](color-picker.md): one capture family). Origin badge:
+**Partial** (stage 3, with [ocr](ocr.md) and [color-picker](color-picker.md): one capture family). Done: deskd
+saving and annotation rendering (`io.github.OlehDzhumyk.Desk.Capture`), the bridge toolbar, region and screen
+capture, delay countdown, clipboard copy, skin preview and the full-screen recording toggle (AC-SHOT-01..04,
+06..10 on the bridge side). Not yet: the annotation editor (`themes capture-edit`, AC-SHOT-05), window mode,
+region recording, `record-format` and `record-audio` (GNOME's screencast service picks the encoder and records no
+sound). Origin badge:
 *In Windows 11 and macOS*. The capture itself is GNOME Shell's (GPL-2.0-or-later, used as-is through
 `org.gnome.Shell.Screenshot` / the built-in UI); annotation candidates to integrate or port with attribution:
 Satty (MPL-2.0), Swappy (MIT); licences re-checked at integration.
