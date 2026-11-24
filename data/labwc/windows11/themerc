@@ -13,10 +13,10 @@
 border.width: 1
 padding.width: 8
 padding.height: 8
-titlebar.height: 32
 window.titlebar.padding.width: 0
 window.titlebar.padding.height: 0
 window.button.width: 46
+# the titlebar is as high as the buttons (labwc 0.20 has no titlebar.height)
 window.button.height: 32
 window.button.spacing: 0
 window.label.text.justify: left

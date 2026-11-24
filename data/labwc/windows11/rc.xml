@@ -2,7 +2,8 @@
 <!--
   SPDX-License-Identifier: GPL-3.0-or-later
 
-  labwc configuration of the "Desk (Windows 11 / labwc)" session (labwc 0.8 or later).
+  labwc configuration of the "Desk (Windows 11 / labwc)" session (labwc 0.8 or later,
+  checked with labwc 0.20).
   Window behavior and key bindings follow Windows 11 and themes/windows11/behavior.dconf.
 
   The session launcher (desk-win11-session) copies this file into the session config
@@ -59,17 +60,23 @@
     </font>
   </theme>
 
-  <!-- Window switcher (Alt+Tab): a centered list with the window titles -->
-  <windowSwitcher show="yes" preview="yes" outlines="yes" allWorkspaces="no">
+  <!--
+    Window switcher (Alt+Tab): a centered list with the window titles. The list is shown by
+    default and lists the windows of the current desktop only (there is one); labwc 0.20 does
+    not accept the old "show" and "allWorkspaces" attributes here.
+  -->
+  <windowSwitcher preview="yes" outlines="yes">
     <fields>
       <field content="icon" width="5%"/>
       <field content="title" width="95%"/>
     </fields>
   </windowSwitcher>
 
-  <!-- Snap layouts: drag a window to a screen edge to tile it, to the top to maximize it -->
+  <!--
+    Snap layouts: drag a window to a screen edge to tile it, to the top to maximize it.
+    The snap range is the labwc default (10 px); labwc 0.20 does not accept a plain <range>.
+  -->
   <snapping>
-    <range>10</range>
     <overlay>
       <enabled>yes</enabled>
       <delay inner="300" outer="300"/>
