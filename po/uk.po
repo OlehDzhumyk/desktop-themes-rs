@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-23 23:57+0000\n"
+"POT-Creation-Date: 2026-11-24 00:11+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -66,96 +66,186 @@ msgstr "За шпалерами"
 msgid "Automatic"
 msgstr "Автоматично"
 
-#: bridge/src/clipboard/listPanel.ts:35
+#: bridge/src/capture/countdown.ts:48
+msgid "Screenshot in {seconds} s. Esc cancels."
+msgstr "Знімок через {seconds} с. Esc скасовує."
+
+#: bridge/src/capture/feature.ts:76
+msgid "Recording saved: {name}"
+msgstr "Запис збережено: {name}"
+
+#: bridge/src/capture/feature.ts:79
+msgid "Could not record the screen: {error}"
+msgstr "Не вдалося записати екран: {error}"
+
+#: bridge/src/capture/feature.ts:227
+msgid "Could not take the screenshot: {error}"
+msgstr "Не вдалося зробити знімок: {error}"
+
+#: bridge/src/capture/feature.ts:243
+msgid "Could not save the screenshot: {error}. It is on the clipboard."
+msgstr "Не вдалося зберегти знімок: {error}. Він є в буфері обміну."
+
+#: bridge/src/capture/feature.ts:244
+msgid "Could not save the screenshot: {error}"
+msgstr "Не вдалося зберегти знімок: {error}"
+
+#: bridge/src/capture/feature.ts:259
+msgid "Select the region to capture"
+msgstr "Виберіть ділянку для знімка"
+
+#: bridge/src/capture/feature.ts:260
+msgid ""
+"Drag over the region to capture it. Arrow keys and Enter select with the "
+"keyboard; Esc cancels."
+msgstr "Протягніть над ділянкою, щоб зробити знімок. Стрілки та Enter вибирають клавіатурою; Esc скасовує."
+
+#: bridge/src/capture/feature.ts:288
+msgid "Could not open the editor: {error}"
+msgstr "Не вдалося відкрити редактор: {error}"
+
+#: bridge/src/capture/preview.ts:44
+msgid "Screenshot copied and saved"
+msgstr "Знімок скопійовано та збережено"
+
+#: bridge/src/capture/preview.ts:44
+msgid "Screenshot saved"
+msgstr "Знімок збережено"
+
+#: bridge/src/capture/preview.ts:61
+msgid "Screenshot saved. Open it in the editor"
+msgstr "Знімок збережено. Відкрити його в редакторі"
+
+#: bridge/src/capture/recorder.ts:67
+msgid "The screen recording stopped because of an error"
+msgstr "Запис екрана зупинився через помилку"
+
+#: bridge/src/capture/recorder.ts:92
+msgid "GNOME refused to start the recording"
+msgstr "GNOME не дозволив почати запис"
+
+#: bridge/src/capture/recorder.ts:129
+msgid "The screen recording could not be saved"
+msgstr "Не вдалося зберегти запис екрана"
+
+#: bridge/src/capture/recorder.ts:147
+msgid "Stop the screen recording"
+msgstr "Зупинити запис екрана"
+
+#: bridge/src/capture/toolbar.ts:28
+msgid "Delay: off"
+msgstr "Затримка: немає"
+
+#: bridge/src/capture/toolbar.ts:28
+msgid "Delay: {seconds} s"
+msgstr "Затримка: {seconds} с"
+
+#: bridge/src/capture/toolbar.ts:70 bridge/src/capture/toolbar.ts:76
+msgid "Screenshot toolbar"
+msgstr "Панель знімків екрана"
+
+#: bridge/src/capture/toolbar.ts:81
+msgid "Capture a region"
+msgstr "Знімок ділянки"
+
+#: bridge/src/capture/toolbar.ts:84
+msgid "Record the screen"
+msgstr "Записати екран"
+
+#: bridge/src/capture/toolbar.ts:84
+msgid "Stop the recording"
+msgstr "Зупинити запис"
+
+#: bridge/src/clipboard/listPanel.ts:33
 msgid "Search"
 msgstr "Пошук"
 
-#: bridge/src/clipboard/listPanel.ts:35 bridge/src/clipboard/listPanel.ts:39
+#: bridge/src/clipboard/listPanel.ts:33 bridge/src/clipboard/listPanel.ts:37
 msgid "Search the clipboard"
 msgstr "Пошук у буфері обміну"
 
-#: bridge/src/clipboard/listPanel.ts:51
+#: bridge/src/clipboard/listPanel.ts:49
 msgid "Clipboard settings"
 msgstr "Налаштування буфера обміну"
 
-#: bridge/src/clipboard/listPanel.ts:62 bridge/src/clipboard/panel.ts:160
-#: bridge/src/clipboard/winFlyout.ts:79
+#: bridge/src/clipboard/listPanel.ts:60 bridge/src/clipboard/panel.ts:100
+#: bridge/src/clipboard/winFlyout.ts:77
 msgid "Clipboard history"
 msgstr "Історія буфера обміну"
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "close"
 msgstr "закрити"
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "delete"
 msgstr "видалити"
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "paste"
 msgstr "вставити"
 
-#: bridge/src/clipboard/listPanel.ts:82
+#: bridge/src/clipboard/listPanel.ts:80
 msgid "pin"
 msgstr "закріпити"
 
-#: bridge/src/clipboard/listPanel.ts:137 bridge/src/emoji/panel.ts:296
+#: bridge/src/clipboard/listPanel.ts:135 bridge/src/emoji/panel.ts:296
 msgid "Nothing found for “{query}”"
 msgstr "Нічого не знайдено за «{query}»"
 
-#: bridge/src/clipboard/listPanel.ts:138
+#: bridge/src/clipboard/listPanel.ts:136
 msgid "Private mode: nothing is recorded"
 msgstr "Приватний режим: нічого не записується"
 
-#: bridge/src/clipboard/listPanel.ts:139
+#: bridge/src/clipboard/listPanel.ts:137
 msgid "The history is empty. Copy something (Ctrl+C) and it shows up here."
 msgstr "Історія порожня. Скопіюйте щось (Ctrl+C), і воно з'явиться тут."
 
-#: bridge/src/clipboard/listPanel.ts:176 bridge/src/clipboard/listPanel.ts:210
+#: bridge/src/clipboard/listPanel.ts:174 bridge/src/clipboard/listPanel.ts:208
 msgid "pinned"
 msgstr "закріплено"
 
-#: bridge/src/clipboard/listPanel.ts:209
+#: bridge/src/clipboard/listPanel.ts:207
 msgid "{count} chars · {when}"
 msgstr "{count} симв. · {when}"
 
-#: bridge/src/clipboard/panel.ts:37
+#: bridge/src/clipboard/panel.ts:35
 msgid "just now"
 msgstr "щойно"
 
-#: bridge/src/clipboard/panel.ts:39
+#: bridge/src/clipboard/panel.ts:37
 msgid "{n} min ago"
 msgstr "{n} хв тому"
 
-#: bridge/src/clipboard/panel.ts:41
+#: bridge/src/clipboard/panel.ts:39
 msgid "{n} h ago"
 msgstr "{n} год тому"
 
-#: bridge/src/clipboard/panel.ts:42
+#: bridge/src/clipboard/panel.ts:40
 msgid "{n} d ago"
 msgstr "{n} д тому"
 
-#: bridge/src/clipboard/panel.ts:48
+#: bridge/src/clipboard/panel.ts:46
 msgid "{text}, pinned"
 msgstr "{text}, закріплено"
 
-#: bridge/src/clipboard/winFlyout.ts:61
+#: bridge/src/clipboard/winFlyout.ts:59
 msgid "Emoji"
 msgstr "Емодзі"
 
-#: bridge/src/clipboard/winFlyout.ts:62
+#: bridge/src/clipboard/winFlyout.ts:60
 msgid "Symbols"
 msgstr "Символи"
 
-#: bridge/src/clipboard/winFlyout.ts:70
+#: bridge/src/clipboard/winFlyout.ts:68
 msgid "Clear all"
 msgstr "Очистити все"
 
-#: bridge/src/clipboard/winFlyout.ts:223
+#: bridge/src/clipboard/winFlyout.ts:221
 msgid "Private mode is on: copies are not kept."
 msgstr "Приватний режим увімкнено: скопійоване не зберігається."
 
-#: bridge/src/clipboard/winFlyout.ts:224
+#: bridge/src/clipboard/winFlyout.ts:222
 msgid ""
 "Copied items will show up here.\n"
 "Press Ctrl+C to copy."
@@ -163,15 +253,15 @@ msgstr ""
 "Тут з'являтимуться скопійовані елементи.\n"
 "Натисніть Ctrl+C, щоб скопіювати."
 
-#: bridge/src/clipboard/winFlyout.ts:249 bridge/src/clipboard/winFlyout.ts:257
+#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
 msgid "Pin"
 msgstr "Закріпити"
 
-#: bridge/src/clipboard/winFlyout.ts:249 bridge/src/clipboard/winFlyout.ts:257
+#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
 msgid "Unpin"
 msgstr "Відкріпити"
 
-#: bridge/src/clipboard/winFlyout.ts:252
+#: bridge/src/clipboard/winFlyout.ts:250
 msgid "More"
 msgstr "Більше"
 
@@ -217,7 +307,7 @@ msgstr "не відповідає AA"
 msgid "Picked colours"
 msgstr "Вибрані кольори"
 
-#: bridge/src/colorPicker/panel.ts:254 bridge/src/quickSettings.ts:325
+#: bridge/src/colorPicker/panel.ts:254 bridge/src/quickSettings.ts:331
 msgid "deskd is unavailable"
 msgstr "deskd недоступний"
 
@@ -462,53 +552,53 @@ msgstr "{app}: гучність {percent} %"
 msgid "{row}, muted"
 msgstr "{row}, без звуку"
 
-#: bridge/src/ocr/feature.ts:50
+#: bridge/src/ocr/feature.ts:26
 msgid "Copied text: {preview}"
 msgstr "Скопійовано текст: {preview}"
 
-#: bridge/src/ocr/feature.ts:50
+#: bridge/src/ocr/feature.ts:26
 msgid "No text found"
 msgstr "Тексту не знайдено"
 
-#: bridge/src/ocr/feature.ts:52
+#: bridge/src/ocr/feature.ts:28
 msgid "No data for language {code}: install tesseract-langpack-{code}"
 msgstr "Немає даних мови {code}: встановіть tesseract-langpack-{code}"
 
-#: bridge/src/ocr/feature.ts:57
+#: bridge/src/ocr/feature.ts:33
 msgid "Text recognition needs tesseract: install the tesseract package"
 msgstr "Для розпізнавання потрібен tesseract: встановіть пакунок tesseract"
 
-#: bridge/src/ocr/feature.ts:152
+#: bridge/src/ocr/feature.ts:130
 msgid "Recognising text…"
 msgstr "Розпізнавання тексту…"
 
-#: bridge/src/ocr/feature.ts:196
-msgid "Recognition was interrupted"
-msgstr "Розпізнавання перервано"
-
-#: bridge/src/ocr/feature.ts:199
-msgid "The region is too large to recognise"
-msgstr "Ділянка завелика для розпізнавання"
-
-#: bridge/src/ocr/feature.ts:202
-msgid "No language data for text recognition: {error}"
-msgstr "Немає даних мов для розпізнавання: {error}"
-
-#: bridge/src/ocr/feature.ts:206
-msgid "Could not recognise text: {error}"
-msgstr "Не вдалося розпізнати текст: {error}"
-
-#: bridge/src/ocr/overlay.ts:53
+#: bridge/src/ocr/feature.ts:146
 msgid "Select the text to copy"
 msgstr "Виділіть текст, який треба скопіювати"
 
-#: bridge/src/ocr/overlay.ts:62
+#: bridge/src/ocr/feature.ts:147
 msgid ""
 "Drag over the text to copy it. Arrow keys and Enter select with the "
 "keyboard; Esc cancels."
 msgstr ""
 "Виділіть текст мишею, щоб скопіювати його. Клавіші зі стрілками та Enter "
 "виділяють клавіатурою; Esc скасовує."
+
+#: bridge/src/ocr/feature.ts:177
+msgid "Recognition was interrupted"
+msgstr "Розпізнавання перервано"
+
+#: bridge/src/ocr/feature.ts:180
+msgid "The region is too large to recognise"
+msgstr "Ділянка завелика для розпізнавання"
+
+#: bridge/src/ocr/feature.ts:183
+msgid "No language data for text recognition: {error}"
+msgstr "Немає даних мов для розпізнавання: {error}"
+
+#: bridge/src/ocr/feature.ts:187
+msgid "Could not recognise text: {error}"
+msgstr "Не вдалося розпізнати текст: {error}"
 
 #: bridge/src/osd/popup.ts:57
 msgid "Microphone muted"
@@ -546,50 +636,50 @@ msgstr "Рівень {level} %"
 msgid "above 100 %"
 msgstr "понад 100 %"
 
-#: bridge/src/quickSettings.ts:74 bridge/src/quickSettings.ts:75
-#: bridge/src/quickSettings.ts:163 bridge/src/quickSettings.ts:197
-#: bridge/src/quickSettings.ts:228 bridge/src/quickSettings.ts:230
-#: bridge/src/quickSettings.ts:232
+#: bridge/src/quickSettings.ts:80 bridge/src/quickSettings.ts:81
+#: bridge/src/quickSettings.ts:169 bridge/src/quickSettings.ts:203
+#: bridge/src/quickSettings.ts:234 bridge/src/quickSettings.ts:236
+#: bridge/src/quickSettings.ts:238
 msgid "Theme"
 msgstr "Тема"
 
-#: bridge/src/quickSettings.ts:84
+#: bridge/src/quickSettings.ts:90
 msgid "Open “Desktop”…"
 msgstr "Відкрити «Робочий стіл»…"
 
-#: bridge/src/quickSettings.ts:150
+#: bridge/src/quickSettings.ts:156
 msgid "service unavailable"
 msgstr "служба недоступна"
 
-#: bridge/src/quickSettings.ts:162
+#: bridge/src/quickSettings.ts:168
 msgid "{name} (mixed)"
 msgstr "{name} (змішано)"
 
-#: bridge/src/quickSettings.ts:172
+#: bridge/src/quickSettings.ts:178
 msgid "{count} of {total} modules active"
 msgstr "активних модулів: {count} з {total}"
 
-#: bridge/src/quickSettings.ts:174
+#: bridge/src/quickSettings.ts:180
 msgid "{name}: modules {modules}"
 msgstr "{name}: модулі {modules}"
 
-#: bridge/src/quickSettings.ts:197 bridge/src/quickSettings.ts:232
+#: bridge/src/quickSettings.ts:203 bridge/src/quickSettings.ts:238
 msgid "Could not apply “{name}”: {error}"
 msgstr "Не вдалося застосувати «{name}»: {error}"
 
-#: bridge/src/quickSettings.ts:224
+#: bridge/src/quickSettings.ts:230
 msgid "applying “{name}”…"
 msgstr "застосування «{name}»…"
 
-#: bridge/src/quickSettings.ts:277
+#: bridge/src/quickSettings.ts:283
 msgid "Clipboard settings…"
 msgstr "Налаштування буфера обміну…"
 
-#: bridge/src/quickSettings.ts:304
+#: bridge/src/quickSettings.ts:310
 msgid "private mode"
 msgstr "приватний режим"
 
-#: bridge/src/quickSettings.ts:331
+#: bridge/src/quickSettings.ts:337
 msgid "The history is empty"
 msgstr "Історія порожня"
 
@@ -863,7 +953,9 @@ msgstr "Відкривати редактор після знімка"
 #: crates/desk-settings/src/capture.rs:180
 msgid ""
 "Mark up each screenshot (pen, arrows, redaction, crop) before you keep it"
-msgstr "Позначати кожен знімок (перо, стрілки, приховування, обрізання), перш ніж зберегти його"
+msgstr ""
+"Позначати кожен знімок (перо, стрілки, приховування, обрізання), перш ніж "
+"зберегти його"
 
 #: crates/desk-settings/src/capture.rs:192
 #: crates/desk-settings/src/capture.rs:208
@@ -899,7 +991,9 @@ msgstr "Почати або зупинити запис екрана"
 msgid ""
 "Capture, mark up and record the screen: Win+Shift+S in Windows 11, "
 "Shift+Cmd+4 in macOS"
-msgstr "Знімки, позначки й запис екрана: Win+Shift+S у Windows 11, Shift+Cmd+4 у macOS"
+msgstr ""
+"Знімки, позначки й запис екрана: Win+Shift+S у Windows 11, Shift+Cmd+4 у "
+"macOS"
 
 #: crates/desk-settings/src/capture.rs:364
 msgid ""
@@ -907,7 +1001,11 @@ msgid ""
 "arrows, shapes and redaction, and record the screen to video. Redaction is "
 "real: the covered pixels are replaced in the saved file. Files stay in your "
 "folders; nothing is uploaded."
-msgstr "Знімайте область або весь екран, позначайте зображення пером, стрілками, фігурами й приховуванням, записуйте екран у відео. Приховування справжнє: закриті пікселі замінюються у збереженому файлі. Файли лишаються у ваших теках; нічого не вивантажується."
+msgstr ""
+"Знімайте область або весь екран, позначайте зображення пером, стрілками, "
+"фігурами й приховуванням, записуйте екран у відео. Приховування справжнє: "
+"закриті пікселі замінюються у збереженому файлі. Файли лишаються у ваших "
+"теках; нічого не вивантажується."
 
 #: crates/desk-settings/src/capture.rs:387
 msgid "Screen recording"
@@ -1998,7 +2096,7 @@ msgstr "Робота"
 msgid "Sleep"
 msgstr "Режим сну"
 
-#: crates/deskd/src/main.rs:45
+#: crates/deskd/src/main.rs:47
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -2015,7 +2113,7 @@ msgstr ""
 "replace, і дозволити наступному забрати її\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:101 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:105 crates/themes/src/service.rs:365
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"

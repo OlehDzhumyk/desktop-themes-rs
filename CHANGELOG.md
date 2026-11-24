@@ -39,6 +39,13 @@ All notable changes to this project are documented in this file. The format is b
   selection overlay (pointer or keyboard, `Esc` cancels) per skin and shows a status toast.
   Settings `io.github.OlehDzhumyk.Desk.Ocr` (`enabled`, `languages`, `record-in-history`,
   `keep-line-breaks`, `max-megapixels`, `ocr-shortcut`) and a «Розпізнавання тексту» page.
+- Screenshot toolbar and capture in the bridge (stage 3): the four `capture-*-shortcut` keys (normal
+  mode only), a skin-aware toolbar (`windows11` top bar, `macos` capsule, `default` bar) with Region,
+  Screen and Record modes, a 0 / 3 / 10 s delay with a countdown that `Esc` cancels, full keyboard
+  operation, region and full-screen capture saved through deskd's `SaveScreenshot` and copied to the
+  clipboard as `image/png` (`copy-to-clipboard`), a macOS floating thumbnail (6 s, click opens
+  `themes capture-edit`) or a toast in the other skins, and screen recording through GNOME's
+  screencast service with an elapsed-time item in the top bar.
 - Screenshot core (stage 3): the new pure-Rust crate `desk-capture` (no GTK, GLib or D-Bus, so any
   Wayland desktop or a CLI can use it) checks PNG captures and refuses images over 100 megapixels
   before decoding, removes `tEXt`, `zTXt`, `iTXt`, `tIME` and `eXIf` chunks (no user name, host
