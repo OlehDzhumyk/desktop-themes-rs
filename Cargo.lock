@@ -294,6 +294,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "desk-search"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "desk-settings"
 version = "0.3.0"
 dependencies = [
