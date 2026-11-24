@@ -4,6 +4,7 @@
 //! Бібліотека містить усю логіку; CLI, GUI і D-Bus-служба лише викликають її.
 
 pub mod apply;
+pub mod backend;
 pub mod commands;
 pub mod crash;
 pub mod dconf;

@@ -66,6 +66,44 @@ pub struct ApplyResult {
     pub token_links: Vec<String>,
     /// Time spent on token generation (cache check included), milliseconds.
     pub tokens_ms: f64,
+    /// The compositor side of the skin outside GNOME (labwc theme, reconfigure); dry run: planned.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub compositor: Vec<String>,
+}
+
+/// The compositor side of the theme's skin on a non-GNOME desktop ([`crate::backend`]). Only for
+/// the live dconf (never in unit tests); a failure is a warning, the apply stands.
+fn compositor_skin(
+    ctx: &Ctx,
+    id: &str,
+    desired: &BTreeMap<String, Option<String>>,
+    dry_run: bool,
+    res: &mut ApplyResult,
+    warnings: &mut Vec<String>,
+) {
+    if !ctx.dconf.live() {
+        return;
+    }
+    let backend = crate::backend::detect();
+    if backend.supports_gnome_extensions() {
+        return;
+    }
+    let Some(skin) = desired
+        .get(crate::backend::SKIN_KEY)
+        .cloned()
+        .flatten()
+        .and_then(|v| dconf::unquote_str(&v))
+    else {
+        return;
+    };
+    match backend.apply_compositor_skin(ctx, id, &skin, dry_run) {
+        Ok(done) => res.compositor = done,
+        Err(e) => warnings.push(tr!(
+            "{desktop}: the skin was not applied to the compositor: {error}",
+            desktop = backend.name(),
+            error = e
+        )),
+    }
 }
 
 /// Чинний список розширень: значення з dconf або типове схеми.
@@ -369,6 +407,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
             }
         }
         res.shell_running = ctx.shell().is_some();
+        compositor_skin(ctx, id, &dplan.desired, true, &mut res, &mut warnings);
         res.warnings = warnings;
         return Ok(res);
     }
@@ -616,6 +655,7 @@ pub fn apply(ctx: &Ctx, id: &str, modules: &[Module], opts: &Options) -> Result<
     let mut protected: BTreeSet<String> = theme_keys.values().flatten().cloned().collect();
     protected.extend(targets.values().flat_map(|t| t.keys().cloned()));
     res.cleanup = cleanup(ctx, &dplan.desired, &baseline, &protected, &purge);
+    compositor_skin(ctx, id, &dplan.desired, false, &mut res, &mut warnings);
     res.warnings = warnings;
     log(
         ctx,

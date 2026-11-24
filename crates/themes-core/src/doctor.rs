@@ -10,6 +10,7 @@ use std::time::Duration;
 use serde::Serialize;
 
 use crate::apply::{disable_broken, ext_lists, ext_stamp};
+use crate::backend::DesktopBackend;
 use crate::dconf;
 use crate::error::Result;
 use crate::lock::Lock;
@@ -35,6 +36,10 @@ pub struct Issue {
 #[derive(Debug, Serialize, Default)]
 pub struct DoctorReport {
     pub ok: bool,
+    /// The desktop when it is not GNOME (`labwc`, `wayland-other`); absent on GNOME, so the GNOME
+    /// report stays as it was ([`crate::backend`]).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub desktop: Option<&'static str>,
     /// GNOME вимкнув користувацькі розширення (`disable-user-extensions=true`).
     pub extensions_disabled_by_gnome: bool,
     /// Останні падіння справжньої оболонки (найновіші спершу).
@@ -999,13 +1004,29 @@ pub struct DoctorOptions {
     pub notify: bool,
 }
 
+pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
+    doctor_on(ctx, opt, crate::backend::detect().as_ref())
+}
+
+/// [`doctor`] for a given desktop. GNOME Shell (extensions, journal, crashes, version) is
+/// checked only where [`DesktopBackend::supports_gnome_extensions`]; the backend adds its own.
 #[allow(
     clippy::too_many_lines,
     reason = "a list of independent checks, each one pushes its own issues"
 )]
-pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
+pub fn doctor_on(
+    ctx: &Ctx,
+    opt: &DoctorOptions,
+    backend: &dyn DesktopBackend,
+) -> Result<DoctorReport> {
     let mut rep = DoctorReport::default();
-    let shell = if opt.wait_shell.is_zero() {
+    let gnome = backend.supports_gnome_extensions();
+    if !gnome {
+        rep.desktop = Some(backend.kind().name());
+    }
+    let shell = if !gnome {
+        None
+    } else if opt.wait_shell.is_zero() {
         Shell::connect()
     } else {
         Shell::wait(opt.wait_shell)
@@ -1024,7 +1045,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     let version = shell
         .as_ref()
         .and_then(Shell::version)
-        .or_else(shell_version_offline);
+        .or_else(|| gnome.then(shell_version_offline).flatten());
     rep.gnome_version = version.clone();
 
     let mut st = State::load(ctx);
@@ -1064,7 +1085,8 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
     }
 
     let cur = dconf::dump()?;
-    let (enabled, ..) = ext_lists(&cur);
+    // outside GNOME Shell no extension runs, whatever dconf still lists
+    let enabled = if gnome { ext_lists(&cur).0 } else { Vec::new() };
     rep.extensions_checked = enabled.len();
     let ver = version.clone().unwrap_or_default();
     let mut to_disable: Vec<(String, String)> = Vec::new();
@@ -1139,7 +1161,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             }
         }
     }
-    for p in PERMANENT_EXTENSIONS {
+    for p in PERMANENT_EXTENSIONS.iter().filter(|_| gnome) {
         if ctx.extension_path(p).is_none() {
             rep.push(
                 "warning",
@@ -1158,9 +1180,12 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
             );
         }
     }
-    check_journal(&enabled, &mut rep);
-    check_crashes(ctx, &mut rep);
-    check_retired(ctx, &mut st, &enabled, opt.fix, &mut rep);
+    if gnome {
+        check_journal(&enabled, &mut rep);
+        check_crashes(ctx, &mut rep);
+        check_retired(ctx, &mut st, &enabled, opt.fix, &mut rep);
+    }
+    rep.issues.extend(backend.diagnose(ctx));
     check_assets(ctx, &st, &mut rep);
     check_token_cache(ctx, &st, opt.fix, &mut rep);
     check_gtk_flatpak(ctx, &mut st, opt.fix, &mut rep);
@@ -1185,7 +1210,7 @@ pub fn doctor(ctx: &Ctx, opt: &DoctorOptions) -> Result<DoctorReport> {
         );
     }
 
-    if opt.fix {
+    if opt.fix && gnome {
         // 1. вимкнути зламані
         if !to_disable.is_empty() {
             if let Some(sh) = &shell {
