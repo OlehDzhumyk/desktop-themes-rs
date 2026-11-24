@@ -49,6 +49,11 @@ Four layers. Dependencies point downward only; a lower layer never knows which u
    * Later backends: KDE (`kwriteconfig6`, Plasma Look-and-Feel) and wlroots-style desktops.
    * Plan, managed keys, baseline, rollback and `themes doctor` stay above the boundary and work
      the same for every backend. The existing `dconf::Backend` is the first step.
+   * First code (`themes-core/src/backend.rs`): `DesktopKind` from `XDG_CURRENT_DESKTOP`, and a
+     trait with `diagnose`, `supports_gnome_extensions` and `apply_compositor_skin`. The GNOME
+     backend keeps the existing checks; the labwc backend checks the
+     [ADR 0012](0012-wayland-layer-shell-desk-shell.md) session and installs the skin's labwc
+     theme. Read, write, snapshot and revert move behind the trait later.
 3. **A settings app that does not depend on libadwaita.** The registry (`desk-settings`) and the
    backends carry no widget code. The app renders pages from the registry, so a skin can draw a
    Fluent or an Aqua layout.

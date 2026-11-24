@@ -34,6 +34,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- `themes-core` gets the `DesktopBackend` boundary of [ADR 0011](docs/adr/0011-wayland-agnostic-rust-core.md):
+  the desktop comes from `XDG_CURRENT_DESKTOP` (GNOME, labwc, other Wayland). In a labwc session
+  `themes doctor` checks labwc, desk-shell, deskd, `libgtk4-layer-shell.so.0`, swaylock, swaybg and
+  the session config instead of GNOME Shell extensions, and its report gains `"desktop": "labwc"`.
+  `themes apply` there installs the skin's labwc theme and runs `labwc --reconfigure`. On GNOME
+  nothing changes, and the report has no `desktop` field.
 - desk-shell: the taskbar shows the running windows (Wayland `zwlr_foreign_toplevel_management_v1`
   on labwc, sway, Hyprland, niri and Wayfire, read by a small built-in client, with no new
   dependency). A short bar under an icon shows that the application runs, a long accent bar that

@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 09:25+0000\n"
+"POT-Creation-Date: 2026-11-24 09:59+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -2846,7 +2846,7 @@ msgstr "Зображення {format} {width}×{height}"
 msgid "{format} image"
 msgstr "Зображення {format}"
 
-#: crates/deskd/src/engine/clipboard.rs:38
+#: crates/deskd/src/engine/clipboard.rs:41
 #, rust-format
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
@@ -2863,7 +2863,7 @@ msgstr "Робота"
 msgid "Sleep"
 msgstr "Режим сну"
 
-#: crates/deskd/src/main.rs:51
+#: crates/deskd/src/main.rs:52
 #, rust-format
 msgid ""
 "deskd {version} — desktop features service (D-Bus {name})\n"
@@ -2880,12 +2880,17 @@ msgstr ""
 "replace, і дозволити наступному забрати її\n"
 "  --version"
 
-#: crates/deskd/src/main.rs:115 crates/themes/src/service.rs:410
+#: crates/deskd/src/main.rs:116 crates/themes/src/service.rs:410
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr "не вдалося зайняти {name}: {error}"
 
-#: crates/themes-core/src/apply.rs:129
+#: crates/themes-core/src/apply.rs:102
+#, rust-format
+msgid "{desktop}: the skin was not applied to the compositor: {error}"
+msgstr "{desktop}: оформлення не застосовано до композитора: {error}"
+
+#: crates/themes-core/src/apply.rs:167
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme and is applied only after an explicit "
@@ -2894,7 +2899,7 @@ msgstr ""
 "«{name}» — експериментальна тема, її застосовують лише після явного "
 "підтвердження: {warning}"
 
-#: crates/themes-core/src/apply.rs:192
+#: crates/themes-core/src/apply.rs:230
 #, rust-format
 msgid ""
 "theme “{theme}” (module {module}) not found; its keys go back to the "
@@ -2903,7 +2908,7 @@ msgstr ""
 "тему «{theme}» (модуль {module}) не знайдено — її ключі повертаються до "
 "стандартних"
 
-#: crates/themes-core/src/apply.rs:237
+#: crates/themes-core/src/apply.rs:275
 #, rust-format
 msgid ""
 "shortcut conflict: {conflict}; the feature keeps it, the system shortcut "
@@ -2912,23 +2917,23 @@ msgstr ""
 "конфлікт скорочень: {conflict}; скорочення лишається функції, системне його "
 "втрачає"
 
-#: crates/themes-core/src/apply.rs:242
+#: crates/themes-core/src/apply.rs:280
 #, rust-format
 msgid "shortcut conflict: {conflict}; change one of them (themes shortcut set)"
 msgstr ""
 "конфлікт скорочень: {conflict}; змініть одне з них (themes shortcut set)"
 
-#: crates/themes-core/src/apply.rs:378
+#: crates/themes-core/src/apply.rs:417
 #, rust-format
 msgid "extension {uuid} is not installed"
 msgstr "розширення {uuid} не встановлене"
 
-#: crates/themes-core/src/apply.rs:382
+#: crates/themes-core/src/apply.rs:421
 #, rust-format
 msgid "extension {uuid} is turned off as broken (see “themes doctor”)"
 msgstr "розширення {uuid} вимкнено як несправне (див. «themes doctor»)"
 
-#: crates/themes-core/src/apply.rs:548
+#: crates/themes-core/src/apply.rs:587
 #, rust-format
 msgid ""
 "applying “{theme}” hit an error after its hooks ran, so it was completed: "
@@ -2937,17 +2942,17 @@ msgstr ""
 "під час застосування «{theme}» сталася помилка вже після хуків, тому "
 "застосування завершено: {error}"
 
-#: crates/themes-core/src/apply.rs:554
+#: crates/themes-core/src/apply.rs:593
 #, rust-format
 msgid "could not apply “{theme}”: {error}. The changes were rolled back."
 msgstr "не вдалося застосувати «{theme}»: {error}. Зміни скасовано."
 
-#: crates/themes-core/src/apply.rs:562
+#: crates/themes-core/src/apply.rs:601
 #, rust-format
 msgid "Not everything could be undone: {problems}"
 msgstr "Не все вдалося скасувати: {problems}"
 
-#: crates/themes-core/src/apply.rs:696
+#: crates/themes-core/src/apply.rs:736
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): the theme's extensions will not work until you turn them "
@@ -2957,45 +2962,45 @@ msgstr ""
 "розширення теми не працюватимуть, доки ви їх не ввімкнете (themes doctor --"
 "enable-extensions або кнопка у вікні «Теми»)"
 
-#: crates/themes-core/src/apply.rs:704
+#: crates/themes-core/src/apply.rs:744
 msgid "the session is locked; new extensions turn on after unlocking"
 msgstr "сеанс заблоковано — нові розширення ввімкнуться після розблокування"
 
-#: crates/themes-core/src/apply.rs:725
+#: crates/themes-core/src/apply.rs:765
 #, rust-format
 msgid ""
 "the shell does not know the extension {uuid} yet (installed after login)"
 msgstr "оболонка ще не знає про розширення {uuid} (встановлене після входу)"
 
-#: crates/themes-core/src/apply.rs:731
+#: crates/themes-core/src/apply.rs:771
 #, rust-format
 msgid "extension {uuid}: {state} {error}"
 msgstr "розширення {uuid}: {state} {error}"
 
-#: crates/themes-core/src/apply.rs:740
+#: crates/themes-core/src/apply.rs:780
 #, rust-format
 msgid "extension {uuid} did not turn on live (state {state})"
 msgstr "розширення {uuid} не ввімкнулося наживо (стан {state})"
 
-#: crates/themes-core/src/apply.rs:751
+#: crates/themes-core/src/apply.rs:791
 #, rust-format
 msgid "extension {uuid} did not turn off live"
 msgstr "розширення {uuid} не вимкнулося наживо"
 
-#: crates/themes-core/src/apply.rs:759
+#: crates/themes-core/src/apply.rs:799
 #, rust-format
 msgid "swapping {old} ↔ {new} live leaves panel artefacts"
 msgstr "заміна {old} ↔ {new} наживо лишає артефакти панелі"
 
-#: crates/themes-core/src/apply.rs:795
+#: crates/themes-core/src/apply.rs:835
 msgid "automatic rollback after applying"
 msgstr "автовідкат після застосування"
 
-#: crates/themes-core/src/apply.rs:862
+#: crates/themes-core/src/apply.rs:902
 msgid "the theme “fedora” cannot be deleted: it is the standard look"
 msgstr "тему «fedora» видаляти не можна — це стандартний вигляд"
 
-#: crates/themes-core/src/apply.rs:875
+#: crates/themes-core/src/apply.rs:915
 #, rust-format
 msgid ""
 "the theme “{theme}” is active now (modules: {modules}); apply another one "
@@ -3003,6 +3008,76 @@ msgid ""
 msgstr ""
 "тема «{theme}» зараз активна (модулі: {modules}) — спершу застосуйте іншу "
 "(themes reset)"
+
+#: crates/themes-core/src/backend.rs:159
+msgid "this desktop has no backend yet: GNOME Shell checks are skipped"
+msgstr ""
+"для цього робочого столу ще немає модуля: перевірки GNOME Shell пропущено"
+
+#: crates/themes-core/src/backend.rs:319
+msgid "labwc is not installed (rpm-ostree install labwc)"
+msgstr "labwc не встановлено (rpm-ostree install labwc)"
+
+#: crates/themes-core/src/backend.rs:325
+msgid ""
+"labwc is not running in this session; run the check inside the labwc session"
+msgstr "labwc не працює в цьому сеансі; запустіть перевірку в сеансі labwc"
+
+#: crates/themes-core/src/backend.rs:332
+msgid ""
+"desk-shell is not installed: no taskbar and Start menu (run data/install.sh)"
+msgstr ""
+"desk-shell не встановлено: немає панелі завдань і меню «Пуск» (запустіть "
+"data/install.sh)"
+
+#: crates/themes-core/src/backend.rs:340
+msgid ""
+"libgtk4-layer-shell.so.0 is not found: desk-shell draws normal windows "
+"instead of a taskbar (install gtk4-layer-shell)"
+msgstr ""
+"libgtk4-layer-shell.so.0 не знайдено: desk-shell малює звичайні вікна "
+"замість панелі завдань (встановіть gtk4-layer-shell)"
+
+#: crates/themes-core/src/backend.rs:348
+msgid ""
+"deskd is not installed: no clipboard history or search (run data/install.sh)"
+msgstr ""
+"deskd не встановлено: немає історії буфера обміну і пошуку (запустіть data/"
+"install.sh)"
+
+#: crates/themes-core/src/backend.rs:355
+msgid ""
+"swaylock is not installed: the screen cannot be locked (install swaylock)"
+msgstr ""
+"swaylock не встановлено: екран не можна заблокувати (встановіть swaylock)"
+
+#: crates/themes-core/src/backend.rs:362
+msgid "swaybg is not installed: the desktop has no wallpaper (install swaybg)"
+msgstr "swaybg не встановлено: робочий стіл без шпалер (встановіть swaybg)"
+
+#: crates/themes-core/src/backend.rs:370
+#, rust-format
+msgid ""
+"the labwc session config {path} is missing (log in with the “Desk (Windows "
+"11 / labwc)” session)"
+msgstr ""
+"немає конфігурації сеансу labwc {path} (увійдіть у сеанс «Desk (Windows 11 / "
+"labwc)»)"
+
+#: crates/themes-core/src/backend.rs:399
+#, rust-format
+msgid "skin → {skin} (theme {theme})"
+msgstr "оформлення → {skin} (тема {theme})"
+
+#: crates/themes-core/src/backend.rs:413
+#, rust-format
+msgid "labwc theme {name} updated"
+msgstr "тему labwc {name} оновлено"
+
+#: crates/themes-core/src/backend.rs:423
+#, rust-format
+msgid "labwc (pid {pid}) reconfigured"
+msgstr "labwc (pid {pid}) переналаштовано"
 
 #: crates/themes-core/src/crash.rs:65
 #, rust-format
@@ -3034,7 +3109,7 @@ msgstr "; ймовірний винуватець: {suspects}"
 msgid "could not restore {keys}"
 msgstr "не вдалося відновити {keys}"
 
-#: crates/themes-core/src/doctor.rs:141
+#: crates/themes-core/src/doctor.rs:146
 msgid ""
 "GNOME turned extensions off after a shell crash (disable-user-"
 "extensions=true): no extension works now"
@@ -3042,7 +3117,7 @@ msgstr ""
 "GNOME вимкнув розширення після збою оболонки (disable-user-extensions=true): "
 "жодне розширення зараз не працює"
 
-#: crates/themes-core/src/doctor.rs:149
+#: crates/themes-core/src/doctor.rs:154
 #, rust-format
 msgid ""
 "Better switch to the safe theme first (themes apply {safe}) if “{theme}” is "
@@ -3051,58 +3126,58 @@ msgstr ""
 "Радимо спершу перейти на безпечну тему (themes apply {safe}), якщо винна "
 "«{theme}»"
 
-#: crates/themes-core/src/doctor.rs:157
+#: crates/themes-core/src/doctor.rs:162
 msgid "To turn them on again: themes doctor --enable-extensions"
 msgstr "Увімкнути знову: themes doctor --enable-extensions"
 
-#: crates/themes-core/src/doctor.rs:181 crates/themes-core/src/doctor.rs:206
-#: crates/themes-core/src/doctor.rs:217 crates/themes-core/src/overlay.rs:150
+#: crates/themes-core/src/doctor.rs:186 crates/themes-core/src/doctor.rs:211
+#: crates/themes-core/src/doctor.rs:222 crates/themes-core/src/overlay.rs:150
 #: crates/themes-core/src/tokens.rs:142
 #, rust-format
 msgid "theme “{theme}”: {error}"
 msgstr "тема «{theme}»: {error}"
 
-#: crates/themes-core/src/doctor.rs:191
+#: crates/themes-core/src/doctor.rs:196
 #, rust-format
 msgid "theme “{theme}”: flatpak override “{line}” is refused: {why}"
 msgstr "тема «{theme}»: перевизначення flatpak «{line}» відхилено: {why}"
 
-#: crates/themes-core/src/doctor.rs:274
+#: crates/themes-core/src/doctor.rs:279
 #, rust-format
 msgid "theme {theme} ({module})"
 msgstr "тема {theme} ({module})"
 
-#: crates/themes-core/src/doctor.rs:298
+#: crates/themes-core/src/doctor.rs:303
 #, rust-format
 msgid "GTK theme “{name}” not found (from: {from})"
 msgstr "не знайдено тему GTK «{name}» (з: {from})"
 
-#: crates/themes-core/src/doctor.rs:303
+#: crates/themes-core/src/doctor.rs:308
 #, rust-format
 msgid "icon theme “{name}” not found (from: {from})"
 msgstr "не знайдено тему значків «{name}» (з: {from})"
 
-#: crates/themes-core/src/doctor.rs:308
+#: crates/themes-core/src/doctor.rs:313
 #, rust-format
 msgid "cursor theme “{name}” not found (from: {from})"
 msgstr "не знайдено тему курсорів «{name}» (з: {from})"
 
-#: crates/themes-core/src/doctor.rs:313
+#: crates/themes-core/src/doctor.rs:318
 #, rust-format
 msgid "sound theme “{name}” not found (from: {from})"
 msgstr "не знайдено звукову тему «{name}» (з: {from})"
 
-#: crates/themes-core/src/doctor.rs:318
+#: crates/themes-core/src/doctor.rs:323
 #, rust-format
 msgid "shell theme “{name}” not found (from: {from})"
 msgstr "не знайдено тему оболонки «{name}» (з: {from})"
 
-#: crates/themes-core/src/doctor.rs:336
+#: crates/themes-core/src/doctor.rs:341
 #, rust-format
 msgid "the wallpaper file does not exist: {path}"
 msgstr "файл шпалер не існує: {path}"
 
-#: crates/themes-core/src/doctor.rs:356
+#: crates/themes-core/src/doctor.rs:361
 msgid ""
 "deskd is not installed: its D-Bus service file is missing (run data/"
 "install.sh)"
@@ -3110,7 +3185,7 @@ msgstr ""
 "deskd не встановлено: немає його файлу служби D-Bus (запустіть data/"
 "install.sh)"
 
-#: crates/themes-core/src/doctor.rs:362
+#: crates/themes-core/src/doctor.rs:367
 msgid ""
 "deskd is not running (it starts when a feature such as the clipboard is "
 "first used)"
@@ -3118,7 +3193,7 @@ msgstr ""
 "deskd не запущено (він стартує, коли вперше використовують функцію, "
 "наприклад буфер обміну)"
 
-#: crates/themes-core/src/doctor.rs:368
+#: crates/themes-core/src/doctor.rs:373
 msgid ""
 "deskd owns its D-Bus name but does not answer; restart it: systemctl --user "
 "restart deskd"
@@ -3126,7 +3201,7 @@ msgstr ""
 "deskd володіє своєю назвою D-Bus, але не відповідає; перезапустіть його: "
 "systemctl --user restart deskd"
 
-#: crates/themes-core/src/doctor.rs:374
+#: crates/themes-core/src/doctor.rs:379
 #, rust-format
 msgid ""
 "deskd {running} is running but this program is {ours}; restart it: systemctl "
@@ -3135,12 +3210,12 @@ msgstr ""
 "працює deskd {running}, а ця програма — {ours}; перезапустіть його: "
 "systemctl --user restart deskd"
 
-#: crates/themes-core/src/doctor.rs:429
+#: crates/themes-core/src/doctor.rs:434
 #, rust-format
 msgid "focus mode “{name}” is on (end it with: themes focus stop)"
 msgstr "увімкнено режим фокусу «{name}» (завершити: themes focus stop)"
 
-#: crates/themes-core/src/doctor.rs:436
+#: crates/themes-core/src/doctor.rs:441
 msgid ""
 "notification banners are off (do not disturb) and no focus mode is active; "
 "turn do not disturb off in the notification list if this is not intended"
@@ -3148,40 +3223,40 @@ msgstr ""
 "банери сповіщень вимкнено (не турбувати), але жоден режим фокусу не "
 "активний; якщо це не навмисно, вимкніть «Не турбувати» в списку сповіщень"
 
-#: crates/themes-core/src/doctor.rs:528
+#: crates/themes-core/src/doctor.rs:533
 #, rust-format
 msgid "compiled the GSettings schemas of {what}"
 msgstr "скомпільовано схеми GSettings: {what}"
 
-#: crates/themes-core/src/doctor.rs:532
+#: crates/themes-core/src/doctor.rs:537
 msgid "gschemas.compiled is missing"
 msgstr "gschemas.compiled відсутній"
 
-#: crates/themes-core/src/doctor.rs:533
+#: crates/themes-core/src/doctor.rs:538
 msgid "gschemas.compiled is older than the schema files"
 msgstr "gschemas.compiled старіший за файли схем"
 
-#: crates/themes-core/src/doctor.rs:534
+#: crates/themes-core/src/doctor.rs:539
 #, rust-format
 msgid "gschemas.compiled does not contain {schema}"
 msgstr "gschemas.compiled не містить {schema}"
 
-#: crates/themes-core/src/doctor.rs:540
+#: crates/themes-core/src/doctor.rs:545
 #, rust-format
 msgid "{what}: {why} (themes doctor --fix runs glib-compile-schemas)"
 msgstr "{what}: {why} (themes doctor --fix запустить glib-compile-schemas)"
 
-#: crates/themes-core/src/doctor.rs:578
+#: crates/themes-core/src/doctor.rs:583
 #, rust-format
 msgid "the GSettings schema {schema} is not installed (run data/install.sh)"
 msgstr "схему GSettings {schema} не встановлено (запустіть data/install.sh)"
 
-#: crates/themes-core/src/doctor.rs:607
+#: crates/themes-core/src/doctor.rs:612
 #, rust-format
 msgid "the extension {uuid}"
 msgstr "розширення {uuid}"
 
-#: crates/themes-core/src/doctor.rs:627
+#: crates/themes-core/src/doctor.rs:632
 #, rust-format
 msgid ""
 "{key} holds a value that is not allowed ({why}); it is ignored (gsettings "
@@ -3190,12 +3265,12 @@ msgstr ""
 "{key} має недопустиме значення ({why}); його ігноровано (скиньте через "
 "gsettings reset або змініть у вікні)"
 
-#: crates/themes-core/src/doctor.rs:671
+#: crates/themes-core/src/doctor.rs:676
 #, rust-format
 msgid "generated the token files of the theme “{theme}”"
 msgstr "згенеровано файли токенів теми «{theme}»"
 
-#: crates/themes-core/src/doctor.rs:679 crates/themes-core/src/overlay.rs:225
+#: crates/themes-core/src/doctor.rs:684 crates/themes-core/src/overlay.rs:225
 #, rust-format
 msgid ""
 "the files generated from tokens.toml of the theme “{theme}” are missing or "
@@ -3204,16 +3279,16 @@ msgstr ""
 "файли, згенеровані з tokens.toml теми «{theme}», відсутні або застарілі "
 "(themes doctor --fix)"
 
-#: crates/themes-core/src/doctor.rs:697
+#: crates/themes-core/src/doctor.rs:702
 #, rust-format
 msgid "updated {path}"
 msgstr "оновлено {path}"
 
-#: crates/themes-core/src/doctor.rs:746
+#: crates/themes-core/src/doctor.rs:751
 msgid "replaced GTK symlinks with Flatpak-compatible copies"
 msgstr "симлінки GTK замінено на копії, сумісні з Flatpak"
 
-#: crates/themes-core/src/doctor.rs:756
+#: crates/themes-core/src/doctor.rs:761
 msgid ""
 "GTK files are symlinked instead of copied; Flatpak apps cannot read them "
 "(themes doctor --fix)"
@@ -3221,7 +3296,7 @@ msgstr ""
 "файли GTK підключено симлінками замість копій; програми Flatpak не можуть їх "
 "прочитати (themes doctor --fix)"
 
-#: crates/themes-core/src/doctor.rs:775
+#: crates/themes-core/src/doctor.rs:780
 msgid ""
 "Flatpak apps do not have read access to ~/.config/gtk-4.0; run: flatpak "
 "override --user --filesystem=xdg-config/gtk-4.0:ro"
@@ -3229,11 +3304,11 @@ msgstr ""
 "програми Flatpak не мають доступу на читання до ~/.config/gtk-4.0; "
 "виконайте: flatpak override --user --filesystem=xdg-config/gtk-4.0:ro"
 
-#: crates/themes-core/src/doctor.rs:800
+#: crates/themes-core/src/doctor.rs:805
 msgid "removed the wallpaper palette"
 msgstr "палітру шпалер прибрано"
 
-#: crates/themes-core/src/doctor.rs:809
+#: crates/themes-core/src/doctor.rs:814
 msgid ""
 "a wallpaper palette is left in the libadwaita stylesheet, but “Accent from "
 "wallpaper” is off (themes doctor --fix)"
@@ -3241,7 +3316,7 @@ msgstr ""
 "у стилях libadwaita лишилася палітра шпалер, але «Акцент за шпалерами» "
 "вимкнено (themes doctor --fix)"
 
-#: crates/themes-core/src/doctor.rs:822
+#: crates/themes-core/src/doctor.rs:827
 #, rust-format
 msgid ""
 "the libadwaita colours of the theme “{theme}” follow the wallpaper (seed "
@@ -3250,7 +3325,7 @@ msgstr ""
 "кольори libadwaita теми «{theme}» беруться зі шпалер (базовий колір "
 "{colour}): {path}"
 
-#: crates/themes-core/src/doctor.rs:837
+#: crates/themes-core/src/doctor.rs:842
 #, rust-format
 msgid ""
 "the accent follows the wallpaper (deskd): {accent} from the seed colour "
@@ -3259,7 +3334,7 @@ msgstr ""
 "акцент іде за шпалерами (deskd): {accent} з базового кольору {colour}; "
 "вимкнення «Акцент за шпалерами» поверне {original}"
 
-#: crates/themes-core/src/doctor.rs:874
+#: crates/themes-core/src/doctor.rs:879
 #, rust-format
 msgid ""
 "theme “{theme}” has been removed; switch to “{replacement}” (themes doctor --"
@@ -3268,12 +3343,12 @@ msgstr ""
 "тему «{theme}» прибрано; перемкніться на «{replacement}» (themes doctor --"
 "fix)"
 
-#: crates/themes-core/src/doctor.rs:883
+#: crates/themes-core/src/doctor.rs:888
 #, rust-format
 msgid "switched retired theme “{theme}” to “{replacement}”"
 msgstr "застарілу тему «{theme}» перемкнено на «{replacement}»"
 
-#: crates/themes-core/src/doctor.rs:898
+#: crates/themes-core/src/doctor.rs:903
 #, rust-format
 msgid ""
 "extension {uuid} is no longer used by any bundled theme (themes doctor --fix "
@@ -3282,7 +3357,7 @@ msgstr ""
 "розширення {uuid} більше не використовується жодною вбудованою темою (themes "
 "doctor --fix вимкне його)"
 
-#: crates/themes-core/src/doctor.rs:903
+#: crates/themes-core/src/doctor.rs:908
 #, rust-format
 msgid ""
 "extension {uuid} is still installed but no longer used by any bundled theme; "
@@ -3291,46 +3366,46 @@ msgstr ""
 "розширення {uuid} досі встановлено, але більше не використовується жодною "
 "вбудованою темою; його можна видалити"
 
-#: crates/themes-core/src/doctor.rs:916
+#: crates/themes-core/src/doctor.rs:921
 #, rust-format
 msgid "turned off retired extension {uuid}"
 msgstr "вимкнено застаріле розширення {uuid}"
 
-#: crates/themes-core/src/doctor.rs:987
+#: crates/themes-core/src/doctor.rs:992
 #, rust-format
 msgid "journal: {line}"
 msgstr "журнал: {line}"
 
-#: crates/themes-core/src/doctor.rs:1057
+#: crates/themes-core/src/doctor.rs:1078
 #, rust-format
 msgid "the GNOME Shell version changed: {old} → {new} (after a system update)"
 msgstr "версія GNOME Shell змінилася: {old} → {new} (після оновлення системи)"
 
-#: crates/themes-core/src/doctor.rs:1086
+#: crates/themes-core/src/doctor.rs:1108
 msgid "out of date (OUT_OF_DATE) for this GNOME version"
 msgstr "застаріле (OUT_OF_DATE) для цієї версії GNOME"
 
-#: crates/themes-core/src/doctor.rs:1088
+#: crates/themes-core/src/doctor.rs:1110
 msgid "error (ERROR)"
 msgstr "помилка (ERROR)"
 
-#: crates/themes-core/src/doctor.rs:1110
+#: crates/themes-core/src/doctor.rs:1132
 #, rust-format
 msgid "{uuid}: enabled but not installed"
 msgstr "{uuid}: увімкнене, але не встановлене"
 
-#: crates/themes-core/src/doctor.rs:1118
+#: crates/themes-core/src/doctor.rs:1140
 #, rust-format
 msgid "{uuid}: installed, but the shell has not loaded it yet (log in again)"
 msgstr ""
 "{uuid}: встановлене, але оболонка його ще не завантажила (потрібен перевхід)"
 
-#: crates/themes-core/src/doctor.rs:1130
+#: crates/themes-core/src/doctor.rs:1152
 #, rust-format
 msgid "{uuid}: metadata.json does not support GNOME {version}"
 msgstr "{uuid}: metadata.json не підтримує GNOME {version}"
 
-#: crates/themes-core/src/doctor.rs:1147
+#: crates/themes-core/src/doctor.rs:1169
 #, rust-format
 msgid ""
 "extension {uuid} (the desktop bridge: “Theme” in quick settings, clipboard) "
@@ -3339,27 +3414,27 @@ msgstr ""
 "розширення {uuid} (міст робочого столу: «Тема» у швидких налаштуваннях, "
 "буфер обміну) не встановлене"
 
-#: crates/themes-core/src/doctor.rs:1155
+#: crates/themes-core/src/doctor.rs:1177
 #, rust-format
 msgid "extension {uuid} is disabled"
 msgstr "розширення {uuid} вимкнене"
 
-#: crates/themes-core/src/doctor.rs:1178
+#: crates/themes-core/src/doctor.rs:1203
 #, rust-format
 msgid "{uuid} turned off {since} ({reason})"
 msgstr "{uuid} вимкнено {since} ({reason})"
 
-#: crates/themes-core/src/doctor.rs:1219
+#: crates/themes-core/src/doctor.rs:1244
 #, rust-format
 msgid "turned off {uuid}"
 msgstr "вимкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1277
+#: crates/themes-core/src/doctor.rs:1302
 #, rust-format
 msgid "turned on {uuid}"
 msgstr "увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1311
+#: crates/themes-core/src/doctor.rs:1336
 msgid ""
 "GNOME turned extensions off after a shell crash. Open Themes to turn them on "
 "again."
@@ -3367,18 +3442,18 @@ msgstr ""
 "GNOME вимкнув розширення після збою оболонки. Відкрийте «Теми», щоб "
 "увімкнути їх знову."
 
-#: crates/themes-core/src/doctor.rs:1316
+#: crates/themes-core/src/doctor.rs:1341
 #, rust-format
 msgid "GNOME updated: {old} → {new}"
 msgstr "GNOME оновлено: {old} → {new}"
 
-#: crates/themes-core/src/doctor.rs:1325 crates/themes/src/cli.rs:504
+#: crates/themes-core/src/doctor.rs:1350 crates/themes/src/cli.rs:504
 #: crates/themes/src/gui/window.rs:1357
 #, rust-format
 msgid "turned on again: {uuid}"
 msgstr "знову увімкнено {uuid}"
 
-#: crates/themes-core/src/doctor.rs:1328
+#: crates/themes-core/src/doctor.rs:1353
 msgid "Themes: system check"
 msgstr "Теми: перевірка системи"
 
