@@ -8,10 +8,23 @@ shortcut, by dragging to a screen edge, or by choosing a layout from a picker; a
 
 ## Status
 
-**Planned** (stage 4) as our own implementation. Today only the stock edge tiling of GNOME is on (`windows11`
-behaviour sets `edge-tiling=true`) and the `windows11` theme enables the third-party extension **Tiling Shell**
-(`tilingshell@ferrarodomenico.com`; GPL-3.0-or-later) for snap layouts: status of that
-path **Partial**. Origin badge: *In Windows 11 and macOS* (tiling); always-on-top *from Windows (PowerToys)*.
+**Implemented** (stage 4) as our own engine: `desk-layouts` and deskd (`io.github.OlehDzhumyk.Desk.Layouts`) keep
+and resolve the layouts; the bridge (`bridge/src/layouts/`) draws the picker per skin, the zone preview and snap
+assist, snaps the focused window and toggles always-on-top (AC-WIN-01..06 on the bridge side). Gaps, honestly:
+
+* no hover picker on the maximise button yet (the `hover-picker` setting is stored but not used);
+* no drag-to-edge or `Shift`/`Alt`-drag zones: dragging still uses GNOME's own edge tiling;
+* `Super+Arrows` / `Ctrl+Super+Arrows` snapping is GNOME's (the behaviour module), not our zones (AC-WIN-08 only
+  in part: snap assist defaults are per theme);
+* the bridge does not pass a window's minimum size to `ResolveZones`, so a window larger than its zone may still
+  overlap its neighbour (AC-WIN-07);
+* after a monitor change the picker and preview close and Mutter keeps windows on the remaining monitors
+  (AC-WIN-04), but windows do not re-snap into their old zone;
+* no pin badge or coloured border for an always-on-top window: only a short toast «Pinned on top» / «Unpinned».
+
+The `windows11` theme still enables the third-party extension **Tiling Shell**
+(`tilingshell@ferrarodomenico.com`; GPL-3.0-or-later) for drag-to-edge layouts. Origin badge: *In Windows 11 and
+macOS* (tiling); always-on-top *from Windows (PowerToys)*.
 
 ## Reference behaviour
 
@@ -112,7 +125,7 @@ motion events with one 600 ms one-shot timer only while hovering); deskd stays <
 
 ## Open questions
 
-1. Replace Tiling Shell with our own engine, or keep integrating it and only skin it (principle 5)? Its custom-layout editor is
-   substantial.
+1. Drop Tiling Shell once our drag zones exist, or keep it for drag-to-edge only (principle 5)? Its custom-layout
+   editor is substantial.
 2. Should tiled windows resize together (macOS) in all skins?
 3. Groups restore (Windows) when a monitor is reconnected: in scope?

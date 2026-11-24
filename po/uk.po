@@ -425,6 +425,70 @@ msgstr "Налаштування фокусу…"
 msgid "Focus session ended"
 msgstr "Сеанс фокусування завершено"
 
+#: bridge/src/layouts/assist.ts:106
+msgid "Press 1–9 or click a window; Esc skips"
+msgstr "Натисніть 1–9 або клацніть вікно; Esc — пропустити"
+
+#: bridge/src/layouts/assist.ts:163
+msgid "Choose a window for zone {number} of {count}"
+msgstr "Виберіть вікно для зони {number} з {count}"
+
+#: bridge/src/layouts/assist.ts:172
+msgid "Untitled window"
+msgstr "Вікно без назви"
+
+#: bridge/src/layouts/assist.ts:182
+msgid "{number}: {title}"
+msgstr "{number}: {title}"
+
+#: bridge/src/layouts/feature.ts:180
+msgid "Unpinned"
+msgstr "Відкріплено"
+
+#: bridge/src/layouts/feature.ts:183
+msgid "Pinned on top"
+msgstr "Закріплено поверх інших"
+
+#: bridge/src/layouts/picker.ts:36
+msgid "Halves"
+msgstr "Половини"
+
+#: bridge/src/layouts/picker.ts:37
+msgid "Thirds"
+msgstr "Третини"
+
+#: bridge/src/layouts/picker.ts:38
+msgid "Two-thirds"
+msgstr "Дві третини"
+
+#: bridge/src/layouts/picker.ts:39
+msgid "Quarters"
+msgstr "Чверті"
+
+#: bridge/src/layouts/picker.ts:41
+msgid "Stack"
+msgstr "Стос"
+
+#: bridge/src/layouts/picker.ts:120
+msgid "Move & Resize"
+msgstr "Перемістити та змінити розмір"
+
+#: bridge/src/layouts/picker.ts:120
+msgid "Snap layouts"
+msgstr "Розкладки прикріплення"
+
+#: bridge/src/layouts/picker.ts:153
+msgid "Arrow keys choose, Enter places the window, Esc closes"
+msgstr "Стрілки — вибір, Enter — розмістити вікно, Esc — закрити"
+
+#: bridge/src/layouts/picker.ts:181
+msgid "Layout {name}"
+msgstr "Розкладка {name}"
+
+#: bridge/src/layouts/picker.ts:199
+msgid "Layout {name}, zone {number} of {count}"
+msgstr "Розкладка {name}, зона {number} з {count}"
+
 #: bridge/src/logoMenu/actions.ts:76
 msgid "this window"
 msgstr "це вікно"
