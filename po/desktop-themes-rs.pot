@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 08:23+0000\n"
+"POT-Creation-Date: 2026-11-24 08:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -994,6 +994,7 @@ msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
+#: crates/desk-shell/src/quick_settings.rs:138
 msgid "Volume mixer"
 msgstr ""
 
@@ -1495,8 +1496,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
-#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:86
-#: crates/desk-shell/src/taskbar.rs:89
+#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:83
+#: crates/desk-shell/src/taskbar.rs:86
 msgid "Search"
 msgstr ""
 
@@ -1612,9 +1613,106 @@ msgid ""
 "follows the skin of the current theme."
 msgstr ""
 
-#: crates/desk-shell/src/main.rs:107 crates/deskd/src/search/mod.rs:179
+#: crates/desk-shell/src/clipboard_flyout.rs:62
+#: crates/desk-shell/src/clipboard_flyout.rs:84
+#: crates/desk-shell/src/clipboard_flyout.rs:104
+#: crates/desk-shell/src/taskbar.rs:111
+msgid "Clipboard history"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:68
+msgid "Private mode is on: new items are not recorded"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:73
+msgid "Clear all"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:161
+msgid ""
+"The clipboard history is not available: the desktop service is not running"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:163
+msgid "The clipboard history is empty"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:194
+#: crates/desk-shell/src/clipboard_flyout.rs:225
+msgid "Pinned item"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:199
+msgid "Pin"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:199
+msgid "Unpin"
+msgstr ""
+
+#: crates/desk-shell/src/clipboard_flyout.rs:212
+#: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
+msgid "Delete"
+msgstr ""
+
+#: crates/desk-shell/src/main.rs:121 crates/deskd/src/search/mod.rs:179
 #, rust-format
 msgid "Search the web for “{query}”"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:93
+msgid "Mute"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:93
+msgid "Unmute"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:123
+#: crates/desk-shell/src/taskbar.rs:126
+msgid "Quick settings"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:124
+msgid "Dark mode"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:125
+#: crates/deskd/src/focus/model.rs:186
+msgid "Do not disturb"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:126
+msgid "Private clipboard"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:157
+msgid "Screenshot"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:160
+msgid "Settings hub"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:192
+msgid "Sound"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:202
+msgid "Volume"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:315
+msgid "Sound is not available: the desktop service is not running"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:317
+msgid "No output device"
+msgstr ""
+
+#: crates/desk-shell/src/quick_settings.rs:370
+#, rust-format
+msgid "Volume of {app}"
 msgstr ""
 
 #: crates/desk-shell/src/start_menu.rs:89
@@ -1637,7 +1735,7 @@ msgstr ""
 msgid "Emoji"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:76
+#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:73
 msgid "Start menu"
 msgstr ""
 
@@ -1669,23 +1767,7 @@ msgstr ""
 msgid "No results"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:126
-msgid "The clipboard history is empty"
-msgstr ""
-
-#: crates/desk-shell/src/taskbar.rs:153
-msgid "Clipboard history"
-msgstr ""
-
-#: crates/desk-shell/src/taskbar.rs:207
-msgid "Desktop themes and settings"
-msgstr ""
-
-#: crates/desk-shell/src/taskbar.rs:212
-msgid "Take a screenshot"
-msgstr ""
-
-#: crates/desk-shell/src/taskbar.rs:228
+#: crates/desk-shell/src/taskbar.rs:195
 msgid "Taskbar"
 msgstr ""
 
@@ -1704,10 +1786,6 @@ msgstr ""
 msgid ""
 "the schema {schema} is not installed (data/install.sh), using the default "
 "settings"
-msgstr ""
-
-#: crates/deskd/src/focus/model.rs:186
-msgid "Do not disturb"
 msgstr ""
 
 #: crates/deskd/src/focus/model.rs:192
@@ -3477,10 +3555,6 @@ msgstr ""
 msgid "Edit {mode}"
 msgstr ""
 
-#: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
-msgid "Delete"
-msgstr ""
-
 #: crates/themes/src/gui/focus.rs:258
 #, rust-format
 msgid "Delete {mode}"
@@ -4524,10 +4598,6 @@ msgstr ""
 msgid "Symbols"
 msgstr ""
 
-#: bridge/src/clipboard/winFlyout.ts:68
-msgid "Clear all"
-msgstr ""
-
 #: bridge/src/clipboard/winFlyout.ts:221
 msgid "Private mode is on: copies are not kept."
 msgstr ""
@@ -4536,14 +4606,6 @@ msgstr ""
 msgid ""
 "Copied items will show up here.\n"
 "Press Ctrl+C to copy."
-msgstr ""
-
-#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
-msgid "Pin"
-msgstr ""
-
-#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
-msgid "Unpin"
 msgstr ""
 
 #: bridge/src/clipboard/winFlyout.ts:250
@@ -4874,10 +4936,6 @@ msgstr ""
 msgid "Could not switch the device"
 msgstr ""
 
-#: bridge/src/mixer/feature.ts:201
-msgid "Sound"
-msgstr ""
-
 #: bridge/src/mixer/feature.ts:209
 msgid "Output"
 msgstr ""
@@ -5203,10 +5261,6 @@ msgstr ""
 
 #: bridge/src/shortcutGuide/reader.ts:89
 msgid "Notifications and calendar"
-msgstr ""
-
-#: bridge/src/shortcutGuide/reader.ts:90
-msgid "Quick settings"
 msgstr ""
 
 #: bridge/src/shortcutGuide/reader.ts:91

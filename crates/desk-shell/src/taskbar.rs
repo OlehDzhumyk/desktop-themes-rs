@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The Windows 11 taskbar: a 48 px layer surface along the bottom edge (`Layer::Top`, exclusive
 //! zone), with the Start button, the Search pill and the pinned applications in the centre, and
-//! the quick actions, the clock and the date on the right.
+//! the clipboard history button, the quick settings pill, the clock and the date on the right.
 
 use std::rc::Rc;
 
@@ -10,8 +10,10 @@ use desk_settings::tr;
 use gtk::prelude::*;
 use gtk::{gio, glib};
 
+use crate::clipboard_flyout::ClipboardFlyout;
 use crate::layer_shell::{Edge, KeyboardMode, Layer, Placement};
-use crate::{capture, deskd, launch, layer_shell, start_menu::StartMenu};
+use crate::quick_settings::QuickSettings;
+use crate::{deskd, launch, layer_shell, start_menu::StartMenu};
 
 /// The height of the bar.
 pub const HEIGHT: i32 = 48;
@@ -24,11 +26,6 @@ const PLACEMENT: Placement = Placement {
     exclusive_zone: true,
     keyboard: KeyboardMode::None,
 };
-
-/// How many clipboard items the clipboard button lists.
-const CLIP_ITEMS: u32 = 8;
-/// The longest clipboard preview, in characters.
-const CLIP_PREVIEW: usize = 48;
 
 /// `HH:MM` and `DD.MM.YYYY` of `t`.
 pub fn clock_texts(t: &glib::DateTime) -> (String, String) {
@@ -107,52 +104,29 @@ fn pin_button(entry: &DesktopEntry) -> gtk::Button {
     button
 }
 
-fn tray_button(icon: &str, name: &str, on_click: impl Fn(&gtk::Button) + 'static) -> gtk::Button {
-    let button = gtk::Button::from_icon_name(icon);
-    name_widget(&button, name);
-    button.connect_clicked(on_click);
+fn clipboard_button(clip: &Rc<ClipboardFlyout>) -> gtk::ToggleButton {
+    let button = gtk::ToggleButton::builder()
+        .icon_name("edit-paste-symbolic")
+        .build();
+    name_widget(&button, &tr!("Clipboard history"));
+    let c = Rc::clone(clip);
+    button.connect_clicked(move |_| c.toggle());
+    clip.set_button(&button);
     button
 }
 
-/// Fill `list` with the recent clipboard items; a click restores one.
-fn fill_clipboard(popover: &gtk::Popover, list: &gtk::Box) {
-    while let Some(child) = list.first_child() {
-        list.remove(&child);
-    }
-    let (popover, list) = (popover.clone(), list.clone());
-    deskd::clipboard_list(CLIP_ITEMS, move |rows| {
-        if rows.is_empty() {
-            list.append(&gtk::Label::new(Some(&tr!(
-                "The clipboard history is empty"
-            ))));
-        }
-        for row in rows {
-            let label = gtk::Label::builder()
-                .label(deskd::preview(&row.text, CLIP_PREVIEW))
-                .xalign(0.0)
-                .build();
-            let button = gtk::Button::builder().child(&label).build();
-            button.add_css_class("flat");
-            let p = popover.clone();
-            button.connect_clicked(move |_| {
-                deskd::clipboard_activate(row.id);
-                p.popdown();
-            });
-            list.append(&button);
-        }
-    });
-}
-
-fn clipboard_button() -> gtk::MenuButton {
-    let list = gtk::Box::new(gtk::Orientation::Vertical, 2);
-    let popover = gtk::Popover::builder().child(&list).build();
-    let button = gtk::MenuButton::builder()
-        .icon_name("edit-paste-symbolic")
-        .popover(&popover)
-        .build();
-    name_widget(&button, &tr!("Clipboard history"));
-    let l = list.clone();
-    popover.connect_show(move |p| fill_clipboard(p, &l));
+/// The Windows 11 system tray pill: the output volume; a click opens the quick settings.
+fn quick_settings_pill(quick: &Rc<QuickSettings>) -> gtk::ToggleButton {
+    let content = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    let volume = gtk::Image::from_icon_name("audio-volume-high-symbolic");
+    content.append(&volume);
+    content.append(&gtk::Image::from_icon_name("emblem-system-symbolic"));
+    let button = gtk::ToggleButton::builder().child(&content).build();
+    button.add_css_class("desk-shell-tray-pill");
+    name_widget(&button, &tr!("Quick settings"));
+    let q = Rc::clone(quick);
+    button.connect_clicked(move |_| q.toggle());
+    quick.attach_pill(&button, &volume);
     button
 }
 
@@ -200,19 +174,10 @@ fn center(menu: &Rc<StartMenu>, pins: &[&DesktopEntry]) -> gtk::Box {
     center
 }
 
-fn tray() -> gtk::Box {
+fn tray(quick: &Rc<QuickSettings>, clip: &Rc<ClipboardFlyout>) -> gtk::Box {
     let tray = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-    tray.append(&tray_button(
-        "preferences-desktop-appearance-symbolic",
-        &tr!("Desktop themes and settings"),
-        |_| launch::open_settings_hub(),
-    ));
-    tray.append(&tray_button(
-        "camera-photo-symbolic",
-        &tr!("Take a screenshot"),
-        |_| capture::take_screenshot(),
-    ));
-    tray.append(&clipboard_button());
+    tray.append(&clipboard_button(clip));
+    tray.append(&quick_settings_pill(quick));
     tray.append(&clock());
     tray
 }
@@ -221,6 +186,8 @@ fn tray() -> gtk::Box {
 pub fn build(
     app: &gtk::Application,
     menu: &Rc<StartMenu>,
+    quick: &Rc<QuickSettings>,
+    clip: &Rc<ClipboardFlyout>,
     pins: &[&DesktopEntry],
 ) -> gtk::ApplicationWindow {
     let window = gtk::ApplicationWindow::builder()
@@ -231,7 +198,7 @@ pub fn build(
     let bar = gtk::CenterBox::new();
     bar.add_css_class("desk-shell-taskbar");
     bar.set_center_widget(Some(&center(menu, pins)));
-    bar.set_end_widget(Some(&tray()));
+    bar.set_end_widget(Some(&tray(quick, clip)));
     window.set_child(Some(&bar));
     if !layer_shell::place(&window, &PLACEMENT) {
         // a preview window on desktops without wlr-layer-shell

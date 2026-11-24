@@ -1,19 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `desk-shell`: the DE-agnostic Wayland desktop shell of desktop-themes-rs (ADR 0012).
 //!
-//! A taskbar and a Start/Search flyout drawn as `wlr-layer-shell` surfaces on labwc, niri, sway,
+//! A taskbar, a Start/Search flyout, a quick settings flyout (toggles and the volume mixer) and a
+//! clipboard history flyout drawn as `wlr-layer-shell` surfaces on labwc, niri, sway,
 //! Hyprland, KWin or COSMIC, with `deskd` and `desk-search` behind them. Without layer-shell
 //! (GNOME, `--windowed`) the same surfaces open as normal windows for previews and tests.
 //!
 //! One instance runs per session (GTK application `io.github.OlehDzhumyk.DeskShell`); a second
-//! `desk-shell --toggle-start`, bound to a key in the compositor, only toggles the flyout of the
-//! running one over D-Bus.
+//! `desk-shell --toggle-start` (or `--toggle-quick-settings`, `--toggle-clipboard`), bound to a
+//! key in the compositor, only toggles that flyout of the running one over D-Bus.
 
 mod capture;
+mod clipboard_flyout;
 mod deskd;
+mod flyout;
 mod launch;
 mod layer_shell;
 mod pinned;
+mod quick_settings;
 mod start_menu;
 mod style;
 mod taskbar;
@@ -28,6 +32,8 @@ use desk_settings::i18n::gettext;
 use gtk::prelude::*;
 use gtk::{gio, glib};
 
+use clipboard_flyout::ClipboardFlyout;
+use quick_settings::QuickSettings;
 use start_menu::StartMenu;
 
 /// The GTK application id (single instance over D-Bus).
@@ -63,6 +69,12 @@ struct Args {
     /// Toggle the Start/Search flyout of the running shell (start it if none runs)
     #[arg(long)]
     toggle_start: bool,
+    /// Toggle the quick settings flyout of the running shell (start it if none runs)
+    #[arg(long)]
+    toggle_quick_settings: bool,
+    /// Toggle the clipboard history flyout of the running shell (start it if none runs)
+    #[arg(long)]
+    toggle_clipboard: bool,
 }
 
 /// The skin to draw: the flag, else the setting, else Windows 11 (the first supported one).
@@ -77,6 +89,8 @@ fn skin_for(flag: Option<SkinArg>, setting: Option<Skin>) -> Skin {
 /// The running shell of the primary instance.
 struct Shell {
     menu: Rc<StartMenu>,
+    quick: Rc<QuickSettings>,
+    clip: Rc<ClipboardFlyout>,
 }
 
 fn default_browser() -> Option<String> {
@@ -109,7 +123,9 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
     // read-only: deskd owns search-usage.json and counts launches (RecordLaunch)
     let usage = UsageStore::load(UsageStore::default_path(), true);
     let menu = StartMenu::new(app, Catalog::new(apps.clone(), gettext), usage, opts, &grid);
-    let bar = taskbar::build(app, &menu, &pins);
+    let quick = QuickSettings::new(app);
+    let clip = ClipboardFlyout::new(app);
+    let bar = taskbar::build(app, &menu, &quick, &clip, &pins);
     for w in app.windows() {
         look.apply(&w);
     }
@@ -129,7 +145,7 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
         settings.connect_gtk_interface_contrast_notify(restyle);
     }
     bar.present();
-    Shell { menu }
+    Shell { menu, quick, clip }
 }
 
 fn command_line(
@@ -150,7 +166,14 @@ fn command_line(
     let running = shell.get_or_insert_with(|| build(app, &args));
     if args.toggle_start {
         running.menu.toggle();
-    } else if !first {
+    }
+    if args.toggle_quick_settings {
+        running.quick.toggle();
+    }
+    if args.toggle_clipboard {
+        running.clip.toggle();
+    }
+    if !first && !(args.toggle_start || args.toggle_quick_settings || args.toggle_clipboard) {
         eprintln!("desk-shell: already running");
     }
     glib::ExitCode::SUCCESS
@@ -185,7 +208,11 @@ mod tests {
         assert_eq!(a.skin, Some(SkinArg::Macos));
         assert!(a.windowed && !a.toggle_start);
         let a = Args::try_parse_from(["desk-shell", "--toggle-start"]).unwrap();
-        assert!(a.toggle_start);
+        assert!(a.toggle_start && !a.toggle_quick_settings && !a.toggle_clipboard);
+        let a = Args::try_parse_from(["desk-shell", "--toggle-quick-settings"]).unwrap();
+        assert!(a.toggle_quick_settings && !a.toggle_start);
+        let a = Args::try_parse_from(["desk-shell", "--toggle-clipboard"]).unwrap();
+        assert!(a.toggle_clipboard && !a.toggle_start);
         assert!(Args::try_parse_from(["desk-shell", "--skin", "aqua"]).is_err());
     }
 
