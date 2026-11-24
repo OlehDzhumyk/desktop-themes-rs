@@ -34,6 +34,8 @@ pub struct DesktopEntry {
     pub exec: String,
     /// `Icon`: a theme icon name or an absolute path.
     pub icon: String,
+    /// `StartupWMClass`: window class or Wayland `app_id`, when declared by the entry.
+    pub startup_wm_class: Option<String>,
 }
 
 impl DesktopEntry {
@@ -188,6 +190,10 @@ fn main_group(text: &str) -> Vec<(&str, &str)> {
 }
 
 /// What the parser decided about one file.
+#[allow(
+    clippy::large_enum_variant,
+    reason = "short-lived return value immediately unpacked by scan"
+)]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Parsed {
     /// An application to list.
@@ -257,6 +263,9 @@ pub fn parse(id: &str, text: &str, opts: &ParseOptions) -> Option<Parsed> {
         keywords,
         exec,
         icon: get("Icon").map_or_default(unescape),
+        startup_wm_class: get("StartupWMClass")
+            .map(unescape)
+            .filter(|v| !v.is_empty()),
     }))
 }
 
@@ -524,5 +533,27 @@ Exec=gnome-text-editor --new-window
     fn application_dirs_join_applications() {
         let dirs = application_dirs(&[PathBuf::from("/usr/share")]);
         assert_eq!(dirs, [PathBuf::from("/usr/share/applications")]);
+    }
+
+    #[test]
+    fn parses_startup_wm_class() {
+        let opts = ParseOptions::default();
+        let base = shown("org.gnome.TextEditor.desktop", EDITOR, &opts);
+        assert_eq!(base.startup_wm_class, None);
+
+        let with_wm = EDITOR.replace("Type=Application", "Type=Application\nStartupWMClass=Code");
+        let e = shown("code.desktop", &with_wm, &opts);
+        assert_eq!(e.startup_wm_class.as_deref(), Some("Code"));
+
+        let esc = EDITOR.replace(
+            "Type=Application",
+            "Type=Application\nStartupWMClass=My\\sApp",
+        );
+        let e = shown("myapp.desktop", &esc, &opts);
+        assert_eq!(e.startup_wm_class.as_deref(), Some("My App"));
+
+        let empty = EDITOR.replace("Type=Application", "Type=Application\nStartupWMClass=");
+        let e = shown("empty.desktop", &empty, &opts);
+        assert_eq!(e.startup_wm_class, None);
     }
 }

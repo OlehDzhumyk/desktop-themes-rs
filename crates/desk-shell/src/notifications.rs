@@ -18,6 +18,7 @@ use gtk::glib::{self, Variant};
 use gtk::prelude::*;
 
 use crate::deskd;
+use crate::flyout::MARGIN;
 use crate::layer_shell::{self, Edge, KeyboardMode, Layer, Placement};
 use crate::taskbar::{icon_of, name_widget};
 
@@ -62,8 +63,8 @@ const TOAST_PLACEMENT: Placement = Placement {
     namespace: "desk-shell-notifications",
     layer: Layer::Overlay,
     anchors: &[Edge::Bottom, Edge::Right],
-    // 12 px above the 48 px taskbar and 12 px from the right screen edge.
-    margins: &[(Edge::Bottom, 60), (Edge::Right, 12)],
+    // 12 px above the taskbar's 48 px exclusive zone and 12 px from the right screen edge.
+    margins: &[(Edge::Bottom, MARGIN), (Edge::Right, MARGIN)],
     exclusive_zone: false,
     keyboard: KeyboardMode::None,
 };
@@ -944,7 +945,8 @@ mod tests {
         assert_eq!(TOAST_PLACEMENT.layer, Layer::Overlay);
         assert_eq!(TOAST_PLACEMENT.keyboard, KeyboardMode::None);
         assert_eq!(TOAST_PLACEMENT.anchors, &[Edge::Bottom, Edge::Right]);
-        assert!(TOAST_PLACEMENT.margins.contains(&(Edge::Bottom, 60)));
+        assert!(TOAST_PLACEMENT.margins.contains(&(Edge::Bottom, MARGIN)));
+        assert!(TOAST_PLACEMENT.margins.contains(&(Edge::Right, MARGIN)));
         const { assert!(!TOAST_PLACEMENT.exclusive_zone) };
     }
 }

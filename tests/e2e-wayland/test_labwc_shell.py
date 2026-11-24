@@ -27,6 +27,8 @@ FLYOUTS = {
     '--toggle-quick-settings': 'desk-shell-quick-settings',
     '--toggle-clipboard': 'desk-shell-clipboard',
 }
+TASKBAR_SURFACE = (r'-> zwlr_layer_shell_v1#\d+\.get_layer_surface'
+                   r'\(new id zwlr_layer_surface_v1#\d+, wl_surface#(\d+),.*"desk-shell-taskbar"\)')
 
 
 def layer_surface(log, namespace, since=0):
@@ -44,8 +46,17 @@ def test_desk_shell_loads_gtk4_layer_shell(session):
 def test_taskbar_is_a_layer_surface_on_labwc(session):
     log = session.logs['desk-shell']
     taskbar = layer_surface(log, 'desk-shell-taskbar')
+    surface = log.wait(TASKBAR_SURFACE).group(1)
     # auto exclusive zone: labwc keeps windows off the bar once GTK knows its height (48 px)
     log.wait(rf'-> zwlr_layer_surface_v1#{taskbar}\.set_exclusive_zone\(48\)')
+    # full monitor width: without resizable(false), GTK honours labwc's configure(output_width, 48)
+    cfg = log.wait(rf'zwlr_layer_surface_v1#{taskbar}\.configure\(\d+,\s*(\d+),\s*48\)')
+    width = int(cfg.group(1))
+    assert width >= 1280, f'expected full-width taskbar configure (>= 1280), got {width}x48'
+    log.wait(
+        rf'-> (?:wl_surface#{surface}\.damage_buffer\(0,\s*0,\s*{width},\s*48\)'
+        rf'|wl_shm_pool#\d+\.create_buffer\(.*,\s*{width},\s*48,\s*\d+,\s*\d+\))'
+    )
 
 
 def test_labwc_accepts_the_bundled_config(session):
@@ -175,8 +186,6 @@ def activate(app):
 app.connect('activate', activate)
 sys.exit(app.run(None))
 '''
-TASKBAR_SURFACE = (r'-> zwlr_layer_shell_v1#\d+\.get_layer_surface'
-                   r'\(new id zwlr_layer_surface_v1#\d+, wl_surface#(\d+),.*"desk-shell-taskbar"\)')
 
 
 def test_running_window_updates_the_taskbar(session):

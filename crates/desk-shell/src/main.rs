@@ -295,7 +295,12 @@ fn build(app: &gtk::Application, args: &Args) -> Shell {
     );
     let browser = default_browser();
     let grid = pinned::start_grid(&apps, browser.as_deref());
-    let pins = pinned::taskbar(&apps, browser.as_deref());
+    let pins_path = pinned::pinned_file_path();
+    let user_pins = pins_path.as_deref().and_then(pinned::load_user_pins);
+    let pins = match user_pins.as_deref() {
+        Some(ids) => pinned::resolve_user_pins(ids, &apps),
+        None => pinned::taskbar(&apps, browser.as_deref()),
+    };
     let search = SearchSettings::new();
     let defaults = SearchOptions::default();
     let opts = SearchOptions {

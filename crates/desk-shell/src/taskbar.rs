@@ -26,7 +26,7 @@ use crate::quick_settings::QuickSettings;
 use crate::running::{self, Indicator};
 use crate::sni::{SniItem, SniWatcher, TRAY_ICON_PX};
 use crate::toplevels::{Command, Toplevel, Toplevels, Update};
-use crate::{deskd, launch, layer_shell, start_menu::StartMenu};
+use crate::{deskd, launch, layer_shell, pinned, start_menu::StartMenu};
 
 /// The height of the bar.
 pub const HEIGHT: i32 = 48;
@@ -464,7 +464,7 @@ impl AppButton {
         name_widget(&button, name);
         let windows: Rc<RefCell<Vec<Toplevel>>> = Rc::default();
 
-        let (list, o) = (Rc::clone(&windows), owner.clone());
+        let (list, o, launch_id) = (Rc::clone(&windows), owner.clone(), desktop_id.clone());
         button.connect_clicked(move |_| match running::click(&list.borrow()) {
             Some(cmd) => {
                 if let Some(t) = o.upgrade() {
@@ -472,7 +472,7 @@ impl AppButton {
                 }
             }
             None => {
-                if let Some(id) = &desktop_id
+                if let Some(id) = &launch_id
                     && launch::launch_app(id)
                 {
                     deskd::record_launch(&format!("app:{id}"));
@@ -480,9 +480,11 @@ impl AppButton {
             }
         });
 
-        // the window menu: a right click, or Menu / Shift+F10 on the focused button
+        // the window / pin menu: a right click, or Menu / Shift+F10 on the focused button
         let (list, o) = (Rc::clone(&windows), owner.clone());
-        let open_menu = Rc::new(move |b: &gtk::Button| window_menu(b, &list.borrow(), &o));
+        let open_menu = Rc::new(move |b: &gtk::Button| {
+            window_menu(b, &list.borrow(), desktop_id.as_deref(), &o);
+        });
         let gesture = gtk::GestureClick::builder()
             .button(gdk::BUTTON_SECONDARY)
             .build();
@@ -533,56 +535,105 @@ impl AppButton {
     }
 }
 
-/// The window menu of the focused (else the newest) window of a button.
-fn window_menu(button: &gtk::Button, windows: &[Toplevel], owner: &Weak<Taskbars>) {
-    let Some(w) = running::target(windows) else {
+/// The context menu of a taskbar button: window actions (for the focused, else newest window)
+/// and Pin / Unpin when the button has a known desktop entry.
+fn window_menu(
+    button: &gtk::Button,
+    windows: &[Toplevel],
+    desktop_id: Option<&str>,
+    owner: &Weak<Taskbars>,
+) {
+    let target = running::target(windows);
+    let pin_entry = desktop_id.and_then(|id| {
+        let t = owner.upgrade()?;
+        let is_pinned = t.is_pinned(id);
+        (is_pinned || t.has_app(id)).then(|| (id.to_owned(), is_pinned))
+    });
+    if target.is_none() && pin_entry.is_none() {
         return;
-    };
-    let (id, state) = (w.id, w.state);
-    let items = [
-        (
-            if state.minimized {
-                tr!("Restore")
-            } else {
-                tr!("Minimize")
-            },
-            Command::ToggleMinimize(id),
-        ),
-        (
-            if state.maximized {
-                tr!("Unmaximize")
-            } else {
-                tr!("Maximize")
-            },
-            Command::ToggleMaximize(id),
-        ),
-        (tr!("Close"), Command::Close(id)),
-    ];
+    }
+
     let column = gtk::Box::new(gtk::Orientation::Vertical, 0);
     let popover = gtk::Popover::builder()
         .child(&column)
         .has_arrow(false)
         .build();
     popover.add_css_class("desk-shell-window-menu");
-    for (label, cmd) in items {
+
+    if let Some(w) = target {
+        let (id, state) = (w.id, w.state);
+        let items = [
+            (
+                if state.minimized {
+                    tr!("Restore")
+                } else {
+                    tr!("Minimize")
+                },
+                Command::ToggleMinimize(id),
+            ),
+            (
+                if state.maximized {
+                    tr!("Unmaximize")
+                } else {
+                    tr!("Maximize")
+                },
+                Command::ToggleMaximize(id),
+            ),
+            (tr!("Close"), Command::Close(id)),
+        ];
+        for (label, cmd) in items {
+            let item = gtk::Button::builder().label(label).build();
+            item.add_css_class("flat");
+            let (o, p) = (owner.clone(), popover.downgrade());
+            item.connect_clicked(move |_| {
+                if let Some(t) = o.upgrade() {
+                    t.send(cmd);
+                }
+                if let Some(p) = p.upgrade() {
+                    p.popdown();
+                }
+            });
+            column.append(&item);
+        }
+    }
+
+    if let Some((id, is_pinned)) = pin_entry {
+        if target.is_some() {
+            column.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
+        }
+        let label = if is_pinned { tr!("Unpin") } else { tr!("Pin") };
         let item = gtk::Button::builder().label(label).build();
         item.add_css_class("flat");
         let (o, p) = (owner.clone(), popover.downgrade());
         item.connect_clicked(move |_| {
-            if let Some(t) = o.upgrade() {
-                t.send(cmd);
-            }
             if let Some(p) = p.upgrade() {
                 p.popdown();
             }
+            let (o, p, id) = (o.clone(), p.clone(), id.clone());
+            // Run on idle so the popover unparents before rebuilding removes this button.
+            glib::idle_add_local_once(move || {
+                if let Some(p) = p.upgrade()
+                    && p.parent().is_some()
+                {
+                    p.unparent();
+                }
+                if let Some(t) = o.upgrade() {
+                    t.toggle_pin(&id);
+                }
+            });
         });
         column.append(&item);
     }
+
     popover.set_parent(button);
     popover.connect_closed(|p| {
         // not inside the signal: the popover may still be handling the click
         let p = p.clone();
-        glib::idle_add_local_once(move || p.unparent());
+        glib::idle_add_local_once(move || {
+            if p.parent().is_some() {
+                p.unparent();
+            }
+        });
     });
     popover.popup();
 }
@@ -592,8 +643,10 @@ struct Bar {
     window: gtk::ApplicationWindow,
     /// `None`: the single preview window.
     monitor: Option<gdk::Monitor>,
+    /// Container for pinned application buttons, in pin order.
+    pin_box: gtk::Box,
     /// One per pinned application, in pin order.
-    pins: Vec<AppButton>,
+    pins: RefCell<Vec<AppButton>>,
     /// The buttons of running applications that are not pinned.
     running: gtk::Box,
     unpinned: RefCell<Vec<(String, AppButton)>>,
@@ -612,7 +665,7 @@ pub struct Taskbars {
     clip: Rc<ClipboardFlyout>,
     sni: Rc<SniWatcher>,
     notifications: Rc<NotificationDaemon>,
-    pins: Vec<DesktopEntry>,
+    pins: RefCell<Vec<DesktopEntry>>,
     /// Every installed application, for the icon and name of unpinned windows.
     apps: Vec<DesktopEntry>,
     me: Weak<Taskbars>,
@@ -645,7 +698,7 @@ impl Taskbars {
             clip: Rc::clone(clip),
             sni: Rc::clone(sni),
             notifications: Rc::clone(notifications),
-            pins: pins.iter().map(|e| (*e).clone()).collect(),
+            pins: RefCell::new(pins.iter().map(|e| (*e).clone()).collect()),
             apps: apps.to_vec(),
             me: me.clone(),
             bars: RefCell::default(),
@@ -707,32 +760,23 @@ impl Taskbars {
     }
 
     fn add_bar(&self, monitor: Option<gdk::Monitor>) {
+        // Do not set `.resizable(false)`: in GTK 4 Wayland (`gdk/wayland/gdktoplevel-wayland.c`),
+        // `resizable = false` sets `GDK_HINT_MAX_SIZE = natural_width`, which clamps labwc's
+        // `configure(output_width, 48)` for the Left|Right|Bottom-anchored layer surface down to
+        // the widgets' natural width instead of spanning the full monitor.
         let window = gtk::ApplicationWindow::builder()
             .application(&self.app)
             .title(tr!("Taskbar"))
-            .resizable(false)
             .build();
-        let pins: Vec<AppButton> = self
-            .pins
-            .iter()
-            .map(|e| {
-                AppButton::new(
-                    &icon_of(&e.icon),
-                    e.display_name(),
-                    Some(e.id.clone()),
-                    &self.me,
-                )
-            })
-            .collect();
+        let pin_box = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         let running = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         let center = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         center.append(&start_button(&self.menu));
         center.append(&search_pill(&self.menu));
-        for p in &pins {
-            center.append(&p.button);
-        }
+        center.append(&pin_box);
         center.append(&running);
         let bar = gtk::CenterBox::new();
+        bar.set_hexpand(true);
         bar.add_css_class("desk-shell-taskbar");
         bar.set_center_widget(Some(&center));
         bar.set_end_widget(Some(&tray(
@@ -753,13 +797,70 @@ impl Taskbars {
         let bar = Bar {
             window,
             monitor,
-            pins,
+            pin_box,
+            pins: RefCell::default(),
             running,
             unpinned: RefCell::default(),
         };
+        self.rebuild_bar_pins(&bar);
         self.show_windows(&bar);
         bar.window.present();
         self.bars.borrow_mut().push(bar);
+    }
+
+    /// Rebuild `bar.pin_box` and `bar.pins` from `self.pins`.
+    fn rebuild_bar_pins(&self, bar: &Bar) {
+        while let Some(child) = bar.pin_box.first_child() {
+            bar.pin_box.remove(&child);
+        }
+        let new_pins: Vec<AppButton> = self
+            .pins
+            .borrow()
+            .iter()
+            .map(|e| {
+                let b = AppButton::new(
+                    &icon_of(&e.icon),
+                    e.display_name(),
+                    Some(e.id.clone()),
+                    &self.me,
+                );
+                bar.pin_box.append(&b.button);
+                b
+            })
+            .collect();
+        *bar.pins.borrow_mut() = new_pins;
+    }
+
+    fn is_pinned(&self, desktop_id: &str) -> bool {
+        self.pins.borrow().iter().any(|e| e.id == desktop_id)
+    }
+
+    fn has_app(&self, desktop_id: &str) -> bool {
+        self.apps.iter().any(|e| e.id == desktop_id)
+    }
+
+    /// Pin or unpin `desktop_id`, save `pinned.json`, and refresh every monitor bar.
+    fn toggle_pin(&self, desktop_id: &str) {
+        let mut ids: Vec<String> = self.pins.borrow().iter().map(|e| e.id.clone()).collect();
+        let added = pinned::toggle_pin(&mut ids, desktop_id);
+        let new_pins: Vec<DesktopEntry> = pinned::resolve_user_pins(&ids, &self.apps)
+            .into_iter()
+            .cloned()
+            .collect();
+        if added && !new_pins.iter().any(|e| e.id == desktop_id) {
+            return;
+        }
+        let saved_ids: Vec<String> = new_pins.iter().map(|e| e.id.clone()).collect();
+        *self.pins.borrow_mut() = new_pins;
+        if let Some(path) = pinned::pinned_file_path()
+            && let Err(e) = pinned::save_user_pins(&path, &saved_ids)
+        {
+            eprintln!("desk-shell: cannot save {}: {e}", path.display());
+        }
+        for bar in self.bars.borrow().iter() {
+            self.rebuild_bar_pins(bar);
+            self.show_windows(bar);
+        }
     }
 
     /// Start the window list; its updates arrive on the GTK thread.
@@ -805,9 +906,10 @@ impl Taskbars {
     /// Put the current windows on the buttons of `bar`.
     fn show_windows(&self, bar: &Bar) {
         let windows = self.windows.borrow();
-        let ids: Vec<&str> = self.pins.iter().map(|e| e.id.as_str()).collect();
-        let groups = running::group(&ids, &windows, crate::APP_ID);
-        for (button, list) in bar.pins.iter().zip(groups.pinned) {
+        let pins = self.pins.borrow();
+        let groups = running::group_entries(&pins, &windows, crate::APP_ID);
+        drop(pins);
+        for (button, list) in bar.pins.borrow().iter().zip(groups.pinned) {
             button.show(list);
         }
         let mut unpinned = bar.unpinned.borrow_mut();

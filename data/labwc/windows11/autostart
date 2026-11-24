@@ -30,7 +30,8 @@ for agent in \
   fi
 done
 
-# Notifications: mako, else dunst, only when org.freedesktop.Notifications has no owner yet.
+# Notifications: desk-shell provides the built-in org.freedesktop.Notifications daemon; only fall
+# back to mako or dunst when desk-shell is not installed and no daemon owns the bus name yet.
 notifications_owned() {
   if command -v gdbus >/dev/null 2>&1; then
     case "$(gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
@@ -42,12 +43,14 @@ notifications_owned() {
   command -v busctl >/dev/null 2>&1 &&
     busctl --user status org.freedesktop.Notifications >/dev/null 2>&1
 }
-notify_daemon=
-for d in mako dunst; do
-  if command -v "$d" >/dev/null 2>&1; then notify_daemon=$d; break; fi
-done
-if [ -n "$notify_daemon" ] && ! notifications_owned; then
-  "$notify_daemon" >/dev/null 2>&1 &
+if ! command -v desk-shell >/dev/null 2>&1; then
+  notify_daemon=
+  for d in mako dunst; do
+    if command -v "$d" >/dev/null 2>&1; then notify_daemon=$d; break; fi
+  done
+  if [ -n "$notify_daemon" ] && ! notifications_owned; then
+    "$notify_daemon" >/dev/null 2>&1 &
+  fi
 fi
 
 # Screen lock: "Lock" in the Start menu runs `loginctl lock-session`; swayidle turns that (and

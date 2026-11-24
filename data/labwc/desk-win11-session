@@ -76,6 +76,18 @@ export MOZ_ENABLE_WAYLAND=1
 export QT_QPA_PLATFORM="wayland;xcb"
 export DESK_LABWC_DIR="$CFG_DIR"
 
+# Expose Flatpak desktop entries and icons when the display manager did not source flatpak.sh.
+XDG_DATA_DIRS=${XDG_DATA_DIRS:-/usr/local/share:/usr/share}
+for d in "$HOME/.local/share/flatpak/exports/share" /var/lib/flatpak/exports/share; do
+  if [ -d "$d" ]; then
+    case ":$XDG_DATA_DIRS:" in
+      *":$d:"*) ;;
+      *) XDG_DATA_DIRS="$XDG_DATA_DIRS:$d" ;;
+    esac
+  fi
+done
+export XDG_DATA_DIRS
+
 # labwc runs "$CFG_DIR/autostart" by itself because it is in the config directory. Do not pass it
 # with -S: labwc would run it twice and exit as soon as the script returns.
 if [ "$DRY" = 1 ]; then

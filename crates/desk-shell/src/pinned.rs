@@ -3,7 +3,18 @@
 //! desktop entries (no GTK). A slot lists known desktop ids in order of preference; the first
 //! installed one wins, and a slot with none installed is skipped.
 
+use std::io::Write;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
+
 use desk_search::DesktopEntry;
+
+/// Subdirectory under `$XDG_CONFIG_HOME` holding user taskbar configuration.
+const CONFIG_DIR: &str = "desk-shell";
+/// Filename storing user-pinned desktop entry ids.
+const PINNED_FILE: &str = "pinned.json";
+/// Bound on `pinned.json` size (64 KiB).
+const MAX_PINNED_BYTES: u64 = 64 * 1024;
 
 /// One pinned place.
 #[derive(Clone, Copy, Debug)]
@@ -138,6 +149,115 @@ pub fn start_grid<'a>(
     out
 }
 
+/// Resolve `$XDG_CONFIG_HOME/desk-shell/pinned.json`, falling back to
+/// `$HOME/.config/desk-shell/pinned.json`.
+pub fn pinned_file_path_from(xdg_config_home: Option<&str>, home: Option<&str>) -> Option<PathBuf> {
+    if let Some(xdg) = xdg_config_home.filter(|s| !s.is_empty()) {
+        return Some(PathBuf::from(xdg).join(CONFIG_DIR).join(PINNED_FILE));
+    }
+    home.filter(|s| !s.is_empty()).map(|h| {
+        PathBuf::from(h)
+            .join(".config")
+            .join(CONFIG_DIR)
+            .join(PINNED_FILE)
+    })
+}
+
+/// Resolve the user pins file path from the process environment.
+pub fn pinned_file_path() -> Option<PathBuf> {
+    pinned_file_path_from(
+        std::env::var("XDG_CONFIG_HOME").ok().as_deref(),
+        std::env::var("HOME").ok().as_deref(),
+    )
+}
+
+/// Read user-pinned desktop ids from `path`. Returns `None` when the file is missing, unreadable,
+/// oversized, or not a JSON array of strings.
+pub fn load_user_pins(path: &Path) -> Option<Vec<String>> {
+    let meta = std::fs::metadata(path).ok()?;
+    if !meta.is_file() || meta.len() > MAX_PINNED_BYTES {
+        return None;
+    }
+    let text = std::fs::read_to_string(path).ok()?;
+    serde_json::from_str::<Vec<String>>(&text).ok()
+}
+
+/// Atomically write user-pinned desktop ids to `path` as a JSON array of strings.
+pub fn save_user_pins(path: &Path, ids: &[String]) -> std::io::Result<()> {
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+    let parent = path.parent().ok_or_else(|| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "pinned.json path has no parent directory",
+        )
+    })?;
+    if !parent.as_os_str().is_empty() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let mut json = serde_json::to_string_pretty(ids)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+    json.push('\n');
+
+    let pid = std::process::id();
+    let (tmp_path, mut file) = loop {
+        let seq = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let candidate = parent.join(format!(".{PINNED_FILE}.{pid}.{seq}.tmp"));
+        match std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&candidate)
+        {
+            Ok(f) => break (candidate, f),
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(e) => return Err(e),
+        }
+    };
+
+    if let Err(e) = file.write_all(json.as_bytes()) {
+        drop(file);
+        let _ = std::fs::remove_file(&tmp_path);
+        return Err(e);
+    }
+    if let Err(e) = file.sync_all() {
+        drop(file);
+        let _ = std::fs::remove_file(&tmp_path);
+        return Err(e);
+    }
+    drop(file);
+    if let Err(e) = std::fs::rename(&tmp_path, path) {
+        let _ = std::fs::remove_file(&tmp_path);
+        return Err(e);
+    }
+    Ok(())
+}
+
+/// Resolve user-saved desktop ids against installed `entries`, preserving order, deduplicating,
+/// and skipping missing entries. An empty list is allowed (all pins removed).
+pub fn resolve_user_pins<'a>(ids: &[String], entries: &'a [DesktopEntry]) -> Vec<&'a DesktopEntry> {
+    let mut out: Vec<&'a DesktopEntry> = Vec::new();
+    for id in ids {
+        if let Some(e) = entries.iter().find(|e| e.id == *id)
+            && !out.iter().any(|o| o.id == e.id)
+        {
+            out.push(e);
+        }
+    }
+    out
+}
+
+/// Toggle `desktop_id` in `ids`: remove all occurrences and return `false` if present, otherwise
+/// append `desktop_id` and return `true`.
+pub fn toggle_pin(ids: &mut Vec<String>, desktop_id: &str) -> bool {
+    let before = ids.len();
+    ids.retain(|id| id != desktop_id);
+    if ids.len() < before {
+        false
+    } else {
+        ids.push(desktop_id.to_owned());
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -213,5 +333,86 @@ mod tests {
         names.dedup();
         assert_eq!(names.len(), SLOTS.len());
         assert!(SLOTS.iter().any(|s| s.name == BROWSER));
+    }
+
+    #[test]
+    fn pinned_file_path_respects_xdg_config_home_and_home() {
+        let home_pins = PathBuf::from("/home/user/.config/desk-shell/pinned.json");
+        assert_eq!(
+            pinned_file_path_from(Some("/tmp/xdg"), Some("/home/user")),
+            Some(PathBuf::from("/tmp/xdg/desk-shell/pinned.json"))
+        );
+        assert_eq!(
+            pinned_file_path_from(Some(""), Some("/home/user")),
+            Some(home_pins.clone())
+        );
+        assert_eq!(
+            pinned_file_path_from(None, Some("/home/user")),
+            Some(home_pins)
+        );
+        assert_eq!(pinned_file_path_from(None, None), None);
+        assert_eq!(pinned_file_path_from(Some(""), Some("")), None);
+    }
+
+    #[test]
+    fn user_pins_load_save_and_fall_back_on_missing_or_corrupt() {
+        let dir = std::env::temp_dir().join(format!("desk-shell-pins-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let path = dir.join("desk-shell").join("pinned.json");
+
+        assert_eq!(load_user_pins(&path), None);
+
+        let saved = vec!["a.desktop".to_owned(), "b.desktop".to_owned()];
+        save_user_pins(&path, &saved).unwrap();
+        assert_eq!(load_user_pins(&path), Some(saved));
+
+        // Explicit empty list is preserved (user unpinned everything)
+        save_user_pins(&path, &[]).unwrap();
+        assert_eq!(load_user_pins(&path), Some(Vec::new()));
+
+        // Invalid JSON or wrong JSON shape falls back to None
+        std::fs::write(&path, "{not valid json").unwrap();
+        assert_eq!(load_user_pins(&path), None);
+        std::fs::write(&path, r#"{"pins": []}"#).unwrap();
+        assert_eq!(load_user_pins(&path), None);
+        std::fs::write(&path, "[1, 2, 3]").unwrap();
+        assert_eq!(load_user_pins(&path), None);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_user_pins_deduplicates_skips_missing_and_allows_empty() {
+        let installed = [
+            entry("a.desktop", "A"),
+            entry("b.desktop", "B"),
+            entry("c.desktop", "C"),
+        ];
+        let want: Vec<String> = ["c.desktop", "missing.desktop", "a.desktop", "c.desktop"]
+            .into_iter()
+            .map(String::from)
+            .collect();
+        assert_eq!(
+            ids(&resolve_user_pins(&want, &installed)),
+            ["c.desktop", "a.desktop"]
+        );
+        assert!(resolve_user_pins(&[], &installed).is_empty());
+    }
+
+    #[test]
+    fn toggle_pin_adds_and_removes_all_occurrences() {
+        let mut pins = vec!["a.desktop".to_owned()];
+        assert!(toggle_pin(&mut pins, "b.desktop"));
+        assert_eq!(pins, ["a.desktop", "b.desktop"]);
+        assert!(!toggle_pin(&mut pins, "a.desktop"));
+        assert_eq!(pins, ["b.desktop"]);
+
+        let mut dup = vec![
+            "x.desktop".to_owned(),
+            "y.desktop".to_owned(),
+            "x.desktop".to_owned(),
+        ];
+        assert!(!toggle_pin(&mut dup, "x.desktop"));
+        assert_eq!(dup, ["y.desktop"]);
     }
 }
