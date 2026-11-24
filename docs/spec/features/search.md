@@ -15,9 +15,10 @@ search engine in deskd (provider-based, privacy-preserving) drawn by the bridge 
 * **Own search engine: Partial** (stage 4). deskd answers queries (`desk-search`, `Desk.Search`) and
   the bridge draws the box in all three skins (`bridge/src/search/`); `Tab` and `Shift+Tab` jump
   between result groups (wrapping) and a second press of the shortcut closes the box (AC-SRCH-01). No
-  theme binds its shortcut yet. Still to come: files and clipboard providers in deskd, the Windows 11
-  flyout with filters and pinned apps, the overview search provider for `default` and the file
-  preview pane. Origin badge: *Based on Spotlight by itsnin
+  theme binds its shortcut yet. deskd answers the files (`.`/`file:`), clipboard (`#`) and emoji
+  (`:`) scopes and mixes them into plain queries (see «Files provider» below). Still to come: the
+  Windows 11 flyout with filters and pinned apps, the overview search provider for `default`, the
+  file preview pane and the `localsearch` (Tracker) files provider. Origin badge: *Based on Spotlight by itsnin
   (GPL-3.0-or-later)* for the current launcher; the engine itself is *In Windows 11 and macOS*.
 
 ## Reference behaviour
@@ -56,9 +57,10 @@ applied as diffs to the pinned upstream build and skipped with a warning if they
 
 ### Architecture
 
-* **deskd search engine:** aggregates **providers**; no private index of the user's files.
+* **deskd search engine:** aggregates **providers**; no stored index of the user's files.
   Providers: applications (desktop entries + usage ranking kept locally), files and folders (the
-  desktop's own indexer, `localsearch`/Tracker, queried over D-Bus; never a crawler of ours), GNOME
+  desktop's own indexer, `localsearch`/Tracker, queried over D-Bus, is the target; today a small
+  bounded in-memory index, see «Files provider»), GNOME
   Settings panels, calculator and unit/currency-free conversion, system actions (lock, suspend, log out,
   restart, toggle dark mode, toggle private mode), clipboard history (the [clipboard](clipboard.md) engine),
   emoji ([emoji](emoji.md)), windows (open windows via the bridge), and existing GNOME **search
@@ -76,6 +78,28 @@ applied as diffs to the pinned upstream build and skipped with a warning if they
 | `. text` or `file:` | files only |
 | `# text` | clipboard history (macOS skin: `Super+4` opens the panel on this scope) |
 | `: text` | emoji |
+
+### Files provider (current)
+
+`desk_search::files` keeps a bounded index in deskd's memory only (never on disk):
+
+* Roots: the XDG user folders Desktop, Documents, Downloads, Pictures, Music and Videos, read from
+  `$XDG_CONFIG_HOME/user-dirs.dirs` (default names below `$HOME` when it is missing). A folder set
+  to `$HOME` itself is dropped.
+* Breadth first over all roots together, at most 3 folder levels below a root and 2000 entries,
+  so building takes milliseconds and a query stays below 5 ms.
+* Hidden names (`.git`, `.cache`, ...) and `node_modules`, `target`, `__pycache__` are skipped.
+* Symbolic links are never followed: a link is listed but not entered, and a root that is a link
+  is not scanned (no loops, no escape from the roots). Names that are not UTF-8 are skipped.
+* Built on the first query that needs it; dropped when a GIO folder watcher on a root or a direct
+  subfolder (at most 64) reports a change, or when it is older than 10 minutes at a query. No
+  timer and no polling.
+* A result has `kind = "file"`, the absolute path as `activate`, the parent folder as subtitle.
+
+Clipboard results (`kind = "clipboard"`) carry the history entry id in decimal as `activate` and
+the first line (at most 80 characters) as title; emoji results carry the glyph. In a plain query
+files weigh 90 %, clipboard entries 60 % and emoji 50 % of the same match tier, and the clipboard
+and emoji are asked only from 2 characters on.
 
 ### Ranking
 
@@ -116,8 +140,9 @@ extension's `toggle-shortcut` and `theme-preference` (`spotlight.dconf`).
 
 ## Privacy & security
 
-Queries are never sent anywhere. File search is delegated to the user's own indexer and respects its
-exclusions. The usage ranking (names of launched items and counts) is stored in `~/.local/share/deskd/` (0600),
+Queries are never sent anywhere. The current file index lives in memory only, covers only the
+XDG user folders and skips hidden files; the target delegates file search to the user's own
+indexer and respects its exclusions. The usage ranking (names of launched items and counts) is stored in `~/.local/share/deskd/` (0600),
 clearable, off with `remember-usage=false`. Private mode of the clipboard hides clipboard results. Launching an
 item starts it with the user's rights, exactly like the stock overview. The calculator evaluates arithmetic
 only, never shell or script input.

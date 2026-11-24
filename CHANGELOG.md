@@ -21,6 +21,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Search: deskd answers `. text` / `file:` (files), `# text` (clipboard history) and `: text`
+  (emoji, English and Ukrainian), and mixes these results into plain queries below applications.
+  Files come from a bounded in-memory index of the XDG user folders (Desktop, Documents,
+  Downloads, Pictures, Music, Videos): at most 3 folder levels and 2000 entries, hidden names and
+  `node_modules`, `target`, `__pycache__` skipped, symbolic links never followed; GIO folder
+  watchers and a 10-minute age limit drop it. Clipboard results follow the history's private mode
+  and are hidden while it is on or the history is off.
 - `desk-shell`, a DE-agnostic Wayland desktop shell for compositors with `wlr-layer-shell` (labwc,
   niri, sway, KWin, COSMIC), Windows 11 first ([ADR 0012](docs/adr/0012-wayland-layer-shell-desk-shell.md)):
   a 48 px taskbar with the Start button, the Search pill, pinned applications chosen from the
