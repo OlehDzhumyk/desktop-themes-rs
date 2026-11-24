@@ -21,6 +21,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- Quick Look (stage 4, partial): `themes quick-look <paths>…` opens a short-lived GTK 4 /
+  libadwaita previewer styled for the skin (`macos` dark title strip, `windows11` Peek-style
+  header with `<` `>`, `default` plain window). It shows images with zoom, text and code (only the
+  first `max-text-kb` KiB are read, with «Показано початок файлу»), folders with sizes and a
+  details card for other files; `Space`/`Esc` close, the arrows move through the files («3 з 3»),
+  `Return` opens in the default application, `I` toggles the details. Files are never run, FIFOs
+  and devices are never opened, and an unreadable file shows an error card. Settings
+  `io.github.OlehDzhumyk.Desk.QuickLook` (`enabled`, `quick-look-shortcut`, `max-text-kb`,
+  `autoplay-media`, `follow-selection`) with per-theme shortcuts (Windows 11: Ctrl+Space; macOS:
+  Super+Y; Fedora: none) and a «Швидкий перегляд» page. The bridge key, the Files hand-over, media
+  and PDF follow separately.
 - Window layouts in the bridge (stage 4): `Super+Z` (macOS: `Ctrl+Super+Up`) opens a skin-aware
   layout picker for the focused window with miniature layouts and a full keyboard path; hovering
   or focusing a zone shows a click-through zone preview (no fade under reduced motion); choosing a

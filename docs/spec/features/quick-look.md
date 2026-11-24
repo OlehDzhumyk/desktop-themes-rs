@@ -8,10 +8,18 @@ closes.
 
 ## Status
 
-**Planned** (stage 4). Origin badge: *From macOS, adapted for Windows 11 style* (Windows gets it as PowerToys Peek).
+**Partial** (stage 4). Origin badge: *From macOS, adapted for Windows 11 style* (Windows gets it as PowerToys Peek).
 Basis: GNOME **Sushi** (GPL-2.0-or-later), integrated rather than reimplemented where it works on Shell 51; our own
 skinned previewer replaces or wraps it where it does not (licence compatible with GPL-3.0-or-later; attribution in
 CREDITS.md).
+
+Done: `themes quick-look <paths>…` (separate process) with images (fit, zoom), text and code (capped at
+`max-text-kb`, truncation notice), folders, the details card, the error card, the per-skin chrome, the keys of
+"Content" below except media and pages, and the settings with per-theme shortcuts. Not yet: the bridge binding of
+`quick-look-shortcut` and the hand-over from Files (`org.gnome.NautilusPreviewer` D-Bus, the minimal path), the
+GStreamer player, PDF/EPUB, archives, Office thumbnails, syntax highlighting, drag to pan, the remembered
+`windows11` size, the neighbour in Files' order with a single selection, «Файл змінено» while open, the spinner for remote files, and the `PrivateNetwork` sandbox. No
+open/close animation exists yet, so AC-QL-08 holds trivially. Sushi code is not used so far.
 
 ## Reference behaviour
 
@@ -28,9 +36,9 @@ CREDITS.md).
 
 | Skin | Key | Window |
 |---|---|---|
-| `macos` | `Space` with a file selected in Files (also in GTK file chooser dialogs when the host allows) | borderless, rounded, centred over the Files window, dark title strip with the name, «Відкрити в…», no minimise |
+| `macos` | `Space` with a file selected in Files (also in GTK file chooser dialogs when the host allows); the global shortcut is `Super+Y` (Cmd+Y) | borderless, rounded, centred over the Files window, dark title strip with the name, «Відкрити в…», no minimise |
 | `windows11` | `Ctrl+Space` | titled window with the file name, icon, «Відкрити», `<` `>` buttons; remembers its size |
-| `default` | `Space` | Sushi-like plain window |
+| `default` | `Space` (Files and Sushi; no global shortcut of ours in the `fedora` theme) | Sushi-like plain window |
 
 The previewer is a **separate process** (never in the shell): the bridge only sees the key and asks deskd to start
 it; this keeps a crashing decoder away from the shell.
@@ -63,10 +71,13 @@ Unreadable file: «Не вдається прочитати файл» with the 
 with «Перегляд недоступний». Remote/slow location: placeholder with a spinner (a label when reduced motion) and a
 10 s timeout.
 
-## Settings (proposed, `io.github.OlehDzhumyk.Desk.QuickLook`)
+## Settings (`io.github.OlehDzhumyk.Desk.QuickLook`)
 
-`enabled` (true), `toggle-shortcut` (per theme), `max-text-kb` (uint 64..8192, 1024), `autoplay-media` (false),
-`follow-selection` (true).
+`enabled` (true), `quick-look-shortcut` (accelerators, default `<Control>space`; per theme: `windows11`
+Ctrl+Space, `macos` Super+Y, `fedora` none; override `quick-look-toggle` in `io.github.OlehDzhumyk.Desk.Shortcuts`),
+`max-text-kb` (uint 64..8192 step 64, 1024), `autoplay-media` (false, reserved for the player), `follow-selection`
+(true). Plain `Space` is never a shell keybinding: those are global and would eat every typed space; `Space` in
+Files needs the Files hand-over.
 
 ## Privacy & security
 

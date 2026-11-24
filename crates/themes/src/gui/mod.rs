@@ -8,6 +8,7 @@ mod credits;
 mod features;
 mod focus;
 mod preview;
+pub mod quick_look;
 mod search;
 mod system;
 mod wallpaper;

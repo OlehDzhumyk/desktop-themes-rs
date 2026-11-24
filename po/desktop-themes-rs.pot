@@ -2005,7 +2005,7 @@ msgstr ""
 msgid "GNOME updated: {old} → {new}"
 msgstr ""
 
-#: crates/themes-core/src/doctor.rs:1325 crates/themes/src/cli.rs:496
+#: crates/themes-core/src/doctor.rs:1325 crates/themes/src/cli.rs:504
 #: crates/themes/src/gui/window.rs:1357
 #, rust-format
 msgid "turned on again: {uuid}"
@@ -2452,109 +2452,117 @@ msgstr ""
 msgid "The PNG file; Save replaces it (redactions are destructive)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:236 crates/themes/src/gui/window.rs:1108
+#: crates/themes/src/cli.rs:56
+msgid "Preview files in a Quick Look window (files are never run)"
+msgstr ""
+
+#: crates/themes/src/cli.rs:57
+msgid "The files or folders; arrow keys move between them"
+msgstr ""
+
+#: crates/themes/src/cli.rs:243 crates/themes/src/gui/window.rs:1108
 #: crates/themes/src/gui/window.rs:1143 crates/themes/src/gui/window.rs:1255
 #: crates/themes/src/gui/window.rs:1290
 #, rust-format
 msgid "Error: {error}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:309
+#: crates/themes/src/cli.rs:317
 #, rust-format
 msgid "active: {modules}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:324
+#: crates/themes/src/cli.rs:332
 msgid "(unknown: no theme has been applied yet)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:337
+#: crates/themes/src/cli.rs:345
 #, rust-format
 msgid "(all modules from the theme “{theme}”)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:401
+#: crates/themes/src/cli.rs:409
 #, rust-format
 msgid ""
 "Saved the theme “{name}” ({id}): dconf keys {keys} ({per_module}), "
 "extensions {extensions}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:411 crates/themes/src/cli.rs:810
+#: crates/themes/src/cli.rs:419 crates/themes/src/cli.rs:818
 #: crates/themes/src/shortcut_cli.rs:116 crates/themes/src/tokens_cli.rs:201
 #, rust-format
 msgid "warning: {text}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:424
+#: crates/themes/src/cli.rs:432
 #, rust-format
 msgid "Theme “{name}” deleted (moved to {path})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:443
+#: crates/themes/src/cli.rs:451
 msgid "Extensions turned on again (disable-user-extensions=false)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:446
+#: crates/themes/src/cli.rs:454
 msgid "Extensions are already on."
 msgstr ""
 
-#: crates/themes/src/cli.rs:464 crates/themes/src/gui/system.rs:141
+#: crates/themes/src/cli.rs:472 crates/themes/src/gui/system.rs:141
 #: crates/themes/src/gui/window.rs:1334
 msgid "running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:466 crates/themes/src/gui/system.rs:143
+#: crates/themes/src/cli.rs:474 crates/themes/src/gui/system.rs:143
 #: crates/themes/src/gui/window.rs:1336
 msgid "not running"
 msgstr ""
 
-#: crates/themes/src/cli.rs:471
+#: crates/themes/src/cli.rs:479
 #, rust-format
 msgid "Extensions checked: {count}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:474 crates/themes/src/gui/system.rs:149
+#: crates/themes/src/cli.rs:482 crates/themes/src/gui/system.rs:149
 #: crates/themes/src/gui/window.rs:1343
 msgid "No problems found."
 msgstr ""
 
-#: crates/themes/src/cli.rs:486
+#: crates/themes/src/cli.rs:494
 msgid "fix with: themes doctor --fix"
 msgstr ""
 
-#: crates/themes/src/cli.rs:493
+#: crates/themes/src/cli.rs:501
 #, rust-format
 msgid "fixed: {what}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:534
+#: crates/themes/src/cli.rs:542
 #, rust-format
 msgid ""
 "“{name}” is an experimental theme: {warning}\n"
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:541
+#: crates/themes/src/cli.rs:549
 #, rust-format
 msgid "“{name}” is an experimental theme."
 msgstr ""
 
-#: crates/themes/src/cli.rs:547 crates/themes/src/cli.rs:608
+#: crates/themes/src/cli.rs:555 crates/themes/src/cli.rs:616
 msgid "Cancelled: the theme was not applied."
 msgstr ""
 
 #. TRANSLATORS: the answer is accepted as y/Y/yes or the translated "yes" below
-#: crates/themes/src/cli.rs:555
+#: crates/themes/src/cli.rs:563
 msgid "Apply it anyway? [y/N]"
 msgstr ""
 
 #. TRANSLATORS: short and long "yes" accepted at the [y/N] prompt, separated by "|"
-#: crates/themes/src/cli.rs:561
+#: crates/themes/src/cli.rs:569
 msgid "y|yes"
 msgstr ""
 
-#: crates/themes/src/cli.rs:594
+#: crates/themes/src/cli.rs:602
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
@@ -2562,143 +2570,143 @@ msgid ""
 "Run it again with --yes to apply it anyway."
 msgstr ""
 
-#: crates/themes/src/cli.rs:602
+#: crates/themes/src/cli.rs:610
 #, rust-format
 msgid ""
 "The theme “{name}” sets keys that run commands:\n"
 "{list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:625
+#: crates/themes/src/cli.rs:633
 #, rust-format
 msgid ""
 "Keys that run commands ({count}); applying asks for confirmation (--yes) "
 "unless approved before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:633
+#: crates/themes/src/cli.rs:641
 msgid "  (approved)"
 msgstr ""
 
-#: crates/themes/src/cli.rs:656
+#: crates/themes/src/cli.rs:664
 #, rust-format
 msgid "automatic rollback: extension {uuid} turned off ({reason})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:674
+#: crates/themes/src/cli.rs:682
 #, rust-format
 msgid "flatpak override refused: “{line}”: {why}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:706
+#: crates/themes/src/cli.rs:714
 #, rust-format
 msgid "Dry run for “{name}” ({id}), modules: {modules}; nothing changed"
 msgstr ""
 
-#: crates/themes/src/cli.rs:712
+#: crates/themes/src/cli.rs:720
 #, rust-format
 msgid "Write ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:718
+#: crates/themes/src/cli.rs:726
 #, rust-format
 msgid "Reset ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:727
+#: crates/themes/src/cli.rs:735
 #, rust-format
 msgid "Extensions: {list}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:751
+#: crates/themes/src/cli.rs:759
 #, rust-format
 msgid "Theme “{name}” ({id}) applied; modules: {modules}."
 msgstr ""
 
-#: crates/themes/src/cli.rs:760
+#: crates/themes/src/cli.rs:768
 msgid "before:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:763
+#: crates/themes/src/cli.rs:771
 msgid "now:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:765
+#: crates/themes/src/cli.rs:773
 msgid "dconf keys changed:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:767
+#: crates/themes/src/cli.rs:775
 #, rust-format
 msgid "{count} (reset to defaults: {resets})"
 msgstr ""
 
-#: crates/themes/src/cli.rs:772
+#: crates/themes/src/cli.rs:780
 msgid "extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:778
+#: crates/themes/src/cli.rs:786
 #, rust-format
 msgid "turned on: {added}   turned off: {removed}"
 msgstr ""
 
-#: crates/themes/src/cli.rs:785
+#: crates/themes/src/cli.rs:793
 msgid "GTK links:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:792
+#: crates/themes/src/cli.rs:800
 msgid "cleaned up after extensions:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:797
+#: crates/themes/src/cli.rs:805
 msgid "hooks:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:815
+#: crates/themes/src/cli.rs:823
 msgid ""
 "GNOME Shell is not running now; the shell changes take effect at the next "
 "login."
 msgstr ""
 
-#: crates/themes/src/cli.rs:821
+#: crates/themes/src/cli.rs:829
 msgid ""
 "The settings are applied, but GNOME turned extensions off after a shell "
 "crash, so the theme's extensions do not work. Check “themes doctor” and turn "
 "them on: themes doctor --enable-extensions"
 msgstr ""
 
-#: crates/themes/src/cli.rs:827
+#: crates/themes/src/cli.rs:835
 msgid "You MUST log out and log in again:"
 msgstr ""
 
-#: crates/themes/src/cli.rs:835
+#: crates/themes/src/cli.rs:843
 msgid ""
 "Applied live, no new login needed (open GTK4/libadwaita apps should be "
 "restarted)."
 msgstr ""
 
-#: crates/themes/src/cli.rs:850
+#: crates/themes/src/cli.rs:858
 #, rust-format
 msgid "Generated from tokens.toml ({count}):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:858
+#: crates/themes/src/cli.rs:866
 #, rust-format
 msgid "from tokens.toml ({count}, {ms} ms):"
 msgstr ""
 
-#: crates/themes/src/cli.rs:866
+#: crates/themes/src/cli.rs:874
 msgid "cache up to date"
 msgstr ""
 
-#: crates/themes/src/cli.rs:867
+#: crates/themes/src/cli.rs:875
 msgid "generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:868
+#: crates/themes/src/cli.rs:876
 msgid "will be generated"
 msgstr ""
 
-#: crates/themes/src/cli.rs:873
+#: crates/themes/src/cli.rs:881
 #, rust-format
 msgid "link: {path}"
 msgstr ""
@@ -3365,6 +3373,101 @@ msgstr ""
 
 #: crates/themes/src/gui/focus.rs:349
 msgid "To (HH:MM)"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:71
+msgid ""
+"Quick Look is turned off: turn it on in the Themes window, page «Quick Look»."
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:83
+msgid "No file to preview."
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:125
+msgid "Previous file"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:126
+msgid "Next file"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:127
+msgid "Open with…"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:128
+msgid "Choose an application to open the file"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:246
+msgid "The file does not exist (it was moved or deleted)."
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:247
+msgid "You do not have permission to read the file."
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:290
+#, rust-format
+msgid "{index} of {total}"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:322
+#: crates/themes/src/gui/quick_look/mod.rs:346
+msgid "Preview not available"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:327
+msgid "Cannot read the file"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:411
+#: crates/themes/src/gui/quick_look/mod.rs:427
+#, rust-format
+msgid "Cannot open the file: {error}"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:449
+msgid "File contents"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:452
+msgid "Showing the start of the file"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:464
+#, rust-format
+msgid "Only the first {count} items are shown"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:473
+msgid "The folder is empty"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:514
+#, rust-format
+msgid "Type: {mime}"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:517
+#, rust-format
+msgid "Size: {size}"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:520
+#, rust-format
+msgid "Modified: {date}"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:523
+#, rust-format
+msgid "Link to: {path}"
+msgstr ""
+
+#: crates/themes/src/gui/quick_look/mod.rs:526
+#, rust-format
+msgid "Location: {path}"
 msgstr ""
 
 #: crates/themes/src/gui/search.rs:11
