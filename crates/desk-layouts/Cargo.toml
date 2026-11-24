@@ -1,0 +1,15 @@
+[package]
+name = "desk-layouts"
+description = "Window layouts core of desktop-themes-rs: built-in snap layouts, portrait adaptation, zone geometry and atomic persistence (pure Rust, no desktop dependency)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
