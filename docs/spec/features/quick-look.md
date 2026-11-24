@@ -15,8 +15,10 @@ CREDITS.md).
 
 Done: `themes quick-look <paths>…` (separate process) with images (fit, zoom), text and code (capped at
 `max-text-kb`, truncation notice), folders, the details card, the error card, the per-skin chrome, the keys of
-"Content" below except media and pages, and the settings with per-theme shortcuts. Not yet: the bridge binding of
-`quick-look-shortcut` and the hand-over from Files (`org.gnome.NautilusPreviewer` D-Bus, the minimal path), the
+"Content" below except media and pages, the settings with per-theme shortcuts, and the bridge binding of
+`quick-look-shortcut` (normal mode only; it previews the local files copied to the clipboard, because Files has no
+selection API, and a second press closes the preview). Not yet: the hand-over from Files (`org.gnome.NautilusPreviewer`
+D-Bus, the minimal path; owning that name would replace Sushi, so it waits for a way to coexist), the
 GStreamer player, PDF/EPUB, archives, Office thumbnails, syntax highlighting, drag to pan, the remembered
 `windows11` size, the neighbour in Files' order with a single selection, «Файл змінено» while open, the spinner for remote files, and the `PrivateNetwork` sandbox. No
 open/close animation exists yet, so AC-QL-08 holds trivially. Sushi code is not used so far.
