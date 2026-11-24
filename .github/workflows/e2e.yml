@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # End-to-end tests (tests/e2e, ADR 0007): GNOME Shell 51 headless in a podman container with
 # systemd, the freshly built bridge, deskd and `themes` inside it. The suite takes about a minute
-# after the build, so it runs on every pull request.
+# after the build, so it runs on every pull request that touches the code or data under test.
 #
 # Two jobs: the binaries are built in a Fedora 45 container (the image the tests run in is Fedora 45
 # too, so they link against the same libraries), then the runner's own rootless podman runs
@@ -13,6 +13,29 @@ on:
   push:
     branches: [main]
   pull_request:
+    # Docs-only and labwc-only changes cannot affect the GNOME Shell session under test.
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/themes-core/**"
+      - "crates/themes/**"
+      - "crates/desk-proto/**"
+      - "crates/deskd/**"
+      - "crates/theme-tokens/**"
+      - "crates/desk-settings/**"
+      - "crates/desk-capture/**"
+      - "crates/desk-layouts/**"
+      - "crates/desk-search/**"
+      - "bridge/**"
+      - "data/dbus/**"
+      - "data/*.gschema.xml"
+      - "data/*.service"
+      - "extensions/**"
+      - "po/**"
+      - "themes/**"
+      - "tests/e2e/**"
+      - "tools/e2e.sh"
+      - ".github/workflows/e2e.yml"
   workflow_dispatch:
 
 concurrency:
@@ -51,6 +74,11 @@ jobs:
             target
           key: cargo-fedora45-e2e-${{ hashFiles('Cargo.lock') }}
           restore-keys: cargo-fedora45-e2e-
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.npm
+          key: npm-fedora45-${{ hashFiles('bridge/package-lock.json') }}
+          restore-keys: npm-fedora45-
       - name: Build
         run: |
           cargo build --locked -p deskd -p themes

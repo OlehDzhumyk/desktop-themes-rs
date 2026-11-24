@@ -271,6 +271,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- CI: npm downloads are cached in the bridge, E2E build and install smoke jobs; the GNOME Shell
+  E2E workflow runs on pull requests only when they touch code or data under test (not docs or
+  labwc only); every job has a timeout; `cargo test` also runs `cargo xtask check`, and the labwc
+  `rc.xml` is checked by `xmllint`.
 - Theme `macos`: the dock shows when the pointer touches the screen edge, without pressure, after
   0.1 s, and hides 0.2 s after the pointer leaves.
 - The bridge's shared UI parts live in `bridge/src/ui/`: primitives (orientations, motion setting,
