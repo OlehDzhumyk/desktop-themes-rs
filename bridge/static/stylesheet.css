@@ -819,3 +819,122 @@
 .desk-hc.desk-guide-panel .desk-guide-search:focus {
   border: 3px solid currentColor;
 }
+
+/* ------------------------------------------------------------------ window layouts (layouts/*.ts)
+   The picker and snap assist sit on a transparent modal layer (a click outside closes).
+   windows11: a compact Fluent popover at the top, miniatures without names; macos: a translucent
+   Move & Resize popover at the top; default: the shell's popup-menu-content in the middle.
+   :focus shows a visible ring on miniatures, zones and windows (keyboard path). The zone preview
+   never takes input; its outline is a light line inside a dark one (3:1 on any background). */
+.desk-layouts-layer, .desk-layouts-assist-layer { background-color: transparent; }
+.desk-layouts-picker, .desk-layouts-assist {
+  spacing: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  color: #f2f2f2;
+  background-color: rgba(30,30,32,0.95);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.desk-layouts-title { font-weight: bold; font-size: 10.5pt; color: inherit; }
+.desk-layouts-hint { font-size: 9pt; color: rgba(255,255,255,0.65); }
+.desk-layouts-grid { spacing: 8px; }
+.desk-layouts-row { spacing: 8px; }
+.desk-layouts-card {
+  spacing: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+.desk-layouts-card:hover { background-color: rgba(255,255,255,0.06); }
+.desk-layouts-card:checked { background-color: rgba(255,255,255,0.10); }
+.desk-layouts-card:focus { border-color: -st-accent-color; }
+.desk-layouts-card-label { font-size: 9pt; text-align: center; color: inherit; }
+.desk-layouts-zone {
+  border-radius: 4px;
+  background-color: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.35);
+}
+.desk-layouts-zone:hover { background-color: -st-accent-color; }
+.desk-layouts-zone:focus { background-color: -st-accent-color; border: 2px solid #ffffff; }
+.desk-layouts-zone:active { background-color: rgba(255,255,255,0.5); }
+
+.desk-layouts-preview {
+  border-radius: 8px;
+  background-color: rgba(120,160,255,0.22);
+  border: 3px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.75);
+}
+.desk-layouts-preview.desk-skin-windows11 { border-radius: 8px; background-color: rgba(96,205,255,0.22); }
+.desk-layouts-preview.desk-skin-macos { border-radius: 10px; background-color: rgba(255,255,255,0.18); }
+.desk-hc.desk-layouts-preview { background-color: rgba(0,0,0,0.35); border: 4px solid #ffffff; }
+
+.desk-layouts-assist-row { spacing: 8px; }
+.desk-layouts-assist-choice {
+  padding: 6px;
+  border-radius: 8px;
+  color: inherit;
+  border: 2px solid transparent;
+}
+.desk-layouts-assist-choice:hover { background-color: rgba(255,255,255,0.08); }
+.desk-layouts-assist-choice:focus { border-color: -st-accent-color; }
+.desk-layouts-assist-box { spacing: 6px; width: 160px; }
+.desk-layouts-assist-thumb { border-radius: 6px; background-color: rgba(0,0,0,0.25); }
+.desk-layouts-assist-caption { spacing: 6px; }
+.desk-layouts-assist-number {
+  font-weight: bold;
+  font-size: 9pt;
+  padding: 0 5px;
+  border-radius: 4px;
+  background-color: rgba(255,255,255,0.16);
+}
+.desk-layouts-assist-label { font-size: 9pt; color: inherit; }
+
+/* windows11: Fluent surface, 8 px corners, compact */
+.desk-skin-windows11.desk-layouts-picker,
+.desk-skin-windows11.desk-layouts-assist { border-radius: 8px; padding: 10px; background-color: #2b2b2b; }
+.desk-skin-windows11 .desk-layouts-card:focus,
+.desk-skin-windows11 .desk-layouts-assist-choice:focus { border-color: #60cdff; }
+.desk-skin-windows11 .desk-layouts-zone:hover,
+.desk-skin-windows11 .desk-layouts-zone:focus { background-color: #60cdff; }
+/* macos: translucent, rounder */
+.desk-skin-macos.desk-layouts-picker,
+.desk-skin-macos.desk-layouts-assist {
+  border-radius: 14px;
+  background-color: rgba(40,40,42,0.86);
+  font-family: Inter, Cantarell, sans-serif;
+}
+.desk-skin-macos .desk-layouts-zone { border-radius: 5px; }
+.desk-skin-macos .desk-layouts-zone:hover,
+.desk-skin-macos .desk-layouts-zone:focus { background-color: #2f6fe4; }
+/* default: the shell theme draws the popover (popup-menu-content); only spacing here */
+.desk-skin-default.desk-layouts-picker,
+.desk-skin-default.desk-layouts-assist { color: inherit; background-color: transparent; border: none; box-shadow: none; }
+.desk-skin-default .desk-layouts-hint { color: inherit; }
+.desk-skin-default .desk-layouts-zone { background-color: rgba(127,127,127,0.30); border-color: rgba(127,127,127,0.55); }
+/* light colour scheme (skins with their own palette) */
+.desk-light.desk-skin-macos.desk-layouts-picker, .desk-light.desk-skin-macos.desk-layouts-assist,
+.desk-light.desk-skin-windows11.desk-layouts-picker, .desk-light.desk-skin-windows11.desk-layouts-assist {
+  color: #1f1f1f; background-color: rgba(246,246,248,0.97); border-color: rgba(0,0,0,0.14);
+}
+.desk-light.desk-skin-windows11.desk-layouts-picker,
+.desk-light.desk-skin-windows11.desk-layouts-assist { background-color: #f3f3f3; }
+.desk-light .desk-layouts-hint { color: rgba(0,0,0,0.65); }
+.desk-light .desk-layouts-zone { background-color: rgba(0,0,0,0.12); border-color: rgba(0,0,0,0.30); }
+.desk-light .desk-layouts-card:hover, .desk-light .desk-layouts-assist-choice:hover { background-color: rgba(0,0,0,0.05); }
+.desk-light .desk-layouts-card:checked { background-color: rgba(0,0,0,0.08); }
+.desk-light .desk-layouts-assist-number { background-color: rgba(0,0,0,0.10); }
+.desk-light.desk-skin-windows11 .desk-layouts-card:focus,
+.desk-light.desk-skin-windows11 .desk-layouts-assist-choice:focus { border-color: #005fb8; }
+.desk-light.desk-skin-windows11 .desk-layouts-zone:hover,
+.desk-light.desk-skin-windows11 .desk-layouts-zone:focus { background-color: #005fb8; }
+/* high contrast: opaque surface, outlines, thick focus ring */
+.desk-hc.desk-layouts-picker, .desk-hc.desk-layouts-assist {
+  color: #ffffff; background-color: #000000; border: 2px solid #ffffff; box-shadow: none;
+}
+.desk-hc.desk-light.desk-layouts-picker, .desk-hc.desk-light.desk-layouts-assist {
+  color: #000000; background-color: #ffffff; border-color: #000000;
+}
+.desk-hc .desk-layouts-zone { border: 2px solid currentColor; }
+.desk-hc .desk-layouts-card:focus, .desk-hc .desk-layouts-assist-choice:focus,
+.desk-hc .desk-layouts-zone:focus { border: 3px solid currentColor; }

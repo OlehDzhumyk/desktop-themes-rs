@@ -16,6 +16,7 @@ import {ColorPickerFeature} from './colorPicker/feature.js';
 import {FocusFeature} from './focus/feature.js';
 import {EmojiFeature} from './emoji/feature.js';
 import {initI18n, setLanguage} from './i18n.js';
+import {LayoutsFeature} from './layouts/feature.js';
 import {LogoMenuFeature} from './logoMenu/feature.js';
 import {MixerFeature} from './mixer/feature.js';
 import {OcrFeature} from './ocr/feature.js';
@@ -29,6 +30,7 @@ const CAPTURE_SCHEMA = 'io.github.OlehDzhumyk.Desk.Capture';
 const CLIPBOARD_SCHEMA = 'io.github.OlehDzhumyk.Desk.Clipboard';
 const COLOR_PICKER_SCHEMA = 'io.github.OlehDzhumyk.Desk.ColorPicker';
 const EMOJI_SCHEMA = 'io.github.OlehDzhumyk.Desk.Emoji';
+const LAYOUTS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Layouts';
 const LOGO_MENU_SCHEMA = 'io.github.OlehDzhumyk.Desk.LogoMenu';
 const MIXER_SCHEMA = 'io.github.OlehDzhumyk.Desk.Mixer';
 const FOCUS_SCHEMA = 'io.github.OlehDzhumyk.Desk.Focus';
@@ -50,6 +52,8 @@ export default class DeskBridge extends Extension {
     private _captureSettings: Gio.Settings | null = null;
     private _mixer: MixerFeature | null = null;
     private _mixerSettings: Gio.Settings | null = null;
+    private _layouts: LayoutsFeature | null = null;
+    private _layoutsSettings: Gio.Settings | null = null;
     private _logoMenu: LogoMenuFeature | null = null;
     private _logoMenuSettings: Gio.Settings | null = null;
     private _focus: FocusFeature | null = null;
@@ -94,6 +98,11 @@ export default class DeskBridge extends Extension {
             this._captureSettings = this._schema(CAPTURE_SCHEMA);
         } catch (e) {
             console.warn(`desk-bridge: screenshots are unavailable: ${String(e)}`);
+        }
+        try {
+            this._layoutsSettings = this._schema(LAYOUTS_SCHEMA);
+        } catch (e) {
+            console.warn(`desk-bridge: window layouts are unavailable: ${String(e)}`);
         }
         this._mixerSettings = this._schema(MIXER_SCHEMA);
         this._logoMenuSettings = this._schema(LOGO_MENU_SCHEMA);
@@ -157,6 +166,13 @@ export default class DeskBridge extends Extension {
                 console.warn(`desk-bridge: screenshots are unavailable: ${String(e)}`);
             }
         }
+        if (this._layoutsSettings) {
+            try {
+                this._layouts = new LayoutsFeature(this._layoutsSettings, this._skin());
+            } catch (e) {
+                console.warn(`desk-bridge: window layouts are unavailable: ${String(e)}`);
+            }
+        }
         if (this._mixerSettings) {
             try {
                 this._mixer = new MixerFeature(this.path, this._mixerSettings, this._skin(),
@@ -213,6 +229,8 @@ export default class DeskBridge extends Extension {
         this._ocr = null;
         this._capture?.destroy();
         this._capture = null;
+        this._layouts?.destroy();
+        this._layouts = null;
         this._emoji?.destroy();
         this._emoji = null;
         this._colorPicker?.destroy();
@@ -239,6 +257,7 @@ export default class DeskBridge extends Extension {
         this._colorPicker?.setSkin(skin);
         this._ocr?.setSkin(skin);
         this._capture?.setSkin(skin);
+        this._layouts?.setSkin(skin);
         this._mixer?.setSkin(skin);
         this._logoMenu?.setSkin(skin);
         this._indicator?.setSkin(skin);
@@ -261,6 +280,7 @@ export default class DeskBridge extends Extension {
         this._colorPickerSettings = null;
         this._ocrSettings = null;
         this._captureSettings = null;
+        this._layoutsSettings = null;
         this._mixerSettings = null;
         this._logoMenuSettings = null;
         this._focusSettings = null;

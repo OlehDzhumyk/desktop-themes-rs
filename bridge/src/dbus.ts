@@ -20,6 +20,8 @@ export const OCR_PATH = '/io/github/OlehDzhumyk/Desk/Ocr';
 export const OCR_IFACE = 'io.github.OlehDzhumyk.Desk.Ocr';
 export const CAPTURE_PATH = '/io/github/OlehDzhumyk/Desk/Capture';
 export const CAPTURE_IFACE = 'io.github.OlehDzhumyk.Desk.Capture';
+export const LAYOUTS_PATH = '/io/github/OlehDzhumyk/Desk/Layouts';
+export const LAYOUTS_IFACE = 'io.github.OlehDzhumyk.Desk.Layouts';
 const THEMES_BUS = 'io.github.OlehDzhumyk.Themes';
 const THEMES_PATH = '/io/github/OlehDzhumyk/Themes';
 
