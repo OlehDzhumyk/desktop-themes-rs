@@ -28,9 +28,20 @@ All notable changes to this project are documented in this file. The format is b
   a new `0600` temporary file with a unique name (`O_EXCL`) and an atomic rename; it never writes
   through a file or link left at the old fixed `.tmp` name, and the wallpaper state is no longer
   written in place.
+- desk-shell checks the owner of deskd's bus name like the bridge (same user, same root, the
+  `deskd` next to it or `/usr/bin/deskd`) and sends calls only to that verified unique name; the
+  connection is cached and checked again when the owner changes.
 
 ### Added
 
+- desk-shell: the Start menu searches through deskd (files, clipboard history, emoji, usage
+  ranking), with the built-in catalog when deskd is missing; file and clipboard results open.
+  The look follows the `skin` setting and deskd's light/dark changes live.
+- desk-shell: `--toggle-*` reaches the running shell over D-Bus before any start-up work, so
+  the Windows key, Win+A and Win+V answer at once.
+- Windows 11 labwc session: `swayidle` locks the screen with `swaylock` for Lock and before
+  suspend; the session imports `WAYLAND_DISPLAY` and `XDG_CURRENT_DESKTOP` into the systemd user
+  manager and removes them when labwc exits. Release archives contain `desk-shell`.
 - Search: deskd answers `. text` / `file:` (files), `# text` (clipboard history) and `: text`
   (emoji, English and Ukrainian), and mixes these results into plain queries below applications.
   Files come from a bounded in-memory index of the XDG user folders (Desktop, Documents,
@@ -339,6 +350,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- desk-shell: the clipboard flyout drops the answer of an older refresh (no stale or doubled
+  rows); `LD_PRELOAD` keeps entries that are not UTF-8 and finds gtk4-layer-shell only as a whole
+  entry or path segment; `dlsym` pointers are size-checked at compile time.
+- `data/install.sh` passes the bridge path to `sh -c` as an argument, not inside the script text.
 - `themes apply` is transactional: an intent journal in `state.json` (`pending`) is saved before
   every step with side effects. A failing step rolls back the steps done so far (dconf values,
   extension list, GTK links and copies, flatpak overrides, token links) and keeps the old

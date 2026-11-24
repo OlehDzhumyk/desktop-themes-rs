@@ -10,19 +10,21 @@ You pick the session on the login screen (gear button) and go back to GNOME the 
 | Part | Role |
 | --- | --- |
 | `labwc` | Wayland compositor: windows, decorations, key bindings, snapping (`data/labwc/windows11/rc.xml`, `themerc`). |
-| `desk-shell` | Taskbar, Start menu, quick settings and clipboard history, a GTK 4 layer-shell client (`gtk4-layer-shell`), started with `--skin windows11`. labwc calls `desk-shell --toggle-start` on the Windows key, `--toggle-quick-settings` on Win+A and `--toggle-clipboard` on Win+V. |
-| `deskd` | The session daemon of this project (clipboard history, search, ...), on the session D-Bus, the same as under GNOME. |
-| `swaybg`, `swaylock` | Wallpaper (the dark "bloom", else `#0b192c`) and lock screen (Win+L). |
+| `desk-shell` | Taskbar, Start menu, quick settings and clipboard history, a GTK 4 layer-shell client (`gtk4-layer-shell`). It follows the `skin` setting and the light/dark changes of `deskd` live; the GNOME `default` skin draws as Windows 11. labwc calls `desk-shell --toggle-start` on the Windows key, `--toggle-quick-settings` on Win+A and `--toggle-clipboard` on Win+V; these calls go to the running shell over D-Bus at once. |
+| `deskd` | The session daemon of this project (clipboard history, search, ...), on the session D-Bus, the same as under GNOME. `desk-shell` sends calls only to the `deskd` next to it or `/usr/bin/deskd`, of the same user and outside a sandbox ([ADR 0008](adr/0008-deskd-serves-content-to-trusted-callers.md)). Without `deskd`, search uses the built-in catalog (no files, clipboard or emoji). |
+| `swaybg`, `swaylock`, `swayidle` | Wallpaper (the dark "bloom", else `#0b192c`) and lock screen (Win+L). `swayidle` locks the screen for `loginctl lock-session` (Lock in the Start menu) and before suspend. |
 | `desk-win11-session` | Launcher: copies the config, installs the `desk-win11` labwc theme, sets the environment, runs labwc. |
 
 Start order: the display manager runs `desk-win11-session`, which runs `labwc -C ~/.config/desk-labwc`.
-labwc runs `autostart` from that directory: it starts `swaybg`, then `deskd`
-(`systemctl --user start deskd.service` when the systemd user manager runs), then `desk-shell`.
+labwc runs `autostart` from that directory: it imports `WAYLAND_DISPLAY` and
+`XDG_CURRENT_DESKTOP` into the systemd user manager, then starts `swaybg`, `swayidle`, `deskd`
+(`systemctl --user start deskd.service` when the systemd user manager runs) and `desk-shell`.
+When labwc exits, `desk-win11-session` removes these variables from the user manager again.
 
 ## 1. Layer the packages (Fedora Silverblue)
 
 ```sh
-rpm-ostree install labwc gtk4-layer-shell swaybg swaylock grim slurp wl-clipboard
+rpm-ostree install labwc gtk4-layer-shell swaybg swaylock swayidle grim slurp wl-clipboard
 systemctl reboot
 ```
 
@@ -30,7 +32,7 @@ systemctl reboot
 Layering does not remove GNOME. To undo it, boot the previous deployment:
 
 ```sh
-rpm-ostree rollback   # or: rpm-ostree uninstall labwc gtk4-layer-shell swaybg swaylock ...
+rpm-ostree rollback   # or: rpm-ostree uninstall labwc gtk4-layer-shell swaybg swaylock swayidle ...
 systemctl reboot
 ```
 
