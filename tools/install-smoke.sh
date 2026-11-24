@@ -3,8 +3,10 @@
 # Smoke test of data/install.sh in a throw-away HOME (no session, no systemd, no real binaries):
 #   1. --dry-run changes nothing,
 #   2. a real install puts every expected file in place (compiled schemas of the app and of the
-#      extensions that ship one, translated [uk] .desktop and metainfo, catalogues, units),
-#   3. a second install over the first still works (upgrade path).
+#      extensions that ship one, translated [uk] .desktop and metainfo, catalogues, units,
+#      desk-shell and the labwc session files),
+#   3. a second install over the first still works (upgrade path),
+#   4. an install without a built desk-shell skips it.
 # Needs glib-compile-schemas, msgfmt and a built bridge (bridge/build, see `npm run build`).
 # Safe to run on a developer machine: HOME, XDG_* and PATH point into a temporary directory.
 set -euo pipefail
@@ -20,9 +22,9 @@ export XDG_CONFIG_HOME="$HOME/.config"
 unset DESKTOP_THEMES_ROOT DBUS_SESSION_BUS_ADDRESS
 mkdir -p "$HOME" "$tmp/stub"
 # stand-ins for what needs a session or a build: the binaries and systemctl
-for b in themes deskd systemctl; do printf '#!/bin/sh\nexit 0\n' > "$tmp/stub/$b"; chmod +x "$tmp/stub/$b"; done
+for b in themes deskd desk-shell systemctl; do printf '#!/bin/sh\nexit 0\n' > "$tmp/stub/$b"; chmod +x "$tmp/stub/$b"; done
 export PATH="$tmp/stub:$PATH"
-args=(--bin "$tmp/stub/themes" --deskd "$tmp/stub/deskd")
+args=(--bin "$tmp/stub/themes" --deskd "$tmp/stub/deskd" --desk-shell "$tmp/stub/desk-shell")
 
 fail=0
 check() { # check DESCRIPTION TEST-ARGS...
@@ -42,6 +44,8 @@ echo "== real install"
 D=$XDG_DATA_HOME
 for f in \
   "$HOME/.local/bin/themes" "$HOME/.local/bin/deskd" "$HOME/.local/bin/theme" \
+  "$HOME/.local/bin/desk-shell" "$HOME/.local/bin/desk-win11-session" \
+  "$D/desktop-themes/labwc/windows11/rc.xml" "$D/desktop-themes/labwc/windows11/autostart" \
   "$D/glib-2.0/schemas/$DESK_ID.gschema.xml" "$D/glib-2.0/schemas/gschemas.compiled" \
   "$D/dbus-1/services/$APP_ID.service" "$D/dbus-1/services/$DESK_ID.service" \
   "$D/applications/$APP_ID.desktop" "$D/metainfo/$APP_ID.metainfo.xml" \
@@ -73,8 +77,17 @@ check ".desktop Exec points into the temporary HOME" has_text "$D/applications/$
 check "metainfo has a uk translation" has_text "$D/metainfo/$APP_ID.metainfo.xml" 'xml:lang="uk"'
 check "no @BIN@ placeholder left" test -z "$(grep -rl '@BIN@' "$D/applications" "$D/dbus-1" 2>/dev/null || true)"
 
+check "labwc autostart stays executable" test -x "$D/desktop-themes/labwc/windows11/autostart"
+
 echo "== second install over the first"
 "$SRC/data/install.sh" "${args[@]}" > "$tmp/install2.log"
 check "upgrade keeps the compiled schemas" has "$D/glib-2.0/schemas/gschemas.compiled"
+check "upgrade keeps the labwc config" has "$D/desktop-themes/labwc/windows11/rc.xml"
+
+echo "== install without desk-shell"
+rm -f "$HOME/.local/bin/desk-shell"
+"$SRC/data/install.sh" --bin "$tmp/stub/themes" --deskd "$tmp/stub/deskd" --desk-shell "$tmp/none" > "$tmp/install3.log"
+check "a missing desk-shell is skipped" test ! -e "$HOME/.local/bin/desk-shell"
+check "the skip is reported" has_text "$tmp/install3.log" "Not installed: desk-shell"
 
 [ "$fail" = 0 ] && echo "install smoke test passed" || { echo "install smoke test FAILED" >&2; exit 1; }

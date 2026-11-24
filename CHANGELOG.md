@@ -31,6 +31,16 @@ All notable changes to this project are documented in this file. The format is b
   `Up`/`Down`/`Return`/`Esc`. `libgtk4-layer-shell.so.0` is loaded at run time; without it, or with
   `--windowed`, the surfaces open as normal windows. `desk-shell --toggle-start` toggles the flyout
   of the running instance from a key binding. deskd trusts the `desk-shell` binary next to it.
+- `desk-shell` Windows 11 flyouts at the right end of the taskbar: quick settings
+  (`desk-shell --toggle-quick-settings`, Win+A on labwc, or the new tray pill) with dark mode, do
+  not disturb, private clipboard, screenshot and settings hub tiles over the default output volume,
+  mute and a per-application volume mixer from deskd's `Mixer`; and clipboard history
+  (`desk-shell --toggle-clipboard`, Win+V on labwc, or the taskbar button) with pin/unpin, delete,
+  "Clear all" (pinned items stay) and a private-mode banner. Both close on `Esc` or a click outside
+  and stay usable when deskd is not running. The settings hub and screenshot buttons moved from the
+  taskbar into quick settings. `data/install.sh` now installs `desk-shell` (when built;
+  `--desk-shell PATH`), `desk-win11-session` and the labwc config, and `scripts/uninstall.sh`
+  removes them.
 - Optional Windows 11 Wayland session on labwc: `data/labwc/windows11/` (labwc `rc.xml` with
   Windows 11 key bindings, cascade placement and edge snapping; the Fluent dark `desk-win11`
   window theme; `autostart` for the wallpaper, `deskd` and `desk-shell`), the launcher

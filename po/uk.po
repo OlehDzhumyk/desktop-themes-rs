@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 08:23+0000\n"
+"POT-Creation-Date: 2026-11-24 08:31+0000\n"
 "PO-Revision-Date: 2026-11-22 12:00+0200\n"
 "Last-Translator: desktop-themes-rs contributors\n"
 "Language-Team: Ukrainian\n"
@@ -198,10 +198,6 @@ msgstr "{text}, закріплено"
 msgid "Symbols"
 msgstr "Символи"
 
-#: bridge/src/clipboard/winFlyout.ts:68
-msgid "Clear all"
-msgstr "Очистити все"
-
 #: bridge/src/clipboard/winFlyout.ts:221
 msgid "Private mode is on: copies are not kept."
 msgstr "Приватний режим увімкнено: скопійоване не зберігається."
@@ -213,14 +209,6 @@ msgid ""
 msgstr ""
 "Тут з'являтимуться скопійовані елементи.\n"
 "Натисніть Ctrl+C, щоб скопіювати."
-
-#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
-msgid "Pin"
-msgstr "Закріпити"
-
-#: bridge/src/clipboard/winFlyout.ts:247 bridge/src/clipboard/winFlyout.ts:255
-msgid "Unpin"
-msgstr "Відкріпити"
 
 #: bridge/src/clipboard/winFlyout.ts:250
 msgid "More"
@@ -549,10 +537,6 @@ msgstr "Вийти із сеансу…"
 #: bridge/src/mixer/feature.ts:156
 msgid "Could not switch the device"
 msgstr "Не вдалося перемкнути"
-
-#: bridge/src/mixer/feature.ts:201
-msgid "Sound"
-msgstr "Звук"
 
 #: bridge/src/mixer/feature.ts:209
 msgid "Output"
@@ -884,10 +868,6 @@ msgstr "Показати всі програми"
 #: bridge/src/shortcutGuide/reader.ts:89
 msgid "Notifications and calendar"
 msgstr "Сповіщення і календар"
-
-#: bridge/src/shortcutGuide/reader.ts:90
-msgid "Quick settings"
-msgstr "Швидкі налаштування"
 
 #: bridge/src/shortcutGuide/reader.ts:91
 msgid "Focus notification"
@@ -1998,6 +1978,7 @@ msgstr "Верхня панель"
 
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
+#: crates/desk-shell/src/quick_settings.rs:138
 msgid "Volume mixer"
 msgstr "Мікшер гучності"
 
@@ -2539,8 +2520,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
-#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:86
-#: crates/desk-shell/src/taskbar.rs:89
+#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:83
+#: crates/desk-shell/src/taskbar.rs:86
 msgid "Search"
 msgstr "Пошук"
 
@@ -2671,10 +2652,107 @@ msgstr ""
 "Скорочення для доступності змінюється на сторінці «Клавіатурні скорочення»; "
 "вигляд наслідує стиль поточної теми."
 
-#: crates/desk-shell/src/main.rs:107 crates/deskd/src/search/mod.rs:179
+#: crates/desk-shell/src/clipboard_flyout.rs:62
+#: crates/desk-shell/src/clipboard_flyout.rs:84
+#: crates/desk-shell/src/clipboard_flyout.rs:104
+#: crates/desk-shell/src/taskbar.rs:111
+msgid "Clipboard history"
+msgstr "Історія буфера обміну"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:68
+msgid "Private mode is on: new items are not recorded"
+msgstr "Приватний режим увімкнено: нові елементи не записуються"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:73
+msgid "Clear all"
+msgstr "Очистити все"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:161
+msgid ""
+"The clipboard history is not available: the desktop service is not running"
+msgstr "Історія буфера обміну недоступна: служба стільниці не працює"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:163
+msgid "The clipboard history is empty"
+msgstr "Історія буфера обміну порожня"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:194
+#: crates/desk-shell/src/clipboard_flyout.rs:225
+msgid "Pinned item"
+msgstr "Закріплений елемент"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:199
+msgid "Pin"
+msgstr "Закріпити"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:199
+msgid "Unpin"
+msgstr "Відкріпити"
+
+#: crates/desk-shell/src/clipboard_flyout.rs:212
+#: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
+msgid "Delete"
+msgstr "Видалити"
+
+#: crates/desk-shell/src/main.rs:121 crates/deskd/src/search/mod.rs:179
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr "Шукати «{query}» в інтернеті"
+
+#: crates/desk-shell/src/quick_settings.rs:93
+msgid "Mute"
+msgstr "Вимкнути звук"
+
+#: crates/desk-shell/src/quick_settings.rs:93
+msgid "Unmute"
+msgstr "Увімкнути звук"
+
+#: crates/desk-shell/src/quick_settings.rs:123
+#: crates/desk-shell/src/taskbar.rs:126
+msgid "Quick settings"
+msgstr "Швидкі налаштування"
+
+#: crates/desk-shell/src/quick_settings.rs:124
+msgid "Dark mode"
+msgstr "Темний режим"
+
+#: crates/desk-shell/src/quick_settings.rs:125
+#: crates/deskd/src/focus/model.rs:186
+msgid "Do not disturb"
+msgstr "Не турбувати"
+
+#: crates/desk-shell/src/quick_settings.rs:126
+msgid "Private clipboard"
+msgstr "Приватний буфер"
+
+#: crates/desk-shell/src/quick_settings.rs:157
+msgid "Screenshot"
+msgstr "Знімок екрана"
+
+#: crates/desk-shell/src/quick_settings.rs:160
+msgid "Settings hub"
+msgstr "Центр налаштувань"
+
+#: crates/desk-shell/src/quick_settings.rs:192
+msgid "Sound"
+msgstr "Звук"
+
+#: crates/desk-shell/src/quick_settings.rs:202
+msgid "Volume"
+msgstr "Гучність"
+
+#: crates/desk-shell/src/quick_settings.rs:315
+msgid "Sound is not available: the desktop service is not running"
+msgstr "Звук недоступний: служба стільниці не працює"
+
+#: crates/desk-shell/src/quick_settings.rs:317
+msgid "No output device"
+msgstr "Немає пристрою виведення"
+
+#: crates/desk-shell/src/quick_settings.rs:370
+#, rust-format
+msgid "Volume of {app}"
+msgstr "Гучність {app}"
 
 #: crates/desk-shell/src/start_menu.rs:89
 msgid "Calculator: press Enter to copy the result"
@@ -2696,7 +2774,7 @@ msgstr "Файл"
 msgid "Emoji"
 msgstr "Емодзі"
 
-#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:76
+#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:73
 msgid "Start menu"
 msgstr "Пуск"
 
@@ -2728,23 +2806,7 @@ msgstr "Заблокувати екран"
 msgid "No results"
 msgstr "Нічого не знайдено"
 
-#: crates/desk-shell/src/taskbar.rs:126
-msgid "The clipboard history is empty"
-msgstr "Історія буфера обміну порожня"
-
-#: crates/desk-shell/src/taskbar.rs:153
-msgid "Clipboard history"
-msgstr "Історія буфера обміну"
-
-#: crates/desk-shell/src/taskbar.rs:207
-msgid "Desktop themes and settings"
-msgstr "Теми та налаштування стільниці"
-
-#: crates/desk-shell/src/taskbar.rs:212
-msgid "Take a screenshot"
-msgstr "Зробити знімок екрана"
-
-#: crates/desk-shell/src/taskbar.rs:228
+#: crates/desk-shell/src/taskbar.rs:195
 msgid "Taskbar"
 msgstr "Панель завдань"
 
@@ -2766,10 +2828,6 @@ msgid ""
 msgstr ""
 "схему {schema} не встановлено (data/install.sh), працюю з типовими "
 "налаштуваннями"
-
-#: crates/deskd/src/focus/model.rs:186
-msgid "Do not disturb"
-msgstr "Не турбувати"
 
 #: crates/deskd/src/focus/model.rs:192
 msgid "Work"
@@ -4645,10 +4703,6 @@ msgstr "Змінити"
 msgid "Edit {mode}"
 msgstr "Змінити «{mode}»"
 
-#: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
-msgid "Delete"
-msgstr "Видалити"
-
 #: crates/themes/src/gui/focus.rs:258
 #, rust-format
 msgid "Delete {mode}"
@@ -5609,6 +5663,9 @@ msgstr ""
 #~ msgid "Automatic light and dark mode by sunset or schedule"
 #~ msgstr "Автоматична світла й темна тема за заходом сонця або розкладом"
 
+#~ msgid "Desktop themes and settings"
+#~ msgstr "Теми та налаштування стільниці"
+
 #~ msgid "Emoji: coming later"
 #~ msgstr "Емодзі — буде пізніше"
 
@@ -5646,3 +5703,6 @@ msgstr ""
 
 #~ msgid "Symbols: coming later"
 #~ msgstr "Символи — буде пізніше"
+
+#~ msgid "Take a screenshot"
+#~ msgstr "Зробити знімок екрана"

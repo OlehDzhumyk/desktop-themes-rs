@@ -8,22 +8,29 @@
 #   Upgrading an install from before the language setting existed (Ukrainian-only builds) sets
 #   io.github.OlehDzhumyk.Desk language='uk' once, so the interface stays Ukrainian on an English
 #   session; new installs follow the session language (change it in the window: Features → General).
+#   Also: desk-shell (when built; the Wayland taskbar of ADR 0012) and the Windows 11 labwc session
+#   files (desk-win11-session in ~/.local/bin, data/labwc/windows11 → ~/.local/share/desktop-themes/
+#   labwc/windows11; the session entry needs sudo, see docs/wayland-session.md).
 # Run on the host after `cargo build --release` (scripts/bootstrap.sh does all of it).
 #
-# Usage: data/install.sh [--dry-run] [--bin PATH] [--deskd PATH]
-#   --bin PATH    install this binary instead of target/release/themes
-#   --deskd PATH  install this binary instead of target/release/deskd
+# Usage: data/install.sh [--dry-run] [--bin PATH] [--deskd PATH] [--desk-shell PATH]
+#   --bin PATH         install this binary instead of target/release/themes
+#   --deskd PATH       install this binary instead of target/release/deskd
+#   --desk-shell PATH  install this binary instead of target/release/desk-shell (optional: skipped
+#                      when it does not exist)
 set -euo pipefail
 SRC=$(cd "$(dirname "$0")/.." && pwd)
 BIN_SRC="$SRC/target/release/themes"
 DESKD_SRC="$SRC/target/release/deskd"
+SHELL_SRC="$SRC/target/release/desk-shell"
 DRY=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run|-n) DRY=1; shift ;;
     --bin) BIN_SRC=$2; shift 2 ;;
     --deskd) DESKD_SRC=$2; shift 2 ;;
-    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
+    --desk-shell) SHELL_SRC=$2; shift 2 ;;
+    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
 done
@@ -54,6 +61,21 @@ run ln -sfn themes "$BIN/theme"          # short alias
 run ln -sfn themes "$BIN/themes-gui"     # launcher name
 run install -m 0755 "$DESKD_SRC" "$BIN/deskd.new"
 run mv -f "$BIN/deskd.new" "$BIN/deskd"
+# desk-shell is optional (not every build makes it); a running one keeps its old binary until the
+# next login
+SHELL_INSTALLED=0
+if [ -x "$SHELL_SRC" ]; then
+  run install -m 0755 "$SHELL_SRC" "$BIN/desk-shell.new"
+  run mv -f "$BIN/desk-shell.new" "$BIN/desk-shell"
+  SHELL_INSTALLED=1
+fi
+
+# Windows 11 session on labwc: the launcher and its bundled config (docs/wayland-session.md)
+LABWC_DIR="$DATA/desktop-themes/labwc/windows11"
+run install -m 0755 "$SRC/data/labwc/desk-win11-session" "$BIN/desk-win11-session"
+run mkdir -p "$DATA/desktop-themes/labwc"
+run rm -rf "${LABWC_DIR:?}"
+run cp -a "$SRC/data/labwc/windows11" "$LABWC_DIR"
 
 # GSettings schema shared by deskd, the bridge and the window
 run install -m 0644 "$SRC/data/$DESK_ID.gschema.xml" "$DATA/glib-2.0/schemas/$DESK_ID.gschema.xml"
@@ -125,4 +147,9 @@ run systemctl --user enable themes-doctor.service
 if command -v update-desktop-database >/dev/null 2>&1; then run update-desktop-database "$DATA/applications"; fi
 # a running deskd (older build) is replaced; the next D-Bus call activates the new one
 run systemctl --user try-restart deskd.service
-echo "Installed: $BIN/themes, $BIN/deskd, $BRIDGE (theme root: $ROOT)"
+if [ "$SHELL_INSTALLED" = 1 ]; then
+  echo "Installed: $BIN/themes, $BIN/deskd, $BIN/desk-shell, $BIN/desk-win11-session, $BRIDGE (theme root: $ROOT)"
+else
+  echo "Installed: $BIN/themes, $BIN/deskd, $BIN/desk-win11-session, $BRIDGE (theme root: $ROOT)"
+  echo "Not installed: desk-shell (not built: $SHELL_SRC)"
+fi

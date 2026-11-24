@@ -214,13 +214,88 @@ window.desk-shell { background: none; }
 }
 .desk-shell-start-menu .start-footer button:hover { background-color: var(--ds-hover); }
 
+.desk-shell-tray-pill { padding: 0 10px; }
+
+.desk-shell-flyout {
+  background-color: var(--ds-flyout);
+  border: 1px solid var(--ds-stroke);
+  border-radius: var(--ds-flyout-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  padding: 16px;
+  color: var(--ds-fg);
+}
+.desk-shell-flyout button {
+  border-radius: var(--ds-radius);
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: var(--ds-fg);
+  min-height: 32px;
+  min-width: 32px;
+}
+.desk-shell-flyout button:hover { background-color: var(--ds-hover); }
+.desk-shell-flyout button:active { background-color: var(--ds-active); }
+.desk-shell-flyout .section-title { font-weight: 600; margin: 4px 0; }
+.desk-shell-flyout .dim,
+.desk-shell-flyout .qs-percent { color: var(--ds-dim); font-size: 12px; }
+.desk-shell-flyout .empty { color: var(--ds-dim); margin: 24px; }
+.desk-shell-flyout .qs-tile {
+  min-height: 72px;
+  padding: 8px 4px;
+  background-color: var(--ds-field);
+  border: 1px solid var(--ds-stroke);
+}
+.desk-shell-flyout .qs-tile image { -gtk-icon-size: 20px; }
+.desk-shell-flyout .qs-tile label { font-size: 12px; }
+.desk-shell-flyout .qs-tile:checked {
+  background-color: var(--ds-accent);
+  color: var(--ds-on-accent);
+  border-color: var(--ds-accent);
+}
+.desk-shell-flyout .qs-tile:disabled { opacity: 0.5; }
+.desk-shell-flyout .qs-audio {
+  border-top: 1px solid var(--ds-stroke);
+  padding-top: 12px;
+}
+.desk-shell-flyout scale trough { min-height: 4px; border-radius: 2px; background-color: var(--ds-stroke); }
+.desk-shell-flyout scale highlight { background-color: var(--ds-accent); border-radius: 2px; }
+.desk-shell-flyout scale slider {
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 999px;
+  background-color: var(--ds-accent);
+  border: 4px solid var(--ds-flyout);
+}
+.desk-shell-flyout list { background: none; }
+.desk-shell-flyout list row {
+  border-radius: var(--ds-radius);
+  padding: 8px;
+  margin: 2px 0;
+  background-color: var(--ds-field);
+  border: 1px solid var(--ds-stroke);
+}
+.desk-shell-flyout list row:hover { background-color: var(--ds-hover); }
+.desk-shell-flyout list row:selected {
+  background-color: var(--ds-active);
+  color: var(--ds-fg);
+  box-shadow: inset 3px 0 0 var(--ds-accent);
+}
+.desk-shell-flyout .clip-pin-badge { color: var(--ds-accent); }
+.desk-shell-flyout .clip-banner {
+  padding: 8px;
+  border-radius: var(--ds-radius);
+  background-color: var(--ds-active);
+  border-left: 3px solid var(--ds-accent);
+}
+
 .desk-shell button:focus-visible,
 .desk-shell row:focus-visible {
   outline: 2px solid var(--ds-fg);
   outline-offset: -2px;
 }
 .desk-shell.hc button:hover,
-.desk-shell.hc row:selected { color: var(--ds-on-accent); }
+.desk-shell.hc row:selected,
+.desk-shell.hc .qs-tile:checked { color: var(--ds-on-accent); }
 "#;
 
 /// Load [`CSS`] for the display (once, at start-up).
@@ -283,6 +358,9 @@ mod tests {
         for surface in [
             ".desk-shell-taskbar",
             ".desk-shell-start-menu",
+            ".desk-shell-flyout",
+            ".qs-tile:checked",
+            ".clip-banner",
             ":focus-visible",
             ".desk-shell.hc",
             ".desk-shell.dark",
