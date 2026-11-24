@@ -122,9 +122,11 @@ elif [ -n "$(find "$SRC/bridge/src" "$SRC/bridge/static" "$SRC/bridge/package.js
 fi
 if [ "$NEED_BRIDGE_BUILD" = 1 ]; then
   if command -v npm >/dev/null 2>&1; then
-    run sh -c "cd '$SRC/bridge' && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build"
+    # the path goes in as $1, never inside the script text (a quote in it cannot break out)
+    run sh -c 'cd "$1" && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build' _ "$SRC/bridge"
   else
-    run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" sh -c "cd '$SRC/bridge' && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build"
+    run toolbox run -c "${DT_TOOLBOX:-desktop-themes-build}" \
+      sh -c 'cd "$1" && ([ -d node_modules ] || npm ci --no-audit --no-fund) && npm run build' _ "$SRC/bridge"
   fi
 fi
 for d in "$SRC"/extensions/*/ "$SRC/bridge/build/$BRIDGE/"; do

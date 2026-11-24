@@ -309,12 +309,15 @@ pub fn install(display: &gdk::Display) {
     );
 }
 
-/// The current look: `skin` and the system's colour scheme and contrast preference.
-pub fn current(skin: Skin) -> Look {
+/// The current look: `skin`, the scheme deskd reports (`deskd_dark`, it wins: on labwc GTK may
+/// not see deskd's change), else the system's colour scheme, and the contrast preference.
+pub fn current(skin: Skin, deskd_dark: Option<bool>) -> Look {
     let settings = gtk::Settings::default();
-    let dark = settings
-        .as_ref()
-        .is_some_and(|s| s.gtk_interface_color_scheme() == gtk::InterfaceColorScheme::Dark);
+    let dark = deskd_dark.unwrap_or_else(|| {
+        settings
+            .as_ref()
+            .is_some_and(|s| s.gtk_interface_color_scheme() == gtk::InterfaceColorScheme::Dark)
+    });
     let high_contrast = settings
         .as_ref()
         .is_some_and(|s| s.gtk_interface_contrast() == gtk::InterfaceContrast::More);

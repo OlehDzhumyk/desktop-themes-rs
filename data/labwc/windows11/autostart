@@ -6,9 +6,21 @@
 # Every long-running program goes to the background; this file itself must return.
 
 # Give the Wayland session to D-Bus and systemd user services (portals, deskd, notifications).
+# desk-win11-session removes these names from the user manager again when labwc exits.
+SESSION_VARS="WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DESK_LABWC_DIR"
+if systemctl --user show-environment >/dev/null 2>&1; then
+  # shellcheck disable=SC2086 # a list of names
+  systemctl --user import-environment $SESSION_VARS >/dev/null 2>&1
+fi
 if command -v dbus-update-activation-environment >/dev/null 2>&1; then
-  dbus-update-activation-environment --systemd \
-    WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE DESK_LABWC_DIR >/dev/null 2>&1
+  # shellcheck disable=SC2086 # a list of names
+  dbus-update-activation-environment --systemd $SESSION_VARS >/dev/null 2>&1
+fi
+
+# Screen lock: "Lock" in the Start menu runs `loginctl lock-session`; swayidle turns that (and
+# suspend) into swaylock. -w: suspend waits until the lock is drawn.
+if command -v swayidle >/dev/null 2>&1 && command -v swaylock >/dev/null 2>&1; then
+  swayidle -w lock 'swaylock -f' before-sleep 'swaylock -f' >/dev/null 2>&1 &
 fi
 
 # Wallpaper: the Windows 11 dark "bloom" (scripts/generate-assets.sh), else a solid color.
@@ -33,9 +45,10 @@ elif command -v deskd >/dev/null 2>&1; then
   deskd >/dev/null 2>&1 &
 fi
 
-# The Windows 11 taskbar and Start menu.
+# The Windows 11 taskbar and Start menu. No --skin: the `skin` setting is followed live (the
+# GNOME "default" skin draws as Windows 11 here).
 if command -v desk-shell >/dev/null 2>&1; then
-  desk-shell --skin windows11 &
+  desk-shell &
 fi
 
 # Your own additions: an executable autostart.user in the same directory.

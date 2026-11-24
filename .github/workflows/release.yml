@@ -5,7 +5,8 @@
 #   scripts/release.sh X.Y.Z && git commit -am "Release X.Y.Z" && git tag -s vX.Y.Z -m X.Y.Z && git push origin main vX.Y.Z
 #
 # Artifacts (x86_64, Fedora 45 / GNOME Shell 51):
-#   desktop-themes-rs-VERSION-x86_64.tar.gz     binaries (themes, deskd), the built bridge, themes, scripts;
+#   desktop-themes-rs-VERSION-x86_64.tar.gz     binaries (themes, deskd, desk-shell), the built bridge, the
+#                                               labwc session (data/labwc), themes, scripts;
 #                                               ./install.sh installs it for the current user
 #   desk-bridge@desktop-themes-rs.shell-extension.zip   the shell extension alone (gnome-extensions install)
 #   SHA256SUMS                                   checksums of both
@@ -59,7 +60,7 @@ jobs:
       - name: Tests
         run: cargo test --workspace --locked
       - name: Build release binaries
-        run: cargo build --release --locked -p themes -p deskd
+        run: cargo build --release --locked -p themes -p deskd -p desk-shell
       - name: Build the bridge
         run: cd bridge && npm ci --no-audit --no-fund && npm run build
       - name: Package
@@ -72,11 +73,14 @@ jobs:
           uuid=desk-bridge@desktop-themes-rs
           name=desktop-themes-rs-$VERSION-x86_64
           mkdir -p dist "stage/$name/target/release" "stage/$name/bridge/build"
-          cp target/release/themes target/release/deskd "stage/$name/target/release/"
+          cp target/release/themes target/release/deskd target/release/desk-shell "stage/$name/target/release/"
           cp -a "bridge/build/$uuid" "stage/$name/bridge/build/"
           cp -a data extensions patches scripts themes tools docs "stage/$name/"
           cp LICENSE README.md CREDITS.md CHANGELOG.md "stage/$name/"
           cp scripts/dist-install.sh "stage/$name/install.sh"
+          # the Windows 11 labwc session (desk-shell's compositor config) must be in the archive
+          test -x "stage/$name/data/labwc/desk-win11-session"
+          test -r "stage/$name/data/labwc/windows11/rc.xml"
           # the source tree has no use for the dev-only parts of tools/
           rm -rf "stage/$name/tools/perf" "stage/$name/tools/headless" "stage/$name/tools/integration-test.sh"
           find stage -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +

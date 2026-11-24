@@ -22,3 +22,5 @@ libc.workspace = true
 desk-proto.workspace = true
 desk-search.workspace = true
 desk-settings = { workspace = true, features = ["gio"] }
+# parses the JSON answer of deskd's Search.Query (already a dependency of desk-search)
+serde_json.workspace = true

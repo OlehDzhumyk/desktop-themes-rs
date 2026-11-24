@@ -22,7 +22,11 @@ pub enum Activation {
     Action(String),
     /// Open the default browser with a web search for the text.
     Web(String),
-    /// Nothing this shell can do (files and clipboard come from other providers).
+    /// Open the file at this absolute path in its default application.
+    File(String),
+    /// Put this clipboard history item (deskd) back on the clipboard.
+    Clipboard(u64),
+    /// Nothing this shell can do (a broken result).
     Ignore,
 }
 
@@ -34,7 +38,11 @@ impl Activation {
             ResultKind::Calculator | ResultKind::Emoji => Activation::Copy(value),
             ResultKind::Action => Activation::Action(value),
             ResultKind::Web => Activation::Web(value),
-            ResultKind::File | ResultKind::Clipboard => Activation::Ignore,
+            ResultKind::File if value.starts_with('/') => Activation::File(value),
+            ResultKind::Clipboard => value
+                .parse()
+                .map_or(Activation::Ignore, Activation::Clipboard),
+            ResultKind::File => Activation::Ignore,
         }
     }
 }
@@ -176,12 +184,26 @@ pub fn activate(a: &Activation, result_id: &str) {
                 deskd::record_launch(result_id);
             }
         }
-        Activation::Copy(text) => copy_text(text),
+        Activation::Copy(text) => {
+            copy_text(text);
+            // emoji count for the ranking; calculator answers do not
+            if result_id != "calc" {
+                deskd::record_launch(result_id);
+            }
+        }
         Activation::Action(id) => {
             run_action(id);
             deskd::record_launch(result_id);
         }
         Activation::Web(query) => open_uri(&web_search_uri(query)),
+        Activation::File(path) => {
+            open_uri(&gio::File::for_path(path).uri());
+            deskd::record_launch(result_id);
+        }
+        Activation::Clipboard(id) => {
+            deskd::clipboard_activate(*id, || {});
+            deskd::record_launch(result_id);
+        }
         Activation::Ignore => {}
     }
 }
@@ -216,6 +238,15 @@ mod tests {
         for (kind, want) in cases {
             assert_eq!(Activation::of(&result(kind, "a.desktop")), want, "{kind:?}");
         }
+        // deskd's file and clipboard results: an absolute path, a decimal item id
+        assert_eq!(
+            Activation::of(&result(ResultKind::File, "/home/user/a b.txt")),
+            Activation::File("/home/user/a b.txt".into())
+        );
+        assert_eq!(
+            Activation::of(&result(ResultKind::Clipboard, "42")),
+            Activation::Clipboard(42)
+        );
     }
 
     #[test]

@@ -5,7 +5,7 @@
 //! deleted, and "Clear all" keeps the pinned ones (as on Windows). A banner says when the
 //! private mode is on (nothing new is recorded).
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use desk_settings::tr;
@@ -51,6 +51,9 @@ pub struct ClipboardFlyout {
     banner: gtk::Label,
     clear: gtk::Button,
     rows: RefCell<Vec<ClipRow>>,
+    /// Bumped by every refresh: answers of an older refresh are dropped, so two quick refreshes
+    /// (open, then pin) never show stale or doubled rows.
+    generation: Cell<u64>,
 }
 
 impl ClipboardFlyout {
@@ -72,6 +75,7 @@ impl ClipboardFlyout {
                 .build(),
             clear: gtk::Button::with_label(&tr!("Clear all")),
             rows: RefCell::default(),
+            generation: Cell::new(0),
         });
         clip.layout(&content);
         clip.connect();
@@ -138,24 +142,24 @@ impl ClipboardFlyout {
 
     /// Read the items and the private mode from deskd again.
     fn refresh(self: &Rc<Self>) {
+        let generation = self.generation.get().wrapping_add(1);
+        self.generation.set(generation);
         let me = Rc::downgrade(self);
         deskd::clipboard_private(move |on| {
-            if let Some(c) = me.upgrade() {
+            if let Some(c) = me.upgrade().filter(|c| c.generation.get() == generation) {
                 c.banner.set_visible(on == Some(true));
             }
         });
         let me = Rc::downgrade(self);
         deskd::clipboard_list(ITEMS, move |rows| {
-            if let Some(c) = me.upgrade() {
+            if let Some(c) = me.upgrade().filter(|c| c.generation.get() == generation) {
                 c.show_rows(rows);
             }
         });
     }
 
     fn show_rows(self: &Rc<Self>, rows: Option<Vec<ClipRow>>) {
-        while let Some(child) = self.list.first_child() {
-            self.list.remove(&child);
-        }
+        self.list.remove_all();
         let status = match rows.as_deref() {
             None => Some(tr!(
                 "The clipboard history is not available: the desktop service is not running"

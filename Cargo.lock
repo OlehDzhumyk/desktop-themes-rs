@@ -320,6 +320,7 @@ dependencies = [
  "desk-settings",
  "gtk4",
  "libc",
+ "serde_json",
 ]
 
 [[package]]

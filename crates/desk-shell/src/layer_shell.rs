@@ -10,7 +10,8 @@
 //! [`ensure_preloaded`] re-executes the program once with the library in `LD_PRELOAD`; then
 //! [`api`] finds the already loaded copy. Children get the original value back ([`child_env`]).
 
-use std::ffi::{CStr, CString, OsString, c_char, c_int, c_void};
+use std::ffi::{CStr, CString, OsStr, OsString, c_char, c_int, c_void};
+use std::os::unix::ffi::OsStrExt;
 use std::sync::OnceLock;
 
 use gtk::glib::translate::ToGlibPtr;
@@ -90,8 +91,9 @@ unsafe fn symbol<F: Copy>(handle: *mut c_void, name: &'static CStr) -> Result<F,
     if ptr.is_null() {
         return Err(LoadError::MissingSymbol(name.to_str().unwrap_or("?")));
     }
-    // SAFETY: a function pointer has the size of a data pointer on the supported platforms, and
-    // the caller promises the signature.
+    // a function pointer must have the size of a data pointer (checked at compile time)
+    const { assert!(size_of::<F>() == size_of::<*mut c_void>()) };
+    // SAFETY: the sizes match (above), and the caller promises the signature.
     Ok(unsafe { std::mem::transmute_copy::<*mut c_void, F>(&ptr) })
 }
 
@@ -191,27 +193,35 @@ pub fn place(window: &impl IsA<gtk::Window>, p: &Placement) -> bool {
     }
 }
 
-/// `LD_PRELOAD` with the library added, or `None` when it is already there.
-pub fn preload_value(current: &str) -> Option<String> {
-    if current.split([':', ' ']).any(|p| p.ends_with(LIBRARY)) {
+/// `LD_PRELOAD` with the library added, or `None` when it is already there (as a whole entry
+/// or the last path segment of one). Other entries are kept byte for byte, UTF-8 or not.
+pub fn preload_value(current: &OsStr) -> Option<OsString> {
+    let suffix = format!("/{LIBRARY}");
+    let present = current
+        .as_bytes()
+        .split(|b| *b == b':' || *b == b' ')
+        .any(|token| token == LIBRARY.as_bytes() || token.ends_with(suffix.as_bytes()));
+    if present {
         return None;
     }
-    Some(if current.is_empty() {
-        LIBRARY.to_owned()
-    } else {
-        format!("{LIBRARY}:{current}")
-    })
+    let mut value = OsString::from(LIBRARY);
+    if !current.is_empty() {
+        value.push(":");
+        value.push(current);
+    }
+    Some(value)
 }
 
 /// Re-execute once with the library in `LD_PRELOAD` (see the module docs). Does nothing when
-/// the library is absent, already preloaded, or this is the re-executed process. Call first
-/// thing in `main`, before any thread starts.
+/// the library is absent, already preloaded, or this is the re-executed process. Call early in
+/// `main`, before GTK starts and before anything changes the environment (`exec` itself is
+/// safe with threads: the fast `--toggle-*` path may have opened the session bus already).
 pub fn ensure_preloaded() {
     use std::os::unix::process::CommandExt;
     if std::env::var_os(ENV_ORIG_PRELOAD).is_some() || Api::load(LIBRARY).is_err() {
         return;
     }
-    let current = std::env::var("LD_PRELOAD").unwrap_or_default();
+    let current = std::env::var_os("LD_PRELOAD").unwrap_or_default();
     let Some(value) = preload_value(&current) else {
         return;
     };
@@ -277,18 +287,41 @@ mod tests {
         assert!(api().is_none());
     }
 
+    fn preload(s: &str) -> Option<OsString> {
+        preload_value(OsStr::new(s))
+    }
+
     #[test]
     fn preload_is_added_once() {
-        assert_eq!(preload_value("").as_deref(), Some(LIBRARY));
+        assert_eq!(preload(""), Some(LIBRARY.into()));
         assert_eq!(
-            preload_value("/usr/lib/libfoo.so").as_deref(),
-            Some("libgtk4-layer-shell.so.0:/usr/lib/libfoo.so")
+            preload("/usr/lib/libfoo.so"),
+            Some("libgtk4-layer-shell.so.0:/usr/lib/libfoo.so".into())
         );
-        assert_eq!(preload_value(LIBRARY), None);
+        assert_eq!(preload(LIBRARY), None);
+        assert_eq!(preload("/usr/lib64/libgtk4-layer-shell.so.0 /x.so"), None);
+        assert_eq!(preload("/x.so:/usr/lib64/libgtk4-layer-shell.so.0"), None);
+        // only a whole entry or a whole last path segment counts
         assert_eq!(
-            preload_value("/usr/lib64/libgtk4-layer-shell.so.0 /x.so"),
-            None
+            preload("/opt/my-libgtk4-layer-shell.so.0"),
+            Some("libgtk4-layer-shell.so.0:/opt/my-libgtk4-layer-shell.so.0".into())
         );
+        assert_eq!(
+            preload("libgtk4-layer-shell.so.0.bak"),
+            Some("libgtk4-layer-shell.so.0:libgtk4-layer-shell.so.0.bak".into())
+        );
+    }
+
+    #[test]
+    fn non_utf8_preload_entries_are_kept() {
+        use std::os::unix::ffi::OsStringExt;
+        let odd = OsString::from_vec(b"/opt/lib\xff.so".to_vec());
+        let mut want = b"libgtk4-layer-shell.so.0:".to_vec();
+        want.extend_from_slice(b"/opt/lib\xff.so");
+        assert_eq!(preload_value(&odd), Some(OsString::from_vec(want)));
+        let mut present = b"/opt/\xfe/".to_vec();
+        present.extend_from_slice(LIBRARY.as_bytes());
+        assert_eq!(preload_value(&OsString::from_vec(present)), None);
     }
 
     #[test]
