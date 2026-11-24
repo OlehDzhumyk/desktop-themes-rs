@@ -69,6 +69,12 @@ All notable changes to this project are documented in this file. The format is b
   `--toggle-quick-settings` and `--toggle-clipboard` reach the running shell, and that `deskd`
   and `desk-shell` own their bus names and log no critical errors. The suite takes about a second
   after the build.
+- Wayland end-to-end tests, more checks: the taskbar's exclusive zone is exactly 48 px; labwc
+  logs no `[ERROR]` for the bundled `rc.xml` and `themerc`; text copied with `wl-copy` reaches
+  `deskd` (`Clipboard.Changed`) and `history.json` (mode `0600`); a copy with
+  `x-kde-passwordManagerHint` is never recorded; an untrusted `Clipboard.List` call gets
+  `AccessDenied`; a GTK 4 window that opens and closes updates the taskbar. The test image adds
+  `wl-clipboard`, `gobject-introspection` and Xwayland.
 - desk-shell: the Start menu searches through deskd (files, clipboard history, emoji, usage
   ranking), with the built-in catalog when deskd is missing; file and clipboard results open.
   The look follows the `skin` setting and deskd's light/dark changes live.
