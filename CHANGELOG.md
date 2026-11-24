@@ -34,6 +34,17 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- desk-shell: the taskbar shows the running windows (Wayland `zwlr_foreign_toplevel_management_v1`
+  on labwc, sway, Hyprland, niri and Wayfire, read by a small built-in client, with no new
+  dependency). A short bar under an icon shows that the application runs, a long accent bar that
+  it has the focus. A pinned application gets the bar on its own icon; other applications get a
+  button after the pins, with the icon of their desktop entry (else a generic icon) and the window
+  titles as tooltip. A click brings the window forward or minimizes it, and a right click (or
+  `Menu`, `Shift+F10`) opens Restore/Minimize, Maximize/Unmaximize and Close. Without the protocol
+  (GNOME, KWin, `--windowed`) the taskbar shows the pins only.
+- desk-shell: one taskbar on every monitor (`gtk_layer_set_monitor`); taskbars are added and
+  removed when monitors are plugged in or out. The Start, quick settings and clipboard buttons of
+  every taskbar show the state of their flyout.
 - Clipboard history without GNOME Shell: deskd captures the clipboard itself on compositors with
   `ext-data-control-v1` or `wlr-data-control-unstable-v1` (labwc, sway, niri, Hyprland, KWin,
   COSMIC), with the bridge's rules: password-manager hints and our own paste are never read, reads
@@ -368,6 +379,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- desk-shell: the taskbar is exactly 48 px high again, with a 48 px exclusive zone (ADR 0012); the
+  top line and the Search pill outline are inset shadows, not borders (labwc 0.20 measured 49 px).
+- Windows 11 labwc session: `rc.xml` and the `desk-win11` theme no longer use options that labwc
+  0.20 rejects (`windowSwitcher` `show` and `allWorkspaces`, `snapping` `range`, `titlebar.height`);
+  the defaults give the same behaviour.
 - desk-shell: the clipboard flyout drops the answer of an older refresh (no stale or doubled
   rows); `LD_PRELOAD` keeps entries that are not UTF-8 and finds gtk4-layer-shell only as a whole
   entry or path segment; `dlsym` pointers are size-checked at compile time.

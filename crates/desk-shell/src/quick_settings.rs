@@ -111,7 +111,8 @@ pub struct QuickSettings {
     output: Cell<Option<(u32, bool)>>,
     /// Set while the code (not the user) changes a widget, so no deskd call follows.
     updating: Cell<bool>,
-    pill_icon: RefCell<Option<glib::WeakRef<gtk::Image>>>,
+    /// The volume icon of the tray pill of each taskbar.
+    pill_icons: RefCell<Vec<glib::WeakRef<gtk::Image>>>,
 }
 
 impl QuickSettings {
@@ -141,7 +142,7 @@ impl QuickSettings {
                 .build(),
             output: Cell::new(None),
             updating: Cell::new(false),
-            pill_icon: RefCell::default(),
+            pill_icons: RefCell::default(),
         });
         qs.layout(&content);
         qs.connect();
@@ -264,11 +265,11 @@ impl QuickSettings {
     }
 
     fn set_pill(&self, volume: f64, muted: bool) {
-        if let Some(icon) = self
-            .pill_icon
+        for icon in self
+            .pill_icons
             .borrow()
-            .as_ref()
-            .and_then(glib::WeakRef::upgrade)
+            .iter()
+            .filter_map(glib::WeakRef::upgrade)
         {
             icon.set_icon_name(Some(deskd::volume_icon(volume, muted)));
         }
@@ -345,7 +346,9 @@ impl QuickSettings {
     /// The taskbar pill opens the flyout and shows the output volume.
     pub fn attach_pill(&self, button: &gtk::ToggleButton, icon: &gtk::Image) {
         self.flyout.set_button(button);
-        *self.pill_icon.borrow_mut() = Some(icon.downgrade());
+        let mut icons = self.pill_icons.borrow_mut();
+        icons.retain(|i| i.upgrade().is_some());
+        icons.push(icon.downgrade());
     }
 
     /// Open or close (the tray pill, `desk-shell --toggle-quick-settings`).

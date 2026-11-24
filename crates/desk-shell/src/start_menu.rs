@@ -107,7 +107,8 @@ pub struct StartMenu {
     catalog: Catalog,
     usage: UsageStore,
     opts: SearchOptions,
-    start_button: RefCell<Option<glib::WeakRef<gtk::ToggleButton>>>,
+    /// The Start button of each taskbar (one per monitor).
+    start_buttons: RefCell<Vec<glib::WeakRef<gtk::ToggleButton>>>,
     /// When a focus loss last closed the flyout (monotonic µs).
     closed_at: Cell<i64>,
     /// Bumped by every query: answers of an older query are dropped.
@@ -149,7 +150,7 @@ impl StartMenu {
             catalog,
             usage,
             opts,
-            start_button: RefCell::default(),
+            start_buttons: RefCell::default(),
             closed_at: Cell::new(0),
             query_gen: Cell::new(0),
         });
@@ -463,19 +464,22 @@ impl StartMenu {
     }
 
     fn set_button_state(&self, active: bool) {
-        if let Some(b) = self
-            .start_button
+        for b in self
+            .start_buttons
             .borrow()
-            .as_ref()
-            .and_then(glib::WeakRef::upgrade)
+            .iter()
+            .filter_map(glib::WeakRef::upgrade)
         {
             b.set_active(active);
         }
     }
 
     /// The taskbar's Start button mirrors whether the flyout is open.
+    /// Add the Start button of a taskbar (buttons of closed taskbars are dropped).
     pub fn set_start_button(&self, button: &gtk::ToggleButton) {
-        *self.start_button.borrow_mut() = Some(button.downgrade());
+        let mut buttons = self.start_buttons.borrow_mut();
+        buttons.retain(|b| b.upgrade().is_some());
+        buttons.push(button.downgrade());
     }
 
     pub fn is_open(&self) -> bool {

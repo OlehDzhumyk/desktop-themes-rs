@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: desktop-themes-rs\n"
 "Report-Msgid-Bugs-To: https://github.com/OlehDzhumyk/desktop-themes-rs/"
 "issues\n"
-"POT-Creation-Date: 2026-11-24 08:31+0000\n"
+"POT-Creation-Date: 2026-11-24 09:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -994,7 +994,7 @@ msgstr ""
 
 #: crates/desk-settings/src/mixer.rs:13 crates/desk-settings/src/mixer.rs:47
 #: crates/desk-settings/src/mixer.rs:191
-#: crates/desk-shell/src/quick_settings.rs:138
+#: crates/desk-shell/src/quick_settings.rs:139
 msgid "Volume mixer"
 msgstr ""
 
@@ -1151,7 +1151,7 @@ msgstr ""
 
 #: crates/desk-settings/src/ocr.rs:176 crates/desk-settings/src/registry.rs:22
 #: crates/desk-settings/src/registry.rs:454
-#: crates/desk-shell/src/start_menu.rs:94
+#: crates/desk-shell/src/start_menu.rs:95
 msgid "Clipboard"
 msgstr ""
 
@@ -1291,7 +1291,7 @@ msgstr ""
 
 #: crates/desk-settings/src/registry.rs:34
 #: crates/desk-settings/src/registry.rs:446
-#: crates/desk-shell/src/start_menu.rs:90
+#: crates/desk-shell/src/start_menu.rs:91
 msgid "Application"
 msgstr ""
 
@@ -1496,8 +1496,8 @@ msgstr ""
 
 #: crates/desk-settings/src/search.rs:12 crates/desk-settings/src/search.rs:20
 #: crates/desk-settings/src/search.rs:129
-#: crates/desk-shell/src/start_menu.rs:135 crates/desk-shell/src/taskbar.rs:83
-#: crates/desk-shell/src/taskbar.rs:86
+#: crates/desk-shell/src/start_menu.rs:139 crates/desk-shell/src/taskbar.rs:94
+#: crates/desk-shell/src/taskbar.rs:97
 msgid "Search"
 msgstr ""
 
@@ -1613,49 +1613,49 @@ msgid ""
 "follows the skin of the current theme."
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:62
-#: crates/desk-shell/src/clipboard_flyout.rs:84
-#: crates/desk-shell/src/clipboard_flyout.rs:104
-#: crates/desk-shell/src/taskbar.rs:111
+#: crates/desk-shell/src/clipboard_flyout.rs:65
+#: crates/desk-shell/src/clipboard_flyout.rs:88
+#: crates/desk-shell/src/clipboard_flyout.rs:108
+#: crates/desk-shell/src/taskbar.rs:107
 msgid "Clipboard history"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:68
+#: crates/desk-shell/src/clipboard_flyout.rs:71
 msgid "Private mode is on: new items are not recorded"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:73
+#: crates/desk-shell/src/clipboard_flyout.rs:76
 msgid "Clear all"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:161
+#: crates/desk-shell/src/clipboard_flyout.rs:165
 msgid ""
 "The clipboard history is not available: the desktop service is not running"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:163
+#: crates/desk-shell/src/clipboard_flyout.rs:167
 msgid "The clipboard history is empty"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:194
-#: crates/desk-shell/src/clipboard_flyout.rs:225
+#: crates/desk-shell/src/clipboard_flyout.rs:198
+#: crates/desk-shell/src/clipboard_flyout.rs:229
 msgid "Pinned item"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:199
+#: crates/desk-shell/src/clipboard_flyout.rs:203
 msgid "Pin"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:199
+#: crates/desk-shell/src/clipboard_flyout.rs:203
 msgid "Unpin"
 msgstr ""
 
-#: crates/desk-shell/src/clipboard_flyout.rs:212
+#: crates/desk-shell/src/clipboard_flyout.rs:216
 #: crates/themes/src/gui/focus.rs:254 crates/themes/src/gui/window.rs:1281
 msgid "Delete"
 msgstr ""
 
-#: crates/desk-shell/src/main.rs:121 crates/deskd/src/search/mod.rs:179
+#: crates/desk-shell/src/main.rs:245 crates/deskd/src/search/mod.rs:258
 #, rust-format
 msgid "Search the web for “{query}”"
 msgstr ""
@@ -1668,107 +1668,133 @@ msgstr ""
 msgid "Unmute"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:123
-#: crates/desk-shell/src/taskbar.rs:126
+#: crates/desk-shell/src/quick_settings.rs:124
+#: crates/desk-shell/src/taskbar.rs:122
 msgid "Quick settings"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:124
+#: crates/desk-shell/src/quick_settings.rs:125
 msgid "Dark mode"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:125
+#: crates/desk-shell/src/quick_settings.rs:126
 #: crates/deskd/src/focus/model.rs:186
 msgid "Do not disturb"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:126
+#: crates/desk-shell/src/quick_settings.rs:127
 msgid "Private clipboard"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:157
+#: crates/desk-shell/src/quick_settings.rs:158
 msgid "Screenshot"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:160
+#: crates/desk-shell/src/quick_settings.rs:161
 msgid "Settings hub"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:192
+#: crates/desk-shell/src/quick_settings.rs:193
 msgid "Sound"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:202
+#: crates/desk-shell/src/quick_settings.rs:203
 msgid "Volume"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:315
+#: crates/desk-shell/src/quick_settings.rs:316
 msgid "Sound is not available: the desktop service is not running"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:317
+#: crates/desk-shell/src/quick_settings.rs:318
 msgid "No output device"
 msgstr ""
 
-#: crates/desk-shell/src/quick_settings.rs:370
+#: crates/desk-shell/src/quick_settings.rs:373
 #, rust-format
 msgid "Volume of {app}"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:89
+#: crates/desk-shell/src/start_menu.rs:90
 msgid "Calculator: press Enter to copy the result"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:91
+#: crates/desk-shell/src/start_menu.rs:92
 msgid "System action"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:92
+#: crates/desk-shell/src/start_menu.rs:93
 msgid "Search the web"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:93
+#: crates/desk-shell/src/start_menu.rs:94
 msgid "File"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:95
+#: crates/desk-shell/src/start_menu.rs:96
 msgid "Emoji"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:125 crates/desk-shell/src/taskbar.rs:73
+#: crates/desk-shell/src/start_menu.rs:129 crates/desk-shell/src/taskbar.rs:84
 msgid "Start menu"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:132
+#: crates/desk-shell/src/start_menu.rs:136
 msgid "Type here to search"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:183
+#: crates/desk-shell/src/start_menu.rs:188
 msgid "Pinned"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:199
+#: crates/desk-shell/src/start_menu.rs:204
 msgid "No applications found"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:274
+#: crates/desk-shell/src/start_menu.rs:279
 msgid "Power"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:294
+#: crates/desk-shell/src/start_menu.rs:299
 msgid "Settings"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:299
+#: crates/desk-shell/src/start_menu.rs:304
 msgid "Lock the screen"
 msgstr ""
 
-#: crates/desk-shell/src/start_menu.rs:418 crates/themes/src/gui/window.rs:353
+#: crates/desk-shell/src/start_menu.rs:441 crates/themes/src/gui/window.rs:353
 msgid "No results"
 msgstr ""
 
-#: crates/desk-shell/src/taskbar.rs:195
+#: crates/desk-shell/src/taskbar.rs:281
+msgid "Restore"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:283
+msgid "Minimize"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:289
+msgid "Unmaximize"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:291
+msgid "Maximize"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:295
+#: crates/themes/src/gui/capture_editor/mod.rs:848
+#: crates/themes/src/gui/window.rs:1369
+msgid "Close"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:438
 msgid "Taskbar"
+msgstr ""
+
+#: crates/desk-shell/src/taskbar.rs:576
+msgid "Window"
 msgstr ""
 
 #: crates/deskd/src/clipboard.rs:249
@@ -1807,7 +1833,7 @@ msgid ""
 "  --version"
 msgstr ""
 
-#: crates/deskd/src/main.rs:113 crates/themes/src/service.rs:365
+#: crates/deskd/src/main.rs:115 crates/themes/src/service.rs:410
 #, rust-format
 msgid "cannot own {name}: {error}"
 msgstr ""
@@ -3179,11 +3205,6 @@ msgstr ""
 msgid "PNG images"
 msgstr ""
 
-#: crates/themes/src/gui/capture_editor/mod.rs:848
-#: crates/themes/src/gui/window.rs:1369
-msgid "Close"
-msgstr ""
-
 #: crates/themes/src/gui/capture_editor/mod.rs:855
 msgid "Save changes?"
 msgstr ""
@@ -4074,7 +4095,7 @@ msgstr ""
 msgid "Allow “{name}” to run commands?"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1095 crates/themes/src/service.rs:137
+#: crates/themes/src/gui/window.rs:1095 crates/themes/src/service.rs:163
 #, rust-format
 msgid ""
 "This theme sets keys that make the desktop run programs:\n"
@@ -4090,7 +4111,7 @@ msgstr ""
 msgid "Error: the apply thread crashed"
 msgstr ""
 
-#: crates/themes/src/gui/window.rs:1153 crates/themes/src/service.rs:186
+#: crates/themes/src/gui/window.rs:1153 crates/themes/src/service.rs:212
 #, rust-format
 msgid "Theme “{name}” applied"
 msgstr ""
@@ -4192,22 +4213,22 @@ msgstr ""
 msgid "Failed: {error}"
 msgstr ""
 
-#: crates/themes/src/service.rs:96
+#: crates/themes/src/service.rs:122
 msgid "internal error of the theme service"
 msgstr ""
 
-#: crates/themes/src/service.rs:174
+#: crates/themes/src/service.rs:200
 msgid "Themes: extensions turned off"
 msgstr ""
 
-#: crates/themes/src/service.rs:176
+#: crates/themes/src/service.rs:202
 #, rust-format
 msgid ""
 "After the theme was applied these extensions went into an error state and "
 "were turned off: {list}"
 msgstr ""
 
-#: crates/themes/src/service.rs:190
+#: crates/themes/src/service.rs:216
 #, rust-format
 msgid "You need to log in again: {reasons}"
 msgstr ""
