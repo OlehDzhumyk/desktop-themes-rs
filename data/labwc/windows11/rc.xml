@@ -11,7 +11,8 @@
   uses it instead of this file.
 
   Commands of the session:
-    desk-shell   the Windows 11 panel and Start menu (layer-shell client)
+    desk-shell   the Windows 11 taskbar, Start menu, quick settings and clipboard history
+                 (layer-shell client)
     deskd        the desktop features daemon (clipboard history, search, ...)
     swaylock     the lock screen
     grim, slurp  the region screenshot (see the "capture" helper)
@@ -100,12 +101,17 @@
     <keybind key="Super_L" onRelease="yes">
       <action name="Execute" command="desk-shell --toggle-start"/>
     </keybind>
-    <!-- Win+S opens search, Win+A the quick settings; both live in the Start menu here -->
+    <!-- Win+S: search (in the Start menu) -->
     <keybind key="W-s">
       <action name="Execute" command="desk-shell --toggle-start"/>
     </keybind>
+    <!-- Win+A: quick settings (dark mode, do not disturb, volume mixer, ...) -->
     <keybind key="W-a">
-      <action name="Execute" command="desk-shell --toggle-start"/>
+      <action name="Execute" command="desk-shell --toggle-quick-settings"/>
+    </keybind>
+    <!-- Win+V: clipboard history -->
+    <keybind key="W-v">
+      <action name="Execute" command="desk-shell --toggle-clipboard"/>
     </keybind>
 
     <!-- Alt+Tab and Alt+Shift+Tab: switch windows -->
